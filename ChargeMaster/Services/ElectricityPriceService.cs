@@ -25,7 +25,7 @@ public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext
         try
         {
             logger.LogInformation("Fetching prices from {Url}", url);
-            var prices = await httpClient.GetFromJsonAsync<List<ElectricityPrice>>(url);
+            List<ElectricityPrice>? prices = await httpClient.GetFromJsonAsync<List<ElectricityPrice>>(url);
 
             if (prices != null && prices.Any())
             {
@@ -61,5 +61,17 @@ public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext
 
         return await context.ElectricityPrices
             .AnyAsync(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay);
+    }
+
+    public async Task DeletePricesForDateAsync(DateOnly date)
+    {
+        var startOfDay = date.ToDateTime(TimeOnly.MinValue);
+        var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
+        var pricesToDelete = await context.ElectricityPrices
+            .Where(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay)
+            .ToListAsync();
+        context.ElectricityPrices.RemoveRange(pricesToDelete);
+        await context.SaveChangesAsync();
+        logger.LogInformation("Deleted {Count} prices for {Date}.", pricesToDelete.Count, date);
     }
 }
