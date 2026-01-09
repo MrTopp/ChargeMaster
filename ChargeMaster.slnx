@@ -1,4 +1,7 @@
 <Solution>
   <Project Path="ChargeMaster/ChargeMaster.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path=".github/copilot-instructions.md" />
+  </Folder>
   <Project Path="ChargeMaster.xUnit/ChargeMaster.xUnit.csproj" Id="4ae7a13f-ae5e-45b3-8729-76a38cf7a498" />
 </Solution>
