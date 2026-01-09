@@ -1,6 +1,7 @@
 using ChargeMaster.Components;
 using ChargeMaster.Components.Account;
 using ChargeMaster.Data;
+using ChargeMaster.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,9 @@ namespace ChargeMaster
                 .AddDefaultTokenProviders();
 
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+            builder.Services.AddHttpClient<IElectricityPriceService, ElectricityPriceService>();
+            builder.Services.AddHostedService<PriceFetchingWorker>();
 
             var app = builder.Build();
 

@@ -5,5 +5,6 @@ namespace ChargeMaster.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<ElectricityPrice> ElectricityPrices { get; set; }
     }
 }
