@@ -8,6 +8,9 @@
 - **Hosting**: ASP.NET Core Web Application
 - **APIs**: RESTful API consumption
 - **Testing**: xUnit for unit testing
+- **Logging**: serilog through ILogger interface
+- **Target Platform**: Raspberry Pi running Ubuntu 25.10.
+- **Target Environment**: .NET 10 runtime and nginx web server as reverse proxy.
 
 ## Coding Style & Conventions
 - Use file-scoped namespaces (`namespace ChargeMaster;`).
