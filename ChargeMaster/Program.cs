@@ -42,8 +42,18 @@ namespace ChargeMaster
                     .AddIdentityCookies();
 
                 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlite(connectionString));
+                
+                if (builder.Environment.IsDevelopment())
+                {
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlServer(connectionString));
+                }
+                else
+                {
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlite(connectionString));
+                }
+
                 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
                 builder.Services.AddIdentityCore<ApplicationUser>(options =>
