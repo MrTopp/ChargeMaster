@@ -67,8 +67,8 @@ public class ElectricityPriceServiceTests : IDisposable
         var date = new DateOnly(2023, 10, 27);
         _context.ElectricityPrices.Add(new ElectricityPrice
         {
-            TimeStart = date.ToDateTime(new TimeOnly(1, 0)),
-            TimeEnd = date.ToDateTime(new TimeOnly(2, 0)),
+            TimeStart = date.ToDateTime(new TimeOnly(13, 0)),
+            TimeEnd = date.ToDateTime(new TimeOnly(13, 15)),
             SekPerKwh = 1.5m,
             EurPerKwh = 0.15m,
             ExchangeRate = 10m
