@@ -67,11 +67,11 @@ public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext
     {
         var startOfDay = date.ToDateTime(TimeOnly.MinValue);
         var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
-        var pricesToDelete = await context.ElectricityPrices
+
+        var count = await context.ElectricityPrices
             .Where(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay)
-            .ToListAsync();
-        context.ElectricityPrices.RemoveRange(pricesToDelete);
-        await context.SaveChangesAsync();
-        logger.LogInformation("Deleted {Count} prices for {Date}.", pricesToDelete.Count, date);
+            .ExecuteDeleteAsync();
+
+        logger.LogInformation("Deleted {Count} prices for {Date}.", count, date);
     }
 }
