@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChargeMaster.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260112122737_ElectricityPrice")]
-    partial class ElectricityPrice
+    [Migration("20260112125455_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
