@@ -11,7 +11,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
 
         // Prefer environment variable, fallback to LocalDB for design-time
         var conn = Environment.GetEnvironmentVariable("CHARGEMASTER_CONNECTION")
-                   ?? "Server=(localdb)\\MSSQLLocalDB;Database=ChargeMaster.Dev;Trusted_Connection=True;MultipleActiveResultSets=true";
+                   ?? "Server=THOMASPC\\SQL2022;Database=ChargeMasterTest;Trusted_Connection=True;TrustServerCertificate=True;";
 
         builder.UseSqlServer(conn);
         return new ApplicationDbContext(builder.Options);
