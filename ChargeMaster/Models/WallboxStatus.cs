@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace ChargeMaster.Models;
 
 public record WallboxStatus(
@@ -8,5 +10,7 @@ public record WallboxStatus(
     int Phase1Current,
     int Phase2Current,
     int Phase3Current,
-    DateTime? CurrentTime
+    DateTime? CurrentTime,
+    [property: JsonPropertyName("currentChargingPower")] double CurrentPower,
+    string Mode
 );

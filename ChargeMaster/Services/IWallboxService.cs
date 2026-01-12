@@ -7,4 +7,5 @@ public interface IWallboxService
     Task<WallboxStatus?> GetStatusAsync();
     Task<bool> SetTimeAsync(DateTime dateTime);
     Task<DateTime?> GetTimeAsync();
+    Task<bool> SetModeAsync(WallboxMode mode);
 }

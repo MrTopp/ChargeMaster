@@ -56,6 +56,16 @@ public class WallboxServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetModeAsync_ReturnsTrue_OnSuccess()
+    {
+        // Act
+        var result = await _service.SetModeAsync(Models.WallboxMode.Available);
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
     public async Task GetStatusAsync_ReturnsNull_WhenWallboxIsUnreachable()
     {
         // Arrange - use a non-existent IP to simulate unreachability
