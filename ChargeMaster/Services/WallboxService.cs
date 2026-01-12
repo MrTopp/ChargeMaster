@@ -44,4 +44,27 @@ public class WallboxService(HttpClient httpClient) : IWallboxService
             return false;
         }
     }
+
+    public async Task<bool> SetModeAsync(WallboxMode mode)
+    {
+        try
+        {
+            string modeString = mode switch
+            {
+                WallboxMode.Available => "ALWAYS_ON",
+                WallboxMode.NotAvailable => "ALWAYS_OFF",
+                WallboxMode.TimerControlled => "SCHEMA",
+                _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
+            };
+
+            var payload = new { mode = modeString };
+            // The wallbox usually expects the payload at /servlet/rest/chargebox/mode
+            var response = await httpClient.PostAsJsonAsync("/servlet/rest/chargebox/mode", payload);
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException)
+        {
+            return false;
+        }
+    }
 }
