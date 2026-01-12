@@ -24,24 +24,21 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
     /// <returns>A task that represents the asynchronous execution of the background service.</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // 1. Startup check: Ensure current day's prices are fetched
+        // Ensure current day's prices are fetched
         await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now), stoppingToken);
 
-        // 2. Schedule daily fetch at 13:10
+        // Fetch tomorrow's prices if past 13:00 on startup
+        var now = DateTime.Now;
+        if (now.Hour > 13)
+        {
+            await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), stoppingToken);
+        }
+
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTime.Now;
-            var nextRun = now.Date.AddHours(13).AddMinutes(10);
+            var tomorrowRun = now.Date.AddDays(1).AddHours(13).AddMinutes(10);
+            var delay = tomorrowRun - now;
             
-            // If 13:10 has already passed today, schedule for tomorrow
-            if (now >= nextRun)
-            {
-                nextRun = nextRun.AddDays(1);
-            }
-
-            var delay = nextRun - now;
-            logger.LogInformation("Next price fetch scheduled for {NextRun}", nextRun);
-
             try
             {
                 await Task.Delay(delay, stoppingToken);
