@@ -1,20 +1,33 @@
 using System.Net.Http.Json;
+
 using ChargeMaster.Models;
+
+using Serilog;
 
 namespace ChargeMaster.Services;
 
+/// <summary>
+/// Access to Garo wallbox through http interface
+/// </summary>
+/// <param name="httpClient"></param>
 public class WallboxService(HttpClient httpClient) : IWallboxService
 {
+    public long accessCounter
+    {
+        get => ++field;
+        set => field = value;
+    } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
     public async Task<WallboxStatus?> GetStatusAsync()
     {
         try
         {
-            // The /status endpoint is standard for these wallboxes to return JSON
-            return await httpClient.GetFromJsonAsync<WallboxStatus>("status");
+            var url = $"servlet/rest/chargebox/status?_={accessCounter}";
+            return await httpClient.GetFromJsonAsync<WallboxStatus>(url);
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            // Log error via Serilog if necessary
+            Log.Error(ex, "Error fetching wallbox status");
             return null;
         }
     }
@@ -22,7 +35,11 @@ public class WallboxService(HttpClient httpClient) : IWallboxService
     public async Task<DateTime?> GetTimeAsync()
     {
         var status = await GetStatusAsync();
-        return status?.CurrentTime;
+        if (status?.ChargeboxTime != null && TimeOnly.TryParse(status.ChargeboxTime, out var time))
+        {
+            return DateTime.Today.Add(time.ToTimeSpan());
+        }
+        return null;
     }
 
     public async Task<bool> SetTimeAsync(DateTime dateTime)
@@ -59,12 +76,26 @@ public class WallboxService(HttpClient httpClient) : IWallboxService
 
             var payload = new { mode = modeString };
             // The wallbox usually expects the payload at /servlet/rest/chargebox/mode
-            var response = await httpClient.PostAsJsonAsync("/servlet/rest/chargebox/mode", payload);
+            var response = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}",null);
             return response.IsSuccessStatusCode;
         }
         catch (HttpRequestException)
         {
             return false;
+        }
+    }
+
+    public async Task<WallboxMeterInfo?> GetMeterInfoAsync()
+    {
+        try
+        {
+            var url = $"servlet/rest/chargebox/meterinfo/EXTERNAL?_={accessCounter}";
+            return await httpClient.GetFromJsonAsync<WallboxMeterInfo>(url);
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Error(ex, "Error fetching wallbox meter info");
+            return null;
         }
     }
 }
