@@ -70,6 +70,11 @@ namespace ChargeMaster
                 builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>();
                 builder.Services.AddHostedService<PriceFetchingWorker>();
 
+                builder.Services.AddHttpClient<IWallboxService, WallboxService>(client =>
+                {
+                    client.BaseAddress = new Uri("http://192.168.1.205:8080/");
+                });
+
                 var app = builder.Build();
 
                 // Configure the HTTP request pipeline.
