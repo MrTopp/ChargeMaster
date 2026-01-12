@@ -47,7 +47,7 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
         try
         {
             using var scope = serviceProvider.CreateScope();
-            var priceService = scope.ServiceProvider.GetRequiredService<IElectricityPriceService>();
+            ElectricityPriceService priceService = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
             
             logger.LogInformation("Worker triggering price fetch for {Date}", date);
             await priceService.FetchAndStorePricesForDateAsync(date);
