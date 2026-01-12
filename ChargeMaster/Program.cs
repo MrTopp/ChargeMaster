@@ -67,7 +67,7 @@ namespace ChargeMaster
 
                 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-                builder.Services.AddHttpClient<IElectricityPriceService, ElectricityPriceService>();
+                builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>();
                 builder.Services.AddHostedService<PriceFetchingWorker>();
 
                 var app = builder.Build();
