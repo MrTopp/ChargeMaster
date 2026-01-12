@@ -11,7 +11,7 @@ public class WallboxServiceTests : IDisposable
     {
         _httpClient = new HttpClient
         {
-            BaseAddress = new Uri("http://192.168.1.205:8080/serialweb/")
+            BaseAddress = new Uri("http://192.168.1.205:8080/")
         };
         _service = new WallboxService(_httpClient);
     }
@@ -22,61 +22,80 @@ public class WallboxServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetStatusAsync_ReturnsStatus()
+    public async Task GetStatusAsync_OK()
     {
         // Act
         var result = await _service.GetStatusAsync();
 
         // Assert
-        // This test requires the wallbox to be reachable at the configured IP
         Assert.NotNull(result);
-        Assert.False(string.IsNullOrWhiteSpace(result.Serial));
+        Assert.True(result.Serial > 0);
     }
 
     [Fact]
-    public async Task GetTimeAsync_ReturnsTime()
+    public async Task GetTimeAsync_ok()
     {
         // Act
         var result = await _service.GetTimeAsync();
 
         // Assert
-        // This test requires the wallbox to be reachable
         Assert.NotNull(result);
     }
 
     [Fact]
-    public async Task SetTimeAsync_ReturnsTrue_OnSuccess()
+    public async Task SetTimeAsync_OK()
     {
         // Act
-        var result = await _service.SetTimeAsync(DateTime.Now);
+        var t = DateTime.Now;
+        // convert to minute precision
+        var time = new DateTime(t.Year, t.Month, t.Day, t.Hour, t.Minute, 0);
 
-        // Assert
-        // This test requires the wallbox to be reachable and accepting time updates
-        Assert.True(result);
-    }
-
-    [Fact]
-    public async Task SetModeAsync_ReturnsTrue_OnSuccess()
-    {
-        // Act
-        var result = await _service.SetModeAsync(Models.WallboxMode.Available);
+        var result = await _service.SetTimeAsync(time);
 
         // Assert
         Assert.True(result);
+
+        var result1 = await _service.GetTimeAsync();
+        Assert.Equal(time, result1);
+    }
+
+    [Theory]
+    [InlineData(Models.WallboxMode.Available, "ALWAYS_ON")]
+    [InlineData(Models.WallboxMode.NotAvailable, "ALWAYS_OFF")]
+    [InlineData(Models.WallboxMode.TimerControlled, "SCHEMA")]
+    public async Task SetModeAsync_OK(Models.WallboxMode mode, string expectedMode)
+    {
+        // read starting status
+        var startingStat = await _service.GetStatusAsync();
+
+        // Act
+        var result = await _service.SetModeAsync(mode);
+
+        var stat = await _service.GetStatusAsync();
+        Assert.NotNull(stat);
+        Assert.Equal(expectedMode, stat.Mode);
+
+        // Assert
+        Assert.True(result);
+
+        // reset starting mode
+        await _service.SetModeAsync((Models.WallboxMode)Enum.Parse(typeof(Models.WallboxMode), startingStat.Mode switch
+        {
+            "ALWAYS_ON" => "Available",
+            "ALWAYS_OFF" => "NotAvailable",
+            "SCHEMA" => "TimerControlled",
+            _ => throw new InvalidOperationException("Unknown mode")
+        }));
     }
 
     [Fact]
-    public async Task GetStatusAsync_ReturnsNull_WhenWallboxIsUnreachable()
+    public async Task GetMeterInfoAsync_OK()
     {
-        // Arrange - use a non-existent IP to simulate unreachability
-        using var tempClient = new HttpClient { BaseAddress = new Uri("http://192.168.1.254:8080/serialweb/") };
-        tempClient.Timeout = TimeSpan.FromSeconds(2);
-        var unreachableService = new WallboxService(tempClient);
-
         // Act
-        var result = await unreachableService.GetStatusAsync();
+        var result = await _service.GetMeterInfoAsync();
 
         // Assert
-        Assert.Null(result);
+        Assert.NotNull(result);
+        Assert.True(result.AccEnergy > 64067100);
     }
 }

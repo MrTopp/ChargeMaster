@@ -8,4 +8,5 @@ public interface IWallboxService
     Task<bool> SetTimeAsync(DateTime dateTime);
     Task<DateTime?> GetTimeAsync();
     Task<bool> SetModeAsync(WallboxMode mode);
+    Task<WallboxMeterInfo?> GetMeterInfoAsync();
 }
