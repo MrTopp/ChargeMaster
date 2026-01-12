@@ -7,5 +7,6 @@ public record WallboxStatus(
     double AccEnergy,
     int Phase1Current,
     int Phase2Current,
-    int Phase3Current
+    int Phase3Current,
+    DateTime? CurrentTime
 );

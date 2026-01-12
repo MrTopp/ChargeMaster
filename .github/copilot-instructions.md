@@ -12,6 +12,10 @@
 - **Target Platform**: Raspberry Pi running Ubuntu 25.10.
 - **Target Environment**: .NET 10 runtime and nginx web server as reverse proxy.
 
+## Wallbox charger interface
+- Communicate with Wallbox chargers using http on url http://192.168.1.205:8080/
+- 
+
 ## Coding Style & Conventions
 - Use file-scoped namespaces (`namespace ChargeMaster;`).
 - Use asynchronous methods (`async Task`) for I/O bound operations.
