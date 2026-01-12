@@ -56,7 +56,7 @@ public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext
 
     public async Task<bool> HasPricesForDateAsync(DateOnly date)
     {
-        var startOfDay = date.ToDateTime(TimeOnly.MinValue).AddHours(13);
+        var startOfDay = date.ToDateTime(TimeOnly.MinValue);
         var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
 
         return await context.ElectricityPrices

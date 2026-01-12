@@ -1,7 +1,27 @@
 namespace ChargeMaster.Services;
 
+
+/// <summary>
+/// A background service that schedules and executes daily electricity price fetching tasks at a specified time.
+/// </summary>
+/// <remarks>This worker ensures that electricity prices are fetched for the current day on startup and then
+/// schedules a recurring fetch at 13:10 each day, typically for the following day's prices. The service is designed to
+/// run continuously until the application is stopped. Logging is provided for both successful operations and error
+/// conditions.</remarks>
+/// <param name="serviceProvider">The service provider used to resolve application services required for price fetching operations.</param>
+/// <param name="logger">The logger used to record informational and error messages related to the worker's execution.</param>
 public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<PriceFetchingWorker> logger) : BackgroundService
 {
+    /// <summary>
+    /// Executes the background service logic to ensure daily price data is fetched and scheduled at the appropriate
+    /// time.
+    /// </summary>
+    /// <remarks>On startup, this method ensures that the current day's prices are fetched. It then schedules
+    /// a daily fetch at 13:10 local time, typically to retrieve prices for the next day. The method continues running
+    /// until cancellation is requested via the provided token. If an error occurs during a scheduled fetch, it is
+    /// logged and the service continues running.</remarks>
+    /// <param name="stoppingToken">A cancellation token that can be used to request graceful termination of the background operation.</param>
+    /// <returns>A task that represents the asynchronous execution of the background service.</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // 1. Startup check: Ensure current day's prices are fetched
@@ -28,7 +48,14 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
 
                 // At 13:10, we usually fetch prices for the NEXT day
                 var tomorrow = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
-                await CheckAndFetchAsync(tomorrow, stoppingToken);
+                
+                bool success = await CheckAndFetchAsync(tomorrow, stoppingToken);
+                while (!success && !stoppingToken.IsCancellationRequested)
+                {
+                    logger.LogInformation("Fetch failed for tomorrow's prices. Retrying in 10 minutes...");
+                    await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                    success = await CheckAndFetchAsync(tomorrow, stoppingToken);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -42,7 +69,13 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
         }
     }
 
-    private async Task CheckAndFetchAsync(DateOnly date, CancellationToken stoppingToken)
+    /// <summary>
+    /// Checks for electricity prices for the specified date and initiates an asynchronous fetch and store operation.
+    /// </summary>
+    /// <param name="date">The date for which to fetch electricity prices.</param>
+    /// <param name="stoppingToken">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>A task that represents the asynchronous operation, returning true if successful.</returns>
+    private async Task<bool> CheckAndFetchAsync(DateOnly date, CancellationToken stoppingToken)
     {
         try
         {
@@ -51,10 +84,12 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
             
             logger.LogInformation("Worker triggering price fetch for {Date}", date);
             await priceService.FetchAndStorePricesForDateAsync(date);
+            return true;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Worker failed to fetch prices for {Date}", date);
+            return false;
         }
     }
 }
