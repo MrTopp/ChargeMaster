@@ -11,18 +11,14 @@ public class WallboxMeterWorker(IServiceProvider serviceProvider, ILogger<Wallbo
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // On startup, run immediately then align to the next hour.
+        // On startup, run immediately then continue every minute.
         await ReadAndStoreAsync(stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTime.Now;
-            var nextHour = now.AddHours(1);
-            var nextRun = new DateTime(nextHour.Year, nextHour.Month, nextHour.Day, nextHour.Hour, 0, 0);
-            var delay = nextRun - now;
             try
             {
-                await Task.Delay(delay, stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 await ReadAndStoreAsync(stoppingToken);
             }
             catch (OperationCanceledException)
