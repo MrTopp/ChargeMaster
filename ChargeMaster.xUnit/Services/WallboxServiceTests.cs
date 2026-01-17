@@ -79,7 +79,7 @@ public class WallboxServiceTests : IDisposable
         Assert.True(result);
 
         // reset starting mode
-        await _service.SetModeAsync((Models.WallboxMode)Enum.Parse(typeof(Models.WallboxMode), startingStat.Mode switch
+        await _service.SetModeAsync((Models.WallboxMode)Enum.Parse(typeof(Models.WallboxMode), startingStat!.Mode switch
         {
             "ALWAYS_ON" => "Available",
             "ALWAYS_OFF" => "NotAvailable",
