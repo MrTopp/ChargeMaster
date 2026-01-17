@@ -1,5 +1,4 @@
 using ChargeMaster.Data;
-using ChargeMaster.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Services;
@@ -9,6 +8,8 @@ namespace ChargeMaster.Services;
 /// </summary>
 public class WallboxMeterWorker(IServiceProvider serviceProvider, ILogger<WallboxMeterWorker> logger) : BackgroundService
 {
+    private double? _lastStoredAccEnergy;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // On startup, run immediately then continue every minute.
@@ -49,6 +50,16 @@ public class WallboxMeterWorker(IServiceProvider serviceProvider, ILogger<Wallbo
             var exists = await db.WallboxMeterReadings.AnyAsync(r => r.ReadAt == readAt, stoppingToken);
             if (exists) return;
 
+            if (!_lastStoredAccEnergy.HasValue)
+            {
+                _lastStoredAccEnergy = await db.WallboxMeterReadings
+                    .OrderByDescending(r => r.ReadAt)
+                    .Select(r => (double?)r.AccEnergy)
+                    .FirstOrDefaultAsync(stoppingToken);
+            }
+
+            if (_lastStoredAccEnergy.HasValue && Math.Abs(_lastStoredAccEnergy.Value - info.AccEnergy) < 0.01) return;
+
             var entry = new WallboxMeterReading
             {
                 ReadAt = readAt,
@@ -60,6 +71,8 @@ public class WallboxMeterWorker(IServiceProvider serviceProvider, ILogger<Wallbo
 
             db.WallboxMeterReadings.Add(entry);
             await db.SaveChangesAsync(stoppingToken);
+
+            _lastStoredAccEnergy = info.AccEnergy;
         }
         catch (Exception ex)
         {
