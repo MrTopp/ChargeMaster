@@ -39,7 +39,7 @@ public class WallboxMeterWorker(IServiceProvider serviceProvider, ILogger<Wallbo
         {
             using var scope = serviceProvider.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var wallbox = scope.ServiceProvider.GetRequiredService<IWallboxService>();
+            var wallbox = scope.ServiceProvider.GetRequiredService<WallboxService>();
 
             var info = await wallbox.GetMeterInfoAsync();
             if (info is null) return;
@@ -47,9 +47,6 @@ public class WallboxMeterWorker(IServiceProvider serviceProvider, ILogger<Wallbo
             var readAt = DateTimeOffset.FromUnixTimeMilliseconds(info.ReadTime).UtcDateTime;
 
             // Do not store if already exists for the same read time
-            var exists = await db.WallboxMeterReadings.AnyAsync(r => r.ReadAt == readAt, stoppingToken);
-            if (exists) return;
-
             if (!_lastStoredAccEnergy.HasValue)
             {
                 _lastStoredAccEnergy = await db.WallboxMeterReadings

@@ -4,7 +4,7 @@ namespace ChargeMaster.Models;
 
 public record WallboxMeterInfo(
     [property: JsonPropertyName("success")] int Success,
-    [property: JsonPropertyName("accEnergy")] double AccEnergy,
+    [property: JsonPropertyName("accEnergy")] long AccEnergy,
     [property: JsonPropertyName("phase1Current")] double Phase1Current,
     [property: JsonPropertyName("phase2Current")] double Phase2Current,
     [property: JsonPropertyName("phase3Current")] double Phase3Current,
@@ -15,5 +15,5 @@ public record WallboxMeterInfo(
     [property: JsonPropertyName("gridNetType")] string? GridNetType,
     [property: JsonPropertyName("meterSerial")] string? MeterSerial,
     [property: JsonPropertyName("type")] int Type,
-    [property: JsonPropertyName("apparentPower")] double ApparentPower
+    [property: JsonPropertyName("apparentPower")] long ApparentPower
 );
