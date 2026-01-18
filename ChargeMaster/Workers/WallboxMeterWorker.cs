@@ -1,7 +1,9 @@
 using ChargeMaster.Data;
+using ChargeMaster.Services;
+
 using Microsoft.EntityFrameworkCore;
 
-namespace ChargeMaster.Services;
+namespace ChargeMaster.Workers;
 
 /// <summary>
 /// Background service that reads meter info every hour and stores it in the database.
