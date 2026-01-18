@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Services;
 
-public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext context, ILogger<ElectricityPriceService> logger) : IElectricityPriceService
+public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext context, ILogger<ElectricityPriceService> logger)
 {
     private const string PriceClass = "SE3";
 
