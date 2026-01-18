@@ -133,7 +133,7 @@ public class WallboxServiceTests : IDisposable
     public async Task GetSlavesAsync_OK()
     {
         // Act
-        var result = await _service.GetSlavesAsync(includeOffline: false);
+        var result = await _service.GetSlavesAsync();
 
         // Assert
         Assert.NotNull(result);

@@ -140,12 +140,11 @@ public class WallboxService(HttpClient httpClient)
         }
     }
 
-    public async Task<IReadOnlyList<WallboxSlaveConfig>?> GetSlavesAsync(bool includeOffline = false)
+    public async Task<IReadOnlyList<WallboxSlaveConfig>?> GetSlavesAsync()
     {
         try
         {
-            var includeOfflineSegment = includeOffline ? "true" : "false";
-            var url = $"servlet/rest/chargebox/slaves/{includeOfflineSegment}?_={accessCounter}";
+            var url = $"servlet/rest/chargebox/slaves/false?_={accessCounter}";
             return await httpClient.GetFromJsonAsync<List<WallboxSlaveConfig>>(url);
         }
         catch (HttpRequestException ex)
