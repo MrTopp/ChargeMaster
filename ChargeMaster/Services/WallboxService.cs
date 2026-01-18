@@ -103,7 +103,8 @@ public class WallboxService(HttpClient httpClient)
         try
         {
             var url = $"servlet/rest/chargebox/meterinfo/EXTERNAL?_={accessCounter}";
-            return await httpClient.GetFromJsonAsync<WallboxMeterInfo>(url);
+            var json = await httpClient.GetStringAsync(url);
+            return JsonSerializer.Deserialize<WallboxMeterInfo>(json);
         }
         catch (HttpRequestException ex)
         {
@@ -117,7 +118,8 @@ public class WallboxService(HttpClient httpClient)
         try
         {
             var url = $"servlet/rest/chargebox/schema?_={accessCounter}";
-            return await httpClient.GetFromJsonAsync<List<WallboxSchemaEntry>>(url);
+            var json = await httpClient.GetStringAsync(url);
+            return JsonSerializer.Deserialize<List<WallboxSchemaEntry>>(json);
         }
         catch (HttpRequestException ex)
         {
@@ -131,7 +133,8 @@ public class WallboxService(HttpClient httpClient)
         try
         {
             var url = $"servlet/rest/chargebox/config?_={accessCounter}";
-            return await httpClient.GetFromJsonAsync<WallboxConfig>(url);
+            var json = await httpClient.GetStringAsync(url);
+            return JsonSerializer.Deserialize<WallboxConfig>(json);
         }
         catch (HttpRequestException ex)
         {
@@ -145,7 +148,8 @@ public class WallboxService(HttpClient httpClient)
         try
         {
             var url = $"servlet/rest/chargebox/slaves/false?_={accessCounter}";
-            return await httpClient.GetFromJsonAsync<List<WallboxSlaveConfig>>(url);
+            var json = await httpClient.GetStringAsync(url);
+            return JsonSerializer.Deserialize<List<WallboxSlaveConfig>>(json);
         }
         catch (HttpRequestException ex)
         {
