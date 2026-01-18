@@ -8,7 +8,7 @@ namespace ChargeMaster.Workers;
 /// <summary>
 /// Background service that reads meter info every hour and stores it in the database.
 /// </summary>
-public class WallboxMeterWorker(IServiceProvider serviceProvider, ILogger<WallboxMeterWorker> logger) : BackgroundService
+public class WallboxWorker(IServiceProvider serviceProvider, ILogger<WallboxWorker> logger) : BackgroundService
 {
     private double? _lastStoredAccEnergy;
 

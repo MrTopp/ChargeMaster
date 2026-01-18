@@ -77,7 +77,7 @@ namespace ChargeMaster
                     client.BaseAddress = new Uri("http://192.168.1.205:8080/");
                 });
 
-                builder.Services.AddHostedService<WallboxMeterWorker>();
+                builder.Services.AddHostedService<WallboxWorker>();
 
                 var app = builder.Build();
 
