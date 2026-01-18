@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-
+using System.Text.Json;
 using ChargeMaster.Models;
 
 using Serilog;
@@ -23,7 +23,8 @@ public class WallboxService(HttpClient httpClient)
         try
         {
             var url = $"servlet/rest/chargebox/status?_={accessCounter}";
-            return await httpClient.GetFromJsonAsync<WallboxStatus>(url);
+            var json = await httpClient.GetStringAsync(url);
+            return JsonSerializer.Deserialize<WallboxStatus>(json);
         }
         catch (HttpRequestException ex)
         {
@@ -32,6 +33,10 @@ public class WallboxService(HttpClient httpClient)
         }
     }
 
+    /// <summary>
+    /// Read wallbox time
+    /// </summary>
+    /// <returns></returns>
     public async Task<DateTime?> GetTimeAsync()
     {
         var status = await GetStatusAsync();
@@ -42,13 +47,21 @@ public class WallboxService(HttpClient httpClient)
         return null;
     }
 
+    /// <summary>
+    /// Set wallbox time
+    /// </summary>
+    /// <param name="dateTime"></param>
+    /// <returns></returns>
     public async Task<bool> SetTimeAsync(DateTime dateTime)
     {
         try
         {
+            var tz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Stockholm");
+            var offsetMinutes = tz.IsDaylightSavingTime(dateTime) ? -60 : 0;
+
             var payload = new
             {
-                offset = -60,
+                offset = offsetMinutes,
                 tzName = "Europe/Stockholm",
                 datetimeUTC = dateTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
             };
