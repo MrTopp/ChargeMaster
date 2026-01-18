@@ -98,4 +98,22 @@ public class WallboxServiceTests : IDisposable
         Assert.NotNull(result);
         Assert.True(result.AccEnergy > 64067100);
     }
+
+    [Fact]
+    public async Task GetSchemaAsync_OK()
+    {
+        // Act
+        var result = await _service.GetSchemaAsync();
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+        Assert.All(result, r =>
+        {
+            Assert.True(r.SchemaId > 0);
+            Assert.InRange(r.Weekday, 1, 7);
+            Assert.False(string.IsNullOrWhiteSpace(r.Start));
+            Assert.False(string.IsNullOrWhiteSpace(r.Stop));
+        });
+    }
 }
