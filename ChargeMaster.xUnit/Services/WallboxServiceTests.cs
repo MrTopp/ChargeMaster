@@ -128,4 +128,16 @@ public class WallboxServiceTests : IDisposable
         Assert.True(result.SerialNumber > 0);
         Assert.False(string.IsNullOrWhiteSpace(result.ProgramVersion));
     }
+
+    [Fact]
+    public async Task GetSlavesAsync_OK()
+    {
+        // Act
+        var result = await _service.GetSlavesAsync(includeOffline: false);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+        Assert.All(result, r => Assert.True(r.SerialNumber > 0));
+    }
 }
