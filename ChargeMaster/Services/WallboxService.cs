@@ -111,4 +111,18 @@ public class WallboxService(HttpClient httpClient)
             return null;
         }
     }
+
+    public async Task<IReadOnlyList<WallboxSchemaEntry>?> GetSchemaAsync()
+    {
+        try
+        {
+            var url = $"servlet/rest/chargebox/schema?_={accessCounter}";
+            return await httpClient.GetFromJsonAsync<List<WallboxSchemaEntry>>(url);
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Error(ex, "Error fetching wallbox schema");
+            return null;
+        }
+    }
 }
