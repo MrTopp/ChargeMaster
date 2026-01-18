@@ -10,7 +10,7 @@ namespace ChargeMaster.Services;
 /// Access to Garo wallbox through http interface
 /// </summary>
 /// <param name="httpClient"></param>
-public class WallboxService(HttpClient httpClient) : IWallboxService
+public class WallboxService(HttpClient httpClient)
 {
     public long accessCounter
     {
