@@ -1,4 +1,6 @@
-namespace ChargeMaster.Services;
+using ChargeMaster.Services;
+
+namespace ChargeMaster.Workers;
 
 
 /// <summary>

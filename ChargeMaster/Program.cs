@@ -2,6 +2,8 @@ using ChargeMaster.Components;
 using ChargeMaster.Components.Account;
 using ChargeMaster.Data;
 using ChargeMaster.Services;
+using ChargeMaster.Workers;
+
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
