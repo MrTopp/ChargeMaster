@@ -18,7 +18,7 @@ public record WallboxStatus(
     [property: JsonPropertyName("currentChargingCurrent")] double CurrentChargingCurrent,
     [property: JsonPropertyName("currentChargingPower")] double CurrentChargingPower,
     [property: JsonPropertyName("accSessionEnergy")] double AccSessionEnergy,
-    [property: JsonPropertyName("sessionStartTime")] string? SessionStartTime,
+    [property: JsonPropertyName("sessionStartTime")] double? SessionStartTime,
     // HH:MM
     [property: JsonPropertyName("chargeboxTime")] string? ChargeboxTime,
     [property: JsonPropertyName("accSessionMillis")] long AccSessionMillis,
@@ -64,7 +64,7 @@ public record MainCharger(
     [property: JsonPropertyName("accSessionEnergy")] double AccSessionEnergy,
     [property: JsonPropertyName("sessionStartValue")] double SessionStartValue,
     [property: JsonPropertyName("accSessionMillis")] long AccSessionMillis,
-    [property: JsonPropertyName("sessionStartTime")] string? SessionStartTime,
+    [property: JsonPropertyName("sessionStartTime")] long? SessionStartTime,
     [property: JsonPropertyName("currentChargingCurrent")] double CurrentChargingCurrent,
     [property: JsonPropertyName("currentChargingPower")] double CurrentChargingPower,
     [property: JsonPropertyName("nrOfPhases")] int NrOfPhases,
