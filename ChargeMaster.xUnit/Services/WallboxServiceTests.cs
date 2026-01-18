@@ -116,4 +116,16 @@ public class WallboxServiceTests : IDisposable
             Assert.False(string.IsNullOrWhiteSpace(r.Stop));
         });
     }
+
+    [Fact]
+    public async Task GetConfigAsync_OK()
+    {
+        // Act
+        var result = await _service.GetConfigAsync();
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.SerialNumber > 0);
+        Assert.False(string.IsNullOrWhiteSpace(result.ProgramVersion));
+    }
 }

@@ -125,4 +125,18 @@ public class WallboxService(HttpClient httpClient)
             return null;
         }
     }
+
+    public async Task<WallboxConfig?> GetConfigAsync()
+    {
+        try
+        {
+            var url = $"servlet/rest/chargebox/config?_={accessCounter}";
+            return await httpClient.GetFromJsonAsync<WallboxConfig>(url);
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Error(ex, "Error fetching wallbox config");
+            return null;
+        }
+    }
 }
