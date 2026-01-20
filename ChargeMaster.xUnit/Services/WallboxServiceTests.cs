@@ -111,7 +111,7 @@ public class WallboxServiceTests : IDisposable
         Assert.All(result, r =>
         {
             Assert.True(r.SchemaId > 0);
-            Assert.InRange(r.Weekday, 1, 7);
+            Assert.InRange(Int32.Parse(r.Weekday!), 1, 7);
             Assert.False(string.IsNullOrWhiteSpace(r.Start));
             Assert.False(string.IsNullOrWhiteSpace(r.Stop));
         });
