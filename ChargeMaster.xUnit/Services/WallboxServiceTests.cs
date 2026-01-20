@@ -1,4 +1,5 @@
 using ChargeMaster.Services;
+using ChargeMaster.Models;  
 
 namespace ChargeMaster.xUnit.Services;
 
@@ -60,10 +61,10 @@ public class WallboxServiceTests : IDisposable
     }
 
     [Theory]
-    [InlineData(Models.WallboxMode.Available, "ALWAYS_ON")]
-    [InlineData(Models.WallboxMode.NotAvailable, "ALWAYS_OFF")]
-    [InlineData(Models.WallboxMode.TimerControlled, "SCHEMA")]
-    public async Task SetModeAsync_OK(Models.WallboxMode mode, string expectedMode)
+    [InlineData(WallboxMode.Available, "ALWAYS_ON")]
+    [InlineData(WallboxMode.NotAvailable, "ALWAYS_OFF")]
+    [InlineData(WallboxMode.TimerControlled, "SCHEMA")]
+    public async Task SetModeAsync_OK(WallboxMode mode, string expectedMode)
     {
         // read starting status
         var startingStat = await _service.GetStatusAsync();
@@ -79,7 +80,7 @@ public class WallboxServiceTests : IDisposable
         Assert.True(result);
 
         // reset starting mode
-        await _service.SetModeAsync((Models.WallboxMode)Enum.Parse(typeof(Models.WallboxMode), startingStat!.Mode switch
+        await _service.SetModeAsync((WallboxMode)Enum.Parse(typeof(WallboxMode), startingStat!.Mode switch
         {
             "ALWAYS_ON" => "Available",
             "ALWAYS_OFF" => "NotAvailable",

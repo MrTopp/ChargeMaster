@@ -82,20 +82,25 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         var allowed = schema
             .Where(e => IsAllowedWinterTimeSlot(e.Start, e.Stop))
             .ToList();
-        if (allowed.Count == 10)
+        if (allowed.Count == 10 && schema.Count == 10)
             return;
 
+        // Remove all not allowed entries
         foreach (var entry in schema.OrderByDescending(x => x.SchemaId))
         {
-            await wallboxService.DeleteSchemaAsync(entry.SchemaId);
+            if (!IsAllowedWinterTimeSlot(entry.Start, entry.Stop))
+                await wallboxService.DeleteSchemaAsync(entry.SchemaId);
         }
 
+        // Add missing entries
         for (int day = 1; day <= 5; day++)
         {
             WallboxSchemaEntry entry1 = new() { Start = "00:00:00", Stop = "07:00:00", Weekday = day.ToString(), ChargeLimit = 0 };
-            await wallboxService.SetSchemaAsync(entry1);
+            if (!schema.Any(e => e.Equals(entry1)))
+                await wallboxService.SetSchemaAsync(entry1);
             WallboxSchemaEntry entry2 = new() { Start = "19:00:00", Stop = "24:00:00", Weekday = day.ToString(), ChargeLimit = 0 };
-            await wallboxService.SetSchemaAsync(entry2);
+            if (!schema.Any(e => e.Equals(entry2)))
+                await wallboxService.SetSchemaAsync(entry2);
         }
     }
 
@@ -110,7 +115,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             && stopTime == new TimeOnly(7, 0)) return true;
 
         if (startTime == new TimeOnly(19, 0)
-            && stopTime == new TimeOnly(24, 0)) return true;
+            && stopTime == new TimeOnly(0, 0)) return true;
 
         return false;
     }
