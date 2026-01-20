@@ -14,6 +14,8 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 {
     private double? _lastStoredAccEnergy;
 
+    private bool isConnected { get; set; } = false;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
@@ -50,12 +52,23 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             // Kontrollera om bilen är ansluten
             await CheckVehicle(wallboxStatus);
 
+            // Spara status på förbrukad el
+            await ReadAndStoreAsync(stoppingToken);
+
         }
     }
 
     private async Task CheckVehicle(WallboxStatus wallboxStatus)
     {
-        
+        bool isConnectedNow = wallboxStatus.Connector == "CONNECTED";
+        if (isConnectedNow && !isConnected)
+        {
+            // vi går live (bilen nu ansluten)
+            // Beräkna laddningsschema
+        }
+        // spara state connected
+        isConnected = isConnectedNow;
+
     }
 
     internal async Task<WallboxStatus> InitializeWallboxStatus(CancellationToken stoppingToken)
