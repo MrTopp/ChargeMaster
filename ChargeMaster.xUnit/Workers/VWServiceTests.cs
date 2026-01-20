@@ -11,7 +11,7 @@ public class VWServiceTests : IDisposable
     {
         httpClient = new HttpClient
         {
-            BaseAddress = new Uri("http://127.0.0.1:5211")
+            BaseAddress = new Uri("http://127.0.0.1:5211/")
         };
         service = new VWService(httpClient);
     }
@@ -28,6 +28,7 @@ public class VWServiceTests : IDisposable
         Assert.NotNull(result);
         Assert.NotNull(result.Status);
         Assert.False(string.IsNullOrWhiteSpace(result.Status.Vin));
+        Assert.NotEqual(Models.VWVehicleState.Unknown, result.Status.VehicleState);
     }
 
     [Fact]
