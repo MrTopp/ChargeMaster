@@ -1,4 +1,4 @@
-using ChargeMaster.Workers;
+using ChargeMaster.Services;
 
 namespace ChargeMaster.xUnit.Workers;
 

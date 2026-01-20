@@ -4,7 +4,7 @@ using ChargeMaster.Models;
 
 using Serilog;
 
-namespace ChargeMaster.Workers;
+namespace ChargeMaster.Services;
 
 public class VWService(HttpClient httpClient)
 {
