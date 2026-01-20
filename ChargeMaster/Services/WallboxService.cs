@@ -11,7 +11,6 @@ namespace ChargeMaster.Services;
 /// </summary>
 /// <param name="httpClient"></param>
 public class WallboxService(HttpClient httpClient)
-    : IWallboxService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
