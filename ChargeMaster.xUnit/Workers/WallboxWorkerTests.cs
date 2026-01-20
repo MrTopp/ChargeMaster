@@ -9,6 +9,30 @@ namespace ChargeMaster.xUnit.Workers;
 public class WallboxWorkerTests
 {
     [Fact]
+    public async Task InitializeWallboxStatus_OK()
+    {
+        // Arrange
+        using var httpClient = new HttpClient
+        {
+            BaseAddress = new Uri("http://192.168.1.205:8080/")
+        };
+
+        var wallbox = new WallboxService(httpClient);
+        var services = new ServiceCollection().BuildServiceProvider();
+        var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
+        var worker = new WallboxWorker(services, wallbox, logger);
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        // Act
+        var result = await worker.InitializeWallboxStatus(cts.Token);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Serial > 0);
+    }
+
+    [Fact]
     public async Task CheckWallboxTime_OK()
     {
         // Arrange

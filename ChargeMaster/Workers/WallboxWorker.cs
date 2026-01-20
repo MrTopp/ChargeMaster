@@ -10,7 +10,7 @@ namespace ChargeMaster.Workers;
 /// 
 /// </summary>
 public class WallboxWorker(IServiceProvider serviceProvider,
-    IWallboxService wallboxService, ILogger<WallboxWorker> logger) : BackgroundService
+    WallboxService wallboxService, ILogger<WallboxWorker> logger) : BackgroundService
 {
     private double? _lastStoredAccEnergy;
 
@@ -39,13 +39,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         while (!stoppingToken.IsCancellationRequested)
         {
             // Initiera genom att läsa upp status
-            WallboxStatus? wallboxStatus = await wallboxService.GetStatusAsync();
-            if (wallboxStatus is null)
-            {
-                logger.LogWarning("Wallbox status is null, retrying in 1 minute");
-                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
-                continue;
-            }
+            WallboxStatus wallboxStatus = await InitializeWallboxStatus(stoppingToken);
 
             // Kontrollera klockan på wallboxen
             await CheckWallboxTime(wallboxStatus);
@@ -53,7 +47,27 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             // Kontrollera schema 
             await CheckWallboxSchedule();
 
+            // Kontrollera om bilen är ansluten
+            await CheckVehicle(wallboxStatus);
+
         }
+    }
+
+    private async Task CheckVehicle(WallboxStatus wallboxStatus)
+    {
+        
+    }
+
+    internal async Task<WallboxStatus> InitializeWallboxStatus(CancellationToken stoppingToken)
+    {
+        WallboxStatus? wallboxStatus = await wallboxService.GetStatusAsync();
+        while (wallboxStatus is null)
+        {
+            logger.LogError("Wallbox status is null, retrying in 1 minute");
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            wallboxStatus = await wallboxService.GetStatusAsync();
+        }
+        return wallboxStatus;
     }
 
     internal async Task CheckWallboxSchedule()

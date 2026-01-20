@@ -21,6 +21,7 @@
 - Use asynchronous methods (`async Task`) for I/O bound operations.
 - Prefer `var` over explicit types when the type is obvious from the right-hand side.
 - Follow standard C# naming conventions (PascalCase for classes/methods, camelCase for local variables).
+- Do not use interfaces for dependency injection unless multiple implementations are expected.
 
 ## Blazor Specifics
 - Use `@inject` for dependency injection in Razor components.
