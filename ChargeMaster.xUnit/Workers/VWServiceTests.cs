@@ -1,4 +1,5 @@
 using ChargeMaster.Services;
+using ChargeMaster.Models;
 
 namespace ChargeMaster.xUnit.Workers;
 
@@ -28,7 +29,7 @@ public class VWServiceTests : IDisposable
         Assert.NotNull(result);
         Assert.NotNull(result.Status);
         Assert.False(string.IsNullOrWhiteSpace(result.Status.Vin));
-        Assert.NotEqual(Models.VWVehicleState.Unknown, result.Status.VehicleState);
+        Assert.NotEqual(VWVehicleState.Unknown, result.Status.VehicleState);
     }
 
     [Fact]
