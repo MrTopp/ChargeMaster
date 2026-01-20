@@ -67,18 +67,5 @@ public class VWService(HttpClient httpClient)
         }
     }
 
-    protected async Task<T?> GetAsync<T>(string relativeUrl)
-    {
-        try
-        {
-            var url = $"{relativeUrl}?_={AccessCounter}";
-            var json = await httpClient.GetStringAsync(url);
-            return JsonSerializer.Deserialize<T>(json, JsonOptions);
-        }
-        catch (HttpRequestException ex)
-        {
-            Log.Error(ex, "Error fetching VW data");
-            return default;
-        }
-    }
+    
 }
