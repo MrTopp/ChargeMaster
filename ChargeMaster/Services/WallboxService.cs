@@ -11,7 +11,10 @@ namespace ChargeMaster.Services;
 /// </summary>
 /// <param name="httpClient"></param>
 public class WallboxService(HttpClient httpClient)
+    : IWallboxService
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
     public long accessCounter
     {
         get => ++field;
@@ -24,7 +27,7 @@ public class WallboxService(HttpClient httpClient)
         {
             var url = $"servlet/rest/chargebox/status?_={accessCounter}";
             var json = await httpClient.GetStringAsync(url);
-            return JsonSerializer.Deserialize<WallboxStatus>(json);
+            return JsonSerializer.Deserialize<WallboxStatus>(json, JsonOptions);
         }
         catch (HttpRequestException ex)
         {
@@ -104,7 +107,7 @@ public class WallboxService(HttpClient httpClient)
         {
             var url = $"servlet/rest/chargebox/meterinfo/EXTERNAL?_={accessCounter}";
             var json = await httpClient.GetStringAsync(url);
-            return JsonSerializer.Deserialize<WallboxMeterInfo>(json);
+            return JsonSerializer.Deserialize<WallboxMeterInfo>(json, JsonOptions);
         }
         catch (HttpRequestException ex)
         {
@@ -119,7 +122,7 @@ public class WallboxService(HttpClient httpClient)
         {
             var url = $"servlet/rest/chargebox/schema?_={accessCounter}";
             var json = await httpClient.GetStringAsync(url);
-            return JsonSerializer.Deserialize<List<WallboxSchemaEntry>>(json);
+            return JsonSerializer.Deserialize<List<WallboxSchemaEntry>>(json, JsonOptions);
         }
         catch (HttpRequestException ex)
         {
@@ -134,7 +137,7 @@ public class WallboxService(HttpClient httpClient)
         {
             var url = $"servlet/rest/chargebox/config?_={accessCounter}";
             var json = await httpClient.GetStringAsync(url);
-            return JsonSerializer.Deserialize<WallboxConfig>(json);
+            return JsonSerializer.Deserialize<WallboxConfig>(json, JsonOptions);
         }
         catch (HttpRequestException ex)
         {
@@ -149,7 +152,7 @@ public class WallboxService(HttpClient httpClient)
         {
             var url = $"servlet/rest/chargebox/slaves/false?_={accessCounter}";
             var json = await httpClient.GetStringAsync(url);
-            return JsonSerializer.Deserialize<List<WallboxSlaveConfig>>(json);
+            return JsonSerializer.Deserialize<List<WallboxSlaveConfig>>(json, JsonOptions);
         }
         catch (HttpRequestException ex)
         {
@@ -157,4 +160,35 @@ public class WallboxService(HttpClient httpClient)
             return null;
         }
     }
+
+    public async Task<bool> SetSchemaAsync(WallboxSchemaEntry schemaEntry)
+    {
+        try
+        {
+            var url = "/servlet/rest/chargebox/schema";
+            var response = await httpClient.PostAsJsonAsync(url, schemaEntry, JsonOptions);
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Error(ex, "Error setting wallbox schema");
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteSchemaAsync(int schemaId)
+    {
+        try
+        {
+            var url = $"/servlet/rest/chargebox/schema/{schemaId}";
+            var response = await httpClient.DeleteAsync(url);
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Error(ex, "Error deleting wallbox schema {SchemaId}", schemaId);
+            return false;
+        }
+    }
+
 }
