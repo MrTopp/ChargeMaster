@@ -55,6 +55,8 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             // Spara status på förbrukad el
             await ReadAndStoreAsync(stoppingToken);
 
+            // Kontrollera att vi får in mätvärden regelbundet
+            await CheckMeterReadingsFreshnessAsync(stoppingToken);
         }
     }
 
@@ -213,4 +215,29 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             logger.LogError(ex, "Failed to read or store meter info");
         }
     }
+
+    internal async Task CheckMeterReadingsFreshnessAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            using var scope = serviceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            var since = DateTime.UtcNow.AddHours(-1);
+            var hasRecentReading = await db.WallboxMeterReadings
+                .AsNoTracking()
+                .AnyAsync(r => r.ReadAt >= since, stoppingToken);
+
+            if (!hasRecentReading)
+            {
+                logger.LogError("No WallboxMeterReadings stored during the last hour.");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to check WallboxMeterReadings freshness");
+        }
+    }
+
+
 }
