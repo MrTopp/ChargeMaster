@@ -12,7 +12,7 @@ namespace ChargeMaster.Workers;
 public class WallboxWorker(IServiceProvider serviceProvider,
     WallboxService wallboxService, ILogger<WallboxWorker> logger) : BackgroundService
 {
-    private double? _lastStoredAccEnergy;
+    private double? LastStoredAccEnergy { get; set; } 
 
     private bool isConnected { get; set; } = false;
 
@@ -170,7 +170,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         }
     }
 
-    private async Task ReadAndStoreAsync(CancellationToken stoppingToken)
+    internal async Task ReadAndStoreAsync(CancellationToken stoppingToken)
     {
         try
         {
@@ -178,25 +178,25 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var wallbox = scope.ServiceProvider.GetRequiredService<WallboxService>();
 
-            var info = await wallbox.GetMeterInfoAsync();
-            if (info is null) return;
+            WallboxMeterInfo? info = await wallbox.GetMeterInfoAsync();
+            if (info is null) 
+                return;
 
-            var readAt = DateTimeOffset.FromUnixTimeMilliseconds(info.ReadTime).UtcDateTime;
-
-            // Do not store if already exists for the same read time
-            if (!_lastStoredAccEnergy.HasValue)
+            // Initialize LastStoredAccEnergy if not set (first run)
+            if (!LastStoredAccEnergy.HasValue)
             {
-                _lastStoredAccEnergy = await db.WallboxMeterReadings
+                LastStoredAccEnergy = await db.WallboxMeterReadings
                     .OrderByDescending(r => r.ReadAt)
                     .Select(r => (double?)r.AccEnergy)
                     .FirstOrDefaultAsync(stoppingToken);
             }
 
-            if (_lastStoredAccEnergy.HasValue && Math.Abs(_lastStoredAccEnergy.Value - info.AccEnergy) < 0.01) return;
+            // Skip if the accumulated energy is the same as last stored
+            if (LastStoredAccEnergy.HasValue && Math.Abs(LastStoredAccEnergy.Value - info.AccEnergy) < 0.01) return;
 
             var entry = new WallboxMeterReading
             {
-                ReadAt = readAt,
+                ReadAt = DateTime.Now,
                 RawJson = System.Text.Json.JsonSerializer.Serialize(info),
                 AccEnergy = info.AccEnergy,
                 MeterSerial = info.MeterSerial,
@@ -206,7 +206,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             db.WallboxMeterReadings.Add(entry);
             await db.SaveChangesAsync(stoppingToken);
 
-            _lastStoredAccEnergy = info.AccEnergy;
+            LastStoredAccEnergy = info.AccEnergy;
         }
         catch (Exception ex)
         {
