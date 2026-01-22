@@ -3,7 +3,7 @@
 ## Tech Stack
 - **Framework**: .NET 10 (ASP.NET Core, Blazor Interactive Server)
 - **Language**: C# latest
-- **Database**: Entity Framework Core with SQLite for production and SQL Server Express LocalDB for testing
+- **Database**: Entity Framework Core with Postgres for production and SQL Server local development and testing
 - **Auth**: ASP.NET Core Identity
 - **Hosting**: ASP.NET Core Web Application
 - **APIs**: RESTful API consumption
