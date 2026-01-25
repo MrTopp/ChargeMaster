@@ -3,7 +3,7 @@
 ## Tech Stack
 - **Framework**: .NET 10 (ASP.NET Core, Blazor Interactive Server)
 - **Language**: C# latest
-- **Database**: Entity Framework Core with Postgres for production and SQL Server local development and testing
+- **Database**: Entity Framework Core with PostgreSQL for both development and production
 - **Auth**: ASP.NET Core Identity
 - **Hosting**: ASP.NET Core Web Application
 - **APIs**: RESTful API consumption
@@ -34,14 +34,14 @@
 ## Testing
 - Write unit tests for critical components using xUnit.
 - Do not mock external dependencies in unit tests; 
-- use sql server express LocalDB for testing Entity Framework Core operations.
+- use a local PostgreSQL instance for testing Entity Framework Core operations.
 
 # Functionality
 
 The main functionality is to read price for electricity from a web API and store it in a database. 
 The application should also provide a Blazor Interactive Server front-end to display the stored prices.
 - Implement a service to fetch electricity prices from a specified web API.
-- Store the fetched prices in a SQLite database using Entity Framework Core.
+- Store the fetched prices in a PostgreSQL database using Entity Framework Core.
 - Create a timer service that fetches and stores the electricity prices once every day at 13:10.
 - Call the web API at startup if there are no prices stored in the database for the current day.
 - The API endpoint to fetch the electricity prices is: `https://www.elprisetjustnu.se/api/v1/prices/[ÅR]/[MÅNAD]-[DAG]_[PRISKLASS].json`
