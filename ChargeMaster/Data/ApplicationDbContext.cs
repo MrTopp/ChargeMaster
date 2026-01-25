@@ -18,6 +18,24 @@ namespace ChargeMaster.Data
                 b.Property(e => e.SekPerKwh).HasColumnType("decimal(18,2)");
                 b.Property(e => e.EurPerKwh).HasColumnType("decimal(18,2)");
                 b.Property(e => e.ExchangeRate).HasColumnType("decimal(18,2)");
+                b.Property(e => e.TimeStart)
+                    .HasColumnType("timestamp without time zone")
+                    .HasConversion(
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
+                b.Property(e => e.TimeEnd)
+                    .HasColumnType("timestamp without time zone")
+                    .HasConversion(
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
+            });
+            modelBuilder.Entity<WallboxMeterReading>(b =>
+            {
+                b.Property(e => e.ReadAt)
+                    .HasColumnType("timestamp without time zone")
+                    .HasConversion(
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
             });
         }
     }

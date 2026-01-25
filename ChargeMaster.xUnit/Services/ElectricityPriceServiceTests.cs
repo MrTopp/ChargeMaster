@@ -20,9 +20,9 @@ public class ElectricityPriceServiceTests : IDisposable
         // Use real HttpClient
         _httpClient = new HttpClient();
 
-        var connectionString = "Server=THOMASPC\\SQL2022;Database=ChargeMasterTest;Trusted_Connection=True;TrustServerCertificate=True;";
+        var connectionString = "Host=127.0.0.1;Port=5432;Database=chargemaster_db;Username=postgres;Password=bulle";
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlServer(connectionString)
+            .UseNpgsql(connectionString)
             .Options;
         
         _context = new ApplicationDbContext(options);
@@ -125,20 +125,20 @@ public class ElectricityPriceServiceTests : IDisposable
     public async Task FetchAndStorePricesForDateAsync_DeletesExistingPrices_AndFetchesNewData()
     {
         // Arrange
-        var date = new DateOnly(2025, 12, 27);
+        var date = new DateTime(2025, 12, 27);
         // remove any existing prices for that date
         var existingPrices = await _context.ElectricityPrices
-            .Where(p => p.TimeStart >= date.ToDateTime(TimeOnly.MinValue) && p.TimeStart <= date.ToDateTime(TimeOnly.MaxValue))
+            .Where(p => p.TimeStart >= date && p.TimeStart < date.AddDays(1))
             .ToListAsync();
         _context.ElectricityPrices.RemoveRange(existingPrices);
         await _context.SaveChangesAsync();
 
         // Act
-        await _service.FetchAndStorePricesForDateAsync(date);
+        await _service.FetchAndStorePricesForDateAsync(DateOnly.FromDateTime(date));
 
         // Assert
         var prices = await _context.ElectricityPrices
-            .Where(p => p.TimeStart >= date.ToDateTime(TimeOnly.MinValue) && p.TimeStart <= date.ToDateTime(TimeOnly.MaxValue))
+            .Where(p => p.TimeStart >= date && p.TimeStart < date.AddDays(1))
             .ToListAsync();
         Assert.InRange(prices.Count, 96, 96); // Expecting around 96 entries
 
