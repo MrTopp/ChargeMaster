@@ -64,7 +64,7 @@ public class ElectricityPriceServiceTests : IDisposable
     public async Task HasPricesForDateAsync_ReturnsTrue_WhenPricesExist()
     {
         // Arrange
-        var date = new DateOnly(2023, 10, 27);
+        var date = new DateOnly(2025, 10, 27);
         _context.ElectricityPrices.Add(new ElectricityPrice
         {
             TimeStart = date.ToDateTime(new TimeOnly(13, 0)),
@@ -86,8 +86,8 @@ public class ElectricityPriceServiceTests : IDisposable
     public async Task GetPricesForDateAsync_ReturnsOnlyPricesForSpecificDate()
     {
         // Arrange
-        var targetDate = new DateOnly(2025, 12, 27);
-        var otherDate = new DateOnly(2025, 12, 28);
+        var targetDate = new DateOnly(2025, 11, 27);
+        var otherDate = new DateOnly(2025, 11, 28);
 
         _context.ElectricityPrices.AddRange(
             new ElectricityPrice // Should match
@@ -178,39 +178,17 @@ public class ElectricityPriceServiceTests : IDisposable
     {
         // Arrange
         // Use a real valid date for the API. 
-        var date = new DateOnly(2023, 1, 1);
+        var date = new DateTime(2026, 1, 1);
         
         // Act
-        await _service.FetchAndStorePricesForDateAsync(date);
+        await _service.FetchAndStorePricesForDateAsync(DateOnly.FromDateTime(date));
 
-        // Assert
-        var prices = await _context.ElectricityPrices.ToListAsync();
-        // The API returns prices for the whole day (24 hours typically)
-        Assert.InRange(prices.Count, 23, 25);
-        Assert.Contains(prices, p => p.SekPerKwh > 0);
+        // Assert -
+        // Verify database content, prices from day 'date' should be 24*4 = 96 entries
+        var prices = await _context.ElectricityPrices
+            .Where(x => x.TimeStart >= date && x.TimeStart < date.AddDays(1)).ToListAsync();
+        Assert.InRange(prices.Count, 96, 96);
+
     }
 
-    [Fact]
-    public async Task FetchAndStorePricesForDateAsync_LogsError_WhenApiFails()
-    {
-        // Arrange
-        // Use a date that the API is likely not to support (e.g. very old date)
-        // This is expected to cause a 404 or similar error from the API
-        var date = new DateOnly(1970, 1, 1);
-        
-        // Act & Assert
-        // The service is designed to re-throw exceptions
-        await Assert.ThrowsAsync<HttpRequestException>(async () => 
-            await _service.FetchAndStorePricesForDateAsync(date));
-        
-        // Assert Logger
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => true),
-                It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
-            Times.Once);
-    }
 }

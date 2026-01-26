@@ -118,7 +118,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         Assert.NotNull(schema);
     }
 
-    [Fact]
+    [Fact(Skip = "Endast för manuell körning av långa serier med mätdata")]
     public async Task ReadAndStoreAsync_DebugOnly()
     {
         var services = new ServiceCollection();
@@ -132,7 +132,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseNpgsql(connectionString));
 
         services.AddSingleton(new WallboxService(httpClient));
 
@@ -147,7 +147,6 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var worker = new WallboxWorker(provider, provider.GetRequiredService<WallboxService>(), logger);
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         for (int i = 0; i < 1000; i++)
         {
             await worker.ReadAndStoreAsync(CancellationToken.None);

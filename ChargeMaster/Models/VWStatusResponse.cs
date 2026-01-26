@@ -35,9 +35,9 @@ public sealed class VWStatus
     [JsonPropertyName("charging_rate")]
     public double? ChargingRate { get; set; }
     [JsonPropertyName("charging_settings_maximum_current")]
-    public string? ChargingSettingsMaximumCurrent { get; set; }
+    public double? ChargingSettingsMaximumCurrent { get; set; }
     [JsonPropertyName("charging_settings_target_level")]
-    public string? ChargingSettingsTargetLevel { get; set; }
+    public double? ChargingSettingsTargetLevel { get; set; }
     [JsonPropertyName("battery_level")]
     public string? BatteryLevel { get; set; }
     [JsonPropertyName("battery_range")]
