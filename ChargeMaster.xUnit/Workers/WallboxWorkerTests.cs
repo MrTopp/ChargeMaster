@@ -141,7 +141,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         await using (var scope = provider.CreateAsyncScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            await db.Database.EnsureCreatedAsync();
+            await db.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
         }
 
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();

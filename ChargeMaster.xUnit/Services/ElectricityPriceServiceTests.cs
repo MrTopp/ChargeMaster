@@ -45,6 +45,7 @@ public class ElectricityPriceServiceTests : IDisposable
         }
         _context.Dispose();
         _httpClient.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     [Fact]
@@ -73,7 +74,7 @@ public class ElectricityPriceServiceTests : IDisposable
             EurPerKwh = 0.15m,
             ExchangeRate = 10m
         });
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _service.HasPricesForDateAsync(date);
@@ -107,7 +108,7 @@ public class ElectricityPriceServiceTests : IDisposable
                 ExchangeRate = 10
             }
         );
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _service.GetPricesForDateAsync(targetDate);
@@ -129,9 +130,9 @@ public class ElectricityPriceServiceTests : IDisposable
         // remove any existing prices for that date
         var existingPrices = await _context.ElectricityPrices
             .Where(p => p.TimeStart >= date && p.TimeStart < date.AddDays(1))
-            .ToListAsync();
+            .ToListAsync(TestContext.Current.CancellationToken);
         _context.ElectricityPrices.RemoveRange(existingPrices);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await _service.FetchAndStorePricesForDateAsync(DateOnly.FromDateTime(date));
@@ -139,7 +140,7 @@ public class ElectricityPriceServiceTests : IDisposable
         // Assert
         var prices = await _context.ElectricityPrices
             .Where(p => p.TimeStart >= date && p.TimeStart < date.AddDays(1))
-            .ToListAsync();
+            .ToListAsync(TestContext.Current.CancellationToken);
         Assert.InRange(prices.Count, 96, 96); // Expecting around 96 entries
 
     }
@@ -157,7 +158,7 @@ public class ElectricityPriceServiceTests : IDisposable
             EurPerKwh = 10,
             ExchangeRate = 10
         });
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await _service.FetchAndStorePricesForDateAsync(date);
@@ -167,7 +168,7 @@ public class ElectricityPriceServiceTests : IDisposable
              x => x.Log(
                  LogLevel.Information,
                  It.IsAny<EventId>(),
-                 It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("exist") == true),
+                 It.Is<It.IsAnyType>((v, t) => v != null && v.ToString()!.Contains("exist")),
                  It.IsAny<Exception>(),
                  It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
              Times.Once);
@@ -186,7 +187,8 @@ public class ElectricityPriceServiceTests : IDisposable
         // Assert -
         // Verify database content, prices from day 'date' should be 24*4 = 96 entries
         var prices = await _context.ElectricityPrices
-            .Where(x => x.TimeStart >= date && x.TimeStart < date.AddDays(1)).ToListAsync();
+            .Where(x => x.TimeStart >= date 
+                        && x.TimeStart < date.AddDays(1)).ToListAsync(TestContext.Current.CancellationToken);
         Assert.InRange(prices.Count, 96, 96);
 
     }
