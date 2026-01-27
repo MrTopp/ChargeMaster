@@ -44,9 +44,9 @@ public class VWService(HttpClient httpClient)
         }
     }
 
-    public Task<bool> StartChargingAsync() => PostAsync("/start_charging");
+    public virtual Task<bool> StartChargingAsync() => PostAsync("/start_charging");
 
-    public Task<bool> StopChargingAsync() => PostAsync("/stop_charging");
+    public virtual Task<bool> StopChargingAsync() => PostAsync("/stop_charging");
 
     public Task<bool> StartClimatizationAsync() => PostAsync("/start_climatization");
 
