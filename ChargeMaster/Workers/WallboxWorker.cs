@@ -7,15 +7,24 @@ using Microsoft.EntityFrameworkCore;
 namespace ChargeMaster.Workers;
 
 /// <summary>
-/// 
+/// Background service responsible for managing the Wallbox charger.
+/// Handles tasks such as status monitoring, time synchronization, schedule enforcement,
+/// and recording energy consumption data.
 /// </summary>
 public class WallboxWorker(IServiceProvider serviceProvider,
     WallboxService wallboxService, ILogger<WallboxWorker> logger) : BackgroundService
 {
-    private double? LastStoredAccEnergy { get; set; } 
+    /// <summary>
+    /// Tracks the last recorded accumulated energy value to avoid storing duplicate readings.
+    /// </summary>
+    private double? LastStoredAccEnergy { get; set; }
 
-    private bool isConnected { get; set; } = false;
+    /// <summary>
+    /// Indicates whether a vehicle is currently connected to the charger.
+    /// </summary>
+    private bool isConnected { get; set; }
 
+    /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
@@ -31,10 +40,16 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error in WallboxMeterWorker loop");
+                await Task.Delay(TimeSpan.FromSeconds(60 * 10), stoppingToken);
             }
         }
 
     }
+
+    /// <summary>
+    /// The main operational loop that runs periodically to perform charger maintenance and data collection.
+    /// </summary>
+    /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
     protected async Task WallboxLoop(CancellationToken stoppingToken)
     {
 
@@ -55,11 +70,16 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             // Spara status på förbrukad el
             await ReadAndStoreAsync(stoppingToken);
 
-            // Kontrollera att vi får in mätvärden regelbundet
-            await CheckMeterReadingsFreshnessAsync(stoppingToken);
+            // vänta innan nästa iteration
+            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
         }
     }
 
+    /// <summary>
+    /// Checks the connection status of the vehicle and updates the local state.
+    /// Can trigger logic when a vehicle is newly connected.
+    /// </summary>
+    /// <param name="wallboxStatus">The current status object fetched from the Wallbox.</param>
     private async Task CheckVehicle(WallboxStatus wallboxStatus)
     {
         bool isConnectedNow = wallboxStatus.Connector == "CONNECTED";
@@ -73,6 +93,12 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 
     }
 
+    /// <summary>
+    /// Initializes communications by retrieving the Wallbox status.
+    /// Retries indefinitely until a valid status is received.
+    /// </summary>
+    /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
+    /// <returns>The initial <see cref="WallboxStatus"/>.</returns>
     internal async Task<WallboxStatus> InitializeWallboxStatus(CancellationToken stoppingToken)
     {
         WallboxStatus? wallboxStatus = await wallboxService.GetStatusAsync();
@@ -85,6 +111,13 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         return wallboxStatus;
     }
 
+    /// <summary>
+    /// Enforces the charging schedule on the Wallbox based on the current season (Summer/Winter).
+    /// </summary>
+    /// <remarks>
+    /// In summer (April-October), no schedule restrictions are applied.
+    /// In winter, specific charging slots (00:00-07:00 and 19:00-24:00) are enforced on weekdays.
+    /// </remarks>
     internal async Task CheckWallboxSchedule()
     {
         var schema = await wallboxService.GetSchemaAsync();
@@ -133,6 +166,12 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         }
     }
 
+    /// <summary>
+    /// Determines if a given time slot is allowed during the winter period.
+    /// </summary>
+    /// <param name="start">Start time string.</param>
+    /// <param name="stop">Stop time string.</param>
+    /// <returns>True if the slot matches permitted winter hours; otherwise false.</returns>
     private static bool IsAllowedWinterTimeSlot(string? start, string? stop)
     {
         if (string.IsNullOrWhiteSpace(start) || string.IsNullOrWhiteSpace(stop)) return false;
@@ -150,8 +189,9 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     }
 
     /// <summary>
-    /// Kontrollera att wallboxens klocka är korrekt och uppdatera den vid behov
+    /// Checks that the Wallbox clock is synchronized with the server time and updates it if the drift exceeds 5 minutes.
     /// </summary>
+    /// <param name="wallboxStatus">The current status object containing the Wallbox time.</param>
     internal async Task CheckWallboxTime(WallboxStatus wallboxStatus)
     {
         // Wallboxens tid i format HH:mm
@@ -172,6 +212,10 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         }
     }
 
+    /// <summary>
+    /// Reads the current meter information from the Wallbox and persists it to the database if the accumulated energy has changed.
+    /// </summary>
+    /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
     internal async Task ReadAndStoreAsync(CancellationToken stoppingToken)
     {
         try
@@ -181,7 +225,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             var wallbox = scope.ServiceProvider.GetRequiredService<WallboxService>();
 
             WallboxMeterInfo? info = await wallbox.GetMeterInfoAsync();
-            if (info is null) 
+            if (info is null)
                 return;
 
             // Initialize LastStoredAccEnergy if not set (first run)
@@ -215,29 +259,5 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             logger.LogError(ex, "Failed to read or store meter info");
         }
     }
-
-    internal async Task CheckMeterReadingsFreshnessAsync(CancellationToken stoppingToken)
-    {
-        try
-        {
-            using var scope = serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-            var since = DateTime.UtcNow.AddHours(-1);
-            var hasRecentReading = await db.WallboxMeterReadings
-                .AsNoTracking()
-                .AnyAsync(r => r.ReadAt >= since, stoppingToken);
-
-            if (!hasRecentReading)
-            {
-                logger.LogError("No WallboxMeterReadings stored during the last hour.");
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to check WallboxMeterReadings freshness");
-        }
-    }
-
 
 }

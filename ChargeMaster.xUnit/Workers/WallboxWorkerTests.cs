@@ -154,4 +154,48 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
             await Task.Delay(TimeSpan.FromSeconds(10), CancellationToken.None);
         }
     }
+
+    [Fact(Skip = "Use for debugging ExecuteAsync loop")]
+    //[Fact]
+    public async Task ExecuteAsync_Debug()
+    {
+        var services = new ServiceCollection();
+
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.Development.json", optional: false)
+            .Build();
+
+        var connectionString = config.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        services.AddSingleton(new WallboxService(httpClient));
+        services.AddLogging();
+
+        await using var provider = services.BuildServiceProvider();
+
+        await using (var scope = provider.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            // Ensure DB is created
+            await db.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
+        }
+
+        var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
+        var worker = new TestableWallboxWorker(provider, provider.GetRequiredService<WallboxService>(), logger);
+
+        await worker.ExecuteAsyncPublic(TestContext.Current.CancellationToken);
+    }
+}
+
+public class TestableWallboxWorker(IServiceProvider serviceProvider,
+    WallboxService wallboxService, ILogger<WallboxWorker> logger) : WallboxWorker(serviceProvider, wallboxService, logger)
+{
+    public Task ExecuteAsyncPublic(CancellationToken stoppingToken)
+    {
+        return ExecuteAsync(stoppingToken);
+    }
 }
