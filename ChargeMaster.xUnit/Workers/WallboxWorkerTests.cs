@@ -47,7 +47,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
         // Act
-        var result = await worker.InitializeWallboxStatus(cts.Token);
+        var result = await worker.InitializeWallboxStatusAsync(cts.Token);
 
         // Assert
         Assert.NotNull(result);
@@ -98,7 +98,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
             TwinCharger: null);
 
         // Act
-        await worker.CheckWallboxTime(status);
+        await worker.CheckWallboxTimeAsync(status);
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var worker = new WallboxWorker(services, wallbox, logger);
 
         // Act
-        await worker.CheckWallboxSchedule();
+        await worker.CheckWallboxScheduleAsync();
 
         // Assert (success-path only): ensure we can still read schema after applying rules.
         var schema = await wallbox.GetSchemaAsync();
@@ -149,7 +149,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 
         for (int i = 0; i < 1000; i++)
         {
-            await worker.ReadAndStoreAsync(CancellationToken.None);
+            await worker.ReadEnergyAsync(CancellationToken.None);
             // wait 10 seconds between reads
             await Task.Delay(TimeSpan.FromSeconds(10), CancellationToken.None);
         }
