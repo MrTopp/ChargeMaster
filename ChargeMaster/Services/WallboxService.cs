@@ -100,7 +100,7 @@ public class WallboxService(HttpClient httpClient)
         }
     }
 
-    public async Task<WallboxMeterInfo?> GetMeterInfoAsync()
+    public virtual async Task<WallboxMeterInfo?> GetMeterInfoAsync()
     {
         try
         {

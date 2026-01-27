@@ -69,6 +69,7 @@ namespace ChargeMaster
                 });
 
                 builder.Services.AddHostedService<WallboxWorker>();
+                builder.Services.AddHostedService<ChargeWorker>();
 
                 var app = builder.Build();
 
