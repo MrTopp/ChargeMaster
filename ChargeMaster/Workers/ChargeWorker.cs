@@ -94,7 +94,7 @@ public class ChargeWorker(
 
             // ----- Kontrollera förväntad timförbrukning(nu -timstart) *60 / minuter_nu
             long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
-            if (förbrukningDennaTimme * 60 / nu.Minute > 300)
+            if (förbrukningDennaTimme * 60 / nu.Minute > 3000)
             {
                 //  För hög förbrukning -> stoppa laddning
                 Timladdning = false;
@@ -128,7 +128,8 @@ public class ChargeWorker(
 
 
             var paus = nu.AddMinutes(1) - DateTime.Now;
-            await Task.Delay(paus, stoppingToken);
+            if (paus.TotalSeconds > 0)
+                await Task.Delay(paus, stoppingToken);
             previous = nu;
         }
     }
@@ -146,6 +147,52 @@ public class ChargeWorker(
     internal async Task StoppaLaddningAsync()
     {
         if (bilenLaddar)
+        {
             bilenLaddar = await vwService.StopChargingAsync();
+        }
+    }
+
+    internal async Task<long> LaddBehov()
+    {
+        // Beräkna laddbehov
+        VWStatusResponse? response = await vwService.GetStatus();
+        if (response == null)
+            return 0;
+        var status = response.Status;
+        var level = status.BatteryLevel;
+        var target = status.ChargingSettingsTargetLevel;
+
+        return 0;
+    }
+
+    internal async Task SkapaKvartlista()
+    {
+        _kvartlista.Clear();
+        using var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var priser = await context.ElectricityPrices
+            .Where(x => x.TimeStart >= DateTime.Now
+                        )
+            .OrderBy(x => x.TimeStart)
+            .ToListAsync();
+
+        _kvartlista = priser.Where(x => x.ChargingAllowed).
+            OrderBy(x => x.SekPerKwh).ToList();
+    }
+
+    private static bool IsAllowedWinterTimeSlot(string? start, string? stop)
+    {
+        if (string.IsNullOrWhiteSpace(start) || string.IsNullOrWhiteSpace(stop)) return false;
+
+        if (!TimeOnly.TryParse(start, out var startTime)) return false;
+        if (!TimeOnly.TryParse(stop, out var stopTime)) return false;
+
+        if (startTime == new TimeOnly(0, 0)
+            && stopTime == new TimeOnly(7, 0)) return true;
+
+        if (startTime == new TimeOnly(19, 0)
+            && stopTime == new TimeOnly(0, 0)) return true;
+
+        return false;
     }
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChargeMaster.Data;
 
@@ -34,4 +35,5 @@ public class WallboxMeterReading
 
 
     public long ApparentPower { get; set; }
+
 }

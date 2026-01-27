@@ -33,7 +33,7 @@
 
 ## Testing
 - Write unit tests for critical components using xUnit.
-- Do not mock external dependencies in unit tests; 
+- Do not mock external dependencies in unit tests unless explicitly required.
 - use a local PostgreSQL instance for testing Entity Framework Core operations.
 
 # Functionality

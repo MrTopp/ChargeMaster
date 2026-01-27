@@ -50,7 +50,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     /// The main operational loop that runs periodically to perform charger maintenance and data collection.
     /// </summary>
     /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
-    protected async Task WallboxLoop(CancellationToken stoppingToken)
+    internal async Task WallboxLoop(CancellationToken stoppingToken)
     {
 
         while (!stoppingToken.IsCancellationRequested)
