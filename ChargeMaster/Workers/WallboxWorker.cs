@@ -56,19 +56,19 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         while (!stoppingToken.IsCancellationRequested)
         {
             // Initiera genom att läsa upp status
-            WallboxStatus wallboxStatus = await InitializeWallboxStatus(stoppingToken);
+            WallboxStatus wallboxStatus = await InitializeWallboxStatusAsync(stoppingToken);
 
             // Kontrollera klockan på wallboxen
-            await CheckWallboxTime(wallboxStatus);
+            await CheckWallboxTimeAsync(wallboxStatus);
 
             // Kontrollera schema 
-            await CheckWallboxSchedule();
+            await CheckWallboxScheduleAsync();
 
             // Kontrollera om bilen är ansluten
             await CheckVehicle(wallboxStatus);
 
             // Spara status på förbrukad el
-            await ReadAndStoreAsync(stoppingToken);
+            await ReadEnergyAsync(stoppingToken);
 
             // vänta innan nästa iteration
             await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
@@ -99,7 +99,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     /// </summary>
     /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
     /// <returns>The initial <see cref="WallboxStatus"/>.</returns>
-    internal async Task<WallboxStatus> InitializeWallboxStatus(CancellationToken stoppingToken)
+    internal async Task<WallboxStatus> InitializeWallboxStatusAsync(CancellationToken stoppingToken)
     {
         WallboxStatus? wallboxStatus = await wallboxService.GetStatusAsync();
         while (wallboxStatus is null)
@@ -118,7 +118,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     /// In summer (April-October), no schedule restrictions are applied.
     /// In winter, specific charging slots (00:00-07:00 and 19:00-24:00) are enforced on weekdays.
     /// </remarks>
-    internal async Task CheckWallboxSchedule()
+    internal async Task CheckWallboxScheduleAsync()
     {
         var schema = await wallboxService.GetSchemaAsync();
         if (schema is null) return;
@@ -192,7 +192,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     /// Checks that the Wallbox clock is synchronized with the server time and updates it if the drift exceeds 5 minutes.
     /// </summary>
     /// <param name="wallboxStatus">The current status object containing the Wallbox time.</param>
-    internal async Task CheckWallboxTime(WallboxStatus wallboxStatus)
+    internal async Task CheckWallboxTimeAsync(WallboxStatus wallboxStatus)
     {
         // Wallboxens tid i format HH:mm
         string? wallboxTime = wallboxStatus.ChargeboxTime;
@@ -216,7 +216,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     /// Reads the current meter information from the Wallbox and persists it to the database if the accumulated energy has changed.
     /// </summary>
     /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
-    internal async Task ReadAndStoreAsync(CancellationToken stoppingToken)
+    internal async Task ReadEnergyAsync(CancellationToken stoppingToken)
     {
         try
         {
