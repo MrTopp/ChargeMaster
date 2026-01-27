@@ -185,17 +185,8 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         }
 
         var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
-        var worker = new TestableWallboxWorker(provider, provider.GetRequiredService<WallboxService>(), logger);
+        var worker = new WallboxWorker(provider, provider.GetRequiredService<WallboxService>(), logger);
 
-        await worker.ExecuteAsyncPublic(TestContext.Current.CancellationToken);
-    }
-}
-
-public class TestableWallboxWorker(IServiceProvider serviceProvider,
-    WallboxService wallboxService, ILogger<WallboxWorker> logger) : WallboxWorker(serviceProvider, wallboxService, logger)
-{
-    public Task ExecuteAsyncPublic(CancellationToken stoppingToken)
-    {
-        return ExecuteAsync(stoppingToken);
+        await worker.WallboxLoop(TestContext.Current.CancellationToken);
     }
 }

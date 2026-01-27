@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace ChargeMaster.Data;
@@ -20,4 +21,21 @@ public class ElectricityPrice
 
     [JsonPropertyName("time_end")]
     public DateTime TimeEnd { get; set; }
+
+
+    [NotMapped]
+    public bool ChargingAllowed
+    {
+        get
+        {
+            if (TimeStart.Month >= 11 || TimeStart.Month <= 3)
+            {
+                if(TimeStart.Hour >= 7 && TimeStart.Hour < 19)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 }
