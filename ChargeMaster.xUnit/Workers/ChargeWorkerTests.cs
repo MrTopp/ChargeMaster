@@ -1,6 +1,7 @@
 using ChargeMaster.Data;
 using ChargeMaster.Services;
 using ChargeMaster.Workers;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,34 +9,34 @@ using Microsoft.Extensions.Logging;
 
 using Moq;
 using Moq.Protected;
+
 using System.Net;
 
 namespace ChargeMaster.xUnit.Workers;
 
 public class ChargeWorkerTests
 {
+    private readonly ChargeWorker _worker = SetUpChargeWorker().Result;
+
     [Fact]
     public async Task ChargeLoop_OK()
     {
-        var worker = await SetUpChargeWorker();
 
-        await worker.ChargeLoop(CancellationToken.None);
+
+        await _worker.ChargeLoop(CancellationToken.None);
     }
 
-     [Fact]
+    [Fact]
     public async Task LaddBehov_OK()
     {
-        // Arrange
-        var worker = await SetUpChargeWorker();
-
         // Act
-        var result = await worker.LaddBehov();
+        var result = await _worker.LaddBehov();
 
         // Assert
         Assert.Equal(0, result);
     }
 
-    private static async Task<ChargeWorker> SetUpChargeWorker()
+    private static Task<ChargeWorker> SetUpChargeWorker()
     {
         var services = new ServiceCollection();
 
@@ -73,7 +74,7 @@ public class ChargeWorkerTests
         var mockLogger = new Mock<ILogger<ChargeWorker>>();
 
         var worker = new ChargeWorker(provider, mockLogger.Object);
-        return worker;
+        return Task.FromResult(worker);
     }
 
 
