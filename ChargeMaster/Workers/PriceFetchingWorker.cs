@@ -31,7 +31,7 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
 
         // Fetch tomorrow's prices if past 13:00 on startup
         var now = DateTime.Now;
-        if (now.Hour > 13)
+        if (now is { Hour: >= 13, Minute: > 5 })
         {
             await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), stoppingToken);
         }
