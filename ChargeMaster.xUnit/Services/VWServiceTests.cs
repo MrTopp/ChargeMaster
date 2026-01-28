@@ -1,7 +1,7 @@
 using ChargeMaster.Services;
 using ChargeMaster.Models;
 
-namespace ChargeMaster.xUnit.Workers;
+namespace ChargeMaster.xUnit.Services;
 
 public class VWServiceTests : IDisposable
 {
