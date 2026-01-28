@@ -7,17 +7,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ChargeMaster.Models;
 
 namespace ChargeMaster.Workers;
 
-public class ChargeWorker(
-    IServiceProvider serviceProvider,
-    ILogger<ChargeWorker> logger,
-    WallboxService wallbox,
-    VWService vwService) : BackgroundService
+public class ChargeWorker : BackgroundService
 {
     // Kvartar när laddning skall ske
     private List<ElectricityPrice> _kvartlista = new List<ElectricityPrice>();
@@ -27,9 +24,24 @@ public class ChargeWorker(
 
     private long FörbrukningVidTimstart { get; set; }
 
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<ChargeWorker> _logger;
+    private readonly WallboxService _wallbox;
+    private readonly VWService _vwService;
+
+    public ChargeWorker(IServiceProvider serviceProvider,
+        ILogger<ChargeWorker> logger)
+    {
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+        _wallbox = serviceProvider.GetService<WallboxService>();
+        _vwService = serviceProvider.GetService<VWService>();
+    }
+
+
     private async Task<long> InitieraFörbrukningAsync(CancellationToken cancellationToken)
     {
-        using var scope = serviceProvider.CreateScope();
+        using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         var now = DateTime.Now;
@@ -72,7 +84,7 @@ public class ChargeWorker(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in ChargeWorker loop");
+                _logger.LogError(ex, "Error in ChargeWorker loop");
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
@@ -85,8 +97,8 @@ public class ChargeWorker(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            logger.LogInformation("ChargeWorker tick at: {time}", DateTimeOffset.Now);
-            WallboxMeterInfo? wstat = await wallbox.GetMeterInfoAsync();
+            _logger.LogInformation("ChargeWorker tick at: {time}", DateTimeOffset.Now);
+            WallboxMeterInfo? wstat = await _wallbox.GetMeterInfoAsync();
             DateTime nu = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day,
                 DateTime.Now.Hour, DateTime.Now.Minute, 0);
 
@@ -134,13 +146,13 @@ public class ChargeWorker(
         }
     }
 
-    private bool bilenLaddar = false;
+    private bool bilenLaddar = true;
 
     internal async Task StartaLaddningAsync()
     {
         if (Timladdning && !bilenLaddar)
         {
-            bilenLaddar = await vwService.StartChargingAsync();
+            bilenLaddar = await _vwService.StartChargingAsync();
         }
     }
 
@@ -148,17 +160,25 @@ public class ChargeWorker(
     {
         if (bilenLaddar)
         {
-            bilenLaddar = await vwService.StopChargingAsync();
+            bool success = await _vwService.StopChargingAsync();
+            if (success) 
+                bilenLaddar = false;
         }
     }
 
     internal async Task<long> LaddBehov()
     {
         // Beräkna laddbehov
-        VWStatusResponse? response = await vwService.GetStatus();
-        if (response == null)
+        VWStatusResponse? response = await _vwService.GetStatus();
+        if (response?.Status == null)
+            return 0;
+        if (response.Status.VehicleState == VWVehicleState.Unknown)
             return 0;
         var status = response.Status;
+        if (status.BatteryLevel == null) 
+            return 0;
+        if (Debugger.IsAttached)
+            Debugger.Break();   // ej testad kod med aktiv bil
         var level = status.BatteryLevel;
         var target = status.ChargingSettingsTargetLevel;
 
@@ -168,7 +188,7 @@ public class ChargeWorker(
     internal async Task SkapaKvartlista()
     {
         _kvartlista.Clear();
-        using var scope = serviceProvider.CreateScope();
+        using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var priser = await context.ElectricityPrices
             .Where(x => x.TimeStart >= DateTime.Now
