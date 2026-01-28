@@ -106,7 +106,7 @@ public class ChargeWorker : BackgroundService
 
             // ----- Kontrollera förväntad timförbrukning(nu -timstart) *60 / minuter_nu
             long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
-            if (förbrukningDennaTimme * 60 / nu.Minute > 3000)
+            if (nu.Minute > 0 && förbrukningDennaTimme * 60 / nu.Minute > 3000)
             {
                 //  För hög förbrukning -> stoppa laddning
                 Timladdning = false;
