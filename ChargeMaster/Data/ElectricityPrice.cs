@@ -30,7 +30,7 @@ public class ElectricityPrice
         {
             if (TimeStart.Month >= 11 || TimeStart.Month <= 3)
             {
-                if(TimeStart.Hour >= 7 && TimeStart.Hour < 19)
+                if(TimeStart.Hour is >= 7 and < 19)
                 {
                     return false;
                 }

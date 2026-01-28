@@ -60,14 +60,19 @@ namespace ChargeMaster
 
                 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+                // ----- Application Services -----
                 builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>();
-                builder.Services.AddHostedService<PriceFetchingWorker>();
-
+                builder.Services.AddHttpClient<VWService, VWService>(client =>
+                {
+                    client.BaseAddress = new Uri("http://localhost:5211/");
+                });
                 builder.Services.AddHttpClient<WallboxService, WallboxService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.205:8080/");
                 });
 
+                // ----- Workers -----
+                builder.Services.AddHostedService<PriceFetchingWorker>();
                 builder.Services.AddHostedService<WallboxWorker>();
                 builder.Services.AddHostedService<ChargeWorker>();
 

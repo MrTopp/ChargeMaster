@@ -125,6 +125,7 @@ public class ChargeWorker : BackgroundService
             // ***** Varje kvart
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
+                await SkapaKvartlista();
                 //    - om finns i listan med kvartar och timladdning
                 if (_kvartlista.Any(x =>
                         x.TimeStart.Hour == nu.Hour && x.TimeStart.Minute == nu.Minute)
@@ -137,7 +138,6 @@ public class ChargeWorker : BackgroundService
                     await StoppaLaddningAsync();
                 }
             }
-
 
             var paus = nu.AddMinutes(1) - DateTime.Now;
             if (paus.TotalSeconds > 0)
@@ -200,19 +200,4 @@ public class ChargeWorker : BackgroundService
             OrderBy(x => x.SekPerKwh).ToList();
     }
 
-    private static bool IsAllowedWinterTimeSlot(string? start, string? stop)
-    {
-        if (string.IsNullOrWhiteSpace(start) || string.IsNullOrWhiteSpace(stop)) return false;
-
-        if (!TimeOnly.TryParse(start, out var startTime)) return false;
-        if (!TimeOnly.TryParse(stop, out var stopTime)) return false;
-
-        if (startTime == new TimeOnly(0, 0)
-            && stopTime == new TimeOnly(7, 0)) return true;
-
-        if (startTime == new TimeOnly(19, 0)
-            && stopTime == new TimeOnly(0, 0)) return true;
-
-        return false;
-    }
 }
