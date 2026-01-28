@@ -16,8 +16,10 @@ namespace ChargeMaster
         public static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console()
-                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File("logs/log-.txt",
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             try
@@ -26,7 +28,10 @@ namespace ChargeMaster
 
                 var builder = WebApplication.CreateBuilder(args);
 
-                builder.Host.UseSerilog();
+                builder.Host.UseSerilog((context, services, configuration) => configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext());
 
                 // Add services to the container.
                 builder.Services.AddRazorComponents()
