@@ -31,15 +31,19 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
 
         // Fetch tomorrow's prices if past 13:00 on startup
         var now = DateTime.Now;
-        if (now is { Hour: >= 13, Minute: > 5 })
+        if (now.Hour >= 13)
         {
             await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), stoppingToken);
         }
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var tomorrowRun = now.Date.AddDays(1).AddHours(13).AddMinutes(10);
-            var delay = tomorrowRun - now;
+            var nextRun = now.Date.AddHours(13).AddMinutes(10);
+            var delay = nextRun - now;
+            if (delay < TimeSpan.Zero)
+            {
+                delay = delay.Add(TimeSpan.FromDays(1));
+            }
             
             try
             {

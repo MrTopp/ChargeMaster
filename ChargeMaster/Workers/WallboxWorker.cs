@@ -55,6 +55,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 
         while (!stoppingToken.IsCancellationRequested)
         {
+          //  logger.LogInformation("WallboxWorker tick at: {time}", DateTimeOffset.Now);
             // Initiera genom att läsa upp status
             WallboxStatus wallboxStatus = await InitializeWallboxStatusAsync(stoppingToken);
 
@@ -62,7 +63,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             await CheckWallboxTimeAsync(wallboxStatus);
 
             // Kontrollera schema 
-            await CheckWallboxScheduleAsync();
+            //await CheckWallboxScheduleAsync();
 
             // Kontrollera om bilen är ansluten
             await CheckVehicle(wallboxStatus);
@@ -71,7 +72,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             await ReadEnergyAsync(stoppingToken);
 
             // vänta innan nästa iteration
-            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
         }
     }
 
@@ -212,6 +213,9 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         }
     }
 
+    private DateTimeOffset? lastReadingAt = null;
+    private long? lastReading = null;
+
     /// <summary>
     /// Reads the current meter information from the Wallbox and persists it to the database if the accumulated energy has changed.
     /// </summary>
@@ -251,6 +255,20 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 
             db.WallboxMeterReadings.Add(entry);
             await db.SaveChangesAsync(stoppingToken);
+           // logger.LogInformation("Energy reading {energy} at {time}", info.AccEnergy, DateTimeOffset.Now);
+            if (lastReading != null && lastReadingAt != null)
+            {
+                var tid = (TimeSpan)(DateTimeOffset.Now - lastReadingAt);
+                var sec = (long)tid.TotalSeconds;
+
+                var effect =  3600/sec/10.0;
+                
+                logger.LogInformation("Energy usage {effect} kW at {time}", effect,
+                    DateTimeOffset.Now);
+            }
+
+            lastReadingAt = DateTimeOffset.Now;
+            lastReading = info.AccEnergy;
 
             LastStoredAccEnergy = info.AccEnergy;
         }

@@ -26,7 +26,8 @@ public class WallboxService(HttpClient httpClient)
         {
             var url = $"servlet/rest/chargebox/status?_={accessCounter}";
             var json = await httpClient.GetStringAsync(url);
-            return JsonSerializer.Deserialize<WallboxStatus>(json, JsonOptions);
+            var retval = JsonSerializer.Deserialize<WallboxStatus>(json, JsonOptions);
+            return retval;
         }
         catch (HttpRequestException ex)
         {

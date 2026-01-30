@@ -39,11 +39,11 @@ public sealed class VWStatus
     [JsonPropertyName("charging_settings_target_level")]
     public double? ChargingSettingsTargetLevel { get; set; }
     [JsonPropertyName("battery_level")]
-    public string? BatteryLevel { get; set; }
+    public double? BatteryLevel { get; set; }
     [JsonPropertyName("battery_range")]
-    public string? BatteryRange { get; set; }
+    public double? BatteryRange { get; set; }
     [JsonPropertyName("battery_range_estimated_full")]
-    public string? BatteryRangeEstimatedFull { get; set; }
+    public double? BatteryRangeEstimatedFull { get; set; }
     [JsonPropertyName("inspection_due_at")]
     public DateTimeOffset? InspectionDueAt { get; set; }
     [JsonPropertyName("odometer")]
