@@ -10,6 +10,7 @@ public record WallboxStatus(
     [property: JsonPropertyName("freeCharging")] bool FreeCharging,
     [property: JsonPropertyName("ocppConnectionState")] string? OcppConnectionState,
     [property: JsonPropertyName("connector")] string Connector,
+    /// "ALWAYS_OFF", ALWAYS_ON, SCHEMA
     [property: JsonPropertyName("mode")] string Mode,
     [property: JsonPropertyName("currentLimit")] double CurrentLimit,
     [property: JsonPropertyName("factoryCurrentLimit")] double FactoryCurrentLimit,

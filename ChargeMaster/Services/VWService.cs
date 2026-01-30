@@ -62,10 +62,10 @@ public class VWService(HttpClient httpClient)
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Error posting VW command");
+            Log.Error(ex, "Error posting VW command to {url}", relativeUrl);
             return false;
         }
     }
 
-    
+
 }
