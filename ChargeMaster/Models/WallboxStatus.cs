@@ -9,6 +9,7 @@ public record WallboxStatus(
     [property: JsonPropertyName("connectedToInternet")] bool ConnectedToInternet,
     [property: JsonPropertyName("freeCharging")] bool FreeCharging,
     [property: JsonPropertyName("ocppConnectionState")] string? OcppConnectionState,
+    // "CHARGING_PAUSED", CONNECTED, CHARGING, DISABLED, CHARGING_FINISHED
     [property: JsonPropertyName("connector")] string Connector,
     /// "ALWAYS_OFF", ALWAYS_ON, SCHEMA
     [property: JsonPropertyName("mode")] string Mode,

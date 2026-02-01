@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ChargeMaster.Data;
 using ChargeMaster.Services;
 
@@ -88,6 +89,7 @@ public class ChargeWorker : BackgroundService
         DateTime previous = DateTime.Now;
         Timladdning = true;
         bilenLaddar = await LaddStatus();
+        var connectorStatus = ConnectionEnum.Unknown;
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -98,9 +100,34 @@ public class ChargeWorker : BackgroundService
 
             // ***** Varje minut
 
+            // ----- Kontrollera om bilen börjar ladda.
+            var currentConnectorStatus = await GetConnectorStatusAsync();
+            if (currentConnectorStatus != connectorStatus)
+            {
+                _logger.LogInformation($"Charge transition {connectorStatus}->{currentConnectorStatus}");
+                connectorStatus = currentConnectorStatus;
+                if (connectorStatus == ConnectionEnum.Charging)
+                {
+                    // Bilen har börjat ladda, skall den stoppas?
+                    // Det kan hända när bilen kopplas in, då skall laddningen 
+                    // stoppas om det inte är rätt tid för laddning
+                    _logger.LogInformation("Car started charging, OK?");
+                    await SkapaKvartlista();
+                    int minutAvrundad = nu.Minute / 15 * 15;
+                    if (!_kvartlista.Any(x =>
+                            x.TimeStart.Hour == nu.Hour && x.TimeStart.Minute == minutAvrundad))
+                    {
+                        // Bilen skall stoppas
+                        _logger.LogInformation("Stopped charging.");
+                        await StoppaLaddningAsync(force: true);
+                    }
+
+                }
+            }
+
             // ----- Kontrollera förväntad timförbrukning(nu -timstart) *60 / minuter_nu
             long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
-            if (förbrukningDennaTimme > 3000 && Timladdning)
+            if (förbrukningDennaTimme > 2500 && Timladdning)
             {
                 //  För hög förbrukning -> stoppa laddning
                 _logger.LogInformation("Charging disabled due to high consumption: {consumption} Wh.", förbrukningDennaTimme);
@@ -119,8 +146,14 @@ public class ChargeWorker : BackgroundService
             // ***** Varje kvart
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
+                _logger.LogInformation("-- Quarter --");
                 await SkapaKvartlista();
                 int minutAvrundad = nu.Minute / 15 * 15;
+
+                foreach (var price in _kvartlista.OrderBy(x => x.TimeStart).Take(5))
+                {
+                    _logger.LogInformation($"Kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
+                }
 
                 //    - om finns i listan med kvartar och timladdning
                 if (_kvartlista.Any(x =>
@@ -138,7 +171,9 @@ public class ChargeWorker : BackgroundService
                 }
                 else
                 {
-                    _logger.LogInformation("Quarter, evaluate charge, not starting");
+                    var next = _kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
+
+                    _logger.LogInformation("Quarter, not starting, next {time}", next?.TimeStart.ToShortTimeString() ?? "---");
                     await StoppaLaddningAsync();
                 }
             }
@@ -164,10 +199,18 @@ public class ChargeWorker : BackgroundService
         }
     }
 
-    internal async Task StoppaLaddningAsync()
+    internal async Task StoppaLaddningAsync(bool force = false)
     {
-        if (bilenLaddar)
+        if (bilenLaddar || force)
         {
+            var behov = await LaddBehov();
+            if (behov <= 1)
+            {
+                // Låt bilen bestämma
+                _logger.LogInformation($"StoppaLaddning:LaddBehov{behov}");
+                return;
+            }
+
             bool success = await _vwService.StopChargingAsync();
             if (success)
             {
@@ -182,6 +225,35 @@ public class ChargeWorker : BackgroundService
         VWStatusResponse? response = await _vwService.GetStatus();
         return (response?.Status?.ChargingPower ?? 0) > 0;
     }
+
+    internal async Task<ConnectionEnum> GetConnectorStatusAsync()
+    {
+        WallboxStatus? response = await _wallbox.GetStatusAsync();
+        if (response == null)
+            return ConnectionEnum.Unknown;
+        switch (response.Connector)
+        {
+            case "CHARGING_PAUSED":
+                return ConnectionEnum.ChargingPaused;
+            case "CONNECTED":
+                return ConnectionEnum.Connected;
+            case "CHARGING":
+                return ConnectionEnum.Charging;
+            case "DISABLED":
+                return ConnectionEnum.Disabled;
+            case "CHARGING_FINISHED":
+                return ConnectionEnum.ChargingFinished;
+
+            default:
+                _logger.LogError("Unknown value för WallboxStatus.Connector: {value}", response.Connector);
+                return ConnectionEnum.Unknown;
+
+        }
+    }
+
+
+
+
 
     /// <summary>
     /// Räknar ut behov av laddning i procent
@@ -213,23 +285,52 @@ public class ChargeWorker : BackgroundService
         _kvartlista.Clear();
         using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var nu = DateTime.Now;
+        var grans = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
         var priser = await context.ElectricityPrices
-            .Where(x => x.TimeStart >= DateTime.Now.AddMinutes(-30)
-            && x.TimeStart < DateTime.Today.AddDays(1).AddHours(7)
+            .Where(x => x.TimeEnd >= grans
+            //&& x.TimeStart < DateTime.Today.AddDays(1).AddHours(7)
                         )
             .OrderBy(x => x.TimeStart)
             .ToListAsync();
 
+        // Sätt ChargingAllowed = false på den dyraste kvarten varje timme
+        var dyrasteKvartPerTimme =
+            priser.GroupBy(x => new { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
+        foreach (var grupp in dyrasteKvartPerTimme)
+        {
+            var dyrasteKvartar = grupp.OrderByDescending(x => x.SekPerKwh).Take(2);
+            foreach (var dyrasteKvart in dyrasteKvartar)
+                dyrasteKvart?.ChargingAllowed = false;
+        }
+
         // Beräkna laddbehov
         var behovProcent = await LaddBehov();
+        if (behovProcent <= 1)
+        {
+            _logger.LogInformation($"Charge full {behovProcent}");
+            return;
+        }
+
         // Kan behöva justering
-        var antalKvartar = (int)(behovProcent * 1.3);
+        var antalKvartar = (int)(behovProcent * 2.1);
 
 
-        _kvartlista = priser.Where(x => x.ChargingAllowed)
+        _kvartlista = priser.Where(x => x.ChargingAllowed
+            && x.TimeEnd > DateTime.Now)
             .OrderBy(x => x.SekPerKwh)
             .Take(antalKvartar)
             .ToList();
     }
 
+}
+
+enum ConnectionEnum
+{
+    Connected,
+    Charging,
+    ChargingPaused,
+    Disabled,
+    Unknown,
+    ChargingFinished
 }
