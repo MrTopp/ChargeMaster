@@ -28,14 +28,21 @@ public class ElectricityPrice
     {
         get
         {
-            if (TimeStart.Month >= 11 || TimeStart.Month <= 3)
+            // Ladda inte mellan november och mars vardagar 07-19
+            if (TimeStart.Month is >= 11 or <= 3)
             {
-                if(TimeStart.Hour is >= 7 and < 19)
+                if (TimeStart.DayOfWeek is >= DayOfWeek.Monday and <= DayOfWeek.Friday)
                 {
-                    return false;
+                    if (TimeStart.Hour is >= 7 and < 19)
+                    {
+                        return false;
+                    }
                 }
             }
-            return true;
+            return _chargingAllowed ?? true;
         }
+        set => _chargingAllowed = value;
     }
+    [NotMapped]
+    private bool? _chargingAllowed;
 }

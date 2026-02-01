@@ -64,34 +64,13 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 
             // Kontrollera schema 
             //await CheckWallboxScheduleAsync();
-
-            // Kontrollera om bilen är ansluten
-            await CheckVehicle(wallboxStatus);
-
+            
             // Spara status på förbrukad el
             await ReadEnergyAsync(stoppingToken);
 
             // vänta innan nästa iteration
             await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
         }
-    }
-
-    /// <summary>
-    /// Checks the connection status of the vehicle and updates the local state.
-    /// Can trigger logic when a vehicle is newly connected.
-    /// </summary>
-    /// <param name="wallboxStatus">The current status object fetched from the Wallbox.</param>
-    private async Task CheckVehicle(WallboxStatus wallboxStatus)
-    {
-        bool isConnectedNow = wallboxStatus.Connector == "CONNECTED";
-        if (isConnectedNow && !isConnected)
-        {
-            // vi går live (bilen nu ansluten)
-            // Beräkna laddningsschema
-        }
-        // spara state connected
-        isConnected = isConnectedNow;
-
     }
 
     /// <summary>

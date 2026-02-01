@@ -36,6 +36,14 @@ public class ChargeWorkerTests
         Assert.Equal(0, result);
     }
 
+    [Fact]
+    public async Task SkapaKvartlista_OK()
+    {
+        // Act
+        await _worker.SkapaKvartlista();
+        
+    }
+
     private static Task<ChargeWorker> SetUpChargeWorker()
     {
         var services = new ServiceCollection();
