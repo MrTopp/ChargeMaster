@@ -308,7 +308,7 @@ public class ChargeWorker : BackgroundService
         var behovProcent = await LaddBehov();
         if (behovProcent <= 1)
         {
-            _logger.LogInformation($"Charge full {behovProcent}");
+            _logger.LogInformation($"Ingen kvartlista: Charge full {behovProcent}");
             return;
         }
 

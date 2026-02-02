@@ -18,51 +18,30 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
     /// Executes the background service logic to ensure daily price data is fetched and scheduled at the appropriate
     /// time.
     /// </summary>
-    /// <remarks>On startup, this method ensures that the current day's prices are fetched. It then schedules
-    /// a daily fetch at 13:10 local time, typically to retrieve prices for the next day. The method continues running
-    /// until cancellation is requested via the provided token. If an error occurs during a scheduled fetch, it is
-    /// logged and the service continues running.</remarks>
-    /// <param name="stoppingToken">A cancellation token that can be used to request graceful termination of the background operation.</param>
-    /// <returns>A task that represents the asynchronous execution of the background service.</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Ensure current day's prices are fetched
-        await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now), stoppingToken);
+        bool success = await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now), stoppingToken);
 
-        // Fetch tomorrow's prices if past 13:00 on startup
         var now = DateTime.Now;
         if (now.Hour >= 13)
         {
-            await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now.AddDays(1)), stoppingToken);
+            success = await CheckAndFetchAsync(DateOnly.FromDateTime(now.AddDays(1)), stoppingToken);
         }
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var nextRun = now.Date.AddHours(13).AddMinutes(10);
-            var delay = nextRun - now;
-            if (delay < TimeSpan.Zero)
-            {
-                delay = delay.Add(TimeSpan.FromDays(1));
-            }
-            
             try
             {
-                await Task.Delay(delay, stoppingToken);
+                now = DateTime.Now;
+                var nextRun = CalculateNextRunTime(now, success);
+                var delay = nextRun - now;
 
-                // At 13:10, we usually fetch prices for the NEXT day
+                await Task.Delay(delay, stoppingToken);
                 var tomorrow = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
-                
-                bool success = await CheckAndFetchAsync(tomorrow, stoppingToken);
-                while (!success && !stoppingToken.IsCancellationRequested)
-                {
-                    logger.LogInformation("Fetch failed for tomorrow's prices. Retrying in 10 minutes...");
-                    await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
-                    success = await CheckAndFetchAsync(tomorrow, stoppingToken);
-                }
+                success = await CheckAndFetchAsync(tomorrow, stoppingToken);
             }
             catch (OperationCanceledException)
             {
-                // Graceful shutdown
                 break;
             }
             catch (Exception ex)
@@ -70,6 +49,29 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
                 logger.LogError(ex, "An error occurred during scheduled price fetching.");
             }
         }
+    }
+
+    /// <summary>
+    /// Calculates the next time to run the price fetch based on current time and success of the last fetch.
+    /// </summary>
+    private DateTime CalculateNextRunTime(DateTime now, bool success)
+    {
+        DateTime nextRun;
+
+        if (success && (now.Hour < 13 || now is { Hour: 13, Minute: < 10 }))
+        {
+            nextRun = now.Date.AddHours(13).AddMinutes(10);
+        }
+        else if (success)
+        {
+            nextRun = now.Date.AddDays(1).AddHours(13).AddMinutes(10);
+        }
+        else
+        {
+            nextRun = now.AddMinutes(30);
+        }
+
+        return nextRun;
     }
 
     /// <summary>
@@ -82,9 +84,16 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
     {
         try
         {
+            // Kontrollera att morgondagens priser inte hämtas före 13:00
+            if (date == DateOnly.FromDateTime(DateTime.Now.AddDays(1)) && DateTime.Now.Hour < 13)
+            {
+                logger.LogInformation("Skipping fetch for {Date} as it's before 13:00", date);
+                return true;
+            }
+
             using var scope = serviceProvider.CreateScope();
             ElectricityPriceService priceService = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
-            
+
             logger.LogInformation("Worker triggering price fetch for {Date}", date);
             await priceService.FetchAndStorePricesForDateAsync(date);
             return true;
