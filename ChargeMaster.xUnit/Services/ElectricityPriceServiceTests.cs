@@ -1,10 +1,8 @@
-using System.Net;
 using ChargeMaster.Data;
 using ChargeMaster.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Moq.Protected;
 
 namespace ChargeMaster.xUnit.Services;
 
