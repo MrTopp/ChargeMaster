@@ -30,13 +30,13 @@ public sealed class WallboxHttpClientFixture : IDisposable
 [Collection(nameof(WallboxHttpClientCollection))]
 public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 {
-    private readonly HttpClient httpClient = fixture.HttpClient;
+    private readonly HttpClient _httpClient = fixture.HttpClient;
 
     [Fact]
     public async Task InitializeWallboxStatus_OK()
     {
         // Arrange
-        var wallbox = new WallboxService(httpClient);
+        var wallbox = new WallboxService(_httpClient);
         var services = new ServiceCollection().BuildServiceProvider();
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var worker = new WallboxWorker(services, wallbox, logger);
@@ -55,7 +55,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     public async Task CheckWallboxTime_OK()
     {
         // Arrange
-        var wallbox = new WallboxService(httpClient);
+        var wallbox = new WallboxService(_httpClient);
         var services = new ServiceCollection().BuildServiceProvider();
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
 
@@ -102,7 +102,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     public async Task CheckWallboxSchedule_OK()
     {
         // Arrange
-        var wallbox = new WallboxService(httpClient);
+        var wallbox = new WallboxService(_httpClient);
         var services = new ServiceCollection().BuildServiceProvider();
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var worker = new WallboxWorker(services, wallbox, logger);
@@ -131,7 +131,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
 
-        services.AddSingleton(new WallboxService(httpClient));
+        services.AddSingleton(new WallboxService(_httpClient));
 
         await using var provider = services.BuildServiceProvider();
 
@@ -169,7 +169,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
 
-        services.AddSingleton(new WallboxService(httpClient));
+        services.AddSingleton(new WallboxService(_httpClient));
         services.AddLogging();
 
         await using var provider = services.BuildServiceProvider();

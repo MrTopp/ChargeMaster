@@ -1,5 +1,6 @@
 using ChargeMaster.Services;
 using ChargeMaster.Models;  
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
 namespace ChargeMaster.xUnit.Services;
 

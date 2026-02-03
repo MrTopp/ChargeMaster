@@ -14,7 +14,7 @@ public sealed class WallboxSchemaEntryTests
             Weekday = "1"
         };
 
-        Assert.False(a.Equals((WallboxSchemaEntry?)null));
+        Assert.False(a.Equals(null));
     }
 
     [Fact]

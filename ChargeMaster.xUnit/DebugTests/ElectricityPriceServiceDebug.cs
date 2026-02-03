@@ -4,13 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace ChargeMaster.xUnit.Debug;
+namespace ChargeMaster.xUnit.DebugTests;
 
 public class ElectricityPriceServiceDebug : IDisposable
 {
     private readonly HttpClient _httpClient;
     private readonly ApplicationDbContext _context;
-    private readonly Mock<ILogger<ElectricityPriceService>> _loggerMock;
     private readonly ElectricityPriceService _service;
 
     public ElectricityPriceServiceDebug()
@@ -26,9 +25,9 @@ public class ElectricityPriceServiceDebug : IDisposable
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
         
-        _loggerMock = new Mock<ILogger<ElectricityPriceService>>();
+        var loggerMock = new Mock<ILogger<ElectricityPriceService>>();
         
-        _service = new ElectricityPriceService(_httpClient, _context, _loggerMock.Object);
+        _service = new ElectricityPriceService(_httpClient, _context, loggerMock.Object);
     }
 
     public void Dispose()
