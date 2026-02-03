@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+// ReSharper disable NotAccessedPositionalProperty.Global
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace ChargeMaster.Models;
 
@@ -11,7 +13,7 @@ public record WallboxStatus(
     [property: JsonPropertyName("ocppConnectionState")] string? OcppConnectionState,
     // "CHARGING_PAUSED", CONNECTED, CHARGING, DISABLED, CHARGING_FINISHED
     [property: JsonPropertyName("connector")] string Connector,
-    /// "ALWAYS_OFF", ALWAYS_ON, SCHEMA
+    // "ALWAYS_OFF", ALWAYS_ON, SCHEMA
     [property: JsonPropertyName("mode")] string Mode,
     [property: JsonPropertyName("currentLimit")] double CurrentLimit,
     [property: JsonPropertyName("factoryCurrentLimit")] double FactoryCurrentLimit,

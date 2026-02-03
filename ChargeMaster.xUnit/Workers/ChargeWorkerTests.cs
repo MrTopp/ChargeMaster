@@ -8,9 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Moq;
-using Moq.Protected;
-
-using System.Net;
 
 namespace ChargeMaster.xUnit.Workers;
 

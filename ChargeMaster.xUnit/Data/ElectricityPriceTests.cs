@@ -1,5 +1,4 @@
 using ChargeMaster.Data;
-using Xunit;
 
 namespace ChargeMaster.xUnit.Data;
 
