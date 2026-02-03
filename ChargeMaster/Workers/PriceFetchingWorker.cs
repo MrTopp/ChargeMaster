@@ -1,4 +1,5 @@
 using ChargeMaster.Services;
+// ReSharper disable UnusedParameter.Local
 
 namespace ChargeMaster.Workers;
 

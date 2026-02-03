@@ -13,7 +13,7 @@ public class WallboxService(HttpClient httpClient)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public long accessCounter
+    public long AccessCounter
     {
         get => ++field;
         set => field = value;
@@ -23,7 +23,7 @@ public class WallboxService(HttpClient httpClient)
     {
         try
         {
-            var url = $"servlet/rest/chargebox/status?_={accessCounter}";
+            var url = $"servlet/rest/chargebox/status?_={AccessCounter}";
             var json = await httpClient.GetStringAsync(url);
             var retval = JsonSerializer.Deserialize<WallboxStatus>(json, JsonOptions);
             return retval;
@@ -89,7 +89,6 @@ public class WallboxService(HttpClient httpClient)
                 _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
             };
 
-            var payload = new { mode = modeString };
             // The wallbox usually expects the payload at /servlet/rest/chargebox/mode
             var response = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}",null);
             return response.IsSuccessStatusCode;
@@ -104,7 +103,7 @@ public class WallboxService(HttpClient httpClient)
     {
         try
         {
-            var url = $"servlet/rest/chargebox/meterinfo/EXTERNAL?_={accessCounter}";
+            var url = $"servlet/rest/chargebox/meterinfo/EXTERNAL?_={AccessCounter}";
             var json = await httpClient.GetStringAsync(url);
             return JsonSerializer.Deserialize<WallboxMeterInfo>(json, JsonOptions);
         }
@@ -119,7 +118,7 @@ public class WallboxService(HttpClient httpClient)
     {
         try
         {
-            var url = $"servlet/rest/chargebox/schema?_={accessCounter}";
+            var url = $"servlet/rest/chargebox/schema?_={AccessCounter}";
             var json = await httpClient.GetStringAsync(url);
             return JsonSerializer.Deserialize<List<WallboxSchemaEntry>>(json, JsonOptions);
         }
@@ -134,7 +133,7 @@ public class WallboxService(HttpClient httpClient)
     {
         try
         {
-            var url = $"servlet/rest/chargebox/config?_={accessCounter}";
+            var url = $"servlet/rest/chargebox/config?_={AccessCounter}";
             var json = await httpClient.GetStringAsync(url);
             return JsonSerializer.Deserialize<WallboxConfig>(json, JsonOptions);
         }
@@ -149,7 +148,7 @@ public class WallboxService(HttpClient httpClient)
     {
         try
         {
-            var url = $"servlet/rest/chargebox/slaves/false?_={accessCounter}";
+            var url = $"servlet/rest/chargebox/slaves/false?_={AccessCounter}";
             var json = await httpClient.GetStringAsync(url);
             return JsonSerializer.Deserialize<List<WallboxSlaveConfig>>(json, JsonOptions);
         }

@@ -19,11 +19,6 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     /// </summary>
     private double? LastStoredAccEnergy { get; set; }
 
-    /// <summary>
-    /// Indicates whether a vehicle is currently connected to the charger.
-    /// </summary>
-    private bool isConnected { get; set; }
-
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -192,8 +187,8 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         }
     }
 
-    private DateTimeOffset? lastReadingAt = null;
-    private long? lastReading = null;
+    private DateTimeOffset? _lastReadingAt;
+    private long? _lastReading;
 
     /// <summary>
     /// Reads the current meter information from the Wallbox and persists it to the database if the accumulated energy has changed.
@@ -235,19 +230,19 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             db.WallboxMeterReadings.Add(entry);
             await db.SaveChangesAsync(stoppingToken);
            // logger.LogInformation("Energy reading {energy} at {time}", info.AccEnergy, DateTimeOffset.Now);
-            if (lastReading != null && lastReadingAt != null)
+            if (_lastReading != null && _lastReadingAt != null)
             {
-                var tid = (TimeSpan)(DateTimeOffset.Now - lastReadingAt);
+                var tid = (TimeSpan)(DateTimeOffset.Now - _lastReadingAt);
                 var sec = (long)tid.TotalSeconds;
 
-                var effect =  3600/sec/10.0;
+                var effect = sec != 0 ? 3600.0 / sec / 10 : 0;
                 
                 logger.LogInformation("Energy usage {effect} kW at {time}", effect,
                     DateTimeOffset.Now);
             }
 
-            lastReadingAt = DateTimeOffset.Now;
-            lastReading = info.AccEnergy;
+            _lastReadingAt = DateTimeOffset.Now;
+            _lastReading = info.AccEnergy;
 
             LastStoredAccEnergy = info.AccEnergy;
         }

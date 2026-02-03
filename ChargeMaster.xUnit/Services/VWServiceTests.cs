@@ -5,27 +5,27 @@ namespace ChargeMaster.xUnit.Services;
 
 public class VWServiceTests : IDisposable
 {
-    private readonly HttpClient httpClient;
-    private readonly VWService service;
+    private readonly HttpClient _httpClient;
+    private readonly VWService _service;
 
     public VWServiceTests()
     {
-        httpClient = new HttpClient
+        _httpClient = new HttpClient
         {
             BaseAddress = new Uri("http://127.0.0.1:5211/")
         };
-        service = new VWService(httpClient);
+        _service = new VWService(_httpClient);
     }
 
     public void Dispose()
     {
-        httpClient.Dispose();
+        _httpClient.Dispose();
     }
 
     [Fact]
     public async Task GetStatus_OK()
     {
-        var result = await service.GetStatus();
+        var result = await _service.GetStatus();
         Assert.NotNull(result);
         Assert.NotNull(result.Status);
         Assert.False(string.IsNullOrWhiteSpace(result.Status.Vin));
@@ -35,7 +35,7 @@ public class VWServiceTests : IDisposable
     [Fact]
     public async Task GetVehicles_OK()
     {
-        var result = await service.GetVehiclesAsync();
+        var result = await _service.GetVehiclesAsync();
         Assert.NotNull(result);
         Assert.NotNull(result.Vehicles);
         Assert.NotEmpty(result.Vehicles);
@@ -45,28 +45,28 @@ public class VWServiceTests : IDisposable
     [Fact]
     public async Task StartCharging_OK()
     {
-        var result = await service.StartChargingAsync();
+        var result = await _service.StartChargingAsync();
         Assert.True(result);
     }
 
     [Fact]
     public async Task StopCharging_OK()
     {
-        var result = await service.StopChargingAsync();
+        var result = await _service.StopChargingAsync();
         Assert.True(result);
     }
 
     [Fact]
     public async Task StartClimatization_OK()
     {
-        var result = await service.StartClimatizationAsync();
+        var result = await _service.StartClimatizationAsync();
         Assert.True(result);
     }
 
     [Fact]
     public async Task StopClimatization_OK()
     {
-        var result = await service.StopClimatizationAsync();
+        var result = await _service.StopClimatizationAsync();
         Assert.True(result);
     }
 }
