@@ -237,8 +237,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 
                 var effect = sec != 0 ? 3600.0 / sec / 10 : 0;
                 
-                logger.LogInformation("Energy usage {effect} kW at {time}", effect,
-                    DateTimeOffset.Now);
+                logger.LogInformation("Energy usage {effect:F1} kW", effect);
             }
 
             _lastReadingAt = DateTimeOffset.Now;
