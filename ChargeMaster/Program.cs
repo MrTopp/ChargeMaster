@@ -67,10 +67,14 @@ namespace ChargeMaster
 
                 // ----- Application Services -----
                 builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>();
+                
+                var vwServiceBaseAddress = builder.Configuration["Services:VWService"] 
+                    ?? throw new InvalidOperationException("VWService base address 'Services:VWService' not configured.");
                 builder.Services.AddHttpClient<VWService, VWService>(client =>
                 {
-                    client.BaseAddress = new Uri("http://localhost:5211/");
+                    client.BaseAddress = new Uri(vwServiceBaseAddress);
                 });
+                
                 builder.Services.AddHttpClient<WallboxService, WallboxService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.205:8080/");
