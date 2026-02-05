@@ -93,19 +93,13 @@ public class ChargeWorker(
 
             // ***** Varje minut
 
-            // Kontrollera om status ändrats
+            // ----- State-övergång
             if (currentConnectorStatus != connectorStatus)
             {
                 logger.LogInformation(
                     $"Charge transition {connectorStatus}->{currentConnectorStatus}");
                 connectorStatus = currentConnectorStatus;
                 // ----- Kontrollera om bilen börjar ladda.
-                if (connectorStatus == ConnectionEnum.SearchingForCommunication)
-                {
-                    // Bilen har kopplats ur, ladda inte
-                    logger.LogInformation("Car disconnected");
-                    continue;
-                }
                 if (connectorStatus == ConnectionEnum.Charging)
                 {
                     // Bilen har börjat ladda, skall den stoppas?
@@ -121,7 +115,15 @@ public class ChargeWorker(
                         logger.LogInformation("Stopped charging.");
                         await StoppaLaddningAsync(force: true);
                     }
-                } 
+                }
+            }
+
+            if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
+            {
+                // Bilen inte hemma, laddning irrelevant
+                // Använd inte continue utan hoppa till för att få med 
+                // viloperioden i slutet på loopen
+                goto NextIteration;
             }
 
             // ----- Kontrollera förväntad timförbrukning(nu -timstart) *60 / minuter_nu
@@ -162,7 +164,7 @@ public class ChargeWorker(
                         $"Kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
                 }
 
-                //    - om finns i listan med kvartar och timladdning
+                // Om nu finns i listan med kvartar 
                 if (_kvartlista.Any(x =>
                         x.TimeStart.Hour == nu.Hour && x.TimeStart.Minute == minutAvrundad))
                 {
@@ -186,6 +188,7 @@ public class ChargeWorker(
                 }
             }
 
+            NextIteration:
             TimeSpan paus = nu.AddMinutes(1) - DateTime.Now;
             if (paus.TotalSeconds > 0)
                 await Task.Delay(paus, stoppingToken);
@@ -296,7 +299,7 @@ public class ChargeWorker(
         var grans = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
         var priser = await context.ElectricityPrices
             .Where(x => x.TimeEnd >= grans
-                //&& x.TimeStart < DateTime.Today.AddDays(1).AddHours(7)
+            //&& x.TimeStart < DateTime.Today.AddDays(1).AddHours(7)
             )
             .OrderBy(x => x.TimeStart)
             .ToListAsync();
@@ -304,7 +307,7 @@ public class ChargeWorker(
         // Sätt ChargingAllowed = false på den dyraste kvarten varje timme
         var dyrasteKvartPerTimme =
             priser.GroupBy(x => new
-                { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
+            { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
         foreach (var grupp in dyrasteKvartPerTimme)
         {
             var dyrasteKvartar = grupp.OrderByDescending(x => x.SekPerKwh).Take(2);

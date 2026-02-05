@@ -36,6 +36,9 @@
 - Do not mock external dependencies in unit tests unless explicitly required.
 - use a local PostgreSQL instance for testing Entity Framework Core operations.
 
+## Commit messages
+- Separate different concerns by putting them in a bullet list using '-' as a prefix.
+
 # Functionality
 
 The main functionality is to read price for electricity from a web API and store it in a database. 
