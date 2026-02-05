@@ -8,6 +8,12 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix>$([System.DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss'))</VersionSuffix>
+    <InformationalVersion>$(VersionPrefix)-$(VersionSuffix)</InformationalVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove=".github\**" />
     <Content Remove=".github\**" />

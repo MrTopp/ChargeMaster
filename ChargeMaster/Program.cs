@@ -1,3 +1,4 @@
+using System.Reflection;
 using ChargeMaster.Components;
 using ChargeMaster.Components.Account;
 using ChargeMaster.Data;
@@ -15,16 +16,24 @@ namespace ChargeMaster
     {
         public static void Main(string[] args)
         {
+            var assembly = typeof(Program).Assembly;
+            var versionInfo = assembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?
+                .InformationalVersion ?? assembly.GetName().Version?.ToString() ?? "Unknown";
+
+            // Ta bort commit-hash om den finns (allt efter "+")
+            versionInfo = versionInfo.Split('+')[0];
+
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
                 .WriteTo.File($"logs/log-.txt",
-                    //rollingInterval: RollingInterval.Day,
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             try
             {
-                Log.Information("Starting web application");
+                Log.Information("==============================================");
+                Log.Information(" Starting ChargeMaster v{Version}", versionInfo);
+                Log.Information("==============================================");
 
                 var builder = WebApplication.CreateBuilder(args);
 
