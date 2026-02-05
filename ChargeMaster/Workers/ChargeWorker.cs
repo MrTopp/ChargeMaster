@@ -90,22 +90,43 @@ public class ChargeWorker(
             DateTime nu = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day,
                 DateTime.Now.Hour, DateTime.Now.Minute, 0);
             var currentConnectorStatus = await GetConnectorStatusAsync();
+            WallboxMeterInfo? wstat = await _wallbox.GetMeterInfoAsync();
 
-            // ***** Varje minut
+            // ----- Varje timme, nollställ timförbrukning
+            if (wstat != null)
+            {
+                long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
+                if (nu.Hour != previous.Hour)
+                {
+                    logger.LogInformation("Hourly consumption: {consumption} Wh",
+                        förbrukningDennaTimme);
+                    Timladdning = true;
+                    FörbrukningVidTimstart = wstat.AccEnergy;
+                }
+            }
+
+            // ----- Om bilen inte är hemma, hoppa över resten av loopen
+            if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
+            {
+                // Bilen inte hemma, laddning irrelevant
+                // Använd inte continue utan hoppa till för att få med 
+                // viloperioden i slutet på loopen
+                goto NextIteration;
+            }
 
             // ----- State-övergång
             if (currentConnectorStatus != connectorStatus)
             {
                 logger.LogInformation(
                     $"Charge transition {connectorStatus}->{currentConnectorStatus}");
-                connectorStatus = currentConnectorStatus;
-                // ----- Kontrollera om bilen börjar ladda.
-                if (connectorStatus == ConnectionEnum.Charging)
+
+                // ----- Bilen börjar ladda.
+                if (currentConnectorStatus == ConnectionEnum.Charging)
                 {
                     // Bilen har börjat ladda, skall den stoppas?
                     // Det kan hända när bilen kopplas in, då skall laddningen 
                     // stoppas om det inte är rätt tid för laddning
-                    logger.LogInformation("Car started charging, OK?");
+                    logger.LogInformation("Car started charging");
                     await SkapaKvartlista();
                     int minutAvrundad = nu.Minute / 15 * 15;
                     if (!_kvartlista.Any(x =>
@@ -116,18 +137,10 @@ public class ChargeWorker(
                         await StoppaLaddningAsync(force: true);
                     }
                 }
-            }
-
-            if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
-            {
-                // Bilen inte hemma, laddning irrelevant
-                // Använd inte continue utan hoppa till för att få med 
-                // viloperioden i slutet på loopen
-                goto NextIteration;
+                connectorStatus = currentConnectorStatus;
             }
 
             // ----- Kontrollera förväntad timförbrukning(nu -timstart) *60 / minuter_nu
-            WallboxMeterInfo? wstat = await _wallbox.GetMeterInfoAsync();
             if (wstat != null)
             {
                 long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
@@ -140,31 +153,24 @@ public class ChargeWorker(
                     Timladdning = false;
                     await StoppaLaddningAsync();
                 }
-
-                // ***** Varje timme
-                if (nu.Hour != previous.Hour)
-                {
-                    logger.LogInformation("Hourly consumption: {consumption} Wh",
-                        förbrukningDennaTimme);
-                    Timladdning = true;
-                    FörbrukningVidTimstart = wstat.AccEnergy;
-                }
             }
+
 
             // ***** Varje kvart
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
                 logger.LogInformation("-- Quarter --");
                 await SkapaKvartlista();
-                int minutAvrundad = nu.Minute / 15 * 15;
+                int numin = nu.Minute;
+                int minutAvrundad = numin / 15 * 15;
 
-                foreach (var price in _kvartlista.OrderBy(x => x.TimeStart).Take(5))
+                foreach (var price in _kvartlista.OrderBy(x => x.TimeStart)/*.Take(5)*/)
                 {
                     logger.LogInformation(
                         $"Kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
                 }
 
-                // Om nu finns i listan med kvartar 
+                // Om 'nu' finns i listan med kvartar 
                 if (_kvartlista.Any(x =>
                         x.TimeStart.Hour == nu.Hour && x.TimeStart.Minute == minutAvrundad))
                 {
@@ -188,7 +194,7 @@ public class ChargeWorker(
                 }
             }
 
-            NextIteration:
+        NextIteration:
             TimeSpan paus = nu.AddMinutes(1) - DateTime.Now;
             if (paus.TotalSeconds > 0)
                 await Task.Delay(paus, stoppingToken);
@@ -275,8 +281,6 @@ public class ChargeWorker(
         VWStatusResponse? response = await _vwService.GetStatus();
         if (response?.Status == null)
             return 0;
-        if (response.Status.VehicleState == VWVehicleState.Unknown)
-            return 0;
         var status = response.Status;
         if (status.BatteryLevel == null)
             return 0;
@@ -299,7 +303,7 @@ public class ChargeWorker(
         var grans = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
         var priser = await context.ElectricityPrices
             .Where(x => x.TimeEnd >= grans
-            //&& x.TimeStart < DateTime.Today.AddDays(1).AddHours(7)
+            && x.TimeStart < DateTime.Today.AddDays(1).AddHours(7)
             )
             .OrderBy(x => x.TimeStart)
             .ToListAsync();
