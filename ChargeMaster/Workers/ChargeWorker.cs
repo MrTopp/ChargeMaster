@@ -11,7 +11,7 @@ public class ChargeWorker(
     : BackgroundService
 {
     // Kvartar när laddning skall ske
-    private List<ElectricityPrice> _kvartlista = new List<ElectricityPrice>();
+    private List<ElectricityPrice> _kvartlista = new();
 
     // Flagga om laddning är tillåten denna timme
     private bool Timladdning { get; set; }
@@ -87,19 +87,25 @@ public class ChargeWorker(
         while (!stoppingToken.IsCancellationRequested)
         {
             logger.LogTrace("ChargeWorker tick at: {time}", DateTimeOffset.Now);
-            WallboxMeterInfo? wstat = await _wallbox.GetMeterInfoAsync();
             DateTime nu = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day,
                 DateTime.Now.Hour, DateTime.Now.Minute, 0);
+            var currentConnectorStatus = await GetConnectorStatusAsync();
 
             // ***** Varje minut
 
-            // ----- Kontrollera om bilen börjar ladda.
-            var currentConnectorStatus = await GetConnectorStatusAsync();
+            // Kontrollera om status ändrats
             if (currentConnectorStatus != connectorStatus)
             {
                 logger.LogInformation(
                     $"Charge transition {connectorStatus}->{currentConnectorStatus}");
                 connectorStatus = currentConnectorStatus;
+                // ----- Kontrollera om bilen börjar ladda.
+                if (connectorStatus == ConnectionEnum.SearchingForCommunication)
+                {
+                    // Bilen har kopplats ur, ladda inte
+                    logger.LogInformation("Car disconnected");
+                    continue;
+                }
                 if (connectorStatus == ConnectionEnum.Charging)
                 {
                     // Bilen har börjat ladda, skall den stoppas?
@@ -115,10 +121,11 @@ public class ChargeWorker(
                         logger.LogInformation("Stopped charging.");
                         await StoppaLaddningAsync(force: true);
                     }
-                }
+                } 
             }
 
             // ----- Kontrollera förväntad timförbrukning(nu -timstart) *60 / minuter_nu
+            WallboxMeterInfo? wstat = await _wallbox.GetMeterInfoAsync();
             if (wstat != null)
             {
                 long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
@@ -179,7 +186,7 @@ public class ChargeWorker(
                 }
             }
 
-            var paus = nu.AddMinutes(1) - DateTime.Now;
+            TimeSpan paus = nu.AddMinutes(1) - DateTime.Now;
             if (paus.TotalSeconds > 0)
                 await Task.Delay(paus, stoppingToken);
             previous = nu;
@@ -244,6 +251,8 @@ public class ChargeWorker(
                 return ConnectionEnum.Disabled;
             case "CHARGING_FINISHED":
                 return ConnectionEnum.ChargingFinished;
+            case "SEARCH_COMM":
+                return ConnectionEnum.SearchingForCommunication;
 
             default:
                 logger.LogError("Unknown value för WallboxStatus.Connector: {value}",
@@ -332,5 +341,6 @@ enum ConnectionEnum
     ChargingPaused,
     Disabled,
     Unknown,
-    ChargingFinished
+    ChargingFinished,
+    SearchingForCommunication
 }
