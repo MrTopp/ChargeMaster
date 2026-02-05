@@ -144,7 +144,8 @@ public class ChargeWorker(
             if (wstat != null)
             {
                 long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
-                if (förbrukningDennaTimme > 2500 && Timladdning)
+                int grans = nu.Minute * 2000 / 60 + 1500;
+                if (förbrukningDennaTimme > grans && Timladdning)
                 {
                     //  För hög förbrukning -> stoppa laddning
                     logger.LogInformation(
