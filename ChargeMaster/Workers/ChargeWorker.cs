@@ -160,12 +160,13 @@ public class ChargeWorker(
             // ***** Varje kvart
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
-                logger.LogInformation("-- Quarter --");
+                long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
+                logger.LogInformation("-- Quarter, förbrukning: {consumption} Wh --", förbrukningDennaTimme);
                 await SkapaKvartlista();
                 int numin = nu.Minute;
                 int minutAvrundad = numin / 15 * 15;
 
-                foreach (var price in _kvartlista.OrderBy(x => x.TimeStart)/*.Take(5)*/)
+                foreach (var price in _kvartlista.OrderBy(x => x.TimeStart).Take(2))
                 {
                     logger.LogInformation(
                         $"Kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
@@ -173,7 +174,9 @@ public class ChargeWorker(
 
                 // Om 'nu' finns i listan med kvartar 
                 if (_kvartlista.Any(x =>
-                        x.TimeStart.Hour == nu.Hour && x.TimeStart.Minute == minutAvrundad))
+                        x.TimeStart.Day == nu.Day &&
+                        x.TimeStart.Hour == nu.Hour &&
+                        x.TimeStart.Minute == minutAvrundad))
                 {
                     if (Timladdning)
                     {
@@ -304,12 +307,16 @@ public class ChargeWorker(
         var grans = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
         var priser = await context.ElectricityPrices
             .Where(x => x.TimeEnd >= grans
-            && x.TimeStart < DateTime.Today.AddDays(1).AddHours(7)
+                        // aldrig vardagar 7-19 november till mars
+            && !((x.TimeStart.Month >= 11 || x.TimeStart.Month <= 3) &&
+                            x.TimeStart.Hour >= 7 && x.TimeStart.Hour < 19 &&
+                 x.TimeStart.DayOfWeek != DayOfWeek.Saturday &&
+                 x.TimeStart.DayOfWeek != DayOfWeek.Sunday)
             )
             .OrderBy(x => x.TimeStart)
             .ToListAsync();
 
-        // Sätt ChargingAllowed = false på den dyraste kvarten varje timme
+        // Sätt ChargingAllowed = false på de två dyraste kvartarna varje timme
         var dyrasteKvartPerTimme =
             priser.GroupBy(x => new
             { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
@@ -331,7 +338,7 @@ public class ChargeWorker(
         }
 
         // Kan behöva justering
-        var antalKvartar = (int)(behovProcent * 2.1);
+        var antalKvartar = (int)(behovProcent * 2.4);
 
 
         _kvartlista = priser.Where(x => x.ChargingAllowed
