@@ -25,6 +25,8 @@ public class ChargeWorker(
     /// </summary>
     private long FörbrukningVidTimstart { get; set; }
 
+    private bool WallboxStopped { get; set; } = false;
+
     /// <summary>
     /// Status för laddningen
     /// </summary>
@@ -36,7 +38,7 @@ public class ChargeWorker(
             if (value != field)
             {
                 field = value;
-                // Logga state-övergången
+                // Logga klockslag för state-övergången
                 ConnectorStatusTime = DateTime.Now;
             }
         }
@@ -53,7 +55,7 @@ public class ChargeWorker(
                                             throw new InvalidOperationException(
                                                 "Initiering av VWService misslyckas");
 
-    
+
     private async Task<long> InitieraFörbrukningAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
@@ -142,6 +144,13 @@ public class ChargeWorker(
 
             // ----- Bilen är hemma, dags att utvärdera laddning -----
 
+            // Kontrollera om laddningen panikstoppad
+            if (WallboxStopped && nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
+            {
+                logger.LogInformation("Wallbox is stopped.");
+                goto NextIteration;
+            }
+
             // ----- Initiering
             await SkapaKvartlista();
 
@@ -176,7 +185,7 @@ public class ChargeWorker(
             {
                 logger.LogInformation(
                     $"Charge transition {ConnectorStatus}->{currentConnectorStatus}");
-                
+
                 // ----- Bilen börjar ladda.
                 if (currentConnectorStatus == ConnectionEnum.Charging)
                 {
@@ -216,6 +225,7 @@ public class ChargeWorker(
             // ***** Varje kvart
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
+                // Starta/stoppa laddning beroende på om det är tillåtet eller inte
                 logger.LogInformation("-- Quarter, förbrukning: {consumption} Wh --", förbrukningDennaTimme);
                 int numin = nu.Minute;
                 int minutAvrundad = numin / 15 * 15;
@@ -266,7 +276,17 @@ public class ChargeWorker(
     {
         if (Timladdning && !BilenLaddar)
         {
-            BilenLaddar = await _vwService.StartChargingAsync();
+            try
+            {
+                BilenLaddar = await _vwService.StartChargingAsync();
+            }
+            catch (CarConnectionException ex)
+            {
+                logger.LogError(ex, "Error starting charging");
+                await StopWallbox();
+                BilenLaddar = false;
+            }
+
             if (BilenLaddar)
             {
                 logger.LogInformation("Charging started successfully.");
@@ -286,7 +306,18 @@ public class ChargeWorker(
                 return;
             }
 
-            bool success = await _vwService.StopChargingAsync();
+            bool success;
+            try
+            {
+                success = await _vwService.StopChargingAsync();
+            }
+            catch (CarConnectionException ex)
+            {
+                logger.LogError(ex, "Error stopping charging");
+                await StopWallbox();    // Om det inte går att stänga av genom att fråga bilen, stäng av wallboxen så att bilen inte kan ladda.
+                success = false;
+            }
+
             if (success)
             {
                 logger.LogInformation("Charging stopped successfully.");
@@ -297,10 +328,58 @@ public class ChargeWorker(
 
     internal async Task<bool> LaddStatus()
     {
-        VWStatusResponse? response = await _vwService.GetStatus();
-        return (response?.Status?.ChargingPower ?? 0) > 0;
+        try
+        {
+            VWStatusResponse? response = await _vwService.GetStatus();
+            return (response?.Status?.ChargingPower ?? 0) > 0;
+        }
+        catch (CarConnectionException ex)
+        {
+            logger.LogError(ex, "Error fetching VW status");
+            await StopWallbox(); 
+            return false;
+        }
     }
 
+    /// <summary>
+    /// Stäng av laddning genom att sätta wallboxen i NotAvailable-läge, används när kopplingen till bilen krånglar. Då kan bilen inte ladda.
+    /// </summary>
+    /// <returns></returns>
+    internal async Task StopWallbox()
+    {
+        // Stoppa laddning genom att sätta wallboxen i NotAvailable-läge
+        try
+        {
+            await _wallbox.SetModeAsync(WallboxMode.NotAvailable);
+            WallboxStopped = true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error setting wallbox mode to NotAvailable");
+        }
+    }
+
+    internal async Task<bool> StartWallbox()
+    {
+        // Tillåt laddning genom att sätta wallboxen i Normal-läge
+        try
+        {
+            await _wallbox.SetModeAsync(WallboxMode.Available);
+            WallboxStopped = false;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error setting wallbox mode to Available");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Status för laddning, används för att avgöra om bilen är inkopplad, laddar,
+    /// eller inte är ansluten. Om det inte går att få status från wallboxen, returneras Unknown.
+    /// </summary>
+    /// <returns></returns>
     internal async Task<ConnectionEnum> GetConnectorStatusAsync()
     {
         WallboxStatus? response = await _wallbox.GetStatusAsync();
@@ -332,11 +411,22 @@ public class ChargeWorker(
     /// <summary>
     /// Räknar ut behov av laddning i procent
     /// </summary>
-    /// <returns></returns>
+    /// <returns>laddbehov i procent</returns>
     internal async Task<double> LaddBehov()
     {
         // Beräkna laddbehov
-        VWStatusResponse? response = await _vwService.GetStatus();
+        VWStatusResponse? response;
+        try
+        {
+            response = await _vwService.GetStatus();
+        }
+        catch (CarConnectionException ex)
+        {
+            logger.LogError(ex, "Error fetching VW status");
+            await StopWallbox();
+            return 0;
+        }
+
         if (response?.Status == null)
             return 0;
         var status = response.Status;
@@ -351,7 +441,6 @@ public class ChargeWorker(
     /// <summary>
     /// Skapa lista med kvartar där laddning skall vara aktiv
     /// </summary>
-    /// <returns></returns>
     internal async Task SkapaKvartlista()
     {
         _kvartlista.Clear();
