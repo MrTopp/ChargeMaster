@@ -1,5 +1,8 @@
-using ChargeMaster.Services;
 using ChargeMaster.Models;
+using ChargeMaster.Services;
+using ChargeMaster.Workers;
+
+using Microsoft.Extensions.Logging;
 
 namespace ChargeMaster.xUnit.Services;
 
@@ -14,7 +17,8 @@ public class VWServiceTests : IDisposable
         {
             BaseAddress = new Uri("http://127.0.0.1:5211/")
         };
-        _service = new VWService(_httpClient);
+        var logger = new LoggerFactory().CreateLogger<VWService>();
+        _service = new VWService(_httpClient, logger);
     }
 
     public void Dispose()

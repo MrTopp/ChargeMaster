@@ -64,7 +64,8 @@ public class ChargeWorkerTests
 
         // Assuming VWService runs on localhost:5211 based on other tests
         var vwClient = new HttpClient { BaseAddress = new Uri("http://127.0.0.1:5211/") };
-        var vwService = new VWService(vwClient);
+        var logger = new LoggerFactory().CreateLogger<VWService>();
+        var vwService = new VWService(vwClient, logger);
 
         services.AddSingleton(vwService);
 
