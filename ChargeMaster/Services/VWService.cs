@@ -1,13 +1,14 @@
 using System.Text.Json;
-
 using ChargeMaster.Models;
-
 using Serilog;
 
 namespace ChargeMaster.Services;
 
-public class VWService(HttpClient httpClient)
+public class CarConnectionException(string message) : Exception(message);
+
+public class VWService(HttpClient httpClient, ILogger<VWService> logger)
 {
+    private ILogger<VWService> Logger { get; } = logger;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public long AccessCounter
@@ -23,10 +24,10 @@ public class VWService(HttpClient httpClient)
             var json = await httpClient.GetStringAsync("/status");
             return JsonSerializer.Deserialize<VWStatusResponse>(json, JsonOptions);
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            Log.Error(ex, "Error fetching VW status");
-            return null;
+            Logger.LogError(ex, "Error fetching VW status");
+            throw new CarConnectionException("GetStatus: Failed to fetch VW status");
         }
     }
 
@@ -37,10 +38,10 @@ public class VWService(HttpClient httpClient)
             var json = await httpClient.GetStringAsync("/vehicles");
             return JsonSerializer.Deserialize<VWVehiclesResponse>(json, JsonOptions);
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
             Log.Error(ex, "Error fetching VW vehicles");
-            return null;
+            throw new CarConnectionException("GetVehiclesAsync: Failed to fetch VW vehicles");
         }
     }
 
@@ -60,12 +61,10 @@ public class VWService(HttpClient httpClient)
             var response = await httpClient.PostAsync(relativeUrl, content);
             return response.IsSuccessStatusCode;
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
             Log.Error(ex, "Error posting VW command to {url}", relativeUrl);
-            return false;
+            throw new CarConnectionException($"PostAsync: Failed to post command to {relativeUrl}");
         }
     }
-
-
 }
