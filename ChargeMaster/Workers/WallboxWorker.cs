@@ -7,6 +7,26 @@ using Microsoft.EntityFrameworkCore;
 namespace ChargeMaster.Workers;
 
 /// <summary>
+/// Event arguments containing Wallbox meter information.
+/// </summary>
+public class MeterInfoEventArgs : EventArgs
+{
+    /// <summary>
+    /// Gets the meter information.
+    /// </summary>
+    public WallboxMeterInfo MeterInfo { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MeterInfoEventArgs"/> class.
+    /// </summary>
+    /// <param name="meterInfo">The meter information to include in the event.</param>
+    public MeterInfoEventArgs(WallboxMeterInfo meterInfo)
+    {
+        MeterInfo = meterInfo;
+    }
+}
+
+/// <summary>
 /// Background service responsible for managing the Wallbox charger.
 /// Handles tasks such as status monitoring, time synchronization, schedule enforcement,
 /// and recording energy consumption data.
@@ -14,6 +34,11 @@ namespace ChargeMaster.Workers;
 public class WallboxWorker(ApplicationDbContext? db,
     WallboxService wallboxService, ILogger<WallboxWorker> logger) : BackgroundService
 {
+    /// <summary>
+    /// Event raised when meter information is calculated and ready for consumption.
+    /// </summary>
+    public event EventHandler<MeterInfoEventArgs>? MeterInfoCalculated;
+
     /// <summary>
     /// Tracks the last recorded accumulated energy value to avoid storing duplicate readings.
     /// </summary>
@@ -63,16 +88,18 @@ public class WallboxWorker(ApplicationDbContext? db,
             WallboxMeterInfo? meterInfo = await ReadEnergyAsync(stoppingToken);
 
             // Räkna ut nuvarande effekt
-            await CalculateCurrentPowerAsync(meterInfo);
+            CalculateCurrentPowerAsync(meterInfo);
 
             // vänta innan nästa iteration
             await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
         }
     }
 
-    private async Task CalculateCurrentPowerAsync(WallboxMeterInfo? meterInfo)
+    private void CalculateCurrentPowerAsync(WallboxMeterInfo? meterInfo)
     {
-        
+        if (meterInfo is null)
+            return;
+        MeterInfoCalculated?.Invoke(this, new MeterInfoEventArgs(meterInfo));
     }
 
     /// <summary>
