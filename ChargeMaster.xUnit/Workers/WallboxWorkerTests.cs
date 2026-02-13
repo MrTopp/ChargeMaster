@@ -128,7 +128,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         //var db = provider.GetRequiredService<ApplicationDbContext>();
         var wallboxService = provider.GetRequiredService<WallboxService>();
-        var worker = new WallboxWorker(db, wallboxService, logger);
+        var worker = new WallboxWorker(provider, wallboxService, logger);
 
         // for (int i = 0; i < 1000; i++)
         {
@@ -163,7 +163,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 
         var wallbox = new WallboxService(_httpClient);
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var worker = new WallboxWorker(db:null, wallbox, logger);
+        var worker = new WallboxWorker(provider, wallbox, logger);
         // Act
         var result = await worker.ReadEnergyAsync(CancellationToken.None);
         // Assert
@@ -190,7 +190,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 
         var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
         var wallboxService = provider.GetRequiredService<WallboxService>();
-        var worker = new WallboxWorker(db, wallboxService, logger);
+        var worker = new WallboxWorker(provider, wallboxService, logger);
 
         await worker.WallboxLoop(TestContext.Current.CancellationToken);
     }

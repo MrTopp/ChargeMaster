@@ -31,7 +31,7 @@ public class MeterInfoEventArgs : EventArgs
 /// Handles tasks such as status monitoring, time synchronization, schedule enforcement,
 /// and recording energy consumption data.
 /// </summary>
-public class WallboxWorker(ApplicationDbContext? db,
+public class WallboxWorker(IServiceProvider serviceProvider,
     WallboxService wallboxService, ILogger<WallboxWorker> logger) : BackgroundService
 {
     /// <summary>
@@ -236,6 +236,9 @@ public class WallboxWorker(ApplicationDbContext? db,
             WallboxMeterInfo? info = await wallboxService.GetMeterInfoAsync();
             if (info is null)
                 return null;
+
+            using var scope = serviceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
 
             // Skip database operations if db context is not available
             if (db is null)
