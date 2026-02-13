@@ -25,7 +25,21 @@ public class ChargeWorker(
     /// </summary>
     private long FörbrukningVidTimstart { get; set; }
 
-    private bool WallboxStopped { get; set; } = false;
+    /// <summary>
+    /// Flagga att wallbox är panikstoppad.
+    /// </summary>
+    private bool WallboxStopped
+    {
+        get;
+        set
+        {
+            if (value != field)
+            {
+                field = value;
+                logger.LogInformation("WallboxStopped set to {value}", value);
+            }
+        }
+    } = false;
 
     /// <summary>
     /// Status för laddningen
@@ -134,22 +148,16 @@ public class ChargeWorker(
                     förbrukningDennaTimme);
                 Timladdning = true;
                 FörbrukningVidTimstart = wstat.AccEnergy;
+                förbrukningDennaTimme = 0;
             }
 
-            // ----- Om bilen inte är hemma, hoppa över resten av loopen
-            if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
+            // ----- Om bilen inte skall laddas, hoppa över resten av loopen
+            if (WallboxStopped || currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
             {
                 goto NextIteration; // Hoppa till avslutande paus.
             }
 
             // ----- Bilen är hemma, dags att utvärdera laddning -----
-
-            // Kontrollera om laddningen panikstoppad
-            if (WallboxStopped && nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
-            {
-                logger.LogInformation("Wallbox is stopped.");
-                goto NextIteration;
-            }
 
             // ----- Initiering
             await SkapaKvartlista();
@@ -166,14 +174,16 @@ public class ChargeWorker(
                     {
                         if (ConnectorStatusTime > nu.AddMinutes(-4))
                         {
-                            logger.LogError("Illegal charging, ask car to stop.");
+                            logger.LogInformation("Illegal charging, ask car to stop. {ConnectorStatusTime}", ConnectorStatusTime);
+                            logger.LogError("Illegal charging, ask car to stop. {ConnectorStatusTime}", ConnectorStatusTime);
                             await StoppaLaddningAsync(force: true);
                         }
                         else if (ConnectorStatusTime < nu.AddMinutes(-6))
                         {
                             // Har laddat i mer än 6 minuter trots att vi frågat snällt
                             // Stäng av laddboxen!
-                            logger.LogError("Illegal charging, hard stop charge through wallbox");
+                            logger.LogInformation("Illegal charging, hard stop charge through wallbox {ConnectorStatusTime}", ConnectorStatusTime);
+                            logger.LogError("Illegal charging, hard stop charge through wallbox {ConnectorStatusTime}", ConnectorStatusTime);
                             await _wallbox.SetModeAsync(WallboxMode.NotAvailable);
                         }
                     }
@@ -203,8 +213,8 @@ public class ChargeWorker(
                     }
                     else
                     {
-                        logger.LogInformation("Allowed to charge.");
-                        BilenLaddar = true; // False om bilen laddar när appen startar.
+                        logger.LogInformation("Charging allowed.");
+                        BilenLaddar = true;
                     }
                 }
                 ConnectorStatus = currentConnectorStatus;
@@ -249,7 +259,7 @@ public class ChargeWorker(
                     }
                     else
                     {
-                        logger.LogInformation("Quarter, evaluate charge, high consumption");
+                        logger.LogInformation("Quarter, evaluate charge, Timladdning == false");
                     }
                 }
                 else
@@ -336,7 +346,7 @@ public class ChargeWorker(
         catch (CarConnectionException ex)
         {
             logger.LogError(ex, "Error fetching VW status");
-            await StopWallbox(); 
+            await StopWallbox();
             return false;
         }
     }
