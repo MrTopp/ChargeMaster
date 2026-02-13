@@ -37,9 +37,8 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     {
         // Arrange
         var wallbox = new WallboxService(_httpClient);
-        var services = new ServiceCollection().BuildServiceProvider();
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var worker = new WallboxWorker(services, wallbox, logger);
+        var worker = new WallboxWorker(null, wallbox, logger);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
@@ -56,10 +55,9 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     {
         // Arrange
         var wallbox = new WallboxService(_httpClient);
-        var services = new ServiceCollection().BuildServiceProvider();
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
 
-        var worker = new WallboxWorker(services, wallbox, logger);
+        var worker = new WallboxWorker(null, wallbox, logger);
 
         var now = DateTime.Now;
 
@@ -103,9 +101,8 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     {
         // Arrange
         var wallbox = new WallboxService(_httpClient);
-        var services = new ServiceCollection().BuildServiceProvider();
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var worker = new WallboxWorker(services, wallbox, logger);
+        var worker = new WallboxWorker(null, wallbox, logger);
 
         // Act
         await worker.CheckWallboxScheduleAsync();
@@ -115,74 +112,85 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         Assert.NotNull(schema);
     }
 
-    [Fact(Skip = "Endast för manuell körning av långa serier med mätdata")]
+    //[Fact(Skip = "Endast för manuell körning av långa serier med mätdata")]
+    [Fact]
     public async Task ReadAndStoreAsync_DebugOnly()
     {
-        var services = new ServiceCollection();
+        var services = CreateServiceCollection();
 
+        await using var provider = services.BuildServiceProvider();
+
+        await using var scope = provider.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
+
+
+        var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
+        //var db = provider.GetRequiredService<ApplicationDbContext>();
+        var wallboxService = provider.GetRequiredService<WallboxService>();
+        var worker = new WallboxWorker(db, wallboxService, logger);
+
+        // for (int i = 0; i < 1000; i++)
+        {
+            var effekt = await worker.ReadEnergyAsync(CancellationToken.None);
+            // wait 10 seconds between reads
+            await Task.Delay(TimeSpan.FromSeconds(10), CancellationToken.None);
+        }
+    }
+
+    private ServiceCollection CreateServiceCollection()
+    {
+        var services = new ServiceCollection();
         var config = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.Development.json", optional: false)
             .Build();
-
         var connectionString = config.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                               ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
-
         services.AddSingleton(new WallboxService(_httpClient));
+        return services;
+    }
 
+    [Fact]
+    public async Task Phase1CurrentEnergy_OK()
+    {
+        // Arrange
+        var services = CreateServiceCollection();
         await using var provider = services.BuildServiceProvider();
 
-        await using (var scope = provider.CreateAsyncScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            await db.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
-        }
-
+        var wallbox = new WallboxService(_httpClient);
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var worker = new WallboxWorker(provider, provider.GetRequiredService<WallboxService>(), logger);
-
-        for (int i = 0; i < 1000; i++)
-        {
-            await worker.ReadEnergyAsync(CancellationToken.None);
-            // wait 10 seconds between reads
-            await Task.Delay(TimeSpan.FromSeconds(10), CancellationToken.None);
-        }
+        var worker = new WallboxWorker(db:null, wallbox, logger);
+        // Act
+        var result = await worker.ReadEnergyAsync(CancellationToken.None);
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Phase1CurrentEnergy > 0);
+        Assert.True(result.Phase2CurrentEnergy > 0);
+        Assert.True(result.Phase3CurrentEnergy > 0);
+        Assert.True(result.CurrentEnergy > 0);
+        int totalEnergy = (int)(result.Phase1CurrentEnergy + result.Phase2CurrentEnergy + result.Phase3CurrentEnergy);
+        Assert.Equal(totalEnergy, result.CurrentEnergy);
+        return;
     }
 
     [Fact(Skip = "Use for debugging ExecuteAsync loop")]
     //[Fact]
     public async Task ExecuteAsync_Debug()
     {
-        var services = new ServiceCollection();
-
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.Development.json", optional: false)
-            .Build();
-
-        var connectionString = config.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(connectionString));
-
-        services.AddSingleton(new WallboxService(_httpClient));
-        services.AddLogging();
-
+        // Arrange
+        var services = CreateServiceCollection();
         await using var provider = services.BuildServiceProvider();
+        var db = provider.GetService<ApplicationDbContext>();
+        await db!.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
 
-        await using (var scope = provider.CreateAsyncScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            // Ensure DB is created
-            await db.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
-        }
 
         var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
-        var worker = new WallboxWorker(provider, provider.GetRequiredService<WallboxService>(), logger);
+        var wallboxService = provider.GetRequiredService<WallboxService>();
+        var worker = new WallboxWorker(db, wallboxService, logger);
 
         await worker.WallboxLoop(TestContext.Current.CancellationToken);
     }

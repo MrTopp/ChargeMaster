@@ -11,7 +11,7 @@ namespace ChargeMaster.Workers;
 /// Handles tasks such as status monitoring, time synchronization, schedule enforcement,
 /// and recording energy consumption data.
 /// </summary>
-public class WallboxWorker(IServiceProvider serviceProvider,
+public class WallboxWorker(ApplicationDbContext? db,
     WallboxService wallboxService, ILogger<WallboxWorker> logger) : BackgroundService
 {
     /// <summary>
@@ -50,7 +50,6 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 
         while (!stoppingToken.IsCancellationRequested)
         {
-          //  logger.LogInformation("WallboxWorker tick at: {time}", DateTimeOffset.Now);
             // Initiera genom att läsa upp status
             WallboxStatus wallboxStatus = await InitializeWallboxStatusAsync(stoppingToken);
 
@@ -61,11 +60,19 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             //await CheckWallboxScheduleAsync();
             
             // Spara status på förbrukad el
-            await ReadEnergyAsync(stoppingToken);
+            WallboxMeterInfo? meterInfo = await ReadEnergyAsync(stoppingToken);
+
+            // Räkna ut nuvarande effekt
+            await CalculateCurrentPowerAsync(meterInfo);
 
             // vänta innan nästa iteration
             await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
         }
+    }
+
+    private async Task CalculateCurrentPowerAsync(WallboxMeterInfo? meterInfo)
+    {
+        
     }
 
     /// <summary>
@@ -194,17 +201,21 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     /// Reads the current meter information from the Wallbox and persists it to the database if the accumulated energy has changed.
     /// </summary>
     /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
-    internal async Task ReadEnergyAsync(CancellationToken stoppingToken)
+    /// <returns>The meter information that was read, or null if no information was available.</returns>
+    internal async Task<WallboxMeterInfo?> ReadEnergyAsync(CancellationToken stoppingToken)
     {
         try
         {
-            using var scope = serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var wallbox = scope.ServiceProvider.GetRequiredService<WallboxService>();
-
-            WallboxMeterInfo? info = await wallbox.GetMeterInfoAsync();
+            WallboxMeterInfo? info = await wallboxService.GetMeterInfoAsync();
             if (info is null)
-                return;
+                return null;
+
+            // Skip database operations if db context is not available
+            if (db is null)
+            {
+                logger.LogWarning("Database context is not available. Meter info will not be persisted.");
+                return info;
+            }
 
             // Initialize LastStoredAccEnergy if not set (first run)
             if (!LastStoredAccEnergy.HasValue)
@@ -216,7 +227,8 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             }
 
             // Skip if the accumulated energy is the same as last stored
-            if (LastStoredAccEnergy.HasValue && Math.Abs(LastStoredAccEnergy.Value - info.AccEnergy) < 0.01) return;
+            if (LastStoredAccEnergy.HasValue && Math.Abs(LastStoredAccEnergy.Value - info.AccEnergy) < 0.01) 
+                return info;
 
             var entry = new WallboxMeterReading
             {
@@ -244,10 +256,13 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             _lastReading = info.AccEnergy;
 
             LastStoredAccEnergy = info.AccEnergy;
+
+            return info;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to read or store meter info");
+            return null;
         }
     }
 
