@@ -12,9 +12,8 @@
 - **Target Platform**: Raspberry Pi running Ubuntu 25.10.
 - **Target Environment**: .NET 10 runtime and nginx web server as reverse proxy.
 
-## Wallbox charger interface
-- Communicate with Wallbox chargers using http on url http://192.168.1.205:8080/
-- 
+## Wallbox Charger Interface
+- Communicate with Wallbox chargers using HTTP on URL `http://192.168.1.205:8080/`
 
 ## Coding Style & Conventions
 - Use file-scoped namespaces (`namespace ChargeMaster;`).
@@ -34,10 +33,10 @@
 ## Testing
 - Write unit tests for critical components using xUnit.
 - Do not mock external dependencies in unit tests unless explicitly required.
-- use a local PostgreSQL instance for testing Entity Framework Core operations.
+- Use a local PostgreSQL instance for testing Entity Framework Core operations.
 
-## Commit messages
-- Separate different concerns by putting them in a bullet list using '-' as a prefix.
+## Commit Messages
+- Format commit messages as a bullet list using '-' as a prefix to separate different concerns.
 
 # Functionality
 
@@ -47,6 +46,6 @@ The application should also provide a Blazor Interactive Server front-end to dis
 - Store the fetched prices in a PostgreSQL database using Entity Framework Core.
 - Create a timer service that fetches and stores the electricity prices once every day at 13:10.
 - Call the web API at startup if there are no prices stored in the database for the current day.
-- The API endpoint to fetch the electricity prices is: `https://www.elprisetjustnu.se/api/v1/prices/[ÅR]/[MÅNAD]-[DAG]_[PRISKLASS].json`
+- The API endpoint to fetch the electricity prices is: `https://www.elprisetjustnu.se/api/v1/prices/[year]/[month]-[day]_[PRISKLASS].json`
 - The price class to use is `SE3`.
 
