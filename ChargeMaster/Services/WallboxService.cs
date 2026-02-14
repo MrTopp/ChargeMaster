@@ -1,7 +1,10 @@
 using System.Text.Json;
+
 using ChargeMaster.Models;
 
 using Serilog;
+
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace ChargeMaster.Services;
 
@@ -9,7 +12,7 @@ namespace ChargeMaster.Services;
 /// Access to Garo wallbox through http interface
 /// </summary>
 /// <param name="httpClient"></param>
-public class WallboxService(HttpClient httpClient)
+public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logger)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -90,7 +93,8 @@ public class WallboxService(HttpClient httpClient)
             };
 
             // The wallbox usually expects the payload at /servlet/rest/chargebox/mode
-            var response = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}",null);
+            logger.LogInformation("Setting wallbox mode to {Mode}", modeString);
+            var response = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}", null);
             return response.IsSuccessStatusCode;
         }
         catch (HttpRequestException)

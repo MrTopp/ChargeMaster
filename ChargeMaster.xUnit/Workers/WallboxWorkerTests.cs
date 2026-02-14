@@ -36,7 +36,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     public async Task InitializeWallboxStatus_OK()
     {
         // Arrange
-        var wallbox = new WallboxService(_httpClient);
+        var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var worker = new WallboxWorker(null, wallbox, logger);
 
@@ -54,7 +54,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     public async Task CheckWallboxTime_OK()
     {
         // Arrange
-        var wallbox = new WallboxService(_httpClient);
+        var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
 
         var worker = new WallboxWorker(null, wallbox, logger);
@@ -100,7 +100,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     public async Task CheckWallboxSchedule_OK()
     {
         // Arrange
-        var wallbox = new WallboxService(_httpClient);
+        var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var worker = new WallboxWorker(null, wallbox, logger);
 
@@ -150,7 +150,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
-        services.AddSingleton(new WallboxService(_httpClient));
+        services.AddSingleton(new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory())));
         return services;
     }
 
@@ -161,7 +161,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var services = CreateServiceCollection();
         await using var provider = services.BuildServiceProvider();
 
-        var wallbox = new WallboxService(_httpClient);
+        var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var worker = new WallboxWorker(provider, wallbox, logger);
         // Act

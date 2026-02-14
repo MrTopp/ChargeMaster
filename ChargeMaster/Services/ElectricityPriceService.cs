@@ -36,7 +36,7 @@ public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to fetch or store prices for {Date}.", date);
+            logger.LogInformation(ex, "Failed to fetch or store prices for {Date}.", date);
             throw; // Re-throw or handle? Background service should handle it.
         }
     }
