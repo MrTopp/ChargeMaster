@@ -1,4 +1,9 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@inject WallboxWorker WallboxWorker
+@using ChargeMaster.Models
+@using ChargeMaster.Workers
 
 <PageTitle>Home</PageTitle>
 
@@ -6,6 +11,68 @@
 
 Welcome to your new app.
 
+<div>
+    <p><strong>Aktuell tid och datum:</strong> @CurrentDateTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
+</div>
+
+@if (CurrentMeterInfo is not null)
+{
+    <div>
+        <h3>Wallbox Meter Information</h3>
+        <p><strong>Accumulated Energy:</strong> @CurrentMeterInfo.AccEnergy kWh</p>
+        <p><strong>Effekt fas 1:</strong> @CurrentMeterInfo.Phase1CurrentEnergy W</p>
+        <p><strong>Effekt fas 2:</strong> @CurrentMeterInfo.Phase2CurrentEnergy W</p>
+        <p><strong>Effekt fas 3:</strong> @CurrentMeterInfo.Phase3CurrentEnergy W</p>
+        <p><strong>Effekt total:</strong> @CurrentMeterInfo.CurrentEnergy W</p>
+    </div>
+}
+
 <p>
     <a href="electricity-prices">View Electricity Prices</a>
 </p>
+
+@code {
+    private DateTime CurrentDateTime { get; set; } = DateTime.Now;
+    private PeriodicTimer? _periodicTimer;
+    private CancellationTokenSource? _cts;
+    private WallboxMeterInfo? CurrentMeterInfo { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        _cts = new CancellationTokenSource();
+        
+        WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
+        
+        _ = UpdateTimeLoop();
+    }
+
+    private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
+    {
+        CurrentMeterInfo = e.MeterInfo;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UpdateTimeLoop()
+    {
+        while (_periodicTimer is not null && await _periodicTimer.WaitForNextTickAsync(_cts!.Token))
+        {
+            CurrentDateTime = DateTime.Now;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
+        
+        _cts?.Cancel();
+        
+        if (_periodicTimer is not null)
+        {
+            _periodicTimer.Dispose();
+        }
+        
+        _cts?.Dispose();
+    }
+}
