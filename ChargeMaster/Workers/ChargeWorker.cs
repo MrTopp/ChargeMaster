@@ -125,6 +125,12 @@ public class ChargeWorker(
         DateTime previous = DateTime.Now;
         Timladdning = true;
         BilenLaddar = await LaddStatus();
+        var currentConnectorStatus = await GetConnectorStatusAsync();
+        if (currentConnectorStatus == ConnectionEnum.Disabled)
+        {
+            logger.LogInformation("Wallbox is disabled.");
+            WallboxStopped = true;
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -132,7 +138,7 @@ public class ChargeWorker(
             DateTime dt = DateTime.Now;
             DateTime nu = new DateTime(dt.Year, dt.Month, dt.Day,
                 dt.Hour, dt.Minute, 0);
-            var currentConnectorStatus = await GetConnectorStatusAsync();
+            currentConnectorStatus = await GetConnectorStatusAsync();
             WallboxMeterInfo? wstat = await _wallbox.GetMeterInfoAsync();
             if (wstat == null)
             {
