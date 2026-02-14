@@ -90,9 +90,13 @@ namespace ChargeMaster
                 });
 
                 // ----- Workers -----
-                builder.Services.AddHostedService<PriceFetchingWorker>();
-                builder.Services.AddHostedService<WallboxWorker>();
-                builder.Services.AddHostedService<ChargeWorker>();
+                builder.Services.AddSingleton<PriceFetchingWorker>();
+                builder.Services.AddSingleton<WallboxWorker>();
+                builder.Services.AddSingleton<ChargeWorker>();
+                
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<PriceFetchingWorker>());
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<WallboxWorker>());
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<ChargeWorker>());
 
                 var app = builder.Build();
 
