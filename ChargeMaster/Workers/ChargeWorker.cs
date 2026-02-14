@@ -144,17 +144,31 @@ public class ChargeWorker(
             long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
             if (nu.Hour != previous.Hour)
             {
-                logger.LogInformation("Hourly consumption: {consumption} Wh",
+                logger.LogInformation("** Hourly consumption: {consumption} Wh **",
                     förbrukningDennaTimme);
                 Timladdning = true;
                 FörbrukningVidTimstart = wstat.AccEnergy;
                 förbrukningDennaTimme = 0;
             }
 
-            // ----- Om bilen inte skall laddas, hoppa över resten av loopen
-            if (WallboxStopped || currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
+            // ----- Bilen inte ansluten, hoppa över utvärdering av laddning
+            if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
             {
                 goto NextIteration; // Hoppa till avslutande paus.
+            }
+
+            // ----- Laddning nödstoppad, kontrollera bilens status 2 minuter före
+            //       utvärdering av laddning.
+            if (WallboxStopped && (nu.Minute + 2) % 15 == 0 && nu.Minute != previous.Minute)
+            {
+                logger.LogInformation("Wallbox stopped, try again");
+                WallboxStopped = false;
+                _ = await LaddBehov();  // WallboxStopped = true om den krånglar
+                if (WallboxStopped)
+                {
+                    goto NextIteration;
+                }
+                await _wallbox.SetModeAsync(WallboxMode.Available);
             }
 
             // ----- Bilen är hemma, dags att utvärdera laddning -----
@@ -174,7 +188,6 @@ public class ChargeWorker(
                     {
                         if (ConnectorStatusTime > nu.AddMinutes(-4))
                         {
-                            logger.LogInformation("Illegal charging, ask car to stop. {ConnectorStatusTime}", ConnectorStatusTime);
                             logger.LogError("Illegal charging, ask car to stop. {ConnectorStatusTime}", ConnectorStatusTime);
                             await StoppaLaddningAsync(force: true);
                         }
@@ -182,7 +195,6 @@ public class ChargeWorker(
                         {
                             // Har laddat i mer än 6 minuter trots att vi frågat snällt
                             // Stäng av laddboxen!
-                            logger.LogInformation("Illegal charging, hard stop charge through wallbox {ConnectorStatusTime}", ConnectorStatusTime);
                             logger.LogError("Illegal charging, hard stop charge through wallbox {ConnectorStatusTime}", ConnectorStatusTime);
                             await _wallbox.SetModeAsync(WallboxMode.NotAvailable);
                         }
@@ -220,7 +232,7 @@ public class ChargeWorker(
                 ConnectorStatus = currentConnectorStatus;
             }
 
-            // ----- Kontrollera förväntad timförbrukning(nu -timstart) *60 / minuter_nu
+            // ----- Kontrollera förväntad timförbrukning
             int grans = nu.Minute * 2000 / 60 + 1500;
             if (förbrukningDennaTimme > grans && Timladdning)
             {
@@ -236,7 +248,7 @@ public class ChargeWorker(
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
                 // Starta/stoppa laddning beroende på om det är tillåtet eller inte
-                logger.LogInformation("-- Quarter, förbrukning: {consumption} Wh --", förbrukningDennaTimme);
+                logger.LogInformation("-- Quarter, consumption: {consumption} Wh --", förbrukningDennaTimme);
                 int numin = nu.Minute;
                 int minutAvrundad = numin / 15 * 15;
 

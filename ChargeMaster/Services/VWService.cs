@@ -26,7 +26,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error fetching VW status");
+            Logger.LogError(ex, "GetStatus: Exception");
             throw new CarConnectionException("GetStatus: Failed to fetch VW status");
         }
     }
@@ -40,7 +40,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error fetching VW vehicles");
+            Log.Error(ex, "GetVehiclesAsync: Error fetching VW vehicles");
             throw new CarConnectionException("GetVehiclesAsync: Failed to fetch VW vehicles");
         }
     }
@@ -63,7 +63,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error posting VW command to {url}", relativeUrl);
+            Log.Error(ex, "PostAsync: Error posting VW command to {url}", relativeUrl);
             throw new CarConnectionException($"PostAsync: Failed to post command to {relativeUrl}");
         }
     }
