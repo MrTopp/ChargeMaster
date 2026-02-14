@@ -47,7 +47,7 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred during scheduled price fetching.");
+                logger.LogInformation(ex, "An error occurred during scheduled price fetching.");
             }
         }
     }
@@ -101,7 +101,7 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Worker failed to fetch prices for {Date}", date);
+            logger.LogInformation(ex, "Worker failed to fetch prices for {Date}", date);
             return false;
         }
     }

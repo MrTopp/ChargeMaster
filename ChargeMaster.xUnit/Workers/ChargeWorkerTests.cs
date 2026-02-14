@@ -57,7 +57,7 @@ public class ChargeWorkerTests
             options.UseNpgsql(connectionString));
 
         HttpClient wallboxClient = new HttpClient { BaseAddress = new Uri("http://192.168.1.205:8080/") };
-        var wallboxService = new WallboxService(wallboxClient);
+        var wallboxService = new WallboxService(wallboxClient, new Logger<WallboxService>(new LoggerFactory()));
 
         services.AddSingleton(wallboxService);
         services.AddLogging();

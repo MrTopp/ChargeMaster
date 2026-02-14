@@ -59,7 +59,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in WallboxMeterWorker loop");
+                logger.LogInformation(ex, "Error in WallboxMeterWorker loop");
                 await Task.Delay(TimeSpan.FromSeconds(60 * 10), stoppingToken);
             }
         }
@@ -113,7 +113,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         WallboxStatus? wallboxStatus = await wallboxService.GetStatusAsync();
         while (wallboxStatus is null)
         {
-            logger.LogError("Wallbox status is null, retrying in 1 minute");
+            logger.LogInformation("Wallbox status is null, retrying in 1 minute");
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             wallboxStatus = await wallboxService.GetStatusAsync();
         }
@@ -291,7 +291,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to read or store meter info");
+            logger.LogInformation(ex, "Failed to read or store meter info");
             return null;
         }
     }

@@ -26,7 +26,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "GetStatus: Exception");
+            Logger.LogInformation(ex, "GetStatus: Exception");
             throw new CarConnectionException("GetStatus: Failed to fetch VW status");
         }
     }

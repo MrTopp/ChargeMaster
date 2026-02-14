@@ -1,5 +1,7 @@
 using ChargeMaster.Services;
-using ChargeMaster.Models;  
+using ChargeMaster.Models;
+using Microsoft.Extensions.Logging;
+
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
 namespace ChargeMaster.xUnit.Services;
@@ -15,7 +17,7 @@ public class WallboxServiceTests : IDisposable
         {
             BaseAddress = new Uri("http://192.168.1.205:8080/")
         };
-        _service = new WallboxService(_httpClient);
+        _service = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
     }
 
     public void Dispose()
