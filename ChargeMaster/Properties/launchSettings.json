@@ -10,16 +10,6 @@
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
-      },
-      "https": {
-        "commandName": "Project",
-        "dotnetRunMessages": true,
-        "launchBrowser": true,
-        "launchUrl": "ChargeMaster",
-        "applicationUrl": "https://chargemaster.dev.localhost:7046;http://chargemaster.dev.localhost:5191",
-        "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        }
       }
     }
   }
