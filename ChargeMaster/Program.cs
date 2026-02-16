@@ -99,6 +99,7 @@ namespace ChargeMaster
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ChargeWorker>());
 
                 var app = builder.Build();
+                app.UsePathBase("/ChargeMaster");
 
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
