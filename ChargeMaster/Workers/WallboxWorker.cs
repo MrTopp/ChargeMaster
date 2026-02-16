@@ -53,10 +53,10 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             {
                 await WallboxLoop(stoppingToken);
             }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
+            //catch (OperationCanceledException)
+            //{
+            //    break;
+            //}
             catch (Exception ex)
             {
                 logger.LogInformation(ex, "Error in WallboxMeterWorker loop");

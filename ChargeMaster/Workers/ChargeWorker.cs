@@ -161,46 +161,21 @@ public class ChargeWorker(
                 goto NextIteration; // Hoppa till avslutande paus.
             }
 
-            // ----- Laddning nödstoppad, kontrollera bilens status 2 minuter före
-            //       utvärdering av laddning.
-            if (WallboxStopped && (nu.Minute + 2) % 15 == 0 && nu.Minute != previous.Minute)
-            {
-                logger.LogInformation("Wallbox stopped, try again");
-                WallboxStopped = false;
-                _ = await LaddBehov();  // WallboxStopped = true om den krånglar
-                if (WallboxStopped)
-                {
-                    goto NextIteration;
-                }
-                await StartWallbox();
-            }
-
             // ----- Bilen är hemma, dags att utvärdera laddning -----
 
             // ----- Nödstopp om bilen laddar när det inte är tillåtet
             if (ConnectorStatus == ConnectionEnum.Charging && !BilenLaddar)
             {
-                if (ConnectorStatusTime <= nu.AddMinutes(-3))
+                int minutAvrundad = nu.Minute / 15 * 15;
+                var kvartlista = await GetKvartlista();
+                if (!kvartlista.Any(x =>
+                        x.TimeStart.Day == nu.Day &&
+                        x.TimeStart.Hour == nu.Hour &&
+                        x.TimeStart.Minute == minutAvrundad))
                 {
-                    // Har laddat i mer än 3 minuter, kolla om det är tillåtet
-                    int minutAvrundad = nu.Minute / 15 * 15;
-                    var kvartlista = await GetKvartlista();
-                    if (!kvartlista.Any(x =>
-                            x.TimeStart.Hour == nu.Hour && x.TimeStart.Minute == minutAvrundad))
-                    {
-                        if (ConnectorStatusTime > nu.AddMinutes(-4))
-                        {
-                            logger.LogInformation("Illegal charging, ask car to stop. {ConnectorStatusTime}", ConnectorStatusTime);
-                            await StoppaLaddningAsync(force: true);
-                        }
-                        else if (ConnectorStatusTime < nu.AddMinutes(-6))
-                        {
-                            // Har laddat i mer än 6 minuter trots att vi frågat snällt
-                            // Stäng av laddboxen!
-                            logger.LogInformation("Illegal charging, hard stop charge through wallbox {ConnectorStatusTime}", ConnectorStatusTime);
-                            await StopWallbox();
-                        }
-                    }
+                    logger.LogInformation("Illegal charging, stop car and wallbox. {ConnectorStatusTime}", ConnectorStatusTime);
+                    await StoppaLaddningAsync(force: true);
+                    await StopWallbox();
                 }
             }
 
@@ -252,16 +227,11 @@ public class ChargeWorker(
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
                 // Starta/stoppa laddning beroende på om det är tillåtet eller inte
-                logger.LogInformation("-- Quarter, consumption: {consumption} Wh --", förbrukningDennaTimme);
+                if (förbrukningDennaTimme > 0)
+                    logger.LogInformation("-- Quarter, consumption: {consumption} Wh --", förbrukningDennaTimme);
                 int numin = nu.Minute;
                 int minutAvrundad = numin / 15 * 15;
                 var kvartlista = await GetKvartlista();
-
-                foreach (var price in kvartlista.OrderBy(x => x.TimeStart).Take(2))
-                {
-                    logger.LogInformation(
-                        $"Kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
-                }
 
                 // Om 'nu' finns i listan med kvartar 
                 if (kvartlista.Any(x =>
@@ -309,23 +279,13 @@ public class ChargeWorker(
                 var wallboxStatus = await GetConnectorStatusAsync();
                 if (wallboxStatus == ConnectionEnum.Disabled)
                 {
-                    if (WallboxStopped)
-                    {
-                        logger.LogInformation("StartaLaddningAsync: Wallbox was emergency stopped, cannot start charging.");
-                    }
-                    else
-                    {
-                        logger.LogInformation("StartaLaddningAsync: Wallbox is disabled, cannot start charging.");
-                    }
-
-                    return;
+                    await StartWallbox();
                 }
                 BilenLaddar = await _vwService.StartChargingAsync();
             }
             catch (CarConnectionException ex)
             {
                 logger.LogInformation(ex, "Error starting charging");
-                await StopWallbox();
             }
 
             if (BilenLaddar)
@@ -339,31 +299,22 @@ public class ChargeWorker(
     {
         if (BilenLaddar || force)
         {
-            var behov = await LaddBehov();
-            if (behov <= 1)
-            {
-                // Låt bilen bestämma
-                logger.LogInformation("StoppaLaddning:LaddBehov{behov}", behov);
-                return;
-            }
-
             bool success;
             try
             {
                 success = await _vwService.StopChargingAsync();
+                if (!success)
+                {
+                    logger.LogInformation("StoppaLaddningAsync: failed to stop car charging, stopping wallbox");
+                    await StopWallbox();
+                }
             }
             catch (CarConnectionException ex)
             {
                 logger.LogInformation(ex, "Error stopping charging");
                 await StopWallbox();    // Om det inte går att stänga av genom att fråga bilen, stäng av wallboxen så att bilen inte kan ladda.
-                success = false;
             }
-
-            if (success)
-            {
-                logger.LogInformation("Charging stopped successfully.");
-                BilenLaddar = false;
-            }
+            BilenLaddar = false;
         }
     }
 
