@@ -183,7 +183,7 @@ public class ChargeWorker(
             await SkapaKvartlista();
 
             // ----- Nödstopp om bilen laddar när det inte är tillåtet
-            if (ConnectorStatus == ConnectionEnum.Charging)
+            if (ConnectorStatus == ConnectionEnum.Charging && !BilenLaddar)
             {
                 if (ConnectorStatusTime <= nu.AddMinutes(-3))
                 {
