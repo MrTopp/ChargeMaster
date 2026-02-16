@@ -10,8 +10,6 @@ public class ChargeWorker(
     ILogger<ChargeWorker> logger)
     : BackgroundService
 {
-    // Kvartar när laddning skall ske
-    private List<ElectricityPrice> _kvartlista = new();
 
     /// <summary>
     /// Flagga om laddning är tillåten denna timme, sätts till false
@@ -179,9 +177,6 @@ public class ChargeWorker(
 
             // ----- Bilen är hemma, dags att utvärdera laddning -----
 
-            // ----- Initiering
-            await SkapaKvartlista();
-
             // ----- Nödstopp om bilen laddar när det inte är tillåtet
             if (ConnectorStatus == ConnectionEnum.Charging && !BilenLaddar)
             {
@@ -189,7 +184,8 @@ public class ChargeWorker(
                 {
                     // Har laddat i mer än 3 minuter, kolla om det är tillåtet
                     int minutAvrundad = nu.Minute / 15 * 15;
-                    if (!_kvartlista.Any(x =>
+                    var kvartlista = await GetKvartlista();
+                    if (!kvartlista.Any(x =>
                             x.TimeStart.Hour == nu.Hour && x.TimeStart.Minute == minutAvrundad))
                     {
                         if (ConnectorStatusTime > nu.AddMinutes(-4))
@@ -222,18 +218,14 @@ public class ChargeWorker(
                     // stoppas om det inte är rätt tid för laddning
                     logger.LogInformation("Car started charging");
                     int minutAvrundad = nu.Minute / 15 * 15;
-                    if (_kvartlista.Any(x =>
+                    var kvartlista = await GetKvartlista();
+                    if (kvartlista.Any(x =>
                             x.TimeStart.Day == nu.Day &&
                             x.TimeStart.Hour == nu.Hour &&
                             x.TimeStart.Minute == minutAvrundad))
                     {
                         logger.LogInformation("Charging allowed, continue.");
                         BilenLaddar = true;
-                        foreach (var price in _kvartlista.OrderBy(x => x.TimeStart).Take(2))
-                        {
-                            logger.LogInformation(
-                                $"Kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
-                        }
                     }
                     else
                     {
@@ -263,15 +255,16 @@ public class ChargeWorker(
                 logger.LogInformation("-- Quarter, consumption: {consumption} Wh --", förbrukningDennaTimme);
                 int numin = nu.Minute;
                 int minutAvrundad = numin / 15 * 15;
+                var kvartlista = await GetKvartlista();
 
-                foreach (var price in _kvartlista.OrderBy(x => x.TimeStart).Take(2))
+                foreach (var price in kvartlista.OrderBy(x => x.TimeStart).Take(2))
                 {
                     logger.LogInformation(
                         $"Kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
                 }
 
                 // Om 'nu' finns i listan med kvartar 
-                if (_kvartlista.Any(x =>
+                if (kvartlista.Any(x =>
                         x.TimeStart.Day == nu.Day &&
                         x.TimeStart.Hour == nu.Hour &&
                         x.TimeStart.Minute == minutAvrundad))
@@ -288,7 +281,7 @@ public class ChargeWorker(
                 }
                 else
                 {
-                    var next = _kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
+                    var next = kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
 
                     logger.LogInformation("Quarter, not starting, next {time}",
                         next?.TimeStart.ToShortTimeString() ?? "---");
@@ -297,6 +290,7 @@ public class ChargeWorker(
             }
 
         NextIteration:
+            _kvartlista = null; // Tvinga uppdatering av kvartlista varje varv
             TimeSpan paus = nu.AddMinutes(1) - DateTime.Now;
             if (paus.TotalSeconds > 0)
                 await Task.Delay(paus, stoppingToken);
@@ -489,11 +483,20 @@ public class ChargeWorker(
     }
 
     /// <summary>
+    /// ! Använd GetKvartlista() i stället!
+    /// </summary>
+    private List<ElectricityPrice>? _kvartlista;
+
+    /// <summary>
     /// Skapa lista med kvartar där laddning skall vara aktiv
     /// </summary>
-    internal async Task SkapaKvartlista()
+    internal async Task<List<ElectricityPrice>> GetKvartlista()
     {
-        _kvartlista.Clear();
+
+        if (_kvartlista != null)
+            return _kvartlista;
+
+        _kvartlista = new List<ElectricityPrice>();
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var nu = DateTime.Now;
@@ -523,22 +526,30 @@ public class ChargeWorker(
         }
 
         // Beräkna laddbehov
-        var behovProcent = await LaddBehov();
+        double behovProcent = await LaddBehov();
         if (behovProcent <= 1)
         {
-            logger.LogInformation("Ingen kvartlista: Charge full {behovProcent}", behovProcent);
-            return;
+            logger.LogInformation("SkapaKvartlista: Charge full {behovProcent}", behovProcent);
+            return _kvartlista;
         }
 
-        // Kan behöva justering
+        // Antar att det behövs 2.4 kvartar per procent laddbehov.
         var antalKvartar = (int)(behovProcent * 2.4);
-
 
         _kvartlista = priser.Where(x => x.ChargingAllowed
                                         && x.TimeEnd > DateTime.Now)
             .OrderBy(x => x.SekPerKwh)
             .Take(antalKvartar)
             .ToList();
+
+        logger.LogInformation("SkapaKvartLista: Laddbehov {behovProcent}, antal kvartar {antalKvartar}", behovProcent, antalKvartar);
+        foreach (var price in _kvartlista.OrderBy(x => x.TimeStart).Take(2))
+        {
+            logger.LogInformation(
+                $"SkapaKvartLista: kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
+        }
+
+        return _kvartlista;
     }
 }
 
