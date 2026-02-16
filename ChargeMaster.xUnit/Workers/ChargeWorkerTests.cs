@@ -37,7 +37,7 @@ public class ChargeWorkerTests
     public async Task SkapaKvartlista_OK()
     {
         // Act
-        await _worker.SkapaKvartlista();
+       var kvartlista =  await _worker.GetKvartlista();
         
     }
 
