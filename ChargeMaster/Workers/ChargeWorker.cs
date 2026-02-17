@@ -443,7 +443,7 @@ public class ChargeWorker(
     /// </summary>
     internal async Task<List<ElectricityPrice>> GetKvartlista()
     {
-
+        // _kvartlista skapas en gång per varv i loopen, sätts till null i slutet av varje varv.
         if (_kvartlista != null)
             return _kvartlista;
 
@@ -493,12 +493,8 @@ public class ChargeWorker(
             .Take(antalKvartar)
             .ToList();
 
-        logger.LogInformation("SkapaKvartLista: Laddbehov {behovProcent}, antal kvartar {antalKvartar}", behovProcent, antalKvartar);
-        foreach (var price in _kvartlista.OrderBy(x => x.TimeStart).Take(2))
-        {
-            logger.LogInformation(
-                $"SkapaKvartLista: kvart {price.TimeStart} - {price.TimeEnd} charge {price.ChargingAllowed}");
-        }
+        var nextKvart = _kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
+        logger.LogInformation("SkapaKvartLista: Laddbehov {behovProcent}, antal kvartar {antalKvartar} nextKvart {nextKvart}", behovProcent, antalKvartar, nextKvart);
 
         return _kvartlista;
     }
