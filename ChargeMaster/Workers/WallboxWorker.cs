@@ -1,7 +1,6 @@
 using ChargeMaster.Data;
 using ChargeMaster.Models;
 using ChargeMaster.Services;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Workers;
@@ -31,8 +30,10 @@ public class MeterInfoEventArgs : EventArgs
 /// Handles tasks such as status monitoring, time synchronization, schedule enforcement,
 /// and recording energy consumption data.
 /// </summary>
-public class WallboxWorker(IServiceProvider serviceProvider,
-    WallboxService wallboxService, ILogger<WallboxWorker> logger) : BackgroundService
+public class WallboxWorker(
+    IServiceProvider serviceProvider,
+    WallboxService wallboxService,
+    ILogger<WallboxWorker> logger) : BackgroundService
 {
     /// <summary>
     /// Event raised when meter information is calculated and ready for consumption.
@@ -63,7 +64,6 @@ public class WallboxWorker(IServiceProvider serviceProvider,
                 await Task.Delay(TimeSpan.FromSeconds(60 * 10), stoppingToken);
             }
         }
-
     }
 
     /// <summary>
@@ -72,7 +72,6 @@ public class WallboxWorker(IServiceProvider serviceProvider,
     /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
     internal async Task WallboxLoop(CancellationToken stoppingToken)
     {
-
         while (!stoppingToken.IsCancellationRequested)
         {
             // Initiera genom att läsa upp status
@@ -83,7 +82,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 
             // Kontrollera schema 
             //await CheckWallboxScheduleAsync();
-            
+
             // Spara status på förbrukad el
             WallboxMeterInfo? meterInfo = await ReadEnergyAsync(stoppingToken);
 
@@ -117,6 +116,7 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             wallboxStatus = await wallboxService.GetStatusAsync();
         }
+
         return wallboxStatus;
     }
 
@@ -166,10 +166,16 @@ public class WallboxWorker(IServiceProvider serviceProvider,
         // Add missing entries
         for (int day = 1; day <= 5; day++)
         {
-            WallboxSchemaEntry entry1 = new() { Start = "00:00:00", Stop = "07:00:00", Weekday = day.ToString(), ChargeLimit = 0 };
+            WallboxSchemaEntry entry1 = new()
+            {
+                Start = "00:00:00", Stop = "07:00:00", Weekday = day.ToString(), ChargeLimit = 0
+            };
             if (!schema.Any(e => e.Equals(entry1)))
                 await wallboxService.SetSchemaAsync(entry1);
-            WallboxSchemaEntry entry2 = new() { Start = "19:00:00", Stop = "24:00:00", Weekday = day.ToString(), ChargeLimit = 0 };
+            WallboxSchemaEntry entry2 = new()
+            {
+                Start = "19:00:00", Stop = "24:00:00", Weekday = day.ToString(), ChargeLimit = 0
+            };
             if (!schema.Any(e => e.Equals(entry2)))
                 await wallboxService.SetSchemaAsync(entry2);
         }
@@ -211,11 +217,13 @@ public class WallboxWorker(IServiceProvider serviceProvider,
                 System.Globalization.DateTimeStyles.None, out DateTime wallboxDateTime))
         {
             DateTime now = DateTime.Now;
-            DateTime correctWallboxTime = new DateTime(now.Year, now.Month, now.Day, wallboxDateTime.Hour, wallboxDateTime.Minute, 0);
+            DateTime correctWallboxTime = new DateTime(now.Year, now.Month, now.Day,
+                wallboxDateTime.Hour, wallboxDateTime.Minute, 0);
             TimeSpan timeDifference = now - correctWallboxTime;
             if (timeDifference.Duration() > TimeSpan.FromMinutes(5))
             {
-                logger.LogInformation("Wallbox time is incorrect by {Difference}. Updating time.", timeDifference);
+                logger.LogInformation("Wallbox time is incorrect by {Difference}. Updating time.",
+                    timeDifference);
                 await wallboxService.SetTimeAsync(now);
             }
         }
@@ -243,7 +251,8 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             // Skip database operations if db context is not available
             if (db is null)
             {
-                logger.LogWarning("Database context is not available. Meter info will not be persisted.");
+                logger.LogWarning(
+                    "Database context is not available. Meter info will not be persisted.");
                 return info;
             }
 
@@ -257,7 +266,8 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             }
 
             // Skip if the accumulated energy is the same as last stored
-            if (LastStoredAccEnergy.HasValue && Math.Abs(LastStoredAccEnergy.Value - info.AccEnergy) < 0.01) 
+            if (LastStoredAccEnergy.HasValue &&
+                Math.Abs(LastStoredAccEnergy.Value - info.AccEnergy) < 0.01)
                 return info;
 
             var entry = new WallboxMeterReading
@@ -271,14 +281,14 @@ public class WallboxWorker(IServiceProvider serviceProvider,
 
             db.WallboxMeterReadings.Add(entry);
             await db.SaveChangesAsync(stoppingToken);
-           // logger.LogInformation("Energy reading {energy} at {time}", info.AccEnergy, DateTimeOffset.Now);
+            // logger.LogInformation("Energy reading {energy} at {time}", info.AccEnergy, DateTimeOffset.Now);
             if (_lastReading != null && _lastReadingAt != null)
             {
                 var tid = (TimeSpan)(DateTimeOffset.Now - _lastReadingAt);
                 var sec = (long)tid.TotalSeconds;
 
                 var effect = sec != 0 ? 3600.0 / sec / 10 : 0;
-                
+
                 logger.LogInformation("Energy usage {effect:F1} kW", effect);
             }
 
@@ -295,5 +305,4 @@ public class WallboxWorker(IServiceProvider serviceProvider,
             return null;
         }
     }
-
 }

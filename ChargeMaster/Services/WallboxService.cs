@@ -1,9 +1,6 @@
 using System.Text.Json;
-
 using ChargeMaster.Models;
-
 using Serilog;
-
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace ChargeMaster.Services;
@@ -49,6 +46,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         {
             return DateTime.Today.Add(time.ToTimeSpan());
         }
+
         return null;
     }
 
@@ -71,7 +69,8 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
                 datetimeUTC = dateTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
             };
 
-            var response = await httpClient.PostAsJsonAsync("/servlet/rest/chargebox/time", payload);
+            var response
+                = await httpClient.PostAsJsonAsync("/servlet/rest/chargebox/time", payload);
             return response.IsSuccessStatusCode;
         }
         catch (HttpRequestException)
@@ -94,7 +93,8 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
 
             // The wallbox usually expects the payload at /servlet/rest/chargebox/mode
             logger.LogInformation("Setting wallbox mode to {Mode}", modeString);
-            var response = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}", null);
+            var response
+                = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}", null);
             return response.IsSuccessStatusCode;
         }
         catch (HttpRequestException)
@@ -192,5 +192,4 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
             return false;
         }
     }
-
 }
