@@ -3,7 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Services;
 
-public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext context, ILogger<ElectricityPriceService> logger)
+public class ElectricityPriceService(
+    HttpClient httpClient,
+    ApplicationDbContext context,
+    ILogger<ElectricityPriceService> logger)
 {
     private const string PriceClass = "SE3";
 
@@ -19,19 +22,22 @@ public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext
         var month = date.Month.ToString("00");
         var day = date.Day.ToString("00");
 
-        var url = $"https://www.elprisetjustnu.se/api/v1/prices/{year}/{month}-{day}_{PriceClass}.json";
+        var url
+            = $"https://www.elprisetjustnu.se/api/v1/prices/{year}/{month}-{day}_{PriceClass}.json";
 
         try
         {
             logger.LogInformation("Fetching prices from {Url}", url);
-            List<ElectricityPrice>? prices = await httpClient.GetFromJsonAsync<List<ElectricityPrice>>(url);
+            List<ElectricityPrice>? prices
+                = await httpClient.GetFromJsonAsync<List<ElectricityPrice>>(url);
 
             if (prices != null && prices.Any())
             {
                 // Normalize dates if necessary, though API sends ISO8601 usually.
                 context.ElectricityPrices.AddRange(prices);
                 await context.SaveChangesAsync();
-                logger.LogInformation("Successfully stored {Count} prices for {Date}.", prices.Count, date);
+                logger.LogInformation("Successfully stored {Count} prices for {Date}.",
+                    prices.Count, date);
             }
         }
         catch (Exception ex)
@@ -46,7 +52,7 @@ public class ElectricityPriceService(HttpClient httpClient, ApplicationDbContext
         // Compare Date part of TimeStart
         var startOfDay = date.ToDateTime(TimeOnly.MinValue);
         var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
-        
+
         return await context.ElectricityPrices
             .Where(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay)
             .OrderBy(p => p.TimeStart)

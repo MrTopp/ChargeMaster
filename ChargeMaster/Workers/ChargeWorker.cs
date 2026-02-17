@@ -10,7 +10,6 @@ public class ChargeWorker(
     ILogger<ChargeWorker> logger)
     : BackgroundService
 {
-
     /// <summary>
     /// Flagga om laddning är tillåten denna timme, sätts till false
     /// om förbrukningen innevarande timme är över tillåten nivå.
@@ -173,7 +172,9 @@ public class ChargeWorker(
                         x.TimeStart.Hour == nu.Hour &&
                         x.TimeStart.Minute == minutAvrundad))
                 {
-                    logger.LogInformation("Illegal charging, stop car and wallbox. {ConnectorStatusTime}", ConnectorStatusTime);
+                    logger.LogInformation(
+                        "Illegal charging, stop car and wallbox. {ConnectorStatusTime}",
+                        ConnectorStatusTime);
                     await StoppaLaddningAsync(force: true);
                     await StopWallbox();
                 }
@@ -208,6 +209,7 @@ public class ChargeWorker(
                         await StoppaLaddningAsync(force: true);
                     }
                 }
+
                 ConnectorStatus = currentConnectorStatus;
             }
 
@@ -228,7 +230,8 @@ public class ChargeWorker(
             {
                 // Starta/stoppa laddning beroende på om det är tillåtet eller inte
                 if (förbrukningDennaTimme > 0)
-                    logger.LogInformation("-- Quarter, consumption: {consumption} Wh --", förbrukningDennaTimme);
+                    logger.LogInformation("-- Quarter, consumption: {consumption} Wh --",
+                        förbrukningDennaTimme);
                 int numin = nu.Minute;
                 int minutAvrundad = numin / 15 * 15;
                 var kvartlista = await GetKvartlista();
@@ -259,7 +262,7 @@ public class ChargeWorker(
                 }
             }
 
-        NextIteration:
+            NextIteration:
             _kvartlista = null; // Tvinga uppdatering av kvartlista varje varv
             TimeSpan paus = nu.AddMinutes(1) - DateTime.Now;
             if (paus.TotalSeconds > 0)
@@ -281,6 +284,7 @@ public class ChargeWorker(
                 {
                     await StartWallbox();
                 }
+
                 BilenLaddar = await _vwService.StartChargingAsync();
             }
             catch (CarConnectionException ex)
@@ -302,18 +306,21 @@ public class ChargeWorker(
             bool success;
             try
             {
+                logger.LogInformation("StoppaLaddningAsync: stopping car charging");
                 success = await _vwService.StopChargingAsync();
                 if (!success)
                 {
-                    logger.LogInformation("StoppaLaddningAsync: failed to stop car charging, stopping wallbox");
+                    logger.LogInformation(
+                        "StoppaLaddningAsync: failed to stop car charging, stopping wallbox");
                     await StopWallbox();
                 }
             }
             catch (CarConnectionException ex)
             {
                 logger.LogInformation(ex, "Error stopping charging");
-                await StopWallbox();    // Om det inte går att stänga av genom att fråga bilen, stäng av wallboxen så att bilen inte kan ladda.
+                await StopWallbox(); // Om det inte går att stänga av genom att fråga bilen, stäng av wallboxen så att bilen inte kan ladda.
             }
+
             BilenLaddar = false;
         }
     }
@@ -454,11 +461,11 @@ public class ChargeWorker(
         var grans = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
         var priser = await context.ElectricityPrices
             .Where(x => x.TimeEnd >= grans
-            // aldrig vardagar 7-19 november till mars
-            && !((x.TimeStart.Month >= 11 || x.TimeStart.Month <= 3) &&
-                            x.TimeStart.Hour >= 7 && x.TimeStart.Hour < 19 &&
-                 x.TimeStart.DayOfWeek != DayOfWeek.Saturday &&
-                 x.TimeStart.DayOfWeek != DayOfWeek.Sunday)
+                        // aldrig vardagar 7-19 november till mars
+                        && !((x.TimeStart.Month >= 11 || x.TimeStart.Month <= 3) &&
+                             x.TimeStart.Hour >= 7 && x.TimeStart.Hour < 19 &&
+                             x.TimeStart.DayOfWeek != DayOfWeek.Saturday &&
+                             x.TimeStart.DayOfWeek != DayOfWeek.Sunday)
             )
             .OrderBy(x => x.TimeStart)
             .ToListAsync();
@@ -466,7 +473,7 @@ public class ChargeWorker(
         // Sätt ChargingAllowed = false på de två dyraste kvartarna varje timme
         var dyrasteKvartPerTimme =
             priser.GroupBy(x => new
-            { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
+                { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
         foreach (var grupp in dyrasteKvartPerTimme)
         {
             var dyrasteKvartar = grupp.OrderByDescending(x => x.SekPerKwh).Take(2);
@@ -478,7 +485,7 @@ public class ChargeWorker(
 
         // Beräkna laddbehov
         double behovProcent = await LaddBehov();
-        if (behovProcent <= 1)
+        if (behovProcent < 1)
         {
             logger.LogInformation("SkapaKvartlista: Charge full {behovProcent}", behovProcent);
             return _kvartlista;
@@ -494,7 +501,9 @@ public class ChargeWorker(
             .ToList();
 
         var nextKvart = _kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
-        logger.LogInformation("SkapaKvartLista: Laddbehov {behovProcent}, antal kvartar {antalKvartar} nextKvart {nextKvart}", behovProcent, antalKvartar, nextKvart);
+        logger.LogInformation(
+            "SkapaKvartLista: Laddbehov {behovProcent}, antal kvartar {antalKvartar} nextKvart {nextKvart}",
+            behovProcent, antalKvartar, nextKvart);
 
         return _kvartlista;
     }

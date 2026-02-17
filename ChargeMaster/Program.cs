@@ -4,7 +4,6 @@ using ChargeMaster.Components.Account;
 using ChargeMaster.Data;
 using ChargeMaster.Services;
 using ChargeMaster.Workers;
-
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,16 +16,20 @@ namespace ChargeMaster
         public static void Main(string[] args)
         {
             var assembly = typeof(Program).Assembly;
-            var versionInfo = assembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?
+            var versionInfo = assembly
+                .GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?
                 .InformationalVersion ?? assembly.GetName().Version?.ToString() ?? "Unknown";
 
             // Ta bort commit-hash om den finns (allt efter "+")
             versionInfo = versionInfo.Split('+')[0];
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.Console(
+                    outputTemplate:
+                    "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
                 .WriteTo.File($"logs/log-.txt",
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
+                    outputTemplate:
+                    "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             try
@@ -48,7 +51,9 @@ namespace ChargeMaster
 
                 builder.Services.AddCascadingAuthenticationState();
                 builder.Services.AddScoped<IdentityRedirectManager>();
-                builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+                builder.Services
+                    .AddScoped<AuthenticationStateProvider,
+                        IdentityRevalidatingAuthenticationStateProvider>();
 
                 builder.Services.AddAuthentication(options =>
                     {
@@ -57,7 +62,10 @@ namespace ChargeMaster
                     })
                     .AddIdentityCookies();
 
-                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");                
+                var connectionString
+                    = builder.Configuration.GetConnectionString("DefaultConnection") ??
+                      throw new InvalidOperationException(
+                          "Connection string 'DefaultConnection' not found.");
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(connectionString));
 
@@ -72,18 +80,20 @@ namespace ChargeMaster
                     .AddSignInManager()
                     .AddDefaultTokenProviders();
 
-                builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+                builder.Services
+                    .AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
                 // ----- Application Services -----
                 builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>();
-                
-                var vwServiceBaseAddress = builder.Configuration["Services:VWService"] 
-                    ?? throw new InvalidOperationException("VWService base address 'Services:VWService' not configured.");
+
+                var vwServiceBaseAddress = builder.Configuration["Services:VWService"]
+                                           ?? throw new InvalidOperationException(
+                                               "VWService base address 'Services:VWService' not configured.");
                 builder.Services.AddHttpClient<VWService, VWService>(client =>
                 {
                     client.BaseAddress = new Uri(vwServiceBaseAddress);
                 });
-                
+
                 builder.Services.AddHttpClient<WallboxService, WallboxService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.205:8080/");
@@ -93,8 +103,9 @@ namespace ChargeMaster
                 builder.Services.AddSingleton<PriceFetchingWorker>();
                 builder.Services.AddSingleton<WallboxWorker>();
                 builder.Services.AddSingleton<ChargeWorker>();
-                
-                builder.Services.AddHostedService(sp => sp.GetRequiredService<PriceFetchingWorker>());
+
+                builder.Services.AddHostedService(sp =>
+                    sp.GetRequiredService<PriceFetchingWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<WallboxWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ChargeWorker>());
 
@@ -111,7 +122,8 @@ namespace ChargeMaster
                     app.UseExceptionHandler("/Error");
                 }
 
-                app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+                app.UseStatusCodePagesWithReExecute("/not-found",
+                    createScopeForStatusCodePages: true);
 
                 app.UseAntiforgery();
 

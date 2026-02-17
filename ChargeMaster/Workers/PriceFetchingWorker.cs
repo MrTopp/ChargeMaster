@@ -1,8 +1,8 @@
 using ChargeMaster.Services;
+
 // ReSharper disable UnusedParameter.Local
 
 namespace ChargeMaster.Workers;
-
 
 /// <summary>
 /// A background service that schedules and executes daily electricity price fetching tasks at a specified time.
@@ -13,7 +13,9 @@ namespace ChargeMaster.Workers;
 /// conditions.</remarks>
 /// <param name="serviceProvider">The service provider used to resolve application services required for price fetching operations.</param>
 /// <param name="logger">The logger used to record informational and error messages related to the worker's execution.</param>
-public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<PriceFetchingWorker> logger) : BackgroundService
+public class PriceFetchingWorker(
+    IServiceProvider serviceProvider,
+    ILogger<PriceFetchingWorker> logger) : BackgroundService
 {
     /// <summary>
     /// Executes the background service logic to ensure daily price data is fetched and scheduled at the appropriate
@@ -26,7 +28,8 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
         var now = DateTime.Now;
         if (now.Hour >= 13)
         {
-            success = await CheckAndFetchAsync(DateOnly.FromDateTime(now.AddDays(1)), stoppingToken);
+            success = await CheckAndFetchAsync(DateOnly.FromDateTime(now.AddDays(1)),
+                stoppingToken);
         }
 
         while (!stoppingToken.IsCancellationRequested)
@@ -93,7 +96,8 @@ public class PriceFetchingWorker(IServiceProvider serviceProvider, ILogger<Price
             }
 
             using var scope = serviceProvider.CreateScope();
-            ElectricityPriceService priceService = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
+            ElectricityPriceService priceService
+                = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
 
             logger.LogInformation("Worker triggering price fetch for {Date}", date);
             await priceService.FetchAndStorePricesForDateAsync(date);
