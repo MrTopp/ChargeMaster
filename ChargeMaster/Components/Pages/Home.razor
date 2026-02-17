@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @implements IAsyncDisposable
 @inject WallboxWorker WallboxWorker
+@inject ChargeWorker ChargeWorker
+@using ChargeMaster.Data
 @using ChargeMaster.Models
 @using ChargeMaster.Workers
 
@@ -27,6 +29,32 @@ Welcome to your new app.
     </div>
 }
 
+@if (CurrentKvartlista is not null && CurrentKvartlista.Count > 0)
+{
+    <div>
+        <h3>Laddkvartal (Charging Quarters)</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tid</th>
+                    <th>Pris (SEK/kWh)</th>
+                    <th>Pris (EUR/kWh)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var kvart in CurrentKvartlista.OrderBy(x => x.TimeStart))
+                {
+                    <tr>
+                        <td>@kvart.TimeStart.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@kvart.SekPerKwh.ToString("F4")</td>
+                        <td>@kvart.EurPerKwh.ToString("F4")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
 <p>
     <a href="electricity-prices">View Electricity Prices</a>
 </p>
@@ -36,6 +64,7 @@ Welcome to your new app.
     private PeriodicTimer? _periodicTimer;
     private CancellationTokenSource? _cts;
     private WallboxMeterInfo? CurrentMeterInfo { get; set; }
+    private List<ElectricityPrice>? CurrentKvartlista { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -43,6 +72,7 @@ Welcome to your new app.
         _cts = new CancellationTokenSource();
         
         WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
+        ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
         
         _ = UpdateTimeLoop();
     }
@@ -50,6 +80,12 @@ Welcome to your new app.
     private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
     {
         CurrentMeterInfo = e.MeterInfo;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnKvartlistaUpdated(object? sender, KvartlistaEventArgs e)
+    {
+        CurrentKvartlista = e.Kvartlista;
         InvokeAsync(StateHasChanged);
     }
 
@@ -65,6 +101,7 @@ Welcome to your new app.
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
+        ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
         
         _cts?.Cancel();
         

@@ -515,7 +515,6 @@ public class ChargeWorker(
             "SkapaKvartLista: Laddbehov {behovProcent}, antal kvartar {antalKvartar} nextKvart {nextKvart}",
             behovProcent, antalKvartar, nextKvart);
 
-        // Utlös event med uppdaterad kvarterlista
         KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(_kvartlista));
 
         return _kvartlista;
