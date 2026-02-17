@@ -191,4 +191,23 @@ public class ElectricityPriceServiceTests : IDisposable
 
     }
 
+    /// <summary>
+    /// Fyll på databasen med priser från 1 oktober 2025 till idag. 
+    /// </summary>
+    /// <returns></returns>
+    [Fact]
+    public async Task FetchAndStorePricesForDateAsync_PopulatesDatabaseFromOctoberFirstToToday()
+    {
+        // Arrange
+        var startDate = new DateOnly(2025, 10, 1);
+        var endDate = DateOnly.FromDateTime(DateTime.Today);
+
+        // Act
+        var currentDate = startDate;
+        while (currentDate <= endDate)
+        {
+            await _service.FetchAndStorePricesForDateAsync(currentDate);
+            currentDate = currentDate.AddDays(1);
+        }
+    }
 }
