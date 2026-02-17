@@ -9,25 +9,23 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+<h1>ChargeMaster</h1>
 
 <div>
-    <p><strong>Aktuell tid och datum:</strong> @CurrentDateTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
+    <p><strong>Aktuell tid:</strong> @CurrentDateTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
 </div>
 
-@if (CurrentMeterInfo is not null)
-{
-    <div>
-        <h3>Wallbox Meter Information</h3>
-        <p><strong>Accumulated Energy:</strong> @CurrentMeterInfo.AccEnergy kWh</p>
-        <p><strong>Effekt fas 1:</strong> @CurrentMeterInfo.Phase1CurrentEnergy W</p>
-        <p><strong>Effekt fas 2:</strong> @CurrentMeterInfo.Phase2CurrentEnergy W</p>
-        <p><strong>Effekt fas 3:</strong> @CurrentMeterInfo.Phase3CurrentEnergy W</p>
-        <p><strong>Effekt total:</strong> @CurrentMeterInfo.CurrentEnergy W</p>
-    </div>
-}
+    @if (CurrentMeterInfo is not null)
+    {
+        <div>
+            <h3>Wallbox Meter Information</h3>
+            <p><strong>Accumulated Energy:</strong> @((CurrentMeterInfo.AccEnergy / 1000m).ToString("F1")) kWh</p>
+            <p><strong>Effekt fas 1:</strong> @CurrentMeterInfo.Phase1CurrentEnergy W</p>
+            <p><strong>Effekt fas 2:</strong> @CurrentMeterInfo.Phase2CurrentEnergy W</p>
+            <p><strong>Effekt fas 3:</strong> @CurrentMeterInfo.Phase3CurrentEnergy W</p>
+            <p><strong>Effekt total:</strong> @CurrentMeterInfo.CurrentEnergy W</p>
+        </div>
+    }
 
 @if (CurrentKvartlista is not null && CurrentKvartlista.Count > 0)
 {
@@ -46,8 +44,7 @@ Welcome to your new app.
                 {
                     <tr>
                         <td>@kvart.TimeStart.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>@kvart.SekPerKwh.ToString("F4")</td>
-                        <td>@kvart.EurPerKwh.ToString("F4")</td>
+                        <td>@kvart.SekPerKwh.ToString("F2")</td>
                     </tr>
                 }
             </tbody>
