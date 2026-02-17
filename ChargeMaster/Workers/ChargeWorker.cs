@@ -5,11 +5,21 @@ using ChargeMaster.Models;
 
 namespace ChargeMaster.Workers;
 
+public class KvartlistaEventArgs(List<ElectricityPrice> kvartlista) : EventArgs
+{
+    public List<ElectricityPrice> Kvartlista { get; } = kvartlista;
+}
+
 public class ChargeWorker(
     IServiceProvider serviceProvider,
     ILogger<ChargeWorker> logger)
     : BackgroundService
 {
+    /// <summary>
+    /// Event som utlöses när GetKvartlista() har uppdaterat kvarterlistan.
+    /// </summary>
+    public event EventHandler<KvartlistaEventArgs>? KvartlistaUpdated;
+
     /// <summary>
     /// Flagga om laddning är tillåten denna timme, sätts till false
     /// om förbrukningen innevarande timme är över tillåten nivå.
@@ -504,6 +514,9 @@ public class ChargeWorker(
         logger.LogInformation(
             "SkapaKvartLista: Laddbehov {behovProcent}, antal kvartar {antalKvartar} nextKvart {nextKvart}",
             behovProcent, antalKvartar, nextKvart);
+
+        // Utlös event med uppdaterad kvarterlista
+        KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(_kvartlista));
 
         return _kvartlista;
     }
