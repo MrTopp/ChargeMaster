@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/ChargeMaster/" />
+    <base href="@baseHref" />
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["ChargeMaster.styles.css"]" />
@@ -20,3 +20,16 @@
 </body>
 
 </html>
+
+@code {
+    private string baseHref = "/";
+
+    protected override void OnInitialized()
+    {
+        var environment = Config.GetValue<string>("ASPNETCORE_ENVIRONMENT") ?? "Production";
+        baseHref = environment == "Development" ? "/" : "/ChargeMaster/";
+    }
+
+    [Inject]
+    private IConfiguration Config { get; set; } = default!;
+}
