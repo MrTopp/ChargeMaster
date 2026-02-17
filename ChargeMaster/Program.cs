@@ -1,12 +1,15 @@
 using System.Reflection;
+
 using ChargeMaster.Components;
 using ChargeMaster.Components.Account;
 using ChargeMaster.Data;
 using ChargeMaster.Services;
 using ChargeMaster.Workers;
+
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using Serilog;
 
 namespace ChargeMaster
@@ -110,7 +113,11 @@ namespace ChargeMaster
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ChargeWorker>());
 
                 var app = builder.Build();
-                app.UsePathBase("/ChargeMaster");
+
+                if (!app.Environment.IsDevelopment())
+                {
+                    app.UsePathBase("/ChargeMaster");
+                }
 
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
