@@ -15,6 +15,8 @@ public class MeterInfoEventArgs : EventArgs
     /// </summary>
     public WallboxMeterInfo MeterInfo { get; }
 
+    public DateTime Timestamp { get; } = DateTime.Now;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MeterInfoEventArgs"/> class.
     /// </summary>
@@ -319,6 +321,77 @@ public class WallboxWorker(
         {
             logger.LogInformation(ex, "Failed to read or store meter info");
             return null;
+        }
+    }
+
+    
+
+    
+
+    /// <summary>
+    /// Calculates total monthly energy consumption by retrieving the first and last meter readings for the specified month.
+    /// This is more efficient than hourly calculations when you only need the total monthly usage.
+    /// </summary>
+    /// <param name="dateInMonth">A date that determines which month to calculate for.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>Total energy consumption in Wh for the specified month, or 0 if insufficient data.</returns>
+    public async Task<long> GetMonthlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var scope = serviceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
+
+            if (db is null)
+            {
+                logger.LogWarning("Database context is not available. Cannot calculate monthly energy usage.");
+                return 0;
+            }
+
+            // Bestäm start- och slutdatum för månaden
+            var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
+            var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
+
+            logger.LogInformation("Calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
+
+            // Hämta första läsningen i månaden
+            var firstReading = await db.WallboxMeterReadings
+                .Where(x => x.ReadAt >= startOfMonth && x.ReadAt <= endOfMonth)
+                .OrderBy(x => x.ReadAt)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (firstReading is null)
+            {
+                logger.LogInformation("No meter readings found for {Month:yyyy-MM}", dateInMonth);
+                return 0;
+            }
+
+            // Hämta sista läsningen i månaden
+            var lastReading = await db.WallboxMeterReadings
+                .Where(x => x.ReadAt >= startOfMonth && x.ReadAt <= endOfMonth)
+                .OrderByDescending(x => x.ReadAt)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (lastReading is null)
+            {
+                logger.LogInformation("Could not find last reading for {Month:yyyy-MM}", dateInMonth);
+                return 0;
+            }
+
+            // Beräkna skillnaden mellan första och sista läsningen
+            var monthlyUsageWh = lastReading.AccEnergy - firstReading.AccEnergy;
+
+            logger.LogInformation("Monthly energy usage for {Month:yyyy-MM}: {Usage} Wh ({UsageKwh:F2} kWh)",
+                dateInMonth, monthlyUsageWh, monthlyUsageWh / 1000.0);
+
+            return monthlyUsageWh;
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation(ex, "Error calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
+            return 0;
         }
     }
 

@@ -10,104 +10,161 @@
 
 <PageTitle>ChargeMaster</PageTitle>
 
-<h1>ChargeMaster</h1>
+<div class="container mt-5 mb-5">
+    <h1 class="mb-4">ChargeMaster</h1>
 
-<div>
-    <p><strong>Aktuell tid:</strong> @CurrentDateTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
+
+    <section class="mb-5">
+        <h3 class="mb-3">Aktuell effekt</h3>
+
+        @if (CurrentMeterInfo is not null)
+        {
+            <div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Värde</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Uppdaterad</strong></td>
+                            <td>@((LastMeterInfoUpdate).ToString("HH:mm:ss"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Effekt fas 1</strong></td>
+                            <td>@CurrentMeterInfo.Phase1CurrentEnergy W</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Effekt fas 2</strong></td>
+                            <td>@CurrentMeterInfo.Phase2CurrentEnergy W</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Effekt fas 3</strong></td>
+                            <td>@CurrentMeterInfo.Phase3CurrentEnergy W</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Effekt total</strong></td>
+                            <td>@CurrentMeterInfo.CurrentEnergy W</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    <section class="mb-5">
+        <h3 class="mb-3">Kostnader denna månad</h3>
+        @if (HighestHourlyUsage is not null)
+        {
+            <div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Avgiftstyp</th>
+                            <th>Energi (kWh)</th>
+                            <th>Timme</th>
+                            <th>Pris (SEK)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Effektavgift</strong></td>
+                            <td>@((HighestHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
+                            <td>@(HighestHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
+                            <td>@((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000).ToString("F2"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Högbelastningsavgift</strong></td>
+                            <td>@((HighestDailyHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
+                            <td>@(HighestDailyHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
+                            <td>@((HighestDailyHourlyUsage.EnergyUsageWh * 50 / 1000).ToString("F2"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fast kostnad</strong></td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>@((3000 / 12.0).ToString("F2"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Överföring</strong></td>
+                            <td>@((MonthlyUsage / 1000.0).ToString("F2"))</td>
+                            <td>&nbsp;</td>
+                            <td>@((MonthlyUsage * 0.175 / 1000).ToString("F2"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Summa</strong></td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>
+                                @(((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000)
+                                                            + (HighestDailyHourlyUsage.EnergyUsageWh * 50 / 1000.0)
+                                                            + (3000 / 12.0)
+                                                            + (MonthlyUsage * 0.175 / 1000)).ToString("F2"))
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p><em>Ingen data tillgänglig</em></p>
+        }
+
+    </section>
+
+    <section class="mb-5">
+        <h3 class="mb-3">Planerad laddning</h3>
+
+        @if (CurrentKvartlista is not null && CurrentKvartlista.Count > 0)
+        {
+            <div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tid</th>
+                            <th>Pris (SEK/kWh)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kvart in CurrentKvartlista.OrderBy(x => x.TimeStart))
+                        {
+                            <tr>
+                                <td>@kvart.TimeStart.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td align="right">@kvart.SekPerKwh.ToString("F2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                Batteriet är fulladdat eller ingen laddning krävs för närvarande.
+            </div>
+        }
+    </section>
+
+    <section class="mb-5">
+        <p>
+            <a href="electricity-prices" class="btn btn-secondary">Se elpriser</a>
+        </p>
+    </section>
 </div>
-<h3>Wallbox Meter Information</h3>
-
-@if (CurrentMeterInfo is not null)
-{
-    <div>
-        <p><strong>Accumulated Energy:</strong> @((CurrentMeterInfo.AccEnergy / 1000m).ToString("F1")) kWh</p>
-        <p><strong>Effekt fas 1:</strong> @CurrentMeterInfo.Phase1CurrentEnergy W</p>
-        <p><strong>Effekt fas 2:</strong> @CurrentMeterInfo.Phase2CurrentEnergy W</p>
-        <p><strong>Effekt fas 3:</strong> @CurrentMeterInfo.Phase3CurrentEnergy W</p>
-        <p><strong>Effekt total:</strong> @CurrentMeterInfo.CurrentEnergy W</p>
-    </div>
-}
-
-<h3>Högsta timförbrukning denna månad</h3>
-@if (HighestHourlyUsage is not null)
-{
-    <div>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Avgiftstyp</th>
-                    <th>Energi (kWh)</th>
-                    <th>Timme</th>
-                    <th>Pris (SEK)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Effektavgift</strong></td>
-                    <td>@((HighestHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
-                    <td>@(HighestHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
-                    <td>@((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000).ToString("F2"))</td>
-                </tr>
-                <tr>
-                    <td><strong>Högbelastningsavgift</strong></td>
-                    <td>@((HighestDailyHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
-                    <td>@(HighestDailyHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
-                    <td>@((HighestDailyHourlyUsage.EnergyUsageWh * 50 / 1000).ToString("F2"))</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-}
-else
-{
-    <p><em>Ingen data tillgänglig</em></p>
-}
-
-<h3>Planerad laddning</h3>
-<br>
-
-@if (CurrentKvartlista is not null && CurrentKvartlista.Count > 0)
-{
-    <div>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Tid</th>
-                    <th>Pris (SEK/kWh)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var kvart in CurrentKvartlista.OrderBy(x => x.TimeStart))
-                {
-                    <tr>
-                        <td>@kvart.TimeStart.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td align="right">@kvart.SekPerKwh.ToString("F2")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-}
-else
-{
-    <div class="alert alert-info">
-        Batteriet är fulladdat eller ingen laddning krävs för närvarande.
-    </div>
-}
-
-<p>
-    <a href="electricity-prices">View Electricity Prices</a>
-</p>
 
 @code {
-    private DateTime CurrentDateTime { get; set; } = DateTime.Now;
     private PeriodicTimer? _periodicTimer;
     private PeriodicTimer? _hourlyUpdateTimer;
     private CancellationTokenSource? _cts;
+    private DateTime LastMeterInfoUpdate { get; set; }
     private WallboxMeterInfo? CurrentMeterInfo { get; set; }
     private List<ElectricityPrice>? CurrentKvartlista { get; set; }
     private HourlyEnergyUsage? HighestHourlyUsage { get; set; }
     private HourlyEnergyUsage? HighestDailyHourlyUsage { get; set; }
+    private long MonthlyUsage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,6 +175,7 @@ else
         if (WallboxWorker.MeterInfo is not null)
         {
             CurrentMeterInfo = WallboxWorker.MeterInfo;
+            LastMeterInfoUpdate= DateTime.Now;
         }
 
         // Hämta senaste kvarterlista direkt från ChargeWorker
@@ -130,13 +188,13 @@ else
         WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
 
-        _ = UpdateTimeLoop();
         _ = UpdateHourlyEnergyLoop();
     }
 
     private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
     {
         CurrentMeterInfo = e.MeterInfo;
+        LastMeterInfoUpdate = e.Timestamp;
         InvokeAsync(StateHasChanged);
     }
 
@@ -150,15 +208,7 @@ else
     {
         HighestHourlyUsage = await WallboxWorker.GetHighestHourlyEnergyUsageAsync(DateTime.Now);
         HighestDailyHourlyUsage = await WallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(DateTime.Now);
-    }
-
-    private async Task UpdateTimeLoop()
-    {
-        while (_periodicTimer is not null && await _periodicTimer.WaitForNextTickAsync(_cts!.Token))
-        {
-            CurrentDateTime = DateTime.Now;
-            await InvokeAsync(StateHasChanged);
-        }
+        MonthlyUsage = await WallboxWorker.GetMonthlyEnergyUsageAsync(DateTime.Now);
     }
 
     private async Task UpdateHourlyEnergyLoop()
