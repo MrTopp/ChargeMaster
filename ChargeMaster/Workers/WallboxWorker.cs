@@ -1,4 +1,4 @@
-using ChargeMaster.Data;
+ï»¿using ChargeMaster.Data;
 using ChargeMaster.Services.Wallbox;
 
 using Microsoft.EntityFrameworkCore;
@@ -79,22 +79,22 @@ public class WallboxWorker(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            // Initiera genom att läsa upp status
+            // Initiera genom att lÃ¤sa upp status
             WallboxStatus wallboxStatus = await InitializeWallboxStatusAsync(stoppingToken);
 
-            // Kontrollera klockan på wallboxen
+            // Kontrollera klockan pÃ¥ wallboxen
             await CheckWallboxTimeAsync(wallboxStatus);
 
             // Kontrollera schema 
             //await CheckWallboxScheduleAsync();
 
-            // Spara status på förbrukad el
+            // Spara status pÃ¥ fÃ¶rbrukad el
             WallboxMeterInfo? meterInfo = await ReadEnergyAsync(stoppingToken);
 
-            // Räkna ut nuvarande effekt
+            // RÃ¤kna ut nuvarande effekt
             CalculateCurrentPowerAsync(meterInfo);
 
-            // vänta innan nästa iteration
+            // vÃ¤nta innan nÃ¤sta iteration
             await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
         }
     }
@@ -226,7 +226,7 @@ public class WallboxWorker(
         // Wallboxens tid i format HH:mm
         string? wallboxTime = wallboxStatus.ChargeboxTime;
         if (wallboxTime is null) return;
-        // Kontrollera om klockan är felaktig
+        // Kontrollera om klockan Ã¤r felaktig
         if (DateTime.TryParseExact(wallboxTime, "HH:mm", null,
                 System.Globalization.DateTimeStyles.None, out DateTime wallboxDateTime))
         {
@@ -343,7 +343,7 @@ public class WallboxWorker(
 
             var allt = db.WallboxMeterReadings.OrderBy(x => x.ReadAt).ToList();
 
-            // Bestäm start- och slutdatum för månaden
+            // BestÃ¤m start- och slutdatum fÃ¶r mÃ¥naden
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
             var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
 
@@ -354,7 +354,7 @@ public class WallboxWorker(
             WallboxMeterReading? lastReading = null;
             long totalReadings = 0;
 
-            // Använd streaming för att undvika att ladda allt i minnet på en gång
+            // AnvÃ¤nd streaming fÃ¶r att undvika att ladda allt i minnet pÃ¥ en gÃ¥ng
             await foreach (var reading in db.WallboxMeterReadings
                 .Where(x => x.ReadAt >= startOfMonth && x.ReadAt <= endOfMonth)
                 .OrderBy(x => x.ReadAt)
@@ -370,7 +370,7 @@ public class WallboxWorker(
                     continue;
                 }
 
-                // Om vi skiftat timme eller dag, beräkna förbrukningen
+                // Om vi skiftat timme eller dag, berÃ¤kna fÃ¶rbrukningen
                 if (reading.ReadAt.Hour != lastReading.ReadAt.Hour || reading.ReadAt.Date != lastReading.ReadAt.Date)
                 {
                     var energyUsageWh =  reading.AccEnergy- lastReading.AccEnergy;

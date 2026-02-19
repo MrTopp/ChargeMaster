@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+ï»¿using System.Text.Json.Serialization;
 
 namespace ChargeMaster.Services.Wallbox;
 
@@ -8,25 +8,25 @@ public class WallboxMeterInfo
     public int Success { get; set; }
 
     /// <summary>
-    /// Ackumulerad förbrukad energi i Wh
+    /// Ackumulerad fÃ¶rbrukad energi i Wh
     /// </summary>
     [JsonPropertyName("accEnergy")]
     public long AccEnergy { get; set; }
 
     /// <summary>
-    /// Aktuell effekt i tiondels ampere för fas 1
+    /// Aktuell effekt i tiondels ampere fÃ¶r fas 1
     /// </summary>
     [JsonPropertyName("phase1Current")]
     public double Phase1Current { get; set; }
 
     /// <summary>
-    /// Aktuell effekt i tiondels ampere för fas 2
+    /// Aktuell effekt i tiondels ampere fÃ¶r fas 2
     /// </summary>
     [JsonPropertyName("phase2Current")]
     public double Phase2Current { get; set; }
 
     /// <summary>
-    /// Aktuell effekt i tiondels ampere för fas 3
+    /// Aktuell effekt i tiondels ampere fÃ¶r fas 3
     /// </summary>
     [JsonPropertyName("phase3Current")]
     public double Phase3Current { get; set; }
@@ -65,25 +65,25 @@ public class WallboxMeterInfo
     public long ApparentPower { get; set; }
 
     /// <summary>
-    /// Momentan effektförbrukning i W för fas 1
+    /// Momentan effektfÃ¶rbrukning i W fÃ¶r fas 1
     /// </summary>
     public long Phase1CurrentEnergy =>
         (long)(Phase1Current*230/10);
 
     /// <summary>
-    /// Momentan effektförbrukning i W för fas 2
+    /// Momentan effektfÃ¶rbrukning i W fÃ¶r fas 2
     /// </summary>
     public long Phase2CurrentEnergy =>
         (long)(Phase2Current * 230 / 10);
 
     /// <summary>
-    /// Momentan effektförbrukning i W för fas 3
+    /// Momentan effektfÃ¶rbrukning i W fÃ¶r fas 3
     /// </summary>
     public long Phase3CurrentEnergy =>
         (long)(Phase3Current * 230 / 10);
 
     /// <summary>
-    /// Momentan effektförbrukning i W för alla faser
+    /// Momentan effektfÃ¶rbrukning i W fÃ¶r alla faser
     /// </summary>
     public long CurrentEnergy =>
         Phase1CurrentEnergy + Phase2CurrentEnergy + Phase3CurrentEnergy;

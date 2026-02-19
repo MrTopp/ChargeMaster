@@ -1,11 +1,11 @@
-using System.Text.Json;
+Ôªøusing System.Text.Json;
 
 using Serilog;
 
 namespace ChargeMaster.Services.Wallbox;
 
     /// <summary>
-    /// ≈tkomst till Garo wallbox via HTTP-gr‰nssnitt
+    /// √Ötkomst till Garo wallbox via HTTP-gr√§nssnitt
     /// </summary>
     /// <param name="httpClient"></param>
     public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logger)
@@ -29,13 +29,13 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid h‰mtning av wallbox-status");
+            Log.Error(ex, "Fel vid h√§mtning av wallbox-status");
             return null;
         }
     }
 
     /// <summary>
-    /// L‰s wallbox-tid
+    /// L√§s wallbox-tid
     /// </summary>
     /// <returns></returns>
     public async Task<DateTime?> GetTimeAsync()
@@ -50,7 +50,7 @@ namespace ChargeMaster.Services.Wallbox;
     }
 
     /// <summary>
-    /// St‰ll in wallbox-tid
+    /// St√§ll in wallbox-tid
     /// </summary>
     /// <param name="dateTime"></param>
     /// <returns></returns>
@@ -90,8 +90,8 @@ namespace ChargeMaster.Services.Wallbox;
                 _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
             };
 
-            // Wallboxen fˆrv‰ntar vanligtvis nyttolasten pÂ /servlet/rest/chargebox/mode
-            logger.LogInformation("St‰ller in wallbox-l‰ge till {Mode}", modeString);
+            // Wallboxen f√∂rv√§ntar vanligtvis nyttolasten p√• /servlet/rest/chargebox/mode
+            logger.LogInformation("St√§ller in wallbox-l√§ge till {Mode}", modeString);
             var response
                 = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}", null);
             return response.IsSuccessStatusCode;
@@ -112,7 +112,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid h‰mtning av wallbox-m‰terinformation");
+            Log.Error(ex, "Fel vid h√§mtning av wallbox-m√§terinformation");
             return null;
         }
     }
@@ -127,7 +127,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid h‰mtning av wallbox-schema");
+            Log.Error(ex, "Fel vid h√§mtning av wallbox-schema");
             return null;
         }
     }
@@ -142,7 +142,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid h‰mtning av wallbox-konfiguration");
+            Log.Error(ex, "Fel vid h√§mtning av wallbox-konfiguration");
             return null;
         }
     }
@@ -157,7 +157,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid h‰mtning av wallbox-slavar");
+            Log.Error(ex, "Fel vid h√§mtning av wallbox-slavar");
             return null;
         }
     }
@@ -172,7 +172,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid inst‰llning av wallbox-schema");
+            Log.Error(ex, "Fel vid inst√§llning av wallbox-schema");
             return false;
         }
     }

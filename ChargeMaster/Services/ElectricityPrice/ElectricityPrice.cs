@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations.Schema;
+Ôªøusing System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace ChargeMaster.Services.ElectricityPrice;
 
 /// <summary>
-/// Elpriset fˆr en kvart.
+/// Elpriset f√∂r en kvart.
 /// </summary>
 public class ElectricityPrice
 {
@@ -26,12 +26,12 @@ public class ElectricityPrice
     public DateTime TimeEnd { get; set; }
 
     /// <summary>
-    /// H‰mtar eller st‰ller in ett v‰rde som anger om laddning ‰r tillÂten baserat pÂ schemat och
-    /// manuell Âsidos‰ttning.
+    /// H√§mtar eller st√§ller in ett v√§rde som anger om laddning √§r till√•ten baserat p√• schemat och
+    /// manuell √•sidos√§ttning.
     /// </summary>
-    /// <remarks>Laddning ‰r inte tillÂten vardagar mellan 07:00 och 19:00 frÂn november till mars.
-    /// Utanfˆr dessa perioder reflekterar v‰rdet det senaste v‰rdet som st‰lldes in. Att manuellt st‰lla denna egenskap Âsidos‰tter
-    /// standardschemat tills det ‰ndras igen.</remarks>
+    /// <remarks>Laddning √§r inte till√•ten vardagar mellan 07:00 och 19:00 fr√•n november till mars.
+    /// Utanf√∂r dessa perioder reflekterar v√§rdet det senaste v√§rdet som st√§lldes in. Att manuellt st√§lla denna egenskap √•sidos√§tter
+    /// standardschemat tills det √§ndras igen.</remarks>
     [NotMapped]
     public bool ChargingAllowed
     {

@@ -1,4 +1,4 @@
-using ChargeMaster.Data;
+ï»¿using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
 
 using Microsoft.EntityFrameworkCore;
@@ -194,7 +194,7 @@ public class ElectricityPriceServiceTests : IDisposable
     }
 
     /// <summary>
-    /// Fyll på databasen med priser från 1 oktober 2025 till idag. 
+    /// Fyll pÃ¥ databasen med priser frÃ¥n 1 oktober 2025 till idag. 
     /// </summary>
     /// <returns></returns>
     [Fact]

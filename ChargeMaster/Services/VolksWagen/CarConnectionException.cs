@@ -1,4 +1,4 @@
-namespace ChargeMaster.Services.VolksWagen;
+﻿namespace ChargeMaster.Services.VolksWagen;
 
 /// <summary>
 /// Represents errors that occur when a connection to a car cannot be established or is lost.

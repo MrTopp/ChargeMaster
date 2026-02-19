@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 
 using ChargeMaster.Components;
 using ChargeMaster.Data;
