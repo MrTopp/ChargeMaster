@@ -4,8 +4,23 @@ using Serilog;
 
 namespace ChargeMaster.Services;
 
+/// <summary>
+/// Represents errors that occur when a connection to a car cannot be established or is lost.
+/// </summary>
+/// <param name="message">The message that describes the error.</param>
 public class CarConnectionException(string message) : Exception(message);
 
+
+/// <summary>
+/// Interacting with Volkswagen vehicle services
+/// </summary>
+/// <remarks>This service encapsulates communication with Volkswagen vehicle APIs and handles error logging and
+/// exception management for all operations. Methods may throw exceptions if the underlying service is unavailable or
+/// returns an error response. This class is not thread-safe; if used concurrently, callers should ensure appropriate
+/// synchronization.</remarks>
+/// <param name="httpClient">The HTTP client used to send requests to the Volkswagen service endpoints. Must be configured with the appropriate
+/// base address and authentication if required.</param>
+/// <param name="logger">The logger used to record diagnostic and operational information for the service.</param>
 public class VWService(HttpClient httpClient, ILogger<VWService> logger)
 {
     private ILogger<VWService> Logger { get; } = logger;
