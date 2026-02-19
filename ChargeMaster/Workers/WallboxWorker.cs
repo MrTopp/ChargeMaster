@@ -94,8 +94,11 @@ public class WallboxWorker(
         }
     }
 
+    public WallboxMeterInfo? MeterInfo { get; private set; }
+
     private void CalculateCurrentPowerAsync(WallboxMeterInfo? meterInfo)
     {
+        MeterInfo = meterInfo;
         if (meterInfo is null)
             return;
         MeterInfoCalculated?.Invoke(this, new MeterInfoEventArgs(meterInfo));
