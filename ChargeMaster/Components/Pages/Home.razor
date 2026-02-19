@@ -8,12 +8,9 @@
 @using ChargeMaster.Services.Wallbox
 @using ChargeMaster.Workers
 
-<PageTitle>ChargeMaster</PageTitle>
+<PageTitle>Charge Master</PageTitle>
 
 <div class="container mt-5 mb-5">
-    <h1 class="mb-4">ChargeMaster</h1>
-
-
     <section class="mb-5">
         <h3 class="mb-3">Aktuell effekt</h3>
 
@@ -47,6 +44,14 @@
                         <tr>
                             <td><strong>Effekt total</strong></td>
                             <td>@CurrentMeterInfo.CurrentEnergy W</td>
+                        </tr>
+                        @* <tr>
+                            <td><strong>Förbrukning denna timme hittils</strong></td>
+                            <td>@ChargeWorker.ForbrukningDennaTimme W</td>
+                        </tr> *@
+                        <tr class="@(EffektDennaTimmeTotalt >  2500 ? "table-danger" : "")">
+                            <td><strong>Uppskattad förbrukning denna timme</strong></td>
+                            <td><strong>@(EffektDennaTimmeTotalt) W</strong></td>
                         </tr>
                     </tbody>
                 </table>
@@ -190,6 +195,8 @@
 
         _ = UpdateHourlyEnergyLoop();
     }
+
+    private long EffektDennaTimmeTotalt => ChargeWorker.ForbrukningDennaTimme * 3600 / (DateTime.Now.Minute * 60 + DateTime.Now.Second);
 
     private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
     {

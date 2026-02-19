@@ -38,6 +38,11 @@ public class ChargeWorker(
     private long FörbrukningVidTimstart { get; set; }
 
     /// <summary>
+    /// Uppräknat värde på timförbrukning.
+    /// </summary>
+    public long ForbrukningDennaTimme { get; private set; }
+
+    /// <summary>
     /// Flagga att wallbox är panikstoppad.
     /// </summary>
     private bool WallboxStopped
@@ -159,14 +164,14 @@ public class ChargeWorker(
             }
 
             // ----- Varje timme, nollställ timförbrukning
-            long förbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
+            ForbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
             if (nu.Hour != previous.Hour)
             {
                 logger.LogInformation("** Hourly consumption: {consumption} Wh **",
-                    förbrukningDennaTimme);
+                    ForbrukningDennaTimme);
                 Timladdning = true;
                 FörbrukningVidTimstart = wstat.AccEnergy;
-                förbrukningDennaTimme = 0;
+                ForbrukningDennaTimme = 0;
             }
 
             // ----- Bilen inte ansluten, hoppa över utvärdering av laddning
@@ -230,12 +235,12 @@ public class ChargeWorker(
 
             // ----- Kontrollera förväntad timförbrukning
             int grans = nu.Minute * 2000 / 60 + 1500;
-            if (förbrukningDennaTimme > grans && Timladdning)
+            if (ForbrukningDennaTimme > grans && Timladdning)
             {
                 //  För hög förbrukning -> stoppa laddning
                 logger.LogInformation(
                     "Charging disabled due to high consumption: {consumption} Wh.",
-                    förbrukningDennaTimme);
+                    ForbrukningDennaTimme);
                 Timladdning = false;
                 await StoppaLaddningAsync();
             }
@@ -244,9 +249,9 @@ public class ChargeWorker(
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
                 // Starta/stoppa laddning beroende på om det är tillåtet eller inte
-                if (förbrukningDennaTimme > 0)
+                if (ForbrukningDennaTimme > 0)
                     logger.LogInformation("-- Quarter, consumption: {consumption} Wh --",
-                        förbrukningDennaTimme);
+                        ForbrukningDennaTimme);
                 int numin = nu.Minute;
                 int minutAvrundad = numin / 15 * 15;
                 var kvartlista = await GetKvartlista();
