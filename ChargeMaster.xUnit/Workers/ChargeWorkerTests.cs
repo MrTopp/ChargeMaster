@@ -41,6 +41,20 @@ public class ChargeWorkerTests
         
     }
 
+    [Fact]
+    public async Task GetHourlyEnergyUsage_OK()
+    {
+        // Arrange
+        var wallboxWorker = await SetUpWallboxWorker();
+        var dateInMonth = DateTime.Now;
+        
+        // Act
+        var hourlyUsage = await wallboxWorker.GetHourlyEnergyUsageAsync(dateInMonth);
+        
+        // Assert
+        var idag = hourlyUsage.Where(x => x.Hour >= DateTime.Today).ToList();
+    }
+
     private static Task<ChargeWorker> SetUpChargeWorker()
     {
         var services = new ServiceCollection();
@@ -52,6 +66,9 @@ public class ChargeWorkerTests
 
         var connectionString = config.GetConnectionString("DefaultConnection")
                                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+        connectionString
+            = "Host=192.168.1.10;Port=5432;Database=chargemaster_db;Username=chargemaster;Password=3fR%qnNAkjW9_h";
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
@@ -83,5 +100,33 @@ public class ChargeWorkerTests
         return Task.FromResult(worker);
     }
 
+    private static Task<WallboxWorker> SetUpWallboxWorker()
+    {
+        var services = new ServiceCollection();
 
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.Development.json", optional: false)
+            .Build();
+
+        var connectionString = config.GetConnectionString("DefaultConnection")
+                               ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        HttpClient wallboxClient = new HttpClient { BaseAddress = new Uri("http://192.168.1.205:8080/") };
+        var wallboxService = new WallboxService(wallboxClient, new Logger<WallboxService>(new LoggerFactory()));
+
+        services.AddSingleton(wallboxService);
+        services.AddLogging();
+
+        var provider = services.BuildServiceProvider();
+
+        var mockLogger = new Mock<ILogger<WallboxWorker>>();
+        var worker = new WallboxWorker(provider, wallboxService, mockLogger.Object);
+
+        return Task.FromResult(worker);
+    }
 }
