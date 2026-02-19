@@ -87,16 +87,29 @@
                             <td>@((HighestDailyHourlyUsage.EnergyUsageWh * 50 / 1000).ToString("F2"))</td>
                         </tr>
                         <tr>
-                            <td><strong>Fast kostnad</strong></td>
+                            <td><strong>Nätavgift</strong></td>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
-                            <td>@((3000 / 12.0).ToString("F2"))</td>
+                            <td>@((3000 / (DateTime.IsLeapYear(DateTime.Now.Year) ? 366 : 365)
+                                   * DateTime.DaysInMonth(DateTime.Now.Year,DateTime.Now.Month)).ToString("F2"))</td>
                         </tr>
                         <tr>
-                            <td><strong>Överföring</strong></td>
+                            <td><strong>Överföring hittils</strong></td>
                             <td>@((MonthlyUsage / 1000.0).ToString("F2"))</td>
                             <td>&nbsp;</td>
-                            <td>@((MonthlyUsage * 0.175 / 1000).ToString("F2"))</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Överföring månad uppskattad</strong></td>
+                            <td>@((ForbrukningManadTotalt / 1000.0).ToString("F3"))</td>
+                            <td>&nbsp;</td>
+                            <td>@((ForbrukningManadTotalt * 0.175 / 1000).ToString("F2"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Energiskatt uppskattad</strong></td>
+                            <td>@((ForbrukningManadTotalt / 1000.0).ToString("F3"))</td>
+                            <td>&nbsp;</td>
+                            <td>@((ForbrukningManadTotalt * 0.5488 / 1000).ToString("F2"))</td>
                         </tr>
                         <tr>
                             <td><strong>Summa</strong></td>
@@ -106,7 +119,9 @@
                                 @(((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000)
                                                             + (HighestDailyHourlyUsage.EnergyUsageWh * 50 / 1000.0)
                                                             + (3000 / 12.0)
-                                                            + (MonthlyUsage * 0.175 / 1000)).ToString("F2"))
+                                                            + (ForbrukningManadTotalt * 0.175 / 1000)
+                                + (ForbrukningManadTotalt * 0.5488 / 1000)
+                                ).ToString("F2"))
                             </td>
                         </tr>
                     </tbody>
@@ -197,6 +212,8 @@
     }
 
     private long EffektDennaTimmeTotalt => ChargeWorker.ForbrukningDennaTimme * 3600 / (DateTime.Now.Minute * 60 + DateTime.Now.Second);
+
+    private long ForbrukningManadTotalt => MonthlyUsage * DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month) / DateTime.Now.Day;
 
     private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
     {
