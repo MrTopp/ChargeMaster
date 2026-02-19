@@ -92,7 +92,7 @@ namespace ChargeMaster
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
-                    app.UseMigrationsEndPoint();
+                    // Development error page
                 }
                 else
                 {
