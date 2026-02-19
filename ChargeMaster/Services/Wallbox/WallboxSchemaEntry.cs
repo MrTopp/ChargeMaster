@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
-namespace ChargeMaster.Models;
+namespace ChargeMaster.Services.Wallbox;
 
 public sealed class WallboxSchemaEntry : IEquatable<WallboxSchemaEntry>
 {

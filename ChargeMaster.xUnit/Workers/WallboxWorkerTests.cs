@@ -1,11 +1,10 @@
-using ChargeMaster.Models;
-using ChargeMaster.Services;
 using ChargeMaster.Workers;
 using ChargeMaster.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ChargeMaster.Services.Wallbox;
 
 namespace ChargeMaster.xUnit.Workers;
 
@@ -38,7 +37,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         // Arrange
         var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var worker = new WallboxWorker(null, wallbox, logger);
+        var worker = new WallboxWorker(null!, wallbox, logger);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
@@ -57,7 +56,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
 
-        var worker = new WallboxWorker(null, wallbox, logger);
+        var worker = new WallboxWorker(null!, wallbox, logger);
 
         var now = DateTime.Now;
 
@@ -102,7 +101,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         // Arrange
         var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var worker = new WallboxWorker(null, wallbox, logger);
+        var worker = new WallboxWorker(null!, wallbox, logger);
 
         // Act
         await worker.CheckWallboxScheduleAsync();

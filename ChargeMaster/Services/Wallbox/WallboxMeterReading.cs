@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ChargeMaster.Data;
+namespace ChargeMaster.Services.Wallbox;
 
 /// <summary>
 /// Represents a reading from a wallbox meter.

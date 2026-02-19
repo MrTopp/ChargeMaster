@@ -1,4 +1,4 @@
-namespace ChargeMaster.Models;
+namespace ChargeMaster.Services.Wallbox;
 
 public enum WallboxMode
 {

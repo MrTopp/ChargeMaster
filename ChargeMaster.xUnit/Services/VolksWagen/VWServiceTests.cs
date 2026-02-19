@@ -1,10 +1,8 @@
-using ChargeMaster.Models;
-using ChargeMaster.Services;
-using ChargeMaster.Workers;
+using ChargeMaster.Services.VolksWagen;
 
 using Microsoft.Extensions.Logging;
 
-namespace ChargeMaster.xUnit.Services;
+namespace ChargeMaster.xUnit.Services.VolksWagen;
 
 public class VWServiceTests : IDisposable
 {

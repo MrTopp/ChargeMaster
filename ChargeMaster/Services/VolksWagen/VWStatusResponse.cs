@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable RedundantSwitchExpressionArms
 
-namespace ChargeMaster.Models;
+namespace ChargeMaster.Services.VolksWagen;
 
 public enum VWVehicleState
 {

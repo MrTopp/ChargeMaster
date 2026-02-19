@@ -1,4 +1,4 @@
-using ChargeMaster.Services;
+using ChargeMaster.Services.ElectricityPrice;
 
 // ReSharper disable UnusedParameter.Local
 

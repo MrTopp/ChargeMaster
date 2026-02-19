@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace ChargeMaster.Data;
+namespace ChargeMaster.Services.ElectricityPrice;
 
 /// <summary>
 /// Elpriset för en kvart.
