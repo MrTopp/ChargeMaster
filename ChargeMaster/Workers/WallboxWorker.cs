@@ -1,9 +1,15 @@
 using ChargeMaster.Data;
 using ChargeMaster.Models;
 using ChargeMaster.Services;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Workers;
+
+/// <summary>
+/// Represents hourly energy usage data.
+/// </summary>
+public record HourlyEnergyUsage(DateTime Hour, long EnergyUsageWh);
 
 /// <summary>
 /// Event arguments containing Wallbox meter information.
@@ -171,13 +177,19 @@ public class WallboxWorker(
         {
             WallboxSchemaEntry entry1 = new()
             {
-                Start = "00:00:00", Stop = "07:00:00", Weekday = day.ToString(), ChargeLimit = 0
+                Start = "00:00:00",
+                Stop = "07:00:00",
+                Weekday = day.ToString(),
+                ChargeLimit = 0
             };
             if (!schema.Any(e => e.Equals(entry1)))
                 await wallboxService.SetSchemaAsync(entry1);
             WallboxSchemaEntry entry2 = new()
             {
-                Start = "19:00:00", Stop = "24:00:00", Weekday = day.ToString(), ChargeLimit = 0
+                Start = "19:00:00",
+                Stop = "24:00:00",
+                Weekday = day.ToString(),
+                ChargeLimit = 0
             };
             if (!schema.Any(e => e.Equals(entry2)))
                 await wallboxService.SetSchemaAsync(entry2);
@@ -306,6 +318,81 @@ public class WallboxWorker(
         {
             logger.LogInformation(ex, "Failed to read or store meter info");
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Calculates hourly energy consumption for a specific month by comparing the last meter reading of each hour
+    /// with the last meter reading from the previous hour. Uses streaming for efficient memory usage.
+    /// </summary>
+    /// <param name="dateInMonth">A date that determines which month to calculate for. Only readings from this month will be included.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>A list of hourly energy usage data sorted by hour for the specified month.</returns>
+    public async Task<List<HourlyEnergyUsage>> GetHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var scope = serviceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
+
+            if (db is null)
+            {
+                logger.LogWarning("Database context is not available. Cannot calculate hourly energy usage.");
+                return new List<HourlyEnergyUsage>();
+            }
+            
+
+            var allt = db.WallboxMeterReadings.OrderBy(x => x.ReadAt).ToList();
+
+            // Bestäm start- och slutdatum för månaden
+            var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
+            var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
+
+            logger.LogInformation("Calculating hourly energy usage for {Month:yyyy-MM} (from {Start:yyyy-MM-dd} to {End:yyyy-MM-dd})",
+                dateInMonth, startOfMonth, endOfMonth);
+
+            var hourlyUsage = new List<HourlyEnergyUsage>();
+            WallboxMeterReading? lastReading = null;
+            long totalReadings = 0;
+
+            // Använd streaming för att undvika att ladda allt i minnet på en gång
+            await foreach (var reading in db.WallboxMeterReadings
+                .Where(x => x.ReadAt >= startOfMonth && x.ReadAt <= endOfMonth)
+                .OrderBy(x => x.ReadAt)
+                .AsNoTracking()
+                .AsAsyncEnumerable()
+                .WithCancellation(cancellationToken))
+            {
+                totalReadings++;
+
+                if (lastReading is null)
+                {
+                    lastReading = reading;
+                    continue;
+                }
+
+                // Om vi skiftat timme eller dag, beräkna förbrukningen
+                if (reading.ReadAt.Hour != lastReading.ReadAt.Hour || reading.ReadAt.Date != lastReading.ReadAt.Date)
+                {
+                    var energyUsageWh =  reading.AccEnergy- lastReading.AccEnergy;
+
+                    hourlyUsage.Add(new HourlyEnergyUsage(
+                        new DateTime(lastReading.ReadAt.Year, lastReading.ReadAt.Month, lastReading.ReadAt.Day, lastReading.ReadAt.Hour, 0, 0),
+                        energyUsageWh
+                    ));
+                    lastReading = reading;
+                }
+            }
+
+            logger.LogInformation("Processed {TotalReadings} readings and calculated {HourlyCount} hourly usages for {Month:yyyy-MM}.",
+                totalReadings, hourlyUsage.Count, dateInMonth);
+
+            return hourlyUsage;
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation(ex, "Error calculating hourly energy usage");
+            return new List<HourlyEnergyUsage>();
         }
     }
 }
