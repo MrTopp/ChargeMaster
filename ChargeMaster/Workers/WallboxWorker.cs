@@ -6,11 +6,6 @@ using Microsoft.EntityFrameworkCore;
 namespace ChargeMaster.Workers;
 
 /// <summary>
-/// Represents hourly energy usage data.
-/// </summary>
-public record HourlyEnergyUsage(DateTime Hour, long EnergyUsageWh);
-
-/// <summary>
 /// Event arguments containing Wallbox meter information.
 /// </summary>
 public class MeterInfoEventArgs : EventArgs
@@ -49,6 +44,13 @@ public class WallboxWorker(
     /// Tracks the last recorded accumulated energy value to avoid storing duplicate readings.
     /// </summary>
     private double? LastStoredAccEnergy { get; set; }
+
+    /// <summary>
+    /// Cache for hourly energy usage calculations. Stores data and timestamp of last calculation.
+    /// </summary>
+    private DateTime _lastHourlyEnergyUsageCacheTime = DateTime.MinValue;
+    private List<HourlyEnergyUsage> _hourlyEnergyUsageCache = new();
+    private readonly object _cacheLocker = new object();
 
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -320,14 +322,73 @@ public class WallboxWorker(
         }
     }
 
+    public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    {
+        var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
+        return hourlyUsage.OrderByDescending(x => x.EnergyUsageWh)
+            .FirstOrDefault(new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
+    }
+
+    /// <summary>
+    /// Högsta värdet i intervallet för oktober till mars vardagar 7-19
+    /// </summary>
+    /// <param name="dateInMonth">Datum i efterfrågad månad</param>
+    public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageDaytimeAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    {
+        var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
+
+        // Filter for October to March weekdays 7-19
+        return hourlyUsage
+            .Where(x => x.Hour.Hour >= 7 && x.Hour.Hour < 19) // Hours between 7-19
+            .Where(x => x.Hour.DayOfWeek >= DayOfWeek.Monday && x.Hour.DayOfWeek <= DayOfWeek.Friday) // Weekdays only
+            .Where(x => x.Hour.Month >= 10 || x.Hour.Month <= 3) // October to March
+            .OrderByDescending(x => x.EnergyUsageWh)
+            .FirstOrDefault(new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
+    }
+
     /// <summary>
     /// Calculates hourly energy consumption for a specific month by comparing the last meter reading of each hour
     /// with the last meter reading from the previous hour. Uses streaming for efficient memory usage.
+    /// Results are cached for one hour to avoid unnecessary recalculation.
     /// </summary>
     /// <param name="dateInMonth">A date that determines which month to calculate for. Only readings from this month will be included.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A list of hourly energy usage data sorted by hour for the specified month.</returns>
     public async Task<List<HourlyEnergyUsage>> GetHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    {
+        // Kontrollera om cachen är giltig (samma timme som nu)
+        lock (_cacheLocker)
+        {
+            var now = DateTime.Now;
+            var cacheHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+            var lastCacheHour = new DateTime(_lastHourlyEnergyUsageCacheTime.Year, _lastHourlyEnergyUsageCacheTime.Month,
+                _lastHourlyEnergyUsageCacheTime.Day, _lastHourlyEnergyUsageCacheTime.Hour, 0, 0);
+
+            // Om cachen är från samma timme, returnera cachad data
+            if (cacheHour == lastCacheHour && _hourlyEnergyUsageCache.Count > 0)
+            {
+                //logger.LogInformation("Returning cached hourly energy usage data");
+                return _hourlyEnergyUsageCache;
+            }
+        }
+
+        // Beräkna ny data
+        var result = await CalculateHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
+
+        // Uppdatera cachen
+        lock (_cacheLocker)
+        {
+            _lastHourlyEnergyUsageCacheTime = DateTime.Now;
+            _hourlyEnergyUsageCache = result;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Performs the actual hourly energy consumption calculation using streaming for efficient memory usage.
+    /// </summary>
+    private async Task<List<HourlyEnergyUsage>> CalculateHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken)
     {
         try
         {
@@ -339,7 +400,7 @@ public class WallboxWorker(
                 logger.LogWarning("Database context is not available. Cannot calculate hourly energy usage.");
                 return new List<HourlyEnergyUsage>();
             }
-            
+
 
             var allt = db.WallboxMeterReadings.OrderBy(x => x.ReadAt).ToList();
 
@@ -373,7 +434,11 @@ public class WallboxWorker(
                 // Om vi skiftat timme eller dag, beräkna förbrukningen
                 if (reading.ReadAt.Hour != lastReading.ReadAt.Hour || reading.ReadAt.Date != lastReading.ReadAt.Date)
                 {
-                    var energyUsageWh =  reading.AccEnergy- lastReading.AccEnergy;
+                    var tidsdiff = reading.ReadAt - lastReading.ReadAt;
+                    var h = tidsdiff.Hours;
+                    var energyUsageWh = reading.AccEnergy - lastReading.AccEnergy;
+                    // Fördela förbrukningen jämnt över timmarna
+                    energyUsageWh = (long)(energyUsageWh * (3600.0 / tidsdiff.TotalSeconds));
 
                     hourlyUsage.Add(new HourlyEnergyUsage(
                         new DateTime(lastReading.ReadAt.Year, lastReading.ReadAt.Month, lastReading.ReadAt.Day, lastReading.ReadAt.Hour, 0, 0),

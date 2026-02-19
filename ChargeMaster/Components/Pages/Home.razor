@@ -28,6 +28,41 @@
     </div>
 }
 
+<h3>Högsta timförbrukning denna månad</h3>
+@if (HighestHourlyUsage is not null)
+{
+    <div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Avgiftstyp</th>
+                    <th>Energi (kWh)</th>
+                    <th>Timme</th>
+                    <th>Pris (SEK)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Effektavgift</strong></td>
+                    <td>@((HighestHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
+                    <td>@(HighestHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
+                    <td>@((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000).ToString("F2"))</td>
+                </tr>
+                <tr>
+                    <td><strong>Högbelastningsavgift</strong></td>
+                    <td>@((HighestDailyHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
+                    <td>@(HighestDailyHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
+                    <td>@((HighestDailyHourlyUsage.EnergyUsageWh * 50 / 1000).ToString("F2"))</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p><em>Ingen data tillgänglig</em></p>
+}
+
 <h3>Planerad laddning</h3>
 <br>
 
@@ -67,9 +102,12 @@ else
 @code {
     private DateTime CurrentDateTime { get; set; } = DateTime.Now;
     private PeriodicTimer? _periodicTimer;
+    private PeriodicTimer? _hourlyUpdateTimer;
     private CancellationTokenSource? _cts;
     private WallboxMeterInfo? CurrentMeterInfo { get; set; }
     private List<ElectricityPrice>? CurrentKvartlista { get; set; }
+    private HourlyEnergyUsage? HighestHourlyUsage { get; set; }
+    private HourlyEnergyUsage? HighestDailyHourlyUsage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,11 +123,15 @@ else
         // Hämta senaste kvarterlista direkt från ChargeWorker
         CurrentKvartlista = await ChargeWorker.GetKvartlista();
 
+        // Hämta högsta timförbrukning för denna månad vid sidladdning
+        await LoadHighestHourlyUsageAsync();
+
         // Prenumerera på events för real-time uppdateringar
         WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
 
         _ = UpdateTimeLoop();
+        _ = UpdateHourlyEnergyLoop();
     }
 
     private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
@@ -104,11 +146,36 @@ else
         InvokeAsync(StateHasChanged);
     }
 
+    private async Task LoadHighestHourlyUsageAsync()
+    {
+        HighestHourlyUsage = await WallboxWorker.GetHighestHourlyEnergyUsageAsync(DateTime.Now);
+        HighestDailyHourlyUsage = await WallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(DateTime.Now);
+    }
+
     private async Task UpdateTimeLoop()
     {
         while (_periodicTimer is not null && await _periodicTimer.WaitForNextTickAsync(_cts!.Token))
         {
             CurrentDateTime = DateTime.Now;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task UpdateHourlyEnergyLoop()
+    {
+        // Uppdatera vid nästa timgräns
+        var now = DateTime.Now;
+        var nextHour = now.AddHours(1).Date.AddHours(now.AddHours(1).Hour);
+        var timeUntilNextHour = nextHour - now;
+
+        await Task.Delay(timeUntilNextHour, _cts!.Token);
+
+        // Skapa en timer som uppdaterar varje timme efter det
+        _hourlyUpdateTimer = new PeriodicTimer(TimeSpan.FromHours(1));
+
+        while (_hourlyUpdateTimer is not null && await _hourlyUpdateTimer.WaitForNextTickAsync(_cts!.Token))
+        {
+            await LoadHighestHourlyUsageAsync();
             await InvokeAsync(StateHasChanged);
         }
     }
@@ -123,6 +190,11 @@ else
         if (_periodicTimer is not null)
         {
             _periodicTimer.Dispose();
+        }
+
+        if (_hourlyUpdateTimer is not null)
+        {
+            _hourlyUpdateTimer.Dispose();
         }
 
         _cts?.Dispose();
