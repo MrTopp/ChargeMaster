@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 // ReSharper disable NotAccessedPositionalProperty.Global
 // ReSharper disable ClassNeverInstantiated.Global
 

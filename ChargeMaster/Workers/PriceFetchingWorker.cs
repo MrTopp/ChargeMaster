@@ -5,20 +5,20 @@ using ChargeMaster.Services.ElectricityPrice;
 namespace ChargeMaster.Workers;
 
 /// <summary>
-/// En bakgrundstjänst som schemalägger och kör dagliga elprishämtningsuppgifter vid en angiven tid.
+/// En bakgrundstjÃ¤nst som schemalÃ¤gger och kÃ¶r dagliga elprishÃ¤mtningsuppgifter vid en angiven tid.
 /// </summary>
-/// <remarks>Den här arbetaren säkerställer att elpriser hämtas för aktuell dag vid start och schemalägger sedan
-/// en återkommande hämtning kl. 13:10 varje dag, vanligtvis för följande dags priser. Tjänsten är utformad för att
-/// köras kontinuerligt tills programmet stoppas. Loggning tillhandahålls för både lyckade operationer och feltillstånd.
+/// <remarks>Den hÃ¤r arbetaren sÃ¤kerstÃ¤ller att elpriser hÃ¤mtas fÃ¶r aktuell dag vid start och schemalÃ¤gger sedan
+/// en Ã¥terkommande hÃ¤mtning kl. 13:10 varje dag, vanligtvis fÃ¶r fÃ¶ljande dags priser. TjÃ¤nsten Ã¤r utformad fÃ¶r att
+/// kÃ¶ras kontinuerligt tills programmet stoppas. Loggning tillhandahÃ¥lls fÃ¶r bÃ¥de lyckade operationer och feltillstÃ¥nd.
 /// </remarks>
-/// <param name="serviceProvider">Tjänsteleverantören som används för att lösa programtjänster som krävs för prishämtningsoperationer.</param>
-/// <param name="logger">Loggern som används för att registrera informations- och felmeddelanden relaterade till arbetarens körning.</param>
+/// <param name="serviceProvider">TjÃ¤nsteleverantÃ¶ren som anvÃ¤nds fÃ¶r att lÃ¶sa programtjÃ¤nster som krÃ¤vs fÃ¶r prishÃ¤mtningsoperationer.</param>
+/// <param name="logger">Loggern som anvÃ¤nds fÃ¶r att registrera informations- och felmeddelanden relaterade till arbetarens kÃ¶rning.</param>
 public class PriceFetchingWorker(
     IServiceProvider serviceProvider,
     ILogger<PriceFetchingWorker> logger) : BackgroundService
 {
     /// <summary>
-    /// Kör bakgrundslogiken för tjänsten för att säkerställa att daglig prisdata hämtas och schemaläggs vid lämplig
+    /// KÃ¶r bakgrundslogiken fÃ¶r tjÃ¤nsten fÃ¶r att sÃ¤kerstÃ¤lla att daglig prisdata hÃ¤mtas och schemalÃ¤ggs vid lÃ¤mplig
     /// tid.
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,13 +50,13 @@ public class PriceFetchingWorker(
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "Ett fel inträffade under schemalägning av pushishämtning.");
+                logger.LogInformation(ex, "Ett fel intrÃ¤ffade under schemalÃ¤gning av pushishÃ¤mtning.");
             }
         }
     }
 
     /// <summary>
-    /// Beräknar nästa gång för att köra prishämtningen baserat på aktuell tid och framgång för den senaste hämtningen.
+    /// BerÃ¤knar nÃ¤sta gÃ¥ng fÃ¶r att kÃ¶ra prishÃ¤mtningen baserat pÃ¥ aktuell tid och framgÃ¥ng fÃ¶r den senaste hÃ¤mtningen.
     /// </summary>
     private DateTime CalculateNextRunTime(DateTime now, bool success)
     {
@@ -79,19 +79,19 @@ public class PriceFetchingWorker(
     }
 
     /// <summary>
-    /// Kontrollerar elpriser för det angivna datumet och initierar en asynkron hämtnings- och lagringsoperation.
+    /// Kontrollerar elpriser fÃ¶r det angivna datumet och initierar en asynkron hÃ¤mtnings- och lagringsoperation.
     /// </summary>
-    /// <param name="date">Datumet för vilket elpriser ska hämtas.</param>
-    /// <param name="stoppingToken">En avbytningstoken som kan användas för att avbryta operationen.</param>
-    /// <returns>En uppgift som repräsenterar den asynkrona operationen och returnerar true om den lyckas.</returns>
+    /// <param name="date">Datumet fÃ¶r vilket elpriser ska hÃ¤mtas.</param>
+    /// <param name="stoppingToken">En avbytningstoken som kan anvÃ¤ndas fÃ¶r att avbryta operationen.</param>
+    /// <returns>En uppgift som reprÃ¤senterar den asynkrona operationen och returnerar true om den lyckas.</returns>
     private async Task<bool> CheckAndFetchAsync(DateOnly date, CancellationToken stoppingToken)
     {
         try
         {
-            // Kontrollera att morgondagens priser inte hämtas före 13:00
+            // Kontrollera att morgondagens priser inte hÃ¤mtas fÃ¶re 13:00
             if (date == DateOnly.FromDateTime(DateTime.Now.AddDays(1)) && DateTime.Now.Hour < 13)
             {
-                logger.LogInformation("Hämtar inte {Date} då det är innan 13:00", date);
+                logger.LogInformation("HÃ¤mtar inte {Date} dÃ¥ det Ã¤r innan 13:00", date);
                 return true;
             }
 
@@ -99,13 +99,13 @@ public class PriceFetchingWorker(
             ElectricityPriceService priceService
                 = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
 
-            logger.LogInformation("Arbetare initierar pushishämtning för {Date}", date);
+            logger.LogInformation("Arbetare initierar pushishÃ¤mtning fÃ¶r {Date}", date);
             await priceService.FetchAndStorePricesForDateAsync(date);
             return true;
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Arbetare kunde inte hämta priser för {Date}", date);
+            logger.LogInformation(ex, "Arbetare kunde inte hÃ¤mta priser fÃ¶r {Date}", date);
             return false;
         }
     }

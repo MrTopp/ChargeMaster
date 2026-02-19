@@ -1,20 +1,20 @@
-using System.Text.Json;
+Ôªøusing System.Text.Json;
 
 using Serilog;
 
 namespace ChargeMaster.Services.VolksWagen;
 
 /// <summary>
-/// Interaktion med Volkswagen-tj‰nster
+/// Interaktion med Volkswagen-tj√§nster
 /// </summary>
-/// <remarks>Den h‰r tj‰nsten kapslar in kommunikation med Volkswagen-API:er och hanterar fellogning och
-/// undantagshantering fˆr alla operationer. Metoder kan kasta undantag om den underliggande tj‰nsten ‰r otillg‰nglig eller
-/// returnerar ett felsvar. Den h‰r klassen ‰r inte trÂds‰ker; om den anv‰nds samtidigt bˆr anropare se till att gˆra l‰mplig
+/// <remarks>Den h√§r tj√§nsten kapslar in kommunikation med Volkswagen-API:er och hanterar fellogning och
+/// undantagshantering f√∂r alla operationer. Metoder kan kasta undantag om den underliggande tj√§nsten √§r otillg√§nglig eller
+/// returnerar ett felsvar. Den h√§r klassen √§r inte tr√•ds√§ker; om den anv√§nds samtidigt b√∂r anropare se till att g√∂ra l√§mplig
 /// synkronisering.
 /// </remarks>
-/// <param name="httpClient">HTTP-klienten som anv‰nds fˆr att skicka fˆrfrÂgningar till Volkswagen-tj‰nstens slutpunkter. MÂste konfigureras med l‰mplig
-/// basadress och autentisering om det kr‰vs.</param>
-/// <param name="logger">Loggern som anv‰nds fˆr att registrera diagnostisk och operativ information fˆr tj‰nsten.</param>
+/// <param name="httpClient">HTTP-klienten som anv√§nds f√∂r att skicka f√∂rfr√•gningar till Volkswagen-tj√§nstens slutpunkter. M√•ste konfigureras med l√§mplig
+/// basadress och autentisering om det kr√§vs.</param>
+/// <param name="logger">Loggern som anv√§nds f√∂r att registrera diagnostisk och operativ information f√∂r tj√§nsten.</param>
 public class VWService(HttpClient httpClient, ILogger<VWService> logger)
 {
     private ILogger<VWService> Logger { get; } = logger;
@@ -36,7 +36,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         catch (Exception ex)
         {
             Logger.LogInformation(ex, "GetStatus: Undantag");
-            throw new CarConnectionException("GetStatus: Kunde inte h‰mta VW-status");
+            throw new CarConnectionException("GetStatus: Kunde inte h√§mta VW-status");
         }
     }
 
@@ -49,8 +49,8 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "GetVehiclesAsync: Fel vid h‰mtning av VW-fordon");
-            throw new CarConnectionException("GetVehiclesAsync: Kunde inte h‰mta VW-fordon");
+            Log.Error(ex, "GetVehiclesAsync: Fel vid h√§mtning av VW-fordon");
+            throw new CarConnectionException("GetVehiclesAsync: Kunde inte h√§mta VW-fordon");
         }
     }
 

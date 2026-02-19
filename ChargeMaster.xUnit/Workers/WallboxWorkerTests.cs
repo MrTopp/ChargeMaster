@@ -1,4 +1,4 @@
-using ChargeMaster.Workers;
+ï»¿using ChargeMaster.Workers;
 using ChargeMaster.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -111,7 +111,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         Assert.NotNull(schema);
     }
 
-    //[Fact(Skip = "Endast för manuell körning av långa serier med mätdata")]
+    //[Fact(Skip = "Endast fÃ¶r manuell kÃ¶rning av lÃ¥nga serier med mÃ¤tdata")]
     [Fact]
     public async Task ReadAndStoreAsync_DebugOnly()
     {

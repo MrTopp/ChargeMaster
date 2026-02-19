@@ -1,4 +1,4 @@
-using ChargeMaster.Data;
+Ôªøusing ChargeMaster.Data;
 using Microsoft.EntityFrameworkCore;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Services.ElectricityPrice;
@@ -12,7 +12,7 @@ public class KvartlistaEventArgs(List<ElectricityPrice> kvartlista) : EventArgs
 }
 
 /// <summary>
-/// ÷vervakar och styr laddning av bilen baserat pÂ elpriser, timfˆrbrukning och bilens status.
+/// √ñvervakar och styr laddning av bilen baserat p√• elpriser, timf√∂rbrukning och bilens status.
 /// </summary>
 public class ChargeWorker(
     IServiceProvider serviceProvider,
@@ -20,25 +20,25 @@ public class ChargeWorker(
     : BackgroundService
 {
     /// <summary>
-    /// Event som utlˆses n‰r Kvartlistan ‰r uppdaterad. Fˆr den som har
-    /// brÂttom kan man h‰mta den med GetKvartlista()
+    /// Event som utl√∂ses n√§r Kvartlistan √§r uppdaterad. F√∂r den som har
+    /// br√•ttom kan man h√§mta den med GetKvartlista()
     /// </summary>
     public event EventHandler<KvartlistaEventArgs>? KvartlistaUpdated;
 
     /// <summary>
-    /// Flagga om laddning ‰r tillÂten denna timme, s‰tts till false
-    /// om fˆrbrukningen innevarande timme ‰r ˆver tillÂten nivÂ.
+    /// Flagga om laddning √§r till√•ten denna timme, s√§tts till false
+    /// om f√∂rbrukningen innevarande timme √§r √∂ver till√•ten niv√•.
     /// </summary>
     private bool Timladdning { get; set; }
 
     /// <summary>
-    /// Laddboxens ackumulerade energim‰tarst‰llning vid timstart,
-    /// anv‰nds fˆr att r‰kna ut fˆrbrukning innevarande timme.
+    /// Laddboxens ackumulerade energim√§tarst√§llning vid timstart,
+    /// anv√§nds f√∂r att r√§kna ut f√∂rbrukning innevarande timme.
     /// </summary>
-    private long FˆrbrukningVidTimstart { get; set; }
+    private long F√∂rbrukningVidTimstart { get; set; }
 
     /// <summary>
-    /// Flagga att wallbox ‰r panikstoppad.
+    /// Flagga att wallbox √§r panikstoppad.
     /// </summary>
     private bool WallboxStopped
     {
@@ -54,7 +54,7 @@ public class ChargeWorker(
     } = false;
 
     /// <summary>
-    /// Status fˆr laddningen
+    /// Status f√∂r laddningen
     /// </summary>
     private ConnectionEnum ConnectorStatus
     {
@@ -64,7 +64,7 @@ public class ChargeWorker(
             if (value != field)
             {
                 field = value;
-                // Logga klockslag fˆr state-ˆvergÂngen
+                // Logga klockslag f√∂r state-√∂verg√•ngen
                 ConnectorStatusTime = DateTime.Now;
             }
         }
@@ -82,7 +82,7 @@ public class ChargeWorker(
                                                 "Initiering av VWService misslyckas");
 
 
-    private async Task<long> InitieraFˆrbrukningAsync(CancellationToken cancellationToken)
+    private async Task<long> InitieraF√∂rbrukningAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -133,7 +133,7 @@ public class ChargeWorker(
 
     internal async Task ChargeLoop(CancellationToken stoppingToken)
     {
-        FˆrbrukningVidTimstart = await InitieraFˆrbrukningAsync(stoppingToken);
+        F√∂rbrukningVidTimstart = await InitieraF√∂rbrukningAsync(stoppingToken);
         DateTime previous = DateTime.Now;
         Timladdning = true;
         BilenLaddar = await LaddStatus();
@@ -158,26 +158,26 @@ public class ChargeWorker(
                 goto NextIteration;
             }
 
-            // ----- Varje timme, nollst‰ll timfˆrbrukning
-            long fˆrbrukningDennaTimme = wstat.AccEnergy - FˆrbrukningVidTimstart;
+            // ----- Varje timme, nollst√§ll timf√∂rbrukning
+            long f√∂rbrukningDennaTimme = wstat.AccEnergy - F√∂rbrukningVidTimstart;
             if (nu.Hour != previous.Hour)
             {
                 logger.LogInformation("** Hourly consumption: {consumption} Wh **",
-                    fˆrbrukningDennaTimme);
+                    f√∂rbrukningDennaTimme);
                 Timladdning = true;
-                FˆrbrukningVidTimstart = wstat.AccEnergy;
-                fˆrbrukningDennaTimme = 0;
+                F√∂rbrukningVidTimstart = wstat.AccEnergy;
+                f√∂rbrukningDennaTimme = 0;
             }
 
-            // ----- Bilen inte ansluten, hoppa ˆver utv‰rdering av laddning
+            // ----- Bilen inte ansluten, hoppa √∂ver utv√§rdering av laddning
             if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
             {
                 goto NextIteration; // Hoppa till avslutande paus.
             }
 
-            // ----- Bilen ‰r hemma, dags att utv‰rdera laddning -----
+            // ----- Bilen √§r hemma, dags att utv√§rdera laddning -----
 
-            // ----- Nˆdstopp om bilen laddar n‰r det inte ‰r tillÂtet
+            // ----- N√∂dstopp om bilen laddar n√§r det inte √§r till√•tet
             if (ConnectorStatus == ConnectionEnum.Charging && !BilenLaddar)
             {
                 int minutAvrundad = nu.Minute / 15 * 15;
@@ -195,18 +195,18 @@ public class ChargeWorker(
                 }
             }
 
-            // ----- State-ˆvergÂng
+            // ----- State-√∂verg√•ng
             if (currentConnectorStatus != ConnectorStatus)
             {
                 logger.LogInformation(
                     $"Charge transition {ConnectorStatus}->{currentConnectorStatus}");
 
-                // ----- Bilen bˆrjar ladda.
+                // ----- Bilen b√∂rjar ladda.
                 if (currentConnectorStatus == ConnectionEnum.Charging)
                 {
-                    // Bilen har bˆrjat ladda, skall den stoppas?
-                    // Det kan h‰nda n‰r bilen kopplas in, dÂ skall laddningen 
-                    // stoppas om det inte ‰r r‰tt tid fˆr laddning
+                    // Bilen har b√∂rjat ladda, skall den stoppas?
+                    // Det kan h√§nda n√§r bilen kopplas in, d√• skall laddningen 
+                    // stoppas om det inte √§r r√§tt tid f√∂r laddning
                     logger.LogInformation("Car started charging");
                     int minutAvrundad = nu.Minute / 15 * 15;
                     var kvartlista = await GetKvartlista();
@@ -228,14 +228,14 @@ public class ChargeWorker(
                 ConnectorStatus = currentConnectorStatus;
             }
 
-            // ----- Kontrollera fˆrv‰ntad timfˆrbrukning
+            // ----- Kontrollera f√∂rv√§ntad timf√∂rbrukning
             int grans = nu.Minute * 2000 / 60 + 1500;
-            if (fˆrbrukningDennaTimme > grans && Timladdning)
+            if (f√∂rbrukningDennaTimme > grans && Timladdning)
             {
-                //  Fˆr hˆg fˆrbrukning -> stoppa laddning
+                //  F√∂r h√∂g f√∂rbrukning -> stoppa laddning
                 logger.LogInformation(
                     "Charging disabled due to high consumption: {consumption} Wh.",
-                    fˆrbrukningDennaTimme);
+                    f√∂rbrukningDennaTimme);
                 Timladdning = false;
                 await StoppaLaddningAsync();
             }
@@ -243,10 +243,10 @@ public class ChargeWorker(
             // ***** Varje kvart
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
-                // Starta/stoppa laddning beroende pÂ om det ‰r tillÂtet eller inte
-                if (fˆrbrukningDennaTimme > 0)
+                // Starta/stoppa laddning beroende p√• om det √§r till√•tet eller inte
+                if (f√∂rbrukningDennaTimme > 0)
                     logger.LogInformation("-- Quarter, consumption: {consumption} Wh --",
-                        fˆrbrukningDennaTimme);
+                        f√∂rbrukningDennaTimme);
                 int numin = nu.Minute;
                 int minutAvrundad = numin / 15 * 15;
                 var kvartlista = await GetKvartlista();
@@ -333,7 +333,7 @@ public class ChargeWorker(
             catch (CarConnectionException ex)
             {
                 logger.LogInformation(ex, "Error stopping charging");
-                await StopWallbox(); // Om det inte gÂr att st‰nga av genom att frÂga bilen, st‰ng av wallboxen sÂ att bilen inte kan ladda.
+                await StopWallbox(); // Om det inte g√•r att st√§nga av genom att fr√•ga bilen, st√§ng av wallboxen s√• att bilen inte kan ladda.
             }
 
             BilenLaddar = false;
@@ -356,12 +356,12 @@ public class ChargeWorker(
     }
 
     /// <summary>
-    /// St‰ng av laddning genom att s‰tta wallboxen i NotAvailable-l‰ge, anv‰nds n‰r kopplingen till bilen krÂnglar. DÂ kan bilen inte ladda.
+    /// St√§ng av laddning genom att s√§tta wallboxen i NotAvailable-l√§ge, anv√§nds n√§r kopplingen till bilen kr√•nglar. D√• kan bilen inte ladda.
     /// </summary>
     /// <returns></returns>
     internal async Task StopWallbox()
     {
-        // Stoppa laddning genom att s‰tta wallboxen i NotAvailable-l‰ge
+        // Stoppa laddning genom att s√§tta wallboxen i NotAvailable-l√§ge
         try
         {
             logger.LogInformation("StopWallbox:");
@@ -377,7 +377,7 @@ public class ChargeWorker(
 
     internal async Task<bool> StartWallbox()
     {
-        // TillÂt laddning genom att s‰tta wallboxen i Normal-l‰ge
+        // Till√•t laddning genom att s√§tta wallboxen i Normal-l√§ge
         try
         {
             logger.LogInformation("StartWallbox: ");
@@ -393,8 +393,8 @@ public class ChargeWorker(
     }
 
     /// <summary>
-    /// Status fˆr laddning, anv‰nds fˆr att avgˆra om bilen ‰r inkopplad, laddar,
-    /// eller inte ‰r ansluten. Om det inte gÂr att fÂ status frÂn wallboxen, returneras Unknown.
+    /// Status f√∂r laddning, anv√§nds f√∂r att avg√∂ra om bilen √§r inkopplad, laddar,
+    /// eller inte √§r ansluten. Om det inte g√•r att f√• status fr√•n wallboxen, returneras Unknown.
     /// </summary>
     /// <returns></returns>
     internal async Task<ConnectionEnum> GetConnectorStatusAsync()
@@ -418,7 +418,7 @@ public class ChargeWorker(
                 return ConnectionEnum.SearchingForCommunication;
 
             default:
-                logger.LogInformation("Unknown value fˆr WallboxStatus.Connector: {value}",
+                logger.LogInformation("Unknown value f√∂r WallboxStatus.Connector: {value}",
                     response.Connector);
                 return ConnectionEnum.Unknown;
         }
@@ -426,12 +426,12 @@ public class ChargeWorker(
 
 
     /// <summary>
-    /// R‰knar ut behov av laddning i procent
+    /// R√§knar ut behov av laddning i procent
     /// </summary>
     /// <returns>laddbehov i procent</returns>
     internal async Task<double> LaddBehov()
     {
-        // Ber‰kna laddbehov
+        // Ber√§kna laddbehov
         VWStatusResponse? response;
         try
         {
@@ -456,16 +456,16 @@ public class ChargeWorker(
     }
 
     /// <summary>
-    /// ! Anv‰nd GetKvartlista() i st‰llet!
+    /// ! Anv√§nd GetKvartlista() i st√§llet!
     /// </summary>
     private List<ElectricityPrice>? _kvartlista;
 
     /// <summary>
-    /// Skapa lista med kvartar d‰r laddning skall vara aktiv
+    /// Skapa lista med kvartar d√§r laddning skall vara aktiv
     /// </summary>
     public async Task<List<ElectricityPrice>> GetKvartlista()
     {
-        // _kvartlista skapas en gÂng per varv i loopen, s‰tts till null i slutet av varje varv.
+        // _kvartlista skapas en g√•ng per varv i loopen, s√§tts till null i slutet av varje varv.
         if (_kvartlista != null)
             return _kvartlista;
 
@@ -485,7 +485,7 @@ public class ChargeWorker(
             .OrderBy(x => x.TimeStart)
             .ToListAsync();
 
-        // S‰tt ChargingAllowed = false pÂ de tvÂ dyraste kvartarna varje timme
+        // S√§tt ChargingAllowed = false p√• de tv√• dyraste kvartarna varje timme
         var dyrasteKvartPerTimme =
             priser.GroupBy(x => new
                 { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
@@ -498,7 +498,7 @@ public class ChargeWorker(
             }
         }
 
-        // Ber‰kna laddbehov
+        // Ber√§kna laddbehov
         double behovProcent = await LaddBehov();
         if (behovProcent < 1)
         {
@@ -506,7 +506,7 @@ public class ChargeWorker(
             return _kvartlista;
         }
 
-        // Antar att det behˆvs 2.4 kvartar per procent laddbehov.
+        // Antar att det beh√∂vs 2.4 kvartar per procent laddbehov.
         var antalKvartar = (int)(behovProcent * 2.4);
 
         _kvartlista = priser.Where(x => x.ChargingAllowed

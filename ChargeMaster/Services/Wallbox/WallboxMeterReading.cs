@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+ï»¿using System.ComponentModel.DataAnnotations;
 
 namespace ChargeMaster.Services.Wallbox;
 
@@ -33,7 +33,7 @@ public class WallboxMeterReading
     public string? MeterSerial { get; set; }
 
     /// <summary>
-    /// Aktuell strömförbrukning i kW rapporterat av wallbox.
+    /// Aktuell strÃ¶mfÃ¶rbrukning i kW rapporterat av wallbox.
     /// </summary>
     public long ApparentPower { get; set; }
 

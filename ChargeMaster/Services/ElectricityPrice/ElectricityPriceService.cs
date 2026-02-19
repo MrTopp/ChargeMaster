@@ -1,21 +1,21 @@
-using ChargeMaster.Data;
+Ôªøusing ChargeMaster.Data;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Services.ElectricityPrice;
 
 /// <summary>
-/// TillhandahÂller metoder fˆr att h‰mta, lagra och hantera elprisdata fˆr specifika datum med hj‰lp av ett externt
+/// Tillhandah√•ller metoder f√∂r att h√§mta, lagra och hantera elprisdata f√∂r specifika datum med hj√§lp av ett externt
 /// API och en databaskontext.
 /// </summary>
-/// <remarks>Den h‰r tj‰nsten ‰r avsedd att anv‰ndas av bakgrundsjobb eller programkomponenter som kr‰ver
-/// aktuell elprisinformation. Den hanterar h‰mtning av data frÂn det externa API:et, persistering till
-/// databasen och hantering av befintliga poster. Alla operationer ‰r asynkrona och bˆr awaitas fˆr att s‰kerst‰lla korrekt
-/// kˆrning. Tj‰nsten ‰r inte trÂds‰ker; samtidiga operationer pÂ samma datum kan resultera i t‰vlingstillstÂnd.
+/// <remarks>Den h√§r tj√§nsten √§r avsedd att anv√§ndas av bakgrundsjobb eller programkomponenter som kr√§ver
+/// aktuell elprisinformation. Den hanterar h√§mtning av data fr√•n det externa API:et, persistering till
+/// databasen och hantering av befintliga poster. Alla operationer √§r asynkrona och b√∂r awaitas f√∂r att s√§kerst√§lla korrekt
+/// k√∂rning. Tj√§nsten √§r inte tr√•ds√§ker; samtidiga operationer p√• samma datum kan resultera i t√§vlingstillst√•nd.
 /// </remarks>
-/// <param name="httpClient">HTTP-klienten som anv‰nds fˆr att h‰mta elprisdata frÂn det externa API:et.</param>
-/// <param name="context">Databaskontext som anv‰nds fˆr att komma Ât och lagra elprisposten.</param>
-/// <param name="logger">Loggern som anv‰nds fˆr att registrera informations- och felmeddelanden relaterade till elpriser.</param>
+/// <param name="httpClient">HTTP-klienten som anv√§nds f√∂r att h√§mta elprisdata fr√•n det externa API:et.</param>
+/// <param name="context">Databaskontext som anv√§nds f√∂r att komma √•t och lagra elprisposten.</param>
+/// <param name="logger">Loggern som anv√§nds f√∂r att registrera informations- och felmeddelanden relaterade till elpriser.</param>
 public class ElectricityPriceService(
     HttpClient httpClient,
     ApplicationDbContext context,
@@ -27,7 +27,7 @@ public class ElectricityPriceService(
     {
         if (await HasPricesForDateAsync(date))
         {
-            logger.LogInformation("Priser fˆr {Date} finns redan.", date);
+            logger.LogInformation("Priser f√∂r {Date} finns redan.", date);
             return;
         }
 
@@ -40,23 +40,23 @@ public class ElectricityPriceService(
 
         try
         {
-            logger.LogInformation("H‰mtar priser frÂn {Url}", url);
+            logger.LogInformation("H√§mtar priser fr√•n {Url}", url);
             List<ElectricityPrice>? prices
                 = await httpClient.GetFromJsonAsync<List<ElectricityPrice>>(url);
 
             if (prices != null && prices.Any())
             {
-                // Normalisera datum om nˆdv‰ndigt, ‰ven om API vanligtvis skickar ISO8601.
+                // Normalisera datum om n√∂dv√§ndigt, √§ven om API vanligtvis skickar ISO8601.
                 context.ElectricityPrices.AddRange(prices);
                 await context.SaveChangesAsync();
-                logger.LogInformation("Lagrade {Count} priser fˆr {Date} har lagrats.",
+                logger.LogInformation("Lagrade {Count} priser f√∂r {Date} har lagrats.",
                     prices.Count, date);
             }
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Kunde inte h‰mta eller lagra priser fˆr {Date}.", date);
-            throw; // Omkastning eller hantering? Bakgrundstj‰nsten bˆr hantera det.
+            logger.LogInformation(ex, "Kunde inte h√§mta eller lagra priser f√∂r {Date}.", date);
+            throw; // Omkastning eller hantering? Bakgrundstj√§nsten b√∂r hantera det.
         }
     }
 

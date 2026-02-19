@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using ChargeMaster.Services.Wallbox;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local

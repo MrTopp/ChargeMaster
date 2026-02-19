@@ -1,0 +1,13 @@
+root = true
+
+# Alla C#-filer
+[*.cs]
+charset = utf-8-bom
+
+# Razor-filer
+[*.razor]
+charset = utf-8-bom
+
+# Alla JSON-filer
+[*.json]
+charset = utf-8

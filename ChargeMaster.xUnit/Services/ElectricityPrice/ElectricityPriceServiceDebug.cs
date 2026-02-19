@@ -1,4 +1,4 @@
-using ChargeMaster.Data;
+﻿using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
 
 using Microsoft.EntityFrameworkCore;
