@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @rendermode InteractiveServer
 @implements IAsyncDisposable
 @inject WallboxWorker WallboxWorker
@@ -68,6 +68,13 @@
         _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         _cts = new CancellationTokenSource();
         
+        // Hämta senaste meter-information direkt från WallboxWorker
+        if (WallboxWorker.MeterInfo is not null)
+        {
+            CurrentMeterInfo = WallboxWorker.MeterInfo;
+        }
+        
+        // Prenumerera på events för real-time uppdateringar
         WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
         
@@ -110,3 +117,4 @@
         _cts?.Dispose();
     }
 }
+
