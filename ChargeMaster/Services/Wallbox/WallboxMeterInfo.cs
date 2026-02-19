@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ChargeMaster.Models;
+namespace ChargeMaster.Services.Wallbox;
 
 public class WallboxMeterInfo
 {

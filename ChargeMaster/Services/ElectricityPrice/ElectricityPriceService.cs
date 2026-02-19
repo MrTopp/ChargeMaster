@@ -1,7 +1,8 @@
 using ChargeMaster.Data;
+
 using Microsoft.EntityFrameworkCore;
 
-namespace ChargeMaster.Services;
+namespace ChargeMaster.Services.ElectricityPrice;
 
 /// <summary>
 /// Provides methods for retrieving, storing, and managing electricity price data for specific dates using an external

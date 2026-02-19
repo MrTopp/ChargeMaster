@@ -1,5 +1,6 @@
 using ChargeMaster.Data;
-using ChargeMaster.Services;
+using ChargeMaster.Services.VolksWagen;
+using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Workers;
 
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +50,7 @@ public class ChargeWorkerTests
         var dateInMonth = DateTime.Now;
         
         // Act
-        var hourlyUsage = await wallboxWorker.GetHourlyEnergyUsageAsync(dateInMonth);
+        var hourlyUsage = await wallboxWorker.GetHourlyEnergyUsageAsync(dateInMonth, TestContext.Current.CancellationToken);
         
         // Assert
         var idag = hourlyUsage.Where(x => x.Hour >= DateTime.Today).ToList();

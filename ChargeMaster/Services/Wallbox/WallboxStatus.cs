@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 // ReSharper disable NotAccessedPositionalProperty.Global
 // ReSharper disable ClassNeverInstantiated.Global
 
-namespace ChargeMaster.Models;
+namespace ChargeMaster.Services.Wallbox;
 
 public record WallboxStatus(
     // 1070144

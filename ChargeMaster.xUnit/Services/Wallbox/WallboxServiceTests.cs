@@ -1,10 +1,9 @@
-using ChargeMaster.Services;
-using ChargeMaster.Models;
 using Microsoft.Extensions.Logging;
+using ChargeMaster.Services.Wallbox;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
-namespace ChargeMaster.xUnit.Services;
+namespace ChargeMaster.xUnit.Services.Wallbox;
 
 public class WallboxServiceTests : IDisposable
 {

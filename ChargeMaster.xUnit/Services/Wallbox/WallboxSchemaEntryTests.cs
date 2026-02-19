@@ -1,6 +1,6 @@
-using ChargeMaster.Models;
+using ChargeMaster.Services.Wallbox;
 
-namespace ChargeMaster.xUnit.Models;
+namespace ChargeMaster.xUnit.Services.Wallbox;
 
 public sealed class WallboxSchemaEntryTests
 {

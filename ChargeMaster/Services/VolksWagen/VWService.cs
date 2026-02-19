@@ -1,15 +1,8 @@
 using System.Text.Json;
-using ChargeMaster.Models;
+
 using Serilog;
 
-namespace ChargeMaster.Services;
-
-/// <summary>
-/// Represents errors that occur when a connection to a car cannot be established or is lost.
-/// </summary>
-/// <param name="message">The message that describes the error.</param>
-public class CarConnectionException(string message) : Exception(message);
-
+namespace ChargeMaster.Services.VolksWagen;
 
 /// <summary>
 /// Interacting with Volkswagen vehicle services

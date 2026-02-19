@@ -1,10 +1,12 @@
 using ChargeMaster.Data;
-using ChargeMaster.Services;
+using ChargeMaster.Services.ElectricityPrice;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+
 using Moq;
 
-namespace ChargeMaster.xUnit.DebugTests;
+namespace ChargeMaster.xUnit.Services.ElectricityPrice;
 
 public class ElectricityPriceServiceDebug : IDisposable
 {

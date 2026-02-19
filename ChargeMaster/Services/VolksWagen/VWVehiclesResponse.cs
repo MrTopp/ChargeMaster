@@ -1,4 +1,4 @@
-namespace ChargeMaster.Models;
+namespace ChargeMaster.Services.VolksWagen;
 
 public sealed class VWVehiclesResponse
 {

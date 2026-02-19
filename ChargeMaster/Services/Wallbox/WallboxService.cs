@@ -1,8 +1,8 @@
 using System.Text.Json;
-using ChargeMaster.Models;
+
 using Serilog;
 
-namespace ChargeMaster.Services;
+namespace ChargeMaster.Services.Wallbox;
 
 /// <summary>
 /// Access to Garo wallbox through http interface

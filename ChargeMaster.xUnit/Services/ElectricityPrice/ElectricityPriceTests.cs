@@ -1,6 +1,6 @@
-using ChargeMaster.Data;
+using ChargeMaster.Services.ElectricityPrice;
 
-namespace ChargeMaster.xUnit.Data;
+namespace ChargeMaster.xUnit.Services.ElectricityPrice;
 
 public class ElectricityPriceTests
 {
@@ -27,7 +27,7 @@ public class ElectricityPriceTests
     {
         // Arrange
         // Year and Day do not impact the logic, but must be valid
-        var price = new ElectricityPrice
+        var price = new ChargeMaster.Services.ElectricityPrice.ElectricityPrice
         {
             TimeStart = new DateTime(2023, month, 15, hour, 0, 0)
         };
