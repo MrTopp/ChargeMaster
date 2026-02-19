@@ -5,15 +5,16 @@ using Serilog;
 namespace ChargeMaster.Services.VolksWagen;
 
 /// <summary>
-/// Interacting with Volkswagen vehicle services
+/// Interaktion med Volkswagen-tjänster
 /// </summary>
-/// <remarks>This service encapsulates communication with Volkswagen vehicle APIs and handles error logging and
-/// exception management for all operations. Methods may throw exceptions if the underlying service is unavailable or
-/// returns an error response. This class is not thread-safe; if used concurrently, callers should ensure appropriate
-/// synchronization.</remarks>
-/// <param name="httpClient">The HTTP client used to send requests to the Volkswagen service endpoints. Must be configured with the appropriate
-/// base address and authentication if required.</param>
-/// <param name="logger">The logger used to record diagnostic and operational information for the service.</param>
+/// <remarks>Den här tjänsten kapslar in kommunikation med Volkswagen-API:er och hanterar fellogning och
+/// undantagshantering för alla operationer. Metoder kan kasta undantag om den underliggande tjänsten är otillgänglig eller
+/// returnerar ett felsvar. Den här klassen är inte trådsäker; om den används samtidigt bör anropare se till att göra lämplig
+/// synkronisering.
+/// </remarks>
+/// <param name="httpClient">HTTP-klienten som används för att skicka förfrågningar till Volkswagen-tjänstens slutpunkter. Måste konfigureras med lämplig
+/// basadress och autentisering om det krävs.</param>
+/// <param name="logger">Loggern som används för att registrera diagnostisk och operativ information för tjänsten.</param>
 public class VWService(HttpClient httpClient, ILogger<VWService> logger)
 {
     private ILogger<VWService> Logger { get; } = logger;
@@ -34,8 +35,8 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            Logger.LogInformation(ex, "GetStatus: Exception");
-            throw new CarConnectionException("GetStatus: Failed to fetch VW status");
+            Logger.LogInformation(ex, "GetStatus: Undantag");
+            throw new CarConnectionException("GetStatus: Kunde inte hämta VW-status");
         }
     }
 
@@ -48,8 +49,8 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "GetVehiclesAsync: Error fetching VW vehicles");
-            throw new CarConnectionException("GetVehiclesAsync: Failed to fetch VW vehicles");
+            Log.Error(ex, "GetVehiclesAsync: Fel vid hämtning av VW-fordon");
+            throw new CarConnectionException("GetVehiclesAsync: Kunde inte hämta VW-fordon");
         }
     }
 
@@ -71,8 +72,8 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "PostAsync: Error posting VW command to {url}", relativeUrl);
-            throw new CarConnectionException($"PostAsync: Failed to post command to {relativeUrl}");
+            Log.Error(ex, "PostAsync: Fel vid skickning av VW-kommando till {url}", relativeUrl);
+            throw new CarConnectionException($"PostAsync: Kunde inte skicka kommando till {relativeUrl}");
         }
     }
 }

@@ -5,17 +5,17 @@ using Microsoft.EntityFrameworkCore;
 namespace ChargeMaster.Services.ElectricityPrice;
 
 /// <summary>
-/// Provides methods for retrieving, storing, and managing electricity price data for specific dates using an external
-/// API and a database context.
+/// Tillhandahåller metoder för att hämta, lagra och hantera elprisdata för specifika datum med hjälp av ett externt
+/// API och en databaskontext.
 /// </summary>
-/// <remarks>This service is intended to be used by background jobs or application components that require
-/// up-to-date electricity price information. It handles fetching data from the external API, persisting it to the
-/// database, and managing existing records. All operations are asynchronous and should be awaited to ensure proper
-/// execution. The service is not thread-safe; concurrent operations on the same date may result in race
-/// conditions.</remarks>
-/// <param name="httpClient">The HTTP client used to fetch electricity price data from the external API.</param>
-/// <param name="context">The database context used to access and store electricity price records.</param>
-/// <param name="logger">The logger used to record informational and error messages related to electricity price operations.</param>
+/// <remarks>Den här tjänsten är avsedd att användas av bakgrundsjobb eller programkomponenter som kräver
+/// aktuell elprisinformation. Den hanterar hämtning av data från det externa API:et, persistering till
+/// databasen och hantering av befintliga poster. Alla operationer är asynkrona och bör awaitas för att säkerställa korrekt
+/// körning. Tjänsten är inte trådsäker; samtidiga operationer på samma datum kan resultera i tävlingstillstånd.
+/// </remarks>
+/// <param name="httpClient">HTTP-klienten som används för att hämta elprisdata från det externa API:et.</param>
+/// <param name="context">Databaskontext som används för att komma åt och lagra elprisposten.</param>
+/// <param name="logger">Loggern som används för att registrera informations- och felmeddelanden relaterade till elpriser.</param>
 public class ElectricityPriceService(
     HttpClient httpClient,
     ApplicationDbContext context,
@@ -27,7 +27,7 @@ public class ElectricityPriceService(
     {
         if (await HasPricesForDateAsync(date))
         {
-            logger.LogInformation("Prices for {Date} already exist.", date);
+            logger.LogInformation("Priser för {Date} finns redan.", date);
             return;
         }
 
@@ -40,23 +40,23 @@ public class ElectricityPriceService(
 
         try
         {
-            logger.LogInformation("Fetching prices from {Url}", url);
+            logger.LogInformation("Hämtar priser från {Url}", url);
             List<ElectricityPrice>? prices
                 = await httpClient.GetFromJsonAsync<List<ElectricityPrice>>(url);
 
             if (prices != null && prices.Any())
             {
-                // Normalize dates if necessary, though API sends ISO8601 usually.
+                // Normalisera datum om nödvändigt, även om API vanligtvis skickar ISO8601.
                 context.ElectricityPrices.AddRange(prices);
                 await context.SaveChangesAsync();
-                logger.LogInformation("Successfully stored {Count} prices for {Date}.",
+                logger.LogInformation("Lagrade {Count} priser för {Date} har lagrats.",
                     prices.Count, date);
             }
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Failed to fetch or store prices for {Date}.", date);
-            throw; // Re-throw or handle? Background service should handle it.
+            logger.LogInformation(ex, "Kunde inte hämta eller lagra priser för {Date}.", date);
+            throw; // Omkastning eller hantering? Bakgrundstjänsten bör hantera det.
         }
     }
 
