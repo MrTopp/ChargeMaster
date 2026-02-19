@@ -7,36 +7,37 @@
 @using ChargeMaster.Models
 @using ChargeMaster.Workers
 
-<PageTitle>Home</PageTitle>
+<PageTitle>ChargeMaster</PageTitle>
 
 <h1>ChargeMaster</h1>
 
 <div>
     <p><strong>Aktuell tid:</strong> @CurrentDateTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
 </div>
+<h3>Wallbox Meter Information</h3>
 
-    @if (CurrentMeterInfo is not null)
-    {
-        <div>
-            <h3>Wallbox Meter Information</h3>
-            <p><strong>Accumulated Energy:</strong> @((CurrentMeterInfo.AccEnergy / 1000m).ToString("F1")) kWh</p>
-            <p><strong>Effekt fas 1:</strong> @CurrentMeterInfo.Phase1CurrentEnergy W</p>
-            <p><strong>Effekt fas 2:</strong> @CurrentMeterInfo.Phase2CurrentEnergy W</p>
-            <p><strong>Effekt fas 3:</strong> @CurrentMeterInfo.Phase3CurrentEnergy W</p>
-            <p><strong>Effekt total:</strong> @CurrentMeterInfo.CurrentEnergy W</p>
-        </div>
-    }
+@if (CurrentMeterInfo is not null)
+{
+    <div>
+        <p><strong>Accumulated Energy:</strong> @((CurrentMeterInfo.AccEnergy / 1000m).ToString("F1")) kWh</p>
+        <p><strong>Effekt fas 1:</strong> @CurrentMeterInfo.Phase1CurrentEnergy W</p>
+        <p><strong>Effekt fas 2:</strong> @CurrentMeterInfo.Phase2CurrentEnergy W</p>
+        <p><strong>Effekt fas 3:</strong> @CurrentMeterInfo.Phase3CurrentEnergy W</p>
+        <p><strong>Effekt total:</strong> @CurrentMeterInfo.CurrentEnergy W</p>
+    </div>
+}
+
+<h3>Planerad laddning</h3>
+<br>
 
 @if (CurrentKvartlista is not null && CurrentKvartlista.Count > 0)
 {
     <div>
-        <h3>Laddkvartal (Charging Quarters)</h3>
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Tid</th>
                     <th>Pris (SEK/kWh)</th>
-                    <th>Pris (EUR/kWh)</th>
                 </tr>
             </thead>
             <tbody>
@@ -44,11 +45,17 @@
                 {
                     <tr>
                         <td>@kvart.TimeStart.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>@kvart.SekPerKwh.ToString("F2")</td>
+                        <td align="right">@kvart.SekPerKwh.ToString("F2")</td>
                     </tr>
                 }
             </tbody>
         </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        Batteriet är fulladdat eller ingen laddning krävs för närvarande.
     </div>
 }
 
@@ -67,17 +74,20 @@
     {
         _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         _cts = new CancellationTokenSource();
-        
+
         // Hämta senaste meter-information direkt från WallboxWorker
         if (WallboxWorker.MeterInfo is not null)
         {
             CurrentMeterInfo = WallboxWorker.MeterInfo;
         }
-        
+
+        // Hämta senaste kvarterlista direkt från ChargeWorker
+        CurrentKvartlista = await ChargeWorker.GetKvartlista();
+
         // Prenumerera på events för real-time uppdateringar
         WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
-        
+
         _ = UpdateTimeLoop();
     }
 
@@ -106,14 +116,14 @@
     {
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
-        
+
         _cts?.Cancel();
-        
+
         if (_periodicTimer is not null)
         {
             _periodicTimer.Dispose();
         }
-        
+
         _cts?.Dispose();
     }
 }
