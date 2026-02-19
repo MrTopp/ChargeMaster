@@ -1,7 +1,6 @@
 using System.Text.Json;
 using ChargeMaster.Models;
 using Serilog;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace ChargeMaster.Services;
 

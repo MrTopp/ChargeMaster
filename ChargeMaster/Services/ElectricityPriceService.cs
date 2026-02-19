@@ -3,6 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Services;
 
+/// <summary>
+/// Provides methods for retrieving, storing, and managing electricity price data for specific dates using an external
+/// API and a database context.
+/// </summary>
+/// <remarks>This service is intended to be used by background jobs or application components that require
+/// up-to-date electricity price information. It handles fetching data from the external API, persisting it to the
+/// database, and managing existing records. All operations are asynchronous and should be awaited to ensure proper
+/// execution. The service is not thread-safe; concurrent operations on the same date may result in race
+/// conditions.</remarks>
+/// <param name="httpClient">The HTTP client used to fetch electricity price data from the external API.</param>
+/// <param name="context">The database context used to access and store electricity price records.</param>
+/// <param name="logger">The logger used to record informational and error messages related to electricity price operations.</param>
 public class ElectricityPriceService(
     HttpClient httpClient,
     ApplicationDbContext context,

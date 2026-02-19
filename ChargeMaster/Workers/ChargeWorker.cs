@@ -10,13 +10,17 @@ public class KvartlistaEventArgs(List<ElectricityPrice> kvartlista) : EventArgs
     public List<ElectricityPrice> Kvartlista { get; } = kvartlista;
 }
 
+/// <summary>
+/// Övervakar och styr laddning av bilen baserat på elpriser, timförbrukning och bilens status.
+/// </summary>
 public class ChargeWorker(
     IServiceProvider serviceProvider,
     ILogger<ChargeWorker> logger)
     : BackgroundService
 {
     /// <summary>
-    /// Event som utlöses när GetKvartlista() har uppdaterat kvarterlistan.
+    /// Event som utlöses när Kvartlistan är uppdaterad. För den som har
+    /// bråttom kan man hämta den med GetKvartlista()
     /// </summary>
     public event EventHandler<KvartlistaEventArgs>? KvartlistaUpdated;
 
@@ -458,7 +462,7 @@ public class ChargeWorker(
     /// <summary>
     /// Skapa lista med kvartar där laddning skall vara aktiv
     /// </summary>
-    internal async Task<List<ElectricityPrice>> GetKvartlista()
+    public async Task<List<ElectricityPrice>> GetKvartlista()
     {
         // _kvartlista skapas en gång per varv i loopen, sätts till null i slutet av varje varv.
         if (_kvartlista != null)

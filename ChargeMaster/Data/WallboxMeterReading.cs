@@ -22,17 +22,19 @@ public class WallboxMeterReading
     public string RawJson { get; set; } = string.Empty;
 
     /// <summary>
-    /// Convenience fields for queries
+    /// Total accumulated energy in watt-hours (Wh) as reported by the meter.
     /// </summary>
     public long AccEnergy { get; set; }
 
     /// <summary>
-    /// Gets or sets the serial number of the meter.
+    /// Serial number of the meter.
     /// </summary>
     [MaxLength(100)]
     public string? MeterSerial { get; set; }
 
-
+    /// <summary>
+    /// Aktuell strömförbrukning i kW rapporterat av wallbox.
+    /// </summary>
     public long ApparentPower { get; set; }
 
 }
