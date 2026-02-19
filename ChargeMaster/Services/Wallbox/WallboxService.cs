@@ -4,11 +4,11 @@ using Serilog;
 
 namespace ChargeMaster.Services.Wallbox;
 
-/// <summary>
-/// Access to Garo wallbox through http interface
-/// </summary>
-/// <param name="httpClient"></param>
-public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logger)
+    /// <summary>
+    /// Åtkomst till Garo wallbox via HTTP-gränssnitt
+    /// </summary>
+    /// <param name="httpClient"></param>
+    public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logger)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -29,13 +29,13 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Error fetching wallbox status");
+            Log.Error(ex, "Fel vid hämtning av wallbox-status");
             return null;
         }
     }
 
     /// <summary>
-    /// Read wallbox time
+    /// Läs wallbox-tid
     /// </summary>
     /// <returns></returns>
     public async Task<DateTime?> GetTimeAsync()
@@ -50,7 +50,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
     }
 
     /// <summary>
-    /// Set wallbox time
+    /// Ställ in wallbox-tid
     /// </summary>
     /// <param name="dateTime"></param>
     /// <returns></returns>
@@ -90,8 +90,8 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
                 _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
             };
 
-            // The wallbox usually expects the payload at /servlet/rest/chargebox/mode
-            logger.LogInformation("Setting wallbox mode to {Mode}", modeString);
+            // Wallboxen förväntar vanligtvis nyttolasten på /servlet/rest/chargebox/mode
+            logger.LogInformation("Ställer in wallbox-läge till {Mode}", modeString);
             var response
                 = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}", null);
             return response.IsSuccessStatusCode;
@@ -112,7 +112,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Error fetching wallbox meter info");
+            Log.Error(ex, "Fel vid hämtning av wallbox-mäterinformation");
             return null;
         }
     }
@@ -127,7 +127,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Error fetching wallbox schema");
+            Log.Error(ex, "Fel vid hämtning av wallbox-schema");
             return null;
         }
     }
@@ -142,7 +142,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Error fetching wallbox config");
+            Log.Error(ex, "Fel vid hämtning av wallbox-konfiguration");
             return null;
         }
     }
@@ -157,7 +157,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Error fetching wallbox slaves");
+            Log.Error(ex, "Fel vid hämtning av wallbox-slavar");
             return null;
         }
     }
@@ -172,7 +172,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Error setting wallbox schema");
+            Log.Error(ex, "Fel vid inställning av wallbox-schema");
             return false;
         }
     }
@@ -187,7 +187,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Error deleting wallbox schema {SchemaId}", schemaId);
+            Log.Error(ex, "Fel vid borttagning av wallbox-schema {SchemaId}", schemaId);
             return false;
         }
     }

@@ -26,12 +26,12 @@ public class ElectricityPrice
     public DateTime TimeEnd { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether charging is currently permitted based on the configured schedule and
-    /// manual override.
+    /// Hämtar eller ställer in ett värde som anger om laddning är tillåten baserat på schemat och
+    /// manuell åsidosättning.
     /// </summary>
-    /// <remarks>Charging is not allowed on weekdays between 07:00 and 19:00 from November through March.
-    /// Outside of these periods, the value reflects the most recent value set. Setting this property manually overrides
-    /// the default schedule until changed again.</remarks>
+    /// <remarks>Laddning är inte tillåten vardagar mellan 07:00 och 19:00 från november till mars.
+    /// Utanför dessa perioder reflekterar värdet det senaste värdet som ställdes in. Att manuellt ställa denna egenskap åsidosätter
+    /// standardschemat tills det ändras igen.</remarks>
     [NotMapped]
     public bool ChargingAllowed
     {

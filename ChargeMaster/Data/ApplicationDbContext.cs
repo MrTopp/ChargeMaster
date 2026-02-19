@@ -14,7 +14,7 @@ namespace ChargeMaster.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Ensure decimal precision matches migrations for SQL Server
+            // Säkerställ decimalprecision matchar migrations
             modelBuilder.Entity<ElectricityPrice>(b =>
             {
                 b.Property(e => e.SekPerKwh).HasColumnType("decimal(18,2)");
