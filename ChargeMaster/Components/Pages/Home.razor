@@ -94,7 +94,7 @@
                                    * DateTime.DaysInMonth(DateTime.Now.Year,DateTime.Now.Month)).ToString("F2"))</td>
                         </tr>
                         <tr>
-                            <td><strong>Överföring hittils</strong></td>
+                            <td><strong>Överföring hittills</strong></td>
                             <td>@((MonthlyUsage / 1000.0).ToString("F2"))</td>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
@@ -211,7 +211,17 @@
         _ = UpdateHourlyEnergyLoop();
     }
 
-    private long EffektDennaTimmeTotalt => ChargeWorker.ForbrukningDennaTimme * 3600 / (DateTime.Now.Minute * 60 + DateTime.Now.Second);
+    private long EffektDennaTimmeTotalt
+    {
+        get
+        {
+            if (DateTime.Now.Minute + DateTime.Now.Second == 0)
+            {
+                return ChargeWorker.ForbrukningDennaTimme; // Undvik division med noll
+            }
+            return ChargeWorker.ForbrukningDennaTimme * 3600 / (DateTime.Now.Minute * 60 + DateTime.Now.Second);
+        }
+    }
 
     private long ForbrukningManadTotalt => MonthlyUsage * DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month) / DateTime.Now.Day;
 
@@ -259,7 +269,7 @@
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
 
-        _cts?.Cancel();
+        await _cts?.CancelAsync();
 
         if (_periodicTimer is not null)
         {
