@@ -383,7 +383,7 @@ public class WallboxWorker(
             // Beräkna skillnaden mellan första och sista läsningen
             var monthlyUsageWh = lastReading.AccEnergy - firstReading.AccEnergy;
 
-            logger.LogInformation("Monthly energy usage for {Month:yyyy-MM}: {Usage} Wh ({UsageKwh:F2} kWh)",
+            logger.LogDebug("Monthly energy usage for {Month:yyyy-MM}: {Usage} Wh ({UsageKwh:F2} kWh)",
                 dateInMonth, monthlyUsageWh, monthlyUsageWh / 1000.0);
 
             return monthlyUsageWh;
@@ -481,7 +481,7 @@ public class WallboxWorker(
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
             var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
 
-            logger.LogInformation("Calculating hourly energy usage for {Month:yyyy-MM} (from {Start:yyyy-MM-dd} to {End:yyyy-MM-dd})",
+            logger.LogDebug("Calculating hourly energy usage for {Month:yyyy-MM} (from {Start:yyyy-MM-dd} to {End:yyyy-MM-dd})",
                 dateInMonth, startOfMonth, endOfMonth);
 
             var hourlyUsage = new List<HourlyEnergyUsage>();
@@ -521,7 +521,7 @@ public class WallboxWorker(
                 }
             }
 
-            logger.LogInformation("Processed {TotalReadings} readings and calculated {HourlyCount} hourly usages for {Month:yyyy-MM}.",
+            logger.LogDebug("Processed {TotalReadings} readings and calculated {HourlyCount} hourly usages for {Month:yyyy-MM}.",
                 totalReadings, hourlyUsage.Count, dateInMonth);
 
             return hourlyUsage;
