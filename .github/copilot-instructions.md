@@ -4,7 +4,6 @@
 - **Framework**: .NET 10 (ASP.NET Core, Blazor Interactive Server)
 - **Language**: C# latest
 - **Database**: Entity Framework Core with PostgreSQL for both development and production
-- **Auth**: ASP.NET Core Identity
 - **Hosting**: ASP.NET Core Web Application
 - **APIs**: RESTful API consumption
 - **Testing**: xUnit for unit testing
@@ -14,6 +13,7 @@
 
 ## Wallbox Charger Interface
 - Communicate with Wallbox chargers using HTTP on URL `http://192.168.1.205:8080/`
+- The wallbox interface does not support HTTPS.
 
 ## Coding Style & Conventions
 - Use file-scoped namespaces (`namespace ChargeMaster;`).
@@ -49,3 +49,13 @@ The application should also provide a Blazor Interactive Server front-end to dis
 - The API endpoint to fetch the electricity prices is: `https://www.elprisetjustnu.se/api/v1/prices/[year]/[month]-[day]_[PRISKLASS].json`
 - The price class to use is `SE3`.
 
+## Production environment
+- The application will be hosted on a Raspberry Pi running Ubuntu 25.10.
+- Use nginx as a reverse proxy to forward requests to the ASP.NET Core application.
+- Logging is done by serilog sending output to stdout and stderr, which will be captured by the hosting environment.
+- Path to applicaation is `/var/www/ChargeMaster`
+- User running the application is `chargemasterapp`
+- Use systemd to manage the application as a service, ensuring it starts on boot and restarts on failure.
+- Application is running interface on http, nginx will handle SSL termination and forwarding to the application.
+- systemd service name is `chargemaster-dotnet.service` and should be configured to run the application with the appropriate user and permissions.
+- 
