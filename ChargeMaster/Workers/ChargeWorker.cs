@@ -285,10 +285,14 @@ public class ChargeWorker(
             }
 
         NextIteration:
-            _kvartlista = null; // Tvinga uppdatering av kvartlista varje varv
-            TimeSpan paus = nu.AddMinutes(1) - DateTime.Now;
-            if (paus.TotalSeconds > 0)
-                await Task.Delay(paus, stoppingToken);
+            // Tvinga uppdatering av kvartlista varje varv
+            _kvartlista = null; 
+            // Vänta tills nästa hela minut
+            var targetNextMinute = nu.AddMinutes(1);
+            while (DateTime.Now < targetNextMinute && !stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(100, stoppingToken);
+            }
             previous = nu;
         }
     }
