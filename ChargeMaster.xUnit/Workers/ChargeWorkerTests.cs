@@ -35,10 +35,10 @@ public class ChargeWorkerTests
     }
 
     [Fact]
-    public async Task SkapaKvartlista_OK()
+    public void SkapaKvartlista_OK()
     {
         // Act
-       var kvartlista =  await _worker.GetKvartlista();
+       var kvartlista =  _worker.GetKvartlista();
         
     }
 
