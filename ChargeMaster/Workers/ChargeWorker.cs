@@ -153,11 +153,11 @@ public class ChargeWorker(
             logger.LogInformation("Wallbox is disabled.");
             WallboxStopped = true;
         }
-        LaddBehovProcent =  await LaddBehov();
+        LaddBehovProcent = await LaddBehov();
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            logger.LogInformation("ChargeWorker tick at: {time}", DateTimeOffset.Now);
+            logger.LogDebug("ChargeWorker tick at: {time}", DateTimeOffset.Now);
             DateTime dt = DateTime.Now;
             DateTime nu = new DateTime(dt.Year, dt.Month, dt.Day,
                 dt.Hour, dt.Minute, 0);
@@ -286,7 +286,7 @@ public class ChargeWorker(
 
         NextIteration:
             // Tvinga uppdatering av kvartlista varje varv
-            _kvartlista = null; 
+            _kvartlista = null;
             // Vänta tills nästa hela minut
             var targetNextMinute = nu.AddMinutes(1);
             while (DateTime.Now < targetNextMinute && !stoppingToken.IsCancellationRequested)
@@ -480,11 +480,19 @@ public class ChargeWorker(
     {
         lock (_kvartlistaLock)
         {
+            var kvartlista = new List<ElectricityPrice>();
+            if (LaddBehovProcent < 1)
+            {
+                // LaddBehovProcent är oinitierat eller bilen fulladdad
+                KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(kvartlista));
+                _kvartlista = kvartlista;
+                return _kvartlista;
+            }
+
             // _kvartlista skapas en gång per varv i loopen, sätts till null i slutet av varje varv.
-            if (_kvartlista != null)
+            if (_kvartlista is { Count: > 0 })
                 return _kvartlista;
 
-            var kvartlista = new List<ElectricityPrice>();
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var nu = DateTime.Now;
@@ -503,7 +511,7 @@ public class ChargeWorker(
             // Sätt ChargingAllowed = false på de två dyraste kvartarna varje timme
             var dyrasteKvartPerTimme =
                 priser.GroupBy(x => new
-                    { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
+                { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
             foreach (var grupp in dyrasteKvartPerTimme)
             {
                 var dyrasteKvartar = grupp.OrderByDescending(x => x.SekPerKwh).Take(2);
@@ -511,16 +519,6 @@ public class ChargeWorker(
                 {
                     dyrasteKvart.ChargingAllowed = false;
                 }
-            }
-
-            // Beräkna laddbehov
-            if (LaddBehovProcent < 1)
-            {
-                logger.LogInformation("SkapaKvartlista: Charge full {behovProcent}",
-                    LaddBehovProcent);
-                KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(kvartlista));
-                _kvartlista = kvartlista;
-                return _kvartlista;
             }
 
             // Antar att det behövs 2.4 kvartar per procent laddbehov.
