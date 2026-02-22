@@ -285,8 +285,6 @@ public class ChargeWorker(
             }
 
         NextIteration:
-            // Tvinga uppdatering av kvartlista varje varv
-            _kvartlista = null;
             // Vänta tills nästa hela minut
             var targetNextMinute = nu.AddMinutes(1);
             while (DateTime.Now < targetNextMinute && !stoppingToken.IsCancellationRequested)
@@ -294,6 +292,8 @@ public class ChargeWorker(
                 await Task.Delay(100, stoppingToken);
             }
             previous = nu;
+            // Tvinga uppdatering av kvartlista varje varv
+            _kvartlista = null;
         }
     }
 
