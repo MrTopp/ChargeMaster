@@ -208,7 +208,7 @@
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
 
         // Trigga uppdatering av kvartlista
-        ChargeWorker.GetKvartlista();
+        CurrentKvartlista = ChargeWorker.GetKvartlista();
 
         _ = UpdateHourlyEnergyLoop();
     }
@@ -271,7 +271,10 @@
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
 
-        await _cts?.CancelAsync();
+        if (_cts != null)
+        {
+            await _cts.CancelAsync();
+        }
 
         if (_periodicTimer is not null)
         {
