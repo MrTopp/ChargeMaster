@@ -200,7 +200,7 @@
         }
 
         // Hämta senaste kvarterlista direkt från ChargeWorker
-        CurrentKvartlista = await ChargeWorker.GetKvartlista();
+        CurrentKvartlista = ChargeWorker.GetKvartlista();
 
         // Hämta högsta timförbrukning för denna månad vid sidladdning
         await LoadHighestHourlyUsageAsync();
