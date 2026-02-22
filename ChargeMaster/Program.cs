@@ -1,15 +1,16 @@
-﻿using System.Reflection;
-
-using ChargeMaster.Components;
+﻿using ChargeMaster.Components;
 using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.VolksWagen;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Workers;
 
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 using Serilog;
+
+using System.Reflection;
 
 namespace ChargeMaster
 {
@@ -41,6 +42,20 @@ namespace ChargeMaster
                 Log.Information("==============================================");
 
                 var builder = WebApplication.CreateBuilder(args);
+
+                // ----- Data Protection (för att persistera krypteringsnycklar) -----
+                var keyRingPath = Path.Combine(builder.Environment.ContentRootPath, "data-protection-keys");
+                if (!Directory.Exists(keyRingPath))
+                {
+                    Directory.CreateDirectory(keyRingPath);
+                }
+
+                builder.Services.AddDataProtection()
+                    .PersistKeysToFileSystem(new DirectoryInfo(keyRingPath))
+                    .SetApplicationName("ChargeMaster");
+
+                builder.Services.AddRazorComponents()
+                    .AddInteractiveServerComponents();
 
                 builder.Host.UseSerilog((context, services, configuration) => configuration
                     .ReadFrom.Configuration(context.Configuration)
