@@ -27,7 +27,7 @@ public class ElectricityPriceService(
     {
         if (await HasPricesForDateAsync(date))
         {
-            logger.LogInformation("Priser för {Date} finns redan.", date);
+            logger.LogInformation("Priser för {Date} finns redan.", date.ToString("yyyy-MM-dd"));
             return;
         }
 
@@ -50,7 +50,7 @@ public class ElectricityPriceService(
                 context.ElectricityPrices.AddRange(prices);
                 await context.SaveChangesAsync();
                 logger.LogInformation("Lagrade {Count} priser för {Date} har lagrats.",
-                    prices.Count, date);
+                    prices.Count, date.ToString("yyyy-MM-dd"));
             }
         }
         catch (Exception ex)

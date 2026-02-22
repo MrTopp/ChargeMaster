@@ -1,4 +1,4 @@
-using ChargeMaster.Services.ElectricityPrice;
+﻿using ChargeMaster.Services.ElectricityPrice;
 
 // ReSharper disable UnusedParameter.Local
 
@@ -99,7 +99,6 @@ public class PriceFetchingWorker(
             ElectricityPriceService priceService
                 = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
 
-            logger.LogInformation("Arbetare initierar pushishämtning för {Date}", date);
             await priceService.FetchAndStorePricesForDateAsync(date);
             return true;
         }
