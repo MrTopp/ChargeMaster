@@ -352,7 +352,7 @@ public class WallboxWorker(
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
             var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
 
-            logger.LogInformation("Calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
+            logger.LogDebug("Calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
 
             // Hämta första läsningen i månaden
             var firstReading = await db.WallboxMeterReadings

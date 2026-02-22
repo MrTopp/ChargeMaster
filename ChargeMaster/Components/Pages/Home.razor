@@ -199,8 +199,6 @@
             LastMeterInfoUpdate = DateTime.Now;
         }
 
-        // Hämta senaste kvarterlista direkt från ChargeWorker
-        CurrentKvartlista = ChargeWorker.GetKvartlista();
 
         // Hämta högsta timförbrukning för denna månad vid sidladdning
         await LoadHighestHourlyUsageAsync();
@@ -208,6 +206,9 @@
         // Prenumerera på events för real-time uppdateringar
         WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
+
+        // Trigga uppdatering av kvartlista
+        ChargeWorker.GetKvartlista();
 
         _ = UpdateHourlyEnergyLoop();
     }
