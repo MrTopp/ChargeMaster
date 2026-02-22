@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /ChargeMaster/Data/app.db-shm
 /ChargeMaster/Data/app.db-wal
+/ChargeMaster/data-protection-keys
