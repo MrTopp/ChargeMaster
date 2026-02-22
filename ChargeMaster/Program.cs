@@ -74,7 +74,10 @@ namespace ChargeMaster
                     options.UseNpgsql(connectionString));
 
                 // ----- Application Services -----
-                builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>();
+                builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>(client =>
+                {
+                    client.Timeout = TimeSpan.FromSeconds(15);
+                });
 
                 var vwServiceBaseAddress = builder.Configuration["Services:VWService"]
                                            ?? throw new InvalidOperationException(
@@ -82,11 +85,13 @@ namespace ChargeMaster
                 builder.Services.AddHttpClient<VWService, VWService>(client =>
                 {
                     client.BaseAddress = new Uri(vwServiceBaseAddress);
+                    client.Timeout = TimeSpan.FromSeconds(30);
                 });
 
                 builder.Services.AddHttpClient<WallboxService, WallboxService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.205:8080/");
+                    client.Timeout = TimeSpan.FromSeconds(10);
                 });
 
                 // ----- Workers -----
