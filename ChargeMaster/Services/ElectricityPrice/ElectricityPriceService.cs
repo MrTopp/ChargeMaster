@@ -46,6 +46,9 @@ public class ElectricityPriceService(
 
             if (prices != null && prices.Any())
             {
+                // Validera prisdata före lagring
+                ValidatePrices(prices, date);
+
                 // Normalisera datum om nödvändigt, även om API vanligtvis skickar ISO8601.
                 context.ElectricityPrices.AddRange(prices);
                 await context.SaveChangesAsync();
@@ -58,6 +61,44 @@ public class ElectricityPriceService(
             logger.LogInformation(ex, "Kunde inte hämta eller lagra priser för {Date}.", date);
             throw; // Omkastning eller hantering? Bakgrundstjänsten bör hantera det.
         }
+    }
+
+    /// <summary>
+    /// Validerar att prisdata innehåller exakt 96 poster (kvartar per dag) och att alla
+    /// poster har TimeStart inom den efterfrågade dagen.
+    /// </summary>
+    /// <param name="prices">Listan med priser att validera</param>
+    /// <param name="date">Det datum som priserna ska tillhöra</param>
+    /// <exception cref="InvalidOperationException">Kastas om validering misslyckas</exception>
+    private void ValidatePrices(List<ElectricityPrice> prices, DateOnly date)
+    {
+        // Kontrollera antal priser (96 = 24 timmar * 4 kvartar per timme)
+        if (prices.Count != 96)
+        {
+            logger.LogInformation("Unexpected number of prices for {Date}: expected 96, got {Count}",
+                date.ToString("yyyy-MM-dd"), prices.Count);
+            throw new InvalidOperationException(
+                $"Expected 96 prices for {date:yyyy-MM-dd}, but got {prices.Count}");
+        }
+
+        // Kontrollera att alla priser är inom den efterfrågade dagen
+        var startOfDay = date.ToDateTime(TimeOnly.MinValue);
+        var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
+
+        foreach (var price in prices)
+        {
+            if (price.TimeStart < startOfDay || price.TimeStart > endOfDay)
+            {
+                logger.LogInformation(
+                    "Price with TimeStart {TimeStart} is outside the requested date {Date}",
+                    price.TimeStart.ToString("yyyy-MM-dd HH:mm"), date.ToString("yyyy-MM-dd"));
+                throw new InvalidOperationException(
+                    $"Price with TimeStart {price.TimeStart:yyyy-MM-dd HH:mm} is outside the requested date {date:yyyy-MM-dd}");
+            }
+        }
+
+        //logger.LogInformation("Validation passed for {Count} prices on {Date}",
+        //    prices.Count, date.ToString("yyyy-MM-dd"));
     }
 
     public async Task<List<ElectricityPrice>> GetPricesForDateAsync(DateOnly date)
