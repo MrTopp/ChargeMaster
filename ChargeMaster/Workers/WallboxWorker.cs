@@ -471,10 +471,7 @@ public class WallboxWorker(
                 logger.LogCritical("Database context is not available. Cannot calculate hourly energy usage.");
                 return new List<HourlyEnergyUsage>();
             }
-
-
-            var allt = db.WallboxMeterReadings.OrderBy(x => x.ReadAt).ToList();
-
+            
             // Bestäm start- och slutdatum för månaden
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
             var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
