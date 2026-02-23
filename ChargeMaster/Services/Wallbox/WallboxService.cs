@@ -27,6 +27,12 @@ namespace ChargeMaster.Services.Wallbox;
             var retval = JsonSerializer.Deserialize<WallboxStatus>(json, JsonOptions);
             return retval;
         }
+        catch (TaskCanceledException ex)
+        {
+            // Händer ibland, får vi leva med
+            Log.Error("Timeout vid hämtning av wallbox-status");
+            return null;
+        }
         catch (HttpRequestException ex)
         {
             Log.Error(ex, "Fel vid hämtning av wallbox-status");
