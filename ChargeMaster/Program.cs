@@ -116,6 +116,16 @@ namespace ChargeMaster
                         ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
                                            | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
                     });
+                    // Säkerhetsheaders
+                    app.Use(async (context, next) =>
+                    {
+                        var headers = context.Response.Headers;
+                        headers["X-Content-Type-Options"] = "nosniff";
+                        headers["X-Frame-Options"] = "DENY";
+                        headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+                        headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+                        await next();
+                    });
                     app.UsePathBase("/ChargeMaster");
                 }
 
