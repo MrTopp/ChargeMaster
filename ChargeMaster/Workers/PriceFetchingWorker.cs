@@ -50,7 +50,7 @@ public class PriceFetchingWorker(
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "Ett fel inträffade under schemalägning av pushishämtning.");
+                logger.LogError(ex, "Ett fel inträffade under schemalägning av hämtning.");
             }
         }
     }
@@ -91,7 +91,7 @@ public class PriceFetchingWorker(
             // Kontrollera att morgondagens priser inte hämtas före 13:00
             if (date == DateOnly.FromDateTime(DateTime.Now.AddDays(1)) && DateTime.Now.Hour < 13)
             {
-                logger.LogInformation("Hämtar inte {Date} då det är innan 13:00", date);
+                logger.LogInformation("Hämtar inte {Date} då det är före 13:00", date);
                 return true;
             }
 
@@ -104,7 +104,7 @@ public class PriceFetchingWorker(
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Arbetare kunde inte hämta priser för {Date}", date);
+            logger.LogError(ex, "PriceFetchingWorker: kunde inte hämta priser för {Date}", date);
             return false;
         }
     }

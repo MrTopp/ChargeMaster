@@ -17,12 +17,6 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public long AccessCounter
-    {
-        get => ++field;
-        set => field = value;
-    } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
     public async Task<VWStatusResponse?> GetStatus()
     {
         try
@@ -32,7 +26,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "GetStatus: Undantag");
+            logger.LogError(ex, "GetStatus: Fel vid hämtning av VW-status");
             throw new CarConnectionException("GetStatus: Kunde inte hämta VW-status");
         }
     }

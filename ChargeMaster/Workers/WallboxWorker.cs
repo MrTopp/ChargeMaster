@@ -69,7 +69,7 @@ public class WallboxWorker(
             //}
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "Error in WallboxMeterWorker loop");
+                logger.LogError(ex, "Error in WallboxMeterWorker loop");
                 await Task.Delay(TimeSpan.FromSeconds(60 * 10), stoppingToken);
             }
         }
@@ -124,7 +124,7 @@ public class WallboxWorker(
         WallboxStatus? wallboxStatus = await wallboxService.GetStatusAsync();
         while (wallboxStatus is null)
         {
-            logger.LogInformation("Wallbox status is null, retrying in 1 minute");
+            logger.LogWarning("Wallbox status is null, retrying in 1 minute");
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             wallboxStatus = await wallboxService.GetStatusAsync();
         }
@@ -269,7 +269,7 @@ public class WallboxWorker(
             // Skip database operations if db context is not available
             if (db is null)
             {
-                logger.LogWarning(
+                logger.LogCritical(
                     "Database context is not available. Meter info will not be persisted.");
                 return info;
             }
@@ -299,7 +299,6 @@ public class WallboxWorker(
 
             db.WallboxMeterReadings.Add(entry);
             await db.SaveChangesAsync(stoppingToken);
-            // logger.LogInformation("Energy reading {energy} at {time}", info.AccEnergy, DateTimeOffset.Now);
             if (_lastReading != null && _lastReadingAt != null)
             {
                 var tid = (TimeSpan)(DateTimeOffset.Now - _lastReadingAt);
@@ -319,7 +318,7 @@ public class WallboxWorker(
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Failed to read or store meter info");
+            logger.LogError(ex, "Failed to read or store meter info");
             return null;
         }
     }
@@ -344,7 +343,7 @@ public class WallboxWorker(
 
             if (db is null)
             {
-                logger.LogWarning("Database context is not available. Cannot calculate monthly energy usage.");
+                logger.LogCritical("Database context is not available. Cannot calculate monthly energy usage.");
                 return 0;
             }
 
@@ -363,7 +362,7 @@ public class WallboxWorker(
 
             if (firstReading is null)
             {
-                logger.LogInformation("No meter readings found for {Month:yyyy-MM}", dateInMonth);
+                logger.LogWarning("No meter readings found for {Month:yyyy-MM}", dateInMonth);
                 return 0;
             }
 
@@ -390,7 +389,7 @@ public class WallboxWorker(
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Error calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
+            logger.LogError(ex, "Error calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
             return 0;
         }
     }
@@ -440,7 +439,6 @@ public class WallboxWorker(
             // Om cachen är från samma timme, returnera cachad data
             if (cacheHour == lastCacheHour && _hourlyEnergyUsageCache.Count > 0)
             {
-                //logger.LogInformation("Returning cached hourly energy usage data");
                 return _hourlyEnergyUsageCache;
             }
         }
@@ -470,7 +468,7 @@ public class WallboxWorker(
 
             if (db is null)
             {
-                logger.LogWarning("Database context is not available. Cannot calculate hourly energy usage.");
+                logger.LogCritical("Database context is not available. Cannot calculate hourly energy usage.");
                 return new List<HourlyEnergyUsage>();
             }
 
@@ -528,7 +526,7 @@ public class WallboxWorker(
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Error calculating hourly energy usage");
+            logger.LogError(ex, "Error calculating hourly energy usage");
             return new List<HourlyEnergyUsage>();
         }
     }

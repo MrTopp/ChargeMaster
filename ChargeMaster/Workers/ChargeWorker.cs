@@ -135,7 +135,7 @@ public class ChargeWorker(
             }
             catch (Exception ex)
             {
-                logger.LogInformation(ex, "Error in ChargeWorker loop");
+                logger.LogError(ex, "Error in ChargeWorker loop");
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
@@ -171,7 +171,7 @@ public class ChargeWorker(
             WallboxMeterInfo? wstat = await _wallbox.GetMeterInfoAsync();
             if (wstat == null)
             {
-                logger.LogInformation("Failed to get meter info from wallbox.");
+                logger.LogError("Failed to get meter info from wallbox.");
                 goto NextIteration;
             }
 
@@ -277,7 +277,7 @@ public class ChargeWorker(
                             x.TimeStart.Hour == nu.Hour &&
                             x.TimeStart.Minute == minutAvrundad))
                     {
-                        logger.LogInformation("Quarter, evaluate charge, starting");
+                        logger.LogInformation("Quarter, start charge");
                         await StartaLaddningAsync();
                     }
                     else
@@ -321,7 +321,7 @@ public class ChargeWorker(
             }
             catch (CarConnectionException ex)
             {
-                logger.LogInformation(ex, "Error starting charging");
+                logger.LogError(ex, "Error starting charging");
             }
 
             if (BilenLaddar)
@@ -342,14 +342,14 @@ public class ChargeWorker(
                 success = await _vwService.StopChargingAsync();
                 if (!success)
                 {
-                    logger.LogInformation(
+                    logger.LogError(
                         "StoppaLaddningAsync: failed to stop car charging, stopping wallbox");
                     await StopWallbox();
                 }
             }
             catch (CarConnectionException ex)
             {
-                logger.LogInformation(ex, "Error stopping charging");
+                logger.LogError(ex, "Error stopping charging");
                 await StopWallbox(); // Om det inte går att stänga av genom att fråga bilen, stäng av wallboxen så att bilen inte kan ladda.
             }
 
@@ -366,7 +366,7 @@ public class ChargeWorker(
         }
         catch (CarConnectionException ex)
         {
-            logger.LogInformation(ex, "Error fetching VW status");
+            logger.LogError(ex, "Error fetching VW status");
             await StopWallbox();
             return false;
         }
@@ -388,7 +388,7 @@ public class ChargeWorker(
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Error setting wallbox mode to NotAvailable");
+            logger.LogError(ex, "Error setting wallbox mode to NotAvailable");
         }
     }
 
@@ -404,7 +404,7 @@ public class ChargeWorker(
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Error setting wallbox mode to Available");
+            logger.LogError(ex, "Error setting wallbox mode to Available");
             return false;
         }
     }
@@ -435,7 +435,7 @@ public class ChargeWorker(
                 return ConnectionEnum.SearchingForCommunication;
 
             default:
-                logger.LogInformation("Unknown value för WallboxStatus.Connector: {value}",
+                logger.LogError("Unknown value för WallboxStatus.Connector: {value}",
                     response.Connector);
                 return ConnectionEnum.Unknown;
         }
@@ -456,7 +456,7 @@ public class ChargeWorker(
         }
         catch (CarConnectionException ex)
         {
-            logger.LogInformation(ex, "Error fetching VW status");
+            logger.LogError(ex, "Error fetching VW status");
             await StopWallbox();
             return 0;
         }
@@ -538,7 +538,7 @@ public class ChargeWorker(
 
             var nextKvart = kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
             logger.LogInformation(
-                "SkapaKvartLista: Laddbehov {behovProcent}, antal kvartar {antalKvartar} nästa kvart {nextKvart}",
+                "Laddbehov {behovProcent}, kvartar {antalKvartar} nästa {nextKvart}",
                 LaddBehovProcent, antalKvartar, nextKvart?.TimeStart.ToString("HH:mm") ?? "---");
 
             KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(kvartlista));
