@@ -44,7 +44,13 @@ namespace ChargeMaster
                 var builder = WebApplication.CreateBuilder(args);
 
                 // ----- Data Protection (för att persistera krypteringsnycklar) -----
-                var keyRingPath = Path.Combine(builder.Environment.ContentRootPath, "data-protection-keys");
+                // Läs sökväg från environment-variabel, eller använd default
+                var keyRingPath = Environment.GetEnvironmentVariable("DATA_PROTECTION_KEYS_PATH");
+                if (string.IsNullOrEmpty(keyRingPath))
+                {
+                    keyRingPath = Path.Combine(builder.Environment.ContentRootPath,
+                        "data-protection-keys");
+                }
                 if (!Directory.Exists(keyRingPath))
                 {
                     Directory.CreateDirectory(keyRingPath);
