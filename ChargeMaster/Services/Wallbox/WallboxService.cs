@@ -1,7 +1,5 @@
 ﻿using System.Text.Json;
 
-using Serilog;
-
 namespace ChargeMaster.Services.Wallbox;
 
     /// <summary>
@@ -30,12 +28,12 @@ namespace ChargeMaster.Services.Wallbox;
         catch (TaskCanceledException ex)
         {
             // Händer ibland, får vi leva med
-            Log.Error("Timeout vid hämtning av wallbox-status");
+            logger.LogError("Timeout vid hämtning av wallbox-status");
             return null;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid hämtning av wallbox-status");
+            logger.LogError(ex, "Fel vid hämtning av wallbox-status");
             return null;
         }
     }
@@ -119,12 +117,12 @@ namespace ChargeMaster.Services.Wallbox;
         catch (TaskCanceledException ex)
         {
             // Händer ibland, får vi leva med
-            Log.Error("Timeout vid hämtning av wallbox-mäterinformation");
+            logger.LogError("Timeout vid hämtning av wallbox-mäterinformation");
             return null;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid hämtning av wallbox-mäterinformation");
+            logger.LogError(ex, "Fel vid hämtning av wallbox-mäterinformation");
             return null;
         }
     }
@@ -139,7 +137,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid hämtning av wallbox-schema");
+            logger.LogError(ex, "Fel vid hämtning av wallbox-schema");
             return null;
         }
     }
@@ -154,7 +152,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid hämtning av wallbox-konfiguration");
+            logger.LogError(ex, "Fel vid hämtning av wallbox-konfiguration");
             return null;
         }
     }
@@ -169,7 +167,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid hämtning av wallbox-slavar");
+            logger.LogError(ex, "Fel vid hämtning av wallbox-slavar");
             return null;
         }
     }
@@ -184,7 +182,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid inställning av wallbox-schema");
+            logger.LogError(ex, "Fel vid inställning av wallbox-schema");
             return false;
         }
     }
@@ -199,7 +197,7 @@ namespace ChargeMaster.Services.Wallbox;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Fel vid borttagning av wallbox-schema {SchemaId}", schemaId);
+            logger.LogError(ex, "Fel vid borttagning av wallbox-schema {SchemaId}", schemaId);
             return false;
         }
     }
