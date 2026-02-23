@@ -64,10 +64,23 @@ namespace ChargeMaster
                 builder.Services.AddRazorComponents()
                     .AddInteractiveServerComponents();
 
-                builder.Host.UseSerilog((context, services, configuration) => configuration
-                    .ReadFrom.Configuration(context.Configuration)
-                    .ReadFrom.Services(services)
-                    .Enrich.FromLogContext());
+                builder.Host.UseSerilog((context, services, configuration) =>
+                {
+                    configuration
+                        .ReadFrom.Configuration(context.Configuration)
+                        .ReadFrom.Services(services)
+                        .Enrich.FromLogContext();
+
+                    // Error och Fatal skrivs även till stderr (utöver stdout från appsettings)
+                    if (!context.HostingEnvironment.IsDevelopment())
+                    {
+                        configuration.WriteTo.Logger(lc => lc
+                            .Filter.ByIncludingOnly(e => e.Level >= Serilog.Events.LogEventLevel.Error)
+                            .WriteTo.Console(
+                                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}",
+                                standardErrorFromLevel: Serilog.Events.LogEventLevel.Verbose));
+                    }
+                });
 
                 var connectionString
                     = builder.Configuration.GetConnectionString("DefaultConnection") ??
