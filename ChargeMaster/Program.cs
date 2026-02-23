@@ -91,7 +91,7 @@ namespace ChargeMaster
                 builder.Services.AddHttpClient<WallboxService, WallboxService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.205:8080/");
-                    client.Timeout = TimeSpan.FromSeconds(10);
+                    client.Timeout = TimeSpan.FromSeconds(20);
                 });
 
                 // ----- Workers -----
