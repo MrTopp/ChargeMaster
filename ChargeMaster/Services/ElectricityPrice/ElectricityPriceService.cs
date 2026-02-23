@@ -52,13 +52,13 @@ public class ElectricityPriceService(
                 // Normalisera datum om nödvändigt, även om API vanligtvis skickar ISO8601.
                 context.ElectricityPrices.AddRange(prices);
                 await context.SaveChangesAsync();
-                logger.LogInformation("Lagrade {Count} priser för {Date} har lagrats.",
+                logger.LogInformation("Lagrade {Count} priser för {Date}.",
                     prices.Count, date.ToString("yyyy-MM-dd"));
             }
         }
         catch (Exception ex)
         {
-            logger.LogInformation(ex, "Kunde inte hämta eller lagra priser för {Date}.", date);
+            logger.LogError(ex, "Kunde inte hämta eller lagra priser för {Date}.", date);
             throw; // Omkastning eller hantering? Bakgrundstjänsten bör hantera det.
         }
     }
@@ -75,7 +75,7 @@ public class ElectricityPriceService(
         // Kontrollera antal priser (96 = 24 timmar * 4 kvartar per timme)
         if (prices.Count != 96)
         {
-            logger.LogInformation("Unexpected number of prices for {Date}: expected 96, got {Count}",
+            logger.LogError("Unexpected number of prices for {Date}: expected 96, got {Count}",
                 date.ToString("yyyy-MM-dd"), prices.Count);
             throw new InvalidOperationException(
                 $"Expected 96 prices for {date:yyyy-MM-dd}, but got {prices.Count}");
@@ -89,16 +89,13 @@ public class ElectricityPriceService(
         {
             if (price.TimeStart < startOfDay || price.TimeStart > endOfDay)
             {
-                logger.LogInformation(
+                logger.LogError(
                     "Price with TimeStart {TimeStart} is outside the requested date {Date}",
                     price.TimeStart.ToString("yyyy-MM-dd HH:mm"), date.ToString("yyyy-MM-dd"));
                 throw new InvalidOperationException(
                     $"Price with TimeStart {price.TimeStart:yyyy-MM-dd HH:mm} is outside the requested date {date:yyyy-MM-dd}");
             }
         }
-
-        //logger.LogInformation("Validation passed for {Count} prices on {Date}",
-        //    prices.Count, date.ToString("yyyy-MM-dd"));
     }
 
     public async Task<List<ElectricityPrice>> GetPricesForDateAsync(DateOnly date)
