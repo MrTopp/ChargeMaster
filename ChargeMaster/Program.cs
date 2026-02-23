@@ -46,6 +46,7 @@ namespace ChargeMaster
                 // ----- Data Protection (för att persistera krypteringsnycklar) -----
                 // Läs sökväg från environment-variabel, eller använd default
                 var keyRingPath = Environment.GetEnvironmentVariable("DATA_PROTECTION_KEYS_PATH");
+
                 if (string.IsNullOrEmpty(keyRingPath))
                 {
                     keyRingPath = Path.Combine(builder.Environment.ContentRootPath,
@@ -67,10 +68,6 @@ namespace ChargeMaster
                     .ReadFrom.Configuration(context.Configuration)
                     .ReadFrom.Services(services)
                     .Enrich.FromLogContext());
-
-                // Add services to the container.
-                builder.Services.AddRazorComponents()
-                    .AddInteractiveServerComponents();
 
                 var connectionString
                     = builder.Configuration.GetConnectionString("DefaultConnection") ??
