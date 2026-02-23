@@ -111,6 +111,11 @@ namespace ChargeMaster
 
                 if (!app.Environment.IsDevelopment())
                 {
+                    app.UseForwardedHeaders(new ForwardedHeadersOptions
+                    {
+                        ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+                                           | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+                    });
                     app.UsePathBase("/ChargeMaster");
                 }
 
