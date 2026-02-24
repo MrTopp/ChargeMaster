@@ -3,8 +3,10 @@
 @implements IAsyncDisposable
 @inject WallboxWorker WallboxWorker
 @inject ChargeWorker ChargeWorker
+@inject VWService VWService
 @using ChargeMaster.Services.ElectricityPrice
 @using ChargeMaster.Services.Wallbox
+@using ChargeMaster.Services.VolksWagen
 @using ChargeMaster.Workers
 
 <PageTitle>Charge Master</PageTitle>
@@ -17,12 +19,6 @@
         {
             <div>
                 <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Värde</th>
-                        </tr>
-                    </thead>
                     <tbody>
                         <tr>
                             <td><strong>Uppdaterad</strong></td>
@@ -51,6 +47,29 @@
                         <tr class="@(EffektDennaTimmeTotalt > 2500 ? "table-danger" : "")">
                             <td><strong>Uppskattad förbrukning denna timme</strong></td>
                             <td><strong>@(EffektDennaTimmeTotalt) W</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+
+    <section class="mb-5">
+        <h3 class="mb-3">Bilens laddstatus</h3>
+
+        @if (CurrentVWStatus is not null)
+        {
+            <div>
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <td><strong>Batterinivå</strong></td>
+                            <td>@((CurrentVWStatus.BatteryLevel ?? 0.0).ToString("F1")) %</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Målnivå för laddning</strong></td>
+                            <td>@((CurrentVWStatus.ChargingSettingsTargetLevel ?? 0.0).ToString("F1")) %</td>
                         </tr>
                     </tbody>
                 </table>
@@ -186,6 +205,7 @@
     private HourlyEnergyUsage? HighestHourlyUsage { get; set; }
     private HourlyEnergyUsage? HighestDailyHourlyUsage { get; set; }
     private long MonthlyUsage { get; set; }
+    private VWStatusLimitet? CurrentVWStatus { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -206,9 +226,12 @@
         // Prenumerera på events för real-time uppdateringar
         WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
+        VWService.VWStatusRetrieved += OnVWStatusRetrieved;
 
         // Trigga uppdatering av kvartlista
         CurrentKvartlista = ChargeWorker.GetKvartlista();
+
+        _ = VWService.GetStatus();
 
         _ = UpdateHourlyEnergyLoop();
     }
@@ -237,6 +260,12 @@
     private void OnKvartlistaUpdated(object? sender, KvartlistaEventArgs e)
     {
         CurrentKvartlista = e.Kvartlista;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnVWStatusRetrieved(object? sender, VWStatusEventArgs e)
+    {
+        CurrentVWStatus = e.VWStatusLimitet;
         InvokeAsync(StateHasChanged);
     }
 
@@ -270,6 +299,7 @@
     {
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
+        VWService.VWStatusRetrieved -= OnVWStatusRetrieved;
 
         if (_cts != null)
         {

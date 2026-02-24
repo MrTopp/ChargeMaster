@@ -29,9 +29,8 @@ public class VWServiceTests : IDisposable
     {
         var result = await _service.GetStatus();
         Assert.NotNull(result);
-        Assert.NotNull(result.Status);
-        Assert.False(string.IsNullOrWhiteSpace(result.Status.Vin));
-        Assert.NotEqual(VWVehicleState.Unknown, result.Status.VehicleState);
+        Assert.False(string.IsNullOrWhiteSpace(result.Vin));
+        Assert.NotEqual(VWVehicleState.Unknown, result.VehicleState);
     }
 
     [Fact]

@@ -1,6 +1,43 @@
-﻿using System.Text.Json;
+﻿using System.Net.NetworkInformation;
+using System.Text.Json;
 
 namespace ChargeMaster.Services.VolksWagen;
+
+/// <summary>
+/// Begränsad version av VWStatus. Innehåller endast de fält som är relevanta för
+/// statusuppdateringar i realtid. Minskar mängden känslig information
+/// som UI har tillgång till och även storleken på skickad information.
+/// </summary>
+public class VWStatusLimitet
+{
+    public double? ChargingSettingsTargetLevel { get; set; }
+    public double? BatteryLevel { get; set; }
+
+    public VWStatusLimitet(VWStatus status)
+    {
+        ChargingSettingsTargetLevel = status.ChargingSettingsTargetLevel;
+        BatteryLevel = status.BatteryLevel; 
+    }
+}
+
+public class VWStatusEventArgs : EventArgs
+{
+    /// <summary>
+    /// Gets the vehicle status data.
+    /// </summary>
+    public VWStatusLimitet? VWStatusLimitet { get; }
+
+    public DateTime Timestamp { get; } = DateTime.Now;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VWStatusEventArgs"/> class.
+    /// </summary>
+    /// <param name="status">The vehicle status data.</param>
+    public VWStatusEventArgs(VWStatus status)
+    {
+        VWStatusLimitet = new VWStatusLimitet(status);
+    }
+}
 
 /// <summary>
 /// Interaktion med Volkswagen-tjänster
@@ -15,14 +52,24 @@ namespace ChargeMaster.Services.VolksWagen;
 /// <param name="logger">Loggern som används för att registrera diagnostisk och operativ information för tjänsten.</param>
 public class VWService(HttpClient httpClient, ILogger<VWService> logger)
 {
+    /// <summary>
+    /// Event raised when vehicle data is successfully retrieved.
+    /// </summary>
+    public event EventHandler<VWStatusEventArgs>? VWStatusRetrieved;
+
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public async Task<VWStatusResponse?> GetStatus()
+    public async Task<VWStatus?> GetStatus()
     {
         try
         {
             var json = await httpClient.GetStringAsync("/status");
-            return JsonSerializer.Deserialize<VWStatusResponse>(json, JsonOptions);
+            VWStatusResponse? response = JsonSerializer.Deserialize<VWStatusResponse>(json, JsonOptions);
+            if (response?.Status != null)
+            {
+                VWStatusRetrieved?.Invoke(this, new VWStatusEventArgs(response.Status));
+            }
+            return response?.Status;
         }
         catch (Exception ex)
         {
