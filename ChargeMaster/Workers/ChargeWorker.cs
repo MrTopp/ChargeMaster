@@ -361,8 +361,8 @@ public class ChargeWorker(
     {
         try
         {
-            VWStatusResponse? response = await _vwService.GetStatus();
-            return (response?.Status?.ChargingPower ?? 0) > 0;
+            VWStatus? response = await _vwService.GetStatus();
+            return (response?.ChargingPower ?? 0) > 0;
         }
         catch (CarConnectionException ex)
         {
@@ -449,10 +449,10 @@ public class ChargeWorker(
     internal async Task<double> LaddBehov()
     {
         // Beräkna laddbehov
-        VWStatusResponse? response;
+        VWStatus? status;
         try
         {
-            response = await _vwService.GetStatus();
+            status = await _vwService.GetStatus();
         }
         catch (CarConnectionException ex)
         {
@@ -461,9 +461,8 @@ public class ChargeWorker(
             return 0;
         }
 
-        if (response?.Status == null)
+        if (status == null)
             return 0;
-        var status = response.Status;
         if (status.BatteryLevel == null)
             return 0;
         double level = status.BatteryLevel ?? 0;
