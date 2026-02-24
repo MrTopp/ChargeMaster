@@ -21,6 +21,7 @@
 - Prefer `var` over explicit types when the type is obvious from the right-hand side.
 - Follow standard C# naming conventions (PascalCase for classes/methods, camelCase for local variables).
 - Do not use interfaces for dependency injection unless multiple implementations are expected.
+- Keep code clean and concise, removing dead code and cleaning up after refactoring to maintain a tidy codebase.
 
 ## Blazor Specifics
 - Use `@inject` for dependency injection in Razor components.
@@ -53,9 +54,8 @@ The application should also provide a Blazor Interactive Server front-end to dis
 - The application will be hosted on a Raspberry Pi running Ubuntu 25.10.
 - Use nginx as a reverse proxy to forward requests to the ASP.NET Core application.
 - Logging is done by serilog sending output to stdout and stderr, which will be captured by the hosting environment.
-- Path to applicaation is `/var/www/ChargeMaster`
+- Path to application is `/var/www/ChargeMaster`
 - User running the application is `chargemasterapp`
 - Use systemd to manage the application as a service, ensuring it starts on boot and restarts on failure.
 - Application is running interface on http, nginx will handle SSL termination and forwarding to the application.
 - systemd service name is `chargemaster-dotnet.service` and should be configured to run the application with the appropriate user and permissions.
-- 
