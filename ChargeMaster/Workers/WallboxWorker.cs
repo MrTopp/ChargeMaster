@@ -105,12 +105,64 @@ public class WallboxWorker(
 
     public WallboxMeterInfo? MeterInfo { get; private set; }
 
-    private void CalculateCurrentPowerAsync(WallboxMeterInfo? meterInfo)
+    // Föregående mätning
+    private DateTime _lastMeterInfoCalculationTime = DateTime.MinValue;
+    private long _lastStartAccEnergy;
+
+    // Sista mätningen i förra timmen
+    private DateTime _finalMeterInfoCalculationTime = DateTime.MinValue;
+    private long _finalStartAccEnergy;
+
+    private double _currentHourAccEnergy;     // Ackumulerad energi för innevarande timme
+    private double _currentHourTotalEnergy;   // Beräknad total energi för innevarande timme
+
+    internal void CalculateCurrentPowerAsync(WallboxMeterInfo? meterInfo, DateTime? testNu = null)
     {
+        // Räknar ut förbrukning innevarande timme.
+        // Sista mätningen från föregående timme är startpunkt
+        // eftersom vi inte kan få exakt värde vid timskiftet.
         MeterInfo = meterInfo;
         if (meterInfo is null)
             return;
+
+        DateTime nu = testNu ?? DateTime.Now;
+
+        // Initiering vid uppstart, sätt startvärden
+        if (_lastMeterInfoCalculationTime == DateTime.MinValue)
+        {
+            _lastMeterInfoCalculationTime = nu;
+            _lastStartAccEnergy = meterInfo.AccEnergy;
+            _finalMeterInfoCalculationTime = nu;
+            _finalStartAccEnergy = meterInfo.AccEnergy;
+            return;
+        }
+
+        // Om ny timme, nollställ startvärden för timme
+        if (nu.Hour != _lastMeterInfoCalculationTime.Hour)
+        {
+            _finalMeterInfoCalculationTime = _lastMeterInfoCalculationTime;
+            _finalStartAccEnergy = _lastStartAccEnergy;
+        }
+
+        // Beräkna ackumulerad effekt för innevarande timme
+
+        // Om vi fått ett nytt värde från wallboxen, använd det för att räkna ut effekt.
+        if (_lastStartAccEnergy != meterInfo.AccEnergy)
+        {
+            // Nytt mätvärde, summera effekterna
+            _currentHourAccEnergy = meterInfo.AccEnergy - _finalStartAccEnergy; ;
+            _currentHourTotalEnergy = (nu - _finalMeterInfoCalculationTime).TotalSeconds > 0
+                ? _currentHourAccEnergy * 3600 / (nu - _finalMeterInfoCalculationTime).TotalSeconds
+                : 0;
+        }
+
+        meterInfo.EffektTimmeNu = _currentHourAccEnergy;
+        meterInfo.EffektTimmeTotal = _currentHourTotalEnergy;
+
         MeterInfoCalculated?.Invoke(this, new MeterInfoEventArgs(meterInfo));
+
+        _lastMeterInfoCalculationTime = nu;
+        _lastStartAccEnergy = meterInfo.AccEnergy;
     }
 
     /// <summary>
@@ -323,9 +375,9 @@ public class WallboxWorker(
         }
     }
 
-    
 
-    
+
+
 
     /// <summary>
     /// Calculates total monthly energy consumption by retrieving the first and last meter readings for the specified month.
@@ -405,6 +457,7 @@ public class WallboxWorker(
     /// Högsta värdet i intervallet för oktober till mars vardagar 7-19
     /// </summary>
     /// <param name="dateInMonth">Datum i efterfrågad månad</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageDaytimeAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
@@ -471,7 +524,7 @@ public class WallboxWorker(
                 logger.LogCritical("Database context is not available. Cannot calculate hourly energy usage.");
                 return new List<HourlyEnergyUsage>();
             }
-            
+
             // Bestäm start- och slutdatum för månaden
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
             var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
@@ -503,7 +556,6 @@ public class WallboxWorker(
                 if (reading.ReadAt.Hour != lastReading.ReadAt.Hour || reading.ReadAt.Date != lastReading.ReadAt.Date)
                 {
                     var tidsdiff = reading.ReadAt - lastReading.ReadAt;
-                    var h = tidsdiff.Hours;
                     var energyUsageWh = reading.AccEnergy - lastReading.AccEnergy;
                     // Fördela förbrukningen jämnt över timmarna
                     energyUsageWh = (long)(energyUsageWh * (3600.0 / tidsdiff.TotalSeconds));

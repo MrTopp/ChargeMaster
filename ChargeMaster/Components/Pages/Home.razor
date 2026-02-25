@@ -45,11 +45,11 @@
                         </tr>
                         <tr>
                             <td><strong>Förbrukning denna timme</strong></td>
-                            <td class="text-end">@ChargeWorker.ForbrukningDennaTimme W</td>
+                            <td class="text-end">@CurrentMeterInfo.EffektTimmeNu W</td>
                         </tr>
-                        <tr class="@(EffektDennaTimmeTotalt > 2500 ? "table-danger" : "")">
+                            <tr class="@(CurrentMeterInfo.EffektTimmeTotal > 2500 ? "table-danger" : "")">
                             <td><strong>Uppskattad förbrukning denna timme</strong></td>
-                            <td class="text-end"><strong>@(EffektDennaTimmeTotalt) W</strong></td>
+                                <td class="text-end"><strong>@((CurrentMeterInfo.EffektTimmeTotal).ToString("F0")) W</strong></td>
                         </tr>
                     </tbody>
                 </table>
@@ -238,18 +238,6 @@
         _ = VWService.GetStatus();
 
         _ = UpdateHourlyEnergyLoop();
-    }
-
-    private long EffektDennaTimmeTotalt
-    {
-        get
-        {
-            if (DateTime.Now.Minute + DateTime.Now.Second == 0)
-            {
-                return 0; // Undvik division med noll
-            }
-            return ChargeWorker.ForbrukningDennaTimme * 3600 / (DateTime.Now.Minute * 60 + DateTime.Now.Second);
-        }
     }
 
     private long ForbrukningManadTotalt => MonthlyUsage * DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month) / DateTime.Now.Day;

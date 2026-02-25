@@ -40,7 +40,7 @@ public class ChargeWorker(
     /// <summary>
     /// Uppräknat värde på timförbrukning.
     /// </summary>
-    public long ForbrukningDennaTimme { get; private set; }
+    private long ForbrukningDennaTimme { get; set; }
 
     /// <summary>
     /// Flagga att wallbox är panikstoppad.

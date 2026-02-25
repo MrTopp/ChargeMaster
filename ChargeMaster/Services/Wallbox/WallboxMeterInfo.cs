@@ -88,4 +88,14 @@ public class WallboxMeterInfo
     public long CurrentEnergy =>
         Phase1CurrentEnergy + Phase2CurrentEnergy + Phase3CurrentEnergy;
 
+    /// <summary>
+    /// Ackumulerad effektförbrukning i W för alla faser denna timme
+    /// </summary>
+    public double EffektTimmeNu { get; set; }
+
+    /// <summary>
+    /// Uppskattad effektförbrukning för innevarande timme
+    /// </summary>
+    public double EffektTimmeTotal { get; set; }
+
 }

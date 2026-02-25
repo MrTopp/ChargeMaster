@@ -193,4 +193,67 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 
         await worker.WallboxLoop(TestContext.Current.CancellationToken);
     }
+
+    [Fact]
+    public void CalculateCurrentPowerAsync_ShouldUpdateMeterInfo()
+    {
+        // Arrange
+        var services = CreateServiceCollection();
+        var provider = services.BuildServiceProvider();
+        var wallboxService = provider.GetRequiredService<WallboxService>();
+        var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
+        var worker = new WallboxWorker(provider, wallboxService, logger);
+
+        // Act
+        // mätning 1: 11:52 - initiering av startvärden
+        var meterInfo = new WallboxMeterInfo { AccEnergy = 900 };
+        DateTime testNu = new DateTime(2024, 6, 1, 11, 53, 0);
+        worker.CalculateCurrentPowerAsync(meterInfo, testNu);
+        // Inga värde beräknade, finns ingen tidigare mätning att jämföra med.
+        Assert.Equal(0, worker.MeterInfo!.EffektTimmeNu);
+        Assert.Equal(0, worker.MeterInfo.EffektTimmeTotal);
+
+        // mätning 2: 11:59 samma timme
+        meterInfo = new WallboxMeterInfo { AccEnergy = 1000 };
+        testNu = new DateTime(2024, 6, 1, 11, 59, 0);
+        worker.CalculateCurrentPowerAsync(meterInfo, testNu);
+        Assert.Equal(100, worker.MeterInfo.EffektTimmeNu);
+        Assert.Equal(1000, worker.MeterInfo.EffektTimmeTotal);
+
+        // mätning 2: 12:05, efter 6 minuter, ny timme
+        meterInfo = new WallboxMeterInfo { AccEnergy = 1100 };
+        testNu = new DateTime(2024, 6, 1, 12, 5, 0);
+        worker.CalculateCurrentPowerAsync(meterInfo, testNu);
+        Assert.Equal(100, worker.MeterInfo.EffektTimmeNu);
+        Assert.Equal(1000, worker.MeterInfo.EffektTimmeTotal);
+
+        // mätning 3: 12:11, efter 12 minuter, fortsättning av samma timme
+        meterInfo = new WallboxMeterInfo { AccEnergy = 1200 };
+        testNu = new DateTime(2024, 6, 1, 12, 11, 0);
+        worker.CalculateCurrentPowerAsync(meterInfo, testNu);
+        Assert.Equal(200, worker.MeterInfo.EffektTimmeNu);
+        Assert.Equal(1000, worker.MeterInfo.EffektTimmeTotal);
+
+        // mätning 2: 12:59 sista läsning timme
+        meterInfo = new WallboxMeterInfo { AccEnergy = 2000 };
+        testNu = new DateTime(2024, 6, 1, 12, 59, 0);
+        worker.CalculateCurrentPowerAsync(meterInfo, testNu);
+        Assert.Equal(1000, worker.MeterInfo.EffektTimmeNu);
+        Assert.Equal(1000, worker.MeterInfo.EffektTimmeTotal);
+
+        // mätning 4: 13:05, ny timme
+        meterInfo = new WallboxMeterInfo { AccEnergy = 2100 };
+        testNu = new DateTime(2024, 6, 1, 13, 5, 0);
+        worker.CalculateCurrentPowerAsync(meterInfo, testNu);
+        Assert.Equal(100, worker.MeterInfo.EffektTimmeNu);
+        Assert.Equal(1000, worker.MeterInfo.EffektTimmeTotal);
+
+        // mätning 4: 13:11, fortsättning av samma timme
+        meterInfo = new WallboxMeterInfo { AccEnergy = 2200 };
+        testNu = new DateTime(2024, 6, 1, 13, 11, 0);
+        worker.CalculateCurrentPowerAsync(meterInfo, testNu);
+        Assert.Equal(200, worker.MeterInfo.EffektTimmeNu);
+        Assert.Equal(1000, worker.MeterInfo.EffektTimmeTotal);
+
+    }
 }
