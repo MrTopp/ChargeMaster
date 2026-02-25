@@ -118,51 +118,51 @@ public class WallboxWorker(
 
     internal void CalculateCurrentPowerAsync(WallboxMeterInfo? meterInfo, DateTime? testNu = null)
     {
-        // Räknar ut förbrukning innevarande timme.
-        // Sista mätningen från föregående timme är startpunkt
+        // Räknar ut förbrukning innevarande timme. Sista mätningen från föregående timme är startpunkt
         // eftersom vi inte kan få exakt värde vid timskiftet.
         MeterInfo = meterInfo;
-        if (meterInfo is null)
-            return;
-
-        DateTime nu = testNu ?? DateTime.Now;
+        if (meterInfo is null) return;
 
         // Initiering vid uppstart, sätt startvärden
-        if (_lastMeterInfoCalculationTime == DateTime.MinValue)
+        if (_lastStartAccEnergy == 0)
         {
+            // Kan inget göra, vänta på läsning med uppdaterad effekt
+            _lastStartAccEnergy = meterInfo.AccEnergy;
+        }
+        else if (_lastStartAccEnergy != meterInfo.AccEnergy)
+        {
+            // Uppdaterad effekt
+            DateTime nu = testNu ?? DateTime.Now;
+            if (_finalMeterInfoCalculationTime == DateTime.MinValue)
+            {
+                // initiera baseline för timme
+                _finalMeterInfoCalculationTime = nu;
+                _finalStartAccEnergy = meterInfo.AccEnergy;
+            }
+            else
+            {
+                // Om ny timme, nollställ startvärden för timme
+                if (nu.Hour != _lastMeterInfoCalculationTime.Hour)
+                {
+                    _finalMeterInfoCalculationTime = _lastMeterInfoCalculationTime;
+                    _finalStartAccEnergy = _lastStartAccEnergy;
+                }
+                // Beräkna timmens effektvärden
+                _currentHourAccEnergy = meterInfo.AccEnergy - _finalStartAccEnergy;
+                var secondsSinceLastCalculation = (int)(nu - _finalMeterInfoCalculationTime).TotalSeconds;
+                _currentHourTotalEnergy = secondsSinceLastCalculation > 0
+                    ? _currentHourAccEnergy * 3600 / secondsSinceLastCalculation
+                    : 0;
+            }
             _lastMeterInfoCalculationTime = nu;
             _lastStartAccEnergy = meterInfo.AccEnergy;
-            _finalMeterInfoCalculationTime = nu;
-            _finalStartAccEnergy = meterInfo.AccEnergy;
-            return;
         }
 
-        // Om ny timme, nollställ startvärden för timme
-        if (nu.Hour != _lastMeterInfoCalculationTime.Hour)
-        {
-            _finalMeterInfoCalculationTime = _lastMeterInfoCalculationTime;
-            _finalStartAccEnergy = _lastStartAccEnergy;
-        }
-
-        // Beräkna ackumulerad effekt för innevarande timme
-
-        // Om vi fått ett nytt värde från wallboxen, använd det för att räkna ut effekt.
-        if (_lastStartAccEnergy != meterInfo.AccEnergy)
-        {
-            // Nytt mätvärde, summera effekterna
-            _currentHourAccEnergy = meterInfo.AccEnergy - _finalStartAccEnergy; ;
-            _currentHourTotalEnergy = (nu - _finalMeterInfoCalculationTime).TotalSeconds > 0
-                ? _currentHourAccEnergy * 3600 / (nu - _finalMeterInfoCalculationTime).TotalSeconds
-                : 0;
-        }
-
+        // Posta alltid event med aktuella värden.
         meterInfo.EffektTimmeNu = _currentHourAccEnergy;
         meterInfo.EffektTimmeTotal = _currentHourTotalEnergy;
-
         MeterInfoCalculated?.Invoke(this, new MeterInfoEventArgs(meterInfo));
 
-        _lastMeterInfoCalculationTime = nu;
-        _lastStartAccEnergy = meterInfo.AccEnergy;
     }
 
     /// <summary>
