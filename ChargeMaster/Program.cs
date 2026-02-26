@@ -2,6 +2,7 @@
 using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.VolksWagen;
+using ChargeMaster.Services.Daikin;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Workers;
 
@@ -108,6 +109,12 @@ namespace ChargeMaster
                 {
                     client.BaseAddress = new Uri("http://192.168.1.205:8080/");
                     client.Timeout = TimeSpan.FromSeconds(20);
+                });
+
+                builder.Services.AddHttpClient<DaikinService, DaikinService>(client =>
+                {
+                    client.BaseAddress = new Uri("http://192.168.1.156/");
+                    client.Timeout = TimeSpan.FromSeconds(10);
                 });
 
                 // ----- Workers -----
