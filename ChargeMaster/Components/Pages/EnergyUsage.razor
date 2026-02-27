@@ -1,0 +1,232 @@
+﻿@page "/energy-usage"
+@rendermode InteractiveServer
+@using ChargeMaster.Data
+@using ChargeMaster.Services.Wallbox
+@using Microsoft.EntityFrameworkCore
+@inject IServiceProvider ServiceProvider
+
+<PageTitle>Timförbrukning</PageTitle>
+
+<div style="margin: 8px;">
+
+<h3>Timförbrukning per månad</h3>
+
+<div class="mb-3 d-flex align-items-center gap-2">
+    <button class="btn btn-outline-secondary btn-sm" @onclick="PreviousMonth">&laquo;</button>
+    <span class="fw-bold">@selectedMonth.ToString("MMMM yyyy")</span>
+    <button class="btn btn-outline-secondary btn-sm" @onclick="NextMonth">&raquo;</button>
+</div>
+
+@if (loading)
+{
+    <p><em>Laddar data...</em></p>
+}
+else if (hourlyData is null || hourlyData.Count == 0)
+{
+    <div class="alert alert-info">
+        Ingen förbrukningsdata hittades för @selectedMonth.ToString("MMMM yyyy").
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm" style="font-size: 0.75rem;">
+            <thead class="table-light">
+                <tr>
+                    <th style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;">Timme</th>
+                    @foreach (var day in daysInMonth)
+                    {
+                        <th class="text-center">@day</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int hour = 0; hour < 24; hour++)
+                {
+                    var h = hour;
+                    <tr>
+                        <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;" class="fw-bold">
+                            @h.ToString("00"):00
+                        </td>
+                        @foreach (var day in daysInMonth)
+                        {
+                            var key = (day, h);
+                            var hasValue = hourlyData.TryGetValue(key, out var wh);
+                            var isHighlight = IsHighlightHour(day, h);
+                            var isHighestOverall = highestOverallKey == key;
+                            var isHighestHighlight = highestHighlightKey == key;
+                            var isBold = isHighestOverall || isHighestHighlight;
+                            <td class="text-end @(isHighlight ? "text-danger" : "") @(isBold ? "fw-bold" : isHighlight ? "fw-semibold" : "")">
+                                @if (hasValue && wh > 0)
+                                {
+                                    @((wh / 1000.0).ToString("F2"))
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="table-light">
+                <tr>
+                    <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;" class="fw-bold">Summa</td>
+                    @foreach (var day in daysInMonth)
+                    {
+                        var dayTotal = Enumerable.Range(0, 24)
+                            .Sum(h => hourlyData.TryGetValue((day, h), out var v) ? v : 0);
+                        <td class="text-end fw-bold">
+                            @if (dayTotal > 0)
+                            {
+                                @((dayTotal / 1000.0).ToString("F1"))
+                            }
+                        </td>
+                    }
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <p class="text-muted mt-2" style="font-size: 0.8rem;">
+        Värden i kWh. <span class="text-danger fw-semibold">Röda värden</span> = vardagar 07–19, oktober–mars.
+        <strong>Fetstil</strong> = högsta värdet totalt och/eller högsta värdet vardagar 07–19, oktober–mars.
+    </p>
+}
+
+</div>
+
+@code {
+    private DateTime selectedMonth = new(DateTime.Now.Year, DateTime.Now.Month, 1);
+    private bool loading = true;
+    private Dictionary<(int Day, int Hour), long>? hourlyData;
+    private List<int> daysInMonth = new();
+    private (int Day, int Hour)? highestOverallKey;
+    private (int Day, int Hour)? highestHighlightKey;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task PreviousMonth()
+    {
+        selectedMonth = selectedMonth.AddMonths(-1);
+        await LoadDataAsync();
+    }
+
+    private async Task NextMonth()
+    {
+        selectedMonth = selectedMonth.AddMonths(1);
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        loading = true;
+        hourlyData = null;
+
+        var totalDays = DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month);
+        daysInMonth = Enumerable.Range(1, totalDays).ToList();
+
+        var startOfMonth = selectedMonth;
+        var endOfMonth = startOfMonth.AddMonths(1);
+
+        // Hämta sista läsningen från föregående månad som startvärde
+        var beforeMonth = startOfMonth.AddSeconds(-1);
+
+        using var scope = ServiceProvider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        // Hämta alla läsningar för månaden plus sista från föregående period
+        var lastBefore = await db.WallboxMeterReadings
+            .Where(r => r.ReadAt < startOfMonth)
+            .OrderByDescending(r => r.ReadAt)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+
+        var readings = await db.WallboxMeterReadings
+            .Where(r => r.ReadAt >= startOfMonth && r.ReadAt < endOfMonth)
+            .OrderBy(r => r.ReadAt)
+            .AsNoTracking()
+            .Select(r => new { r.ReadAt, r.AccEnergy })
+            .ToListAsync();
+
+        var result = new Dictionary<(int Day, int Hour), long>();
+
+        if (readings.Count == 0)
+        {
+            hourlyData = result;
+            loading = false;
+            return;
+        }
+
+        // Gruppera per timme: sista läsningen per timme
+        // Nyckeln är (dag, timme) -> sista AccEnergy i den timmen
+        var lastPerHour = new SortedDictionary<(int Day, int Hour), long>();
+
+        foreach (var r in readings)
+        {
+            var key = (r.ReadAt.Day, r.ReadAt.Hour);
+            lastPerHour[key] = r.AccEnergy;
+        }
+
+        // Beräkna förbrukning per timme
+        long? previousAccEnergy = lastBefore?.AccEnergy;
+        DateTime? previousTime = lastBefore?.ReadAt;
+
+        var sortedKeys = lastPerHour.Keys.ToList();
+
+        for (int i = 0; i < sortedKeys.Count; i++)
+        {
+            var key = sortedKeys[i];
+            var currentAccEnergy = lastPerHour[key];
+
+            if (previousAccEnergy.HasValue && previousTime.HasValue)
+            {
+                var diffWh = currentAccEnergy - previousAccEnergy.Value;
+
+                if (diffWh > 0)
+                {
+                    // Beräkna faktisk tid mellan mätpunkterna
+                    var currentTime = new DateTime(selectedMonth.Year, selectedMonth.Month, key.Day, key.Hour, 30, 0);
+                    var intervalMinutes = (currentTime - previousTime.Value).TotalMinutes;
+
+                    // Justera till en hel timme (60 min)
+                    var adjustedWh = intervalMinutes > 0
+                        ? (long)(diffWh * 60.0 / intervalMinutes)
+                        : diffWh;
+
+                    result[key] = adjustedWh;
+                }
+            }
+
+            previousAccEnergy = currentAccEnergy;
+            // Uppskatta tiden till mitten av timmen för nästa beräkning
+            previousTime = new DateTime(selectedMonth.Year, selectedMonth.Month, key.Day, key.Hour, 30, 0);
+        }
+
+        hourlyData = result;
+
+        highestOverallKey = result.Count > 0
+            ? result.MaxBy(kv => kv.Value).Key
+            : null;
+
+        highestHighlightKey = result
+            .Where(kv => IsHighlightHour(kv.Key.Day, kv.Key.Hour))
+            .Select(kv => ((int Day, int Hour)?)kv.Key)
+            .DefaultIfEmpty(null)
+            .MaxBy(k => k.HasValue ? result[k.Value] : 0);
+
+        loading = false;
+    }
+
+    private bool IsHighlightHour(int day, int hour)
+    {
+        if (hour < 7 || hour >= 19)
+            return false;
+
+        var month = selectedMonth.Month;
+        if (month >= 4 && month <= 9)
+            return false;
+
+        var date = new DateTime(selectedMonth.Year, selectedMonth.Month, day);
+        return date.DayOfWeek >= DayOfWeek.Monday && date.DayOfWeek <= DayOfWeek.Friday;
+    }
+}
