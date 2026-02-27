@@ -23,11 +23,30 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
 
             return new DaikinBasicInfo
             {
+                Type = data.GetValueOrDefault("type"),
+                Region = data.GetValueOrDefault("reg"),
+                DaylightSaving = ParseInt(data.GetValueOrDefault("dst")),
+                FirmwareVersion = data.GetValueOrDefault("ver"),
+                Revision = data.GetValueOrDefault("rev"),
+                Power = ParseInt(data.GetValueOrDefault("pow")),
+                ErrorCode = ParseInt(data.GetValueOrDefault("err")),
                 Name = data.TryGetValue("name", out var name)
                     ? HttpUtility.UrlDecode(name)
                     : null,
+                Method = data.GetValueOrDefault("method"),
+                Port = ParseInt(data.GetValueOrDefault("port")),
+                Id = data.GetValueOrDefault("id"),
+                AdapterKind = ParseInt(data.GetValueOrDefault("adp_kind")),
+                ProtocolVersion = data.GetValueOrDefault("pv"),
+                Led = ParseInt(data.GetValueOrDefault("led")),
                 MacAddress = data.GetValueOrDefault("mac"),
-                FirmwareVersion = data.GetValueOrDefault("ver")
+                Ssid = data.GetValueOrDefault("ssid"),
+                AdapterMode = data.GetValueOrDefault("adp_mode"),
+                WifiSignal = ParseInt(data.GetValueOrDefault("radio1")),
+                ConnectedSsid = data.TryGetValue("ssid1", out var ssid1)
+                    ? HttpUtility.UrlDecode(ssid1)
+                    : null,
+                SecurityType = data.GetValueOrDefault("sec_type")
             };
         }
         catch (Exception ex)
