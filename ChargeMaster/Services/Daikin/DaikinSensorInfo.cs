@@ -21,7 +21,12 @@ public class DaikinSensorInfo
     public double? IndoorHumidity { get; set; }
 
     /// <summary>
-    /// Kompressorfrekvens (om tillgänglig).
+    /// Kompressorfrekvens. 999 = vilande/av, 0 = av.
     /// </summary>
-    public double? CompressorFrequency { get; set; }
+    public int? CompressorFrequency { get; set; }
+
+    /// <summary>
+    /// Felkod (0 = inget fel).
+    /// </summary>
+    public int? ErrorCode { get; set; }
 }
