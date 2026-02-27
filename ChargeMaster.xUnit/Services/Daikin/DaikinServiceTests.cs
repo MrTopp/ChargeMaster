@@ -28,12 +28,24 @@ public class DaikinServiceTests : IDisposable
     public async Task GetBasicInfoAsync_ReturnsDeviceInfo()
     {
         // Act
-        var result = await _service.GetBasicInfoAsync();
+        DaikinBasicInfo? result = await _service.GetBasicInfoAsync();
 
         // Assert
         Assert.NotNull(result);
+        Assert.Equal("aircon", result.Type);
+        Assert.False(string.IsNullOrWhiteSpace(result.Region));
+        Assert.False(string.IsNullOrWhiteSpace(result.FirmwareVersion));
         Assert.False(string.IsNullOrWhiteSpace(result.Name));
         Assert.False(string.IsNullOrWhiteSpace(result.MacAddress));
+        Assert.False(string.IsNullOrWhiteSpace(result.Id));
+        Assert.False(string.IsNullOrWhiteSpace(result.Ssid));
+        Assert.False(string.IsNullOrWhiteSpace(result.ConnectedSsid));
+        Assert.False(string.IsNullOrWhiteSpace(result.SecurityType));
+        Assert.NotNull(result.Power);
+        Assert.InRange(result.Power.Value, 0, 1);
+        Assert.NotNull(result.ErrorCode);
+        Assert.NotNull(result.Port);
+        Assert.NotNull(result.WifiSignal);
     }
 
     [Fact]
