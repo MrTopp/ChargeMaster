@@ -71,6 +71,11 @@ public class DaikinBasicInfo
     public string? ProtocolVersion { get; set; }
 
     /// <summary>
+    /// Kontrollprotokollversion.
+    /// </summary>
+    public string? ControlProtocolVersion { get; set; }
+
+    /// <summary>
     /// LED-indikator aktiv (1 = ja, 0 = nej).
     /// </summary>
     public int? Led { get; set; }
@@ -104,4 +109,9 @@ public class DaikinBasicInfo
     /// Säkerhetstyp för WiFi-anslutningen (t.ex. "WPA2").
     /// </summary>
     public string? SecurityType { get; set; }
+
+    /// <summary>
+    /// Semesterläge aktivt (0 = av, 1 = på).
+    /// </summary>
+    public int? HolidayMode { get; set; }
 }

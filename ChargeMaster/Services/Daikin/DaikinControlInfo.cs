@@ -11,7 +11,7 @@ public class DaikinControlInfo
     public int Power { get; set; }
 
     /// <summary>
-    /// Driftläge (0=Auto, 1=Auto, 2=Torkning, 3=Kylning, 4=Uppvärmning, 6=Fläkt).
+    /// Driftläge (0/1/7=Auto, 2=Torkning, 3=Kylning, 4=Uppvärmning, 6=Fläkt).
     /// </summary>
     public int Mode { get; set; }
 
@@ -19,6 +19,11 @@ public class DaikinControlInfo
     /// Börvärdestemperatur i °C.
     /// </summary>
     public double? TargetTemperature { get; set; }
+
+    /// <summary>
+    /// Målnivå för fuktighet.
+    /// </summary>
+    public string? TargetHumidity { get; set; }
 
     /// <summary>
     /// Fläkthastighet (A=Auto, B=Tyst, 3-7=Hastighet).
@@ -31,11 +36,16 @@ public class DaikinControlInfo
     public int FanDirection { get; set; }
 
     /// <summary>
+    /// Alertkod.
+    /// </summary>
+    public int? Alert { get; set; }
+
+    /// <summary>
     /// Returnerar en läsbar beskrivning av driftläget.
     /// </summary>
     public string ModeDescription => Mode switch
     {
-        0 or 1 => "Auto",
+        0 or 1 or 7 => "Auto",
         2 => "Torkning",
         3 => "Kylning",
         4 => "Uppvärmning",
