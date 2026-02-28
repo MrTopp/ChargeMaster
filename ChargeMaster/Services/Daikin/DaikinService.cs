@@ -144,7 +144,9 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
 
             return new DaikinWifiSetting
             {
-                SSID = data.GetValueOrDefault("ssid"),
+                SSID = data.TryGetValue("ssid", out var name)
+                    ? HttpUtility.UrlDecode(name)
+                    : null,
                 Security = data.GetValueOrDefault("security"),
                 Link = ParseInt(data.GetValueOrDefault("link"))
             };
@@ -227,6 +229,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     /// <summary>
     /// Hämtar aktuella sensorvärden (temperaturer, fuktighet, kompressorfrekvens).
     /// </summary>
+    /// <remarks>Fuktmätare inte tillgänglig i min enhet</remarks>
     public async Task<DaikinSensorInfo?> GetSensorInfoAsync()
     {
         try
@@ -363,8 +366,8 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
             return new DaikinWeekPowerEx
             {
                 StartDayOfWeek = ParseInt(data.GetValueOrDefault("s_dayw")),
-                WeekHeat = data.GetValueOrDefault("week_heat"),
-                WeekCool = data.GetValueOrDefault("week_cool")
+                WeekHeat = ParseIntArray(data.GetValueOrDefault("week_heat")),
+                WeekCool = ParseIntArray(data.GetValueOrDefault("week_cool"))
             };
         }
         catch (Exception ex)
@@ -673,5 +676,19 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
             return null;
 
         return int.TryParse(value, out var result) ? result : null;
+    }
+
+    /// <summary>
+    /// Parsar en '/'-separerad sträng till en int-array.
+    /// Daikin returnerar t.ex. "59/128/171/147" där varje värde är i 100W-enheter.
+    /// </summary>
+    private static int[] ParseIntArray(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return [];
+
+        return value.Split('/')
+            .Select(s => int.TryParse(s.Trim(), out var v) ? v : 0)
+            .ToArray();
     }
 }
