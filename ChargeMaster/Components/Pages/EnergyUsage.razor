@@ -56,7 +56,8 @@ else
                             var isHighestOverall = highestOverallKey == key;
                             var isHighestHighlight = highestHighlightKey == key;
                             var isBold = isHighestOverall || isHighestHighlight;
-                            <td class="text-end @(isHighlight ? "text-danger" : "") @(isBold ? "fw-bold" : isHighlight ? "fw-semibold" : "")">
+                            var hasFrame = isHighestOverall || isHighestHighlight;
+                            <td class="text-end @(isHighlight ? "text-danger" : "") @(isBold ? "fw-bold" : isHighlight ? "fw-semibold" : "")" style="@(hasFrame ? "box-shadow: inset 0 0 0 2px red;" : "")">
                                 @if (hasValue && wh > 0)
                                 {
                                     @((wh / 1000.0).ToString("F2"))
@@ -81,6 +82,60 @@ else
                         </td>
                     }
                 </tr>
+                @{
+                    var maxRowValues = daysInMonth
+                        .Select(d => (Day: d, Max: Enumerable.Range(0, 24).Select(h => hourlyData.TryGetValue((d, h), out var v) ? v : 0).Max()))
+                        .ToList();
+                    var maxRowHighest = maxRowValues.Where(x => x.Max > 0).Select(x => x.Max).DefaultIfEmpty(0).Max();
+                }
+                <tr>
+                    <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;" class="fw-bold">Max</td>
+                    @foreach (var item in maxRowValues)
+                    {
+                        var isMaxHighest = item.Max > 0 && item.Max == maxRowHighest;
+                        <td class="text-end fw-bold" style="@(isMaxHighest ? "box-shadow: inset 0 0 0 2px red;" : "")">
+                            @if (item.Max > 0)
+                            {
+                                @((item.Max / 1000.0).ToString("F2"))
+                            }
+                        </td>
+                    }
+                </tr>
+                @if (IsHighlightMonth())
+                {
+                    var peakRowValues = daysInMonth
+                        .Select(d =>
+                        {
+                            var date = new DateTime(selectedMonth.Year, selectedMonth.Month, d);
+                            var isWeekday = date.DayOfWeek >= DayOfWeek.Monday && date.DayOfWeek <= DayOfWeek.Friday;
+                            var peakMax = isWeekday
+                                ? Enumerable.Range(7, 12).Select(h => hourlyData.TryGetValue((d, h), out var v) ? v : 0).Max()
+                                : 0;
+                            return (Day: d, IsWeekday: isWeekday, Max: peakMax);
+                        })
+                        .ToList();
+                    var peakRowHighest = peakRowValues.Where(x => x.Max > 0).Select(x => x.Max).DefaultIfEmpty(0).Max();
+                    <tr>
+                        <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;" class="fw-bold text-danger">Max 7–19</td>
+                        @foreach (var item in peakRowValues)
+                        {
+                            if (item.IsWeekday)
+                            {
+                                var isPeakHighest = item.Max > 0 && item.Max == peakRowHighest;
+                                <td class="text-end fw-bold text-danger" style="@(isPeakHighest ? "box-shadow: inset 0 0 0 2px red;" : "")">
+                                    @if (item.Max > 0)
+                                    {
+                                        @((item.Max / 1000.0).ToString("F2"))
+                                    }
+                                </td>
+                            }
+                            else
+                            {
+                                <td></td>
+                            }
+                        }
+                    </tr>
+                }
             </tfoot>
         </table>
     </div>
@@ -215,6 +270,12 @@ else
             .MaxBy(k => k.HasValue ? result[k.Value] : 0);
 
         loading = false;
+    }
+
+    private bool IsHighlightMonth()
+    {
+        var month = selectedMonth.Month;
+        return month < 4 || month > 9;
     }
 
     private bool IsHighlightHour(int day, int hour)

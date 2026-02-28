@@ -62,9 +62,22 @@ public class DaikinWeekPower
 
 public class DaikinWeekPowerEx
 {
+    /// <summary>
+    /// Startdag för veckan (0=Sön, 1=Mån, ... 6=Lör).
+    /// </summary>
     public int? StartDayOfWeek { get; set; }
-    public string? WeekHeat { get; set; }
-    public string? WeekCool { get; set; }
+
+    /// <summary>
+    /// Daglig energiförbrukning för uppvärmning i 100W-enheter (dela med 10 för kWh).
+    /// Första värdet är idag, därefter bakåt.
+    /// </summary>
+    public int[] WeekHeat { get; set; } = [];
+
+    /// <summary>
+    /// Daglig energiförbrukning för kylning i 100W-enheter (dela med 10 för kWh).
+    /// Första värdet är idag, därefter bakåt.
+    /// </summary>
+    public int[] WeekCool { get; set; } = [];
 }
 
 public class DaikinDayPowerEx
