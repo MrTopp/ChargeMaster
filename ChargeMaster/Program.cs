@@ -121,11 +121,13 @@ namespace ChargeMaster
                 builder.Services.AddSingleton<PriceFetchingWorker>();
                 builder.Services.AddSingleton<WallboxWorker>();
                 builder.Services.AddSingleton<ChargeWorker>();
+                builder.Services.AddSingleton<DaikinWorker>();
 
                 builder.Services.AddHostedService(sp =>
                     sp.GetRequiredService<PriceFetchingWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<WallboxWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ChargeWorker>());
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<DaikinWorker>());
 
                 var app = builder.Build();
 
