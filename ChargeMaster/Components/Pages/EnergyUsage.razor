@@ -214,12 +214,12 @@ else
 
         // Gruppera per timme: sista läsningen per timme
         // Nyckeln är (dag, timme) -> sista AccEnergy i den timmen
-        var lastPerHour = new SortedDictionary<(int Day, int Hour), long>();
+        var lastPerHour = new SortedDictionary<(int Day, int Hour), (long AccEnergy, DateTime ReadAt)>();
 
         foreach (var r in readings)
         {
             var key = (r.ReadAt.Day, r.ReadAt.Hour);
-            lastPerHour[key] = r.AccEnergy;
+            lastPerHour[key] = (r.AccEnergy, r.ReadAt);
         }
 
         // Beräkna förbrukning per timme
@@ -231,7 +231,8 @@ else
         for (int i = 0; i < sortedKeys.Count; i++)
         {
             var key = sortedKeys[i];
-            var currentAccEnergy = lastPerHour[key];
+            var currentAccEnergy = lastPerHour[key].AccEnergy;
+            var currentTime = lastPerHour[key].ReadAt;
 
             if (previousAccEnergy.HasValue && previousTime.HasValue)
             {
@@ -240,7 +241,6 @@ else
                 if (diffWh > 0)
                 {
                     // Beräkna faktisk tid mellan mätpunkterna
-                    var currentTime = new DateTime(selectedMonth.Year, selectedMonth.Month, key.Day, key.Hour, 30, 0);
                     var intervalMinutes = (currentTime - previousTime.Value).TotalMinutes;
 
                     // Justera till en hel timme (60 min)
@@ -254,7 +254,7 @@ else
 
             previousAccEnergy = currentAccEnergy;
             // Uppskatta tiden till mitten av timmen för nästa beräkning
-            previousTime = new DateTime(selectedMonth.Year, selectedMonth.Month, key.Day, key.Hour, 30, 0);
+            previousTime = currentTime;
         }
 
         hourlyData = result;
