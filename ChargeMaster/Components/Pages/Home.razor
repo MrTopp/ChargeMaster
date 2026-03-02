@@ -65,56 +65,27 @@
             <h4 class="mb-2">Värmepump (Daikin)</h4>
 
             <div class="row g-2 mb-3">
-                <div class="col-auto">
+                <div class="col-auto" style="@(HighlightedProperties.Contains("CurrentTemperature") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
                     <small class="text-muted">Innetemperatur:</small><br>
                     <strong>@DaikinFacade.CurrentTemperature?.ToString("F1") °C</strong>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto" style="@(HighlightedProperties.Contains("OutdoorTemperature") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
                     <small class="text-muted">Utetemperatur:</small><br>
                     <strong>@DaikinFacade.OutdoorTemperature?.ToString("F1") °C</strong>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto" style="@(HighlightedProperties.Contains("TargetTemperature") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
                     <small class="text-muted">Måltemperatur:</small><br>
                     <strong>@DaikinFacade.TargetTemperature?.ToString("F1") °C</strong>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto" style="@(HighlightedProperties.Contains("Mode") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
                     <small class="text-muted">Läge:</small><br>
                     <strong>@DaikinFacade.Mode</strong>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto" style="@(HighlightedProperties.Contains("Power") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
                     <small class="text-muted">Status:</small><br>
                     <strong>@(DaikinFacade.IsOn ? "PÅ" : "AV")</strong>
                 </div>
             </div>
-
-            @if (LastStatusChange is not null)
-            {
-                <div class="alert alert-info mb-0" role="alert">
-                    <small>
-                        <strong>Senaste ändring:</strong> @LastStatusChange.ChangedAt.ToString("HH:mm")<br>
-                        @if (LastStatusChange.CurrentTemperatureChanged)
-                        {
-                            <span>✓ Innetemperatur ändrad</span><br>
-                        }
-                        @if (LastStatusChange.OutdoorTemperatureChanged)
-                        {
-                            <span>✓ Utetemperatur ändrad</span><br>
-                        }
-                        @if (LastStatusChange.TargetTemperatureChanged)
-                        {
-                            <span>✓ Måltemperatur ändrad</span><br>
-                        }
-                        @if (LastStatusChange.PowerChanged)
-                        {
-                            <span>✓ Strömstatus ändrad</span><br>
-                        }
-                        @if (LastStatusChange.ModeChanged)
-                        {
-                            <span>✓ Läge ändrat</span><br>
-                        }
-                    </small>
-                </div>
-            }
         </div>
     </section>
 
@@ -272,7 +243,8 @@
     private HourlyEnergyUsage? HighestDailyHourlyUsage { get; set; }
     private long MonthlyUsage { get; set; }
     private VWStatusLimitet? CurrentVWStatus { get; set; }
-    private DaikinStatusChangedEventArgs? LastStatusChange { get; set; }
+    private HashSet<string> HighlightedProperties { get; set; } = [];
+    private CancellationTokenSource? _highlightCts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -329,8 +301,33 @@
 
     private void OnDaikinStatusChanged(object? sender, DaikinStatusChangedEventArgs e)
     {
-        LastStatusChange = e;
+        // Avbryt tidigare highlight-timer
+        _highlightCts?.Cancel();
+        _highlightCts = new CancellationTokenSource();
+
+        // Lägg till ändringar till highlighted set
+        if (e.CurrentTemperatureChanged)
+            HighlightedProperties.Add("CurrentTemperature");
+        if (e.OutdoorTemperatureChanged)
+            HighlightedProperties.Add("OutdoorTemperature");
+        if (e.TargetTemperatureChanged)
+            HighlightedProperties.Add("TargetTemperature");
+        if (e.PowerChanged)
+            HighlightedProperties.Add("Power");
+        if (e.ModeChanged)
+            HighlightedProperties.Add("Mode");
+
         InvokeAsync(StateHasChanged);
+
+        // Ta bort highlight efter 55 sekunder
+        _ = Task.Delay(55000, _highlightCts.Token).ContinueWith(async _ =>
+        {
+            if (!_highlightCts.Token.IsCancellationRequested)
+            {
+                HighlightedProperties.Clear();
+                await InvokeAsync(StateHasChanged);
+            }
+        });
     }
 
     private async Task LoadHighestHourlyUsageAsync()
@@ -365,6 +362,9 @@
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
         VWService.VWStatusRetrieved -= OnVWStatusRetrieved;
         DaikinFacade.StatusChanged -= OnDaikinStatusChanged;
+
+        _highlightCts?.Cancel();
+        _highlightCts?.Dispose();
 
         if (_cts != null)
         {
