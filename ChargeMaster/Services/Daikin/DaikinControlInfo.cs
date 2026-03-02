@@ -18,6 +18,9 @@ public class DaikinControlInfo
     /// <summary>
     /// Börvärdestemperatur i °C.
     /// </summary>
+    /// <remarks>
+    /// 10.0–41.0, M=no temp, --=N/A
+    /// </remarks>
     public double? TargetTemperature { get; set; }
 
     /// <summary>
@@ -36,7 +39,7 @@ public class DaikinControlInfo
     public int FanDirection { get; set; }
 
     /// <summary>
-    /// Alertkod.
+    /// Alertkod. 255=no alert
     /// </summary>
     public int? Alert { get; set; }
 

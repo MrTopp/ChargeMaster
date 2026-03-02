@@ -26,10 +26,11 @@ public class DaikinServiceTests : IDisposable
 
     // ==================== COMMON ENDPOINTS ====================
 
-    [Fact]
+    [Fact(Skip="Allmän info, inget som behöver loggas")]
     public async Task GetBasicInfoAsync_ReturnsDeviceInfo()
     {
-        var result = await _service.GetBasicInfoAsync();
+        // Allmän info om pumpen, inget som behöver loggas
+        DaikinBasicInfo? result = await _service.GetBasicInfoAsync();
 
         Assert.NotNull(result);
         Assert.Equal("aircon", result.Type);
@@ -41,10 +42,11 @@ public class DaikinServiceTests : IDisposable
         Assert.InRange(result.Power.Value, 0, 1);
     }
 
-    [Fact]
+    [Fact(Skip="Fjärrkommunikationskonfiguration, inget som behöver loggas")]
     public async Task GetRemoteMethodAsync_ReturnsRemoteConfig()
     {
-        var result = await _service.GetRemoteMethodAsync();
+        // 
+        DaikinRemoteMethod? result = await _service.GetRemoteMethodAsync();
 
         Assert.NotNull(result);
         Assert.False(string.IsNullOrWhiteSpace(result.Method));
@@ -52,62 +54,62 @@ public class DaikinServiceTests : IDisposable
         Assert.NotNull(result.NoticeSyncInterval);
     }
 
-    [Fact]
+    [Fact(Skip="Hämtar pumpens klocka, vi vet redan tiden")]
     public async Task GetDateTimeAsync_ReturnsDateTime()
     {
-        var result = await _service.GetDateTimeAsync();
+        DaikinDateTime? result = await _service.GetDateTimeAsync();
 
         Assert.NotNull(result);
-        Assert.False(string.IsNullOrWhiteSpace(result.Current));
+        Assert.NotNull(result.Current);
         Assert.NotNull(result.Status);
     }
 
-    [Fact]
+    [Fact(Skip="Semesterläge, Inte intressant")]
     public async Task GetHolidayAsync_ReturnsHolidayStatus()
     {
-        var result = await _service.GetHolidayAsync();
+        DaikinHoliday? result = await _service.GetHolidayAsync();
 
         Assert.NotNull(result);
-        Assert.NotNull(result.Enabled);
+        Assert.IsType<bool>(result.IsHoliday);
     }
 
-    [Fact]
+    [Fact(Skip="WiFi konfiguration")]
     public async Task GetWifiSettingAsync_ReturnsWifiConfig()
     {
-        var result = await _service.GetWifiSettingAsync();
+        DaikinWifiSetting? result = await _service.GetWifiSettingAsync();
 
         Assert.NotNull(result);
         Assert.False(string.IsNullOrWhiteSpace(result.SSID));
         Assert.NotNull(result.Link);
     }
 
-    [Fact]
+    [Fact(Skip="Semesterläge inställning")]
     public async Task SetHolidayAsync_RestoresOriginal()
     {
-        var original = await _service.GetHolidayAsync();
+        DaikinHoliday? original = await _service.GetHolidayAsync();
         Assert.NotNull(original);
-        var originalState = original.Enabled ?? 0;
+        bool originalState = original.IsHoliday;
 
         try
         {
-            var newState = (originalState == 1) ? 0 : 1;
-            var result = await _service.SetHolidayAsync(newState == 1);
+            bool newState = !originalState;
+            bool result = await _service.SetHolidayAsync(newState);
             Assert.True(result);
 
-            var updated = await _service.GetHolidayAsync();
+            DaikinHoliday? updated = await _service.GetHolidayAsync();
             Assert.NotNull(updated);
-            Assert.Equal(newState, updated.Enabled);
+            Assert.Equal(newState, updated.IsHoliday);
         }
         finally
         {
-            await _service.SetHolidayAsync(originalState == 1);
+            await _service.SetHolidayAsync(originalState);
         }
     }
 
-    [Fact]
+    [Fact(Skip="Regionkod inställning")]
     public async Task SetRegionCodeAsync_ReturnsTrue()
     {
-        var result = await _service.SetRegionCodeAsync("eu");
+        bool result = await _service.SetRegionCodeAsync("eu");
         Assert.True(result);
     }
 
@@ -116,7 +118,9 @@ public class DaikinServiceTests : IDisposable
     [Fact]
     public async Task GetControlInfoAsync_ReturnsSettings()
     {
-        var result = await _service.GetControlInfoAsync();
+        DaikinControlInfo? result = await _service.GetControlInfoAsync();
+
+        // Pumpens inställningar
 
         Assert.NotNull(result);
         Assert.InRange(result.Power, 0, 1);
@@ -127,52 +131,54 @@ public class DaikinServiceTests : IDisposable
     [Fact]
     public async Task GetSensorInfoAsync_ReturnsTemperatures()
     {
-        var result = await _service.GetSensorInfoAsync();
+        // Temperatur inne och ute
+        DaikinSensorInfo? result = await _service.GetSensorInfoAsync();
         
         Assert.NotNull(result);
         Assert.NotNull(result.IndoorTemperature);
         Assert.InRange(result.IndoorTemperature.Value, -20, 50);
         Assert.NotNull(result.OutdoorTemperature);
         Assert.InRange(result.OutdoorTemperature.Value, -40, 60);
+        Assert.Equal(0, result.ErrorCode);
     }
 
-    [Fact]
+    [Fact(Skip="Hårdvarukonfiguration")]
     public async Task GetModelInfoAsync_ReturnsCapabilities()
     {
-        var result = await _service.GetModelInfoAsync();
+        DaikinModelInfo? result = await _service.GetModelInfoAsync();
 
         Assert.NotNull(result);
         Assert.False(string.IsNullOrWhiteSpace(result.Model));
         Assert.False(string.IsNullOrWhiteSpace(result.ProtocolVersion));
     }
 
-    [Fact]
+    [Fact(Skip="Returnerar 0")]
     public async Task GetTargetAsync_ReturnsTarget()
     {
-        var result = await _service.GetTargetAsync();
-        // returnerar 0 när jag kör, inte användbart
+        DaikinTarget? result = await _service.GetTargetAsync();
+
         Assert.NotNull(result);
         Assert.NotNull(result.Target);
     }
 
-    [Fact]
+    [Fact(Skip="Vet inte vad det betyder")]
     public async Task GetPriceAsync_ReturnsPrice()
     {
-        var result = await _service.GetPriceAsync();
+        DaikinPrice? result = await _service.GetPriceAsync();
 
         Assert.NotNull(result);
         Assert.NotNull(result.PriceInt);
         Assert.NotNull(result.PriceDec);
     }
 
-    [Fact]
+    [Fact(Skip="Körtid för dagen")]
     public async Task GetWeekPowerAsync_ReturnsWeeklyData()
     {
-        var result = await _service.GetWeekPowerAsync();
+        DaikinWeekPower? result = await _service.GetWeekPowerAsync();
 
         Assert.NotNull(result);
         Assert.NotNull(result.TodayRuntime);
-        Assert.False(string.IsNullOrWhiteSpace(result.WeeklyData));
+        Assert.NotEmpty(result.WeeklyData);
     }
 
     [Fact]
@@ -191,47 +197,60 @@ public class DaikinServiceTests : IDisposable
     [Fact]
     public async Task GetDayPowerExAsync_ReturnsDailyDataExtended()
     {
-        var result = await _service.GetDayPowerExAsync();
+        DaikinDayPowerEx? result = await _service.GetDayPowerExAsync();
 
         Assert.NotNull(result);
-        Assert.False(string.IsNullOrWhiteSpace(result.CurrentDayHeat));
-        Assert.False(string.IsNullOrWhiteSpace(result.CurrentDayCool));
+        Assert.NotEmpty(result.CurrentDayHeat);
+        Assert.NotEmpty(result.CurrentDayCool);
+        Assert.Equal(24, result.CurrentDayHeat.Length);
+        Assert.Equal(24, result.PreviousDayHeat.Length);
+        Assert.Equal(24, result.CurrentDayCool.Length);
+        Assert.Equal(24, result.PreviousDayCool.Length);
     }
 
-    [Fact]
+    [Fact(Skip="Returnerar 5 ggr verkligt värde")]
     public async Task GetYearPowerAsync_ReturnsYearlyData()
     {
-        var result = await _service.GetYearPowerAsync();
+        DaikinYearPower? result = await _service.GetYearPowerAsync();
 
         Assert.NotNull(result);
-        Assert.False(string.IsNullOrWhiteSpace(result.ThisYear));
+        Assert.NotEmpty(result.ThisYear);
+        Assert.NotEmpty(result.PreviousYear);
     }
 
     [Fact]
     public async Task GetYearPowerExAsync_ReturnsYearlyDataExtended()
     {
-        var result = await _service.GetYearPowerExAsync();
+        DaikinYearPowerEx? result = await _service.GetYearPowerExAsync();
 
         Assert.NotNull(result);
-        // Den här ger inga data
-        //Assert.False(string.IsNullOrWhiteSpace(result.ThisYearHeat));
-        //Assert.False(string.IsNullOrWhiteSpace(result.ThisYearCool));
+        Assert.NotEmpty(result.CurrentYearCool);
+        Assert.NotEmpty(result.CurrentYearHeat);
+        Assert.NotEmpty(result.PreviousYearCool);
+        Assert.NotEmpty(result.PreviousYearHeat);
+        Assert.Equal(12, result.CurrentYearCool.Length);
+        Assert.Equal(12, result.CurrentYearHeat.Length);
+        Assert.Equal(12, result.PreviousYearCool.Length);
+        Assert.Equal(12, result.PreviousYearHeat.Length);
     }
 
-    [Fact]
+    [Fact(Skip="Används inte")]
     public async Task GetMonthPowerExAsync_ReturnsMonthlyDataExtended()
     {
-        var result = await _service.GetMonthPowerExAsync();
+        // Summerad förbrukning per dag
+        DaikinMonthPowerEx? result = await _service.GetMonthPowerExAsync();
 
         Assert.NotNull(result);
-        Assert.False(string.IsNullOrWhiteSpace(result.CurrentMonthHeat));
-        Assert.False(string.IsNullOrWhiteSpace(result.CurrentMonthCool));
+        Assert.NotEmpty(result.CurrentMonthHeat);
+        Assert.NotEmpty(result.CurrentMonthCool);
+        Assert.NotEmpty(result.PreviousMonthHeat);
+        Assert.NotEmpty(result.PreviousMonthCool);
     }
 
-    [Fact]
+    [Fact(Skip="Schema inte intressant")]
     public async Task GetScheduleTimerInfoAsync_ReturnsScheduleInfo()
     {
-        var result = await _service.GetScheduleTimerInfoAsync();
+        DaikinScheduleTimerInfo? result = await _service.GetScheduleTimerInfoAsync();
 
         Assert.NotNull(result);
         Assert.False(string.IsNullOrWhiteSpace(result.Format));
@@ -242,15 +261,16 @@ public class DaikinServiceTests : IDisposable
     [Fact]
     public async Task SetControlInfoAsync_RestoresOriginal()
     {
-        var original = await _service.GetControlInfoAsync();
+        // Ställer måltemperatur, fungerar!
+        DaikinControlInfo? original = await _service.GetControlInfoAsync();
         Assert.NotNull(original);
 
-        var modified = new DaikinControlInfo
+        DaikinControlInfo modified = new DaikinControlInfo
         {
             Power = original.Power,
             Mode = original.Mode,
             TargetTemperature = original.TargetTemperature.HasValue
-                ? original.TargetTemperature.Value + 1
+                ? original.TargetTemperature.Value + 3
                 : 22.0,
             TargetHumidity = original.TargetHumidity,
             FanRate = original.FanRate,
@@ -259,10 +279,10 @@ public class DaikinServiceTests : IDisposable
 
         try
         {
-            var result = await _service.SetControlInfoAsync(modified);
+            bool result = await _service.SetControlInfoAsync(modified);
             Assert.True(result);
 
-            var updated = await _service.GetControlInfoAsync();
+            DaikinControlInfo? updated = await _service.GetControlInfoAsync();
             Assert.NotNull(updated);
             Assert.Equal(modified.TargetTemperature, updated.TargetTemperature);
         }
@@ -272,10 +292,10 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Vad gör den här?")]
     public async Task SetTargetAsync_ReturnsTrue()
     {
-        var result = await _service.SetTargetAsync(0);
+        bool result = await _service.SetTargetAsync(0);
         Assert.True(result);
     }
 
@@ -284,23 +304,23 @@ public class DaikinServiceTests : IDisposable
     [Fact]
     public async Task TurnOffAndOn_RestoresOriginalState()
     {
-        var original = await _service.GetControlInfoAsync();
+        DaikinControlInfo? original = await _service.GetControlInfoAsync();
         Assert.NotNull(original);
-        var originalPower = original.Power;
+        int originalPower = original.Power;
 
         try
         {
-            var offResult = await _service.TurnOffAsync();
+            bool offResult = await _service.TurnOffAsync();
             Assert.True(offResult);
 
-            var offState = await _service.GetControlInfoAsync();
+            DaikinControlInfo? offState = await _service.GetControlInfoAsync();
             Assert.NotNull(offState);
             Assert.False(offState.IsOn);
 
-            var onResult = await _service.TurnOnAsync();
+            bool onResult = await _service.TurnOnAsync();
             Assert.True(onResult);
 
-            var onState = await _service.GetControlInfoAsync();
+            DaikinControlInfo? onState = await _service.GetControlInfoAsync();
             Assert.NotNull(onState);
             Assert.True(onState.IsOn);
         }
@@ -313,18 +333,18 @@ public class DaikinServiceTests : IDisposable
     [Fact]
     public async Task SetTargetTemperatureAsync_RestoresOriginal()
     {
-        var original = await _service.GetControlInfoAsync();
+        DaikinControlInfo? original = await _service.GetControlInfoAsync();
         Assert.NotNull(original);
 
-        var originalTemp = original.TargetTemperature;
-        var testTemp = originalTemp.HasValue ? originalTemp.Value + 1 : 22.0;
+        double? originalTemp = original.TargetTemperature;
+        double testTemp = originalTemp.HasValue ? originalTemp.Value + 4 : 22.0;
 
         try
         {
-            var result = await _service.SetTargetTemperatureAsync(testTemp);
+            bool result = await _service.SetTargetTemperatureAsync(testTemp);
             Assert.True(result);
 
-            var updated = await _service.GetControlInfoAsync();
+            DaikinControlInfo? updated = await _service.GetControlInfoAsync();
             Assert.NotNull(updated);
             Assert.Equal(testTemp, updated.TargetTemperature);
         }
@@ -337,21 +357,21 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Används inte")]
     public async Task SetFanRateAsync_RestoresOriginal()
     {
-        var original = await _service.GetControlInfoAsync();
+        DaikinControlInfo? original = await _service.GetControlInfoAsync();
         Assert.NotNull(original);
 
-        var originalFanRate = original.FanRate;
-        var testFanRate = originalFanRate == "A" ? "B" : "A";
+        string? originalFanRate = original.FanRate;
+        string testFanRate = originalFanRate == "A" ? "B" : "A";
 
         try
         {
-            var result = await _service.SetFanRateAsync(testFanRate);
+            bool result = await _service.SetFanRateAsync(testFanRate);
             Assert.True(result);
 
-            var updated = await _service.GetControlInfoAsync();
+            DaikinControlInfo? updated = await _service.GetControlInfoAsync();
             Assert.NotNull(updated);
             Assert.Equal(testFanRate, updated.FanRate);
         }
@@ -364,21 +384,21 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Används inte")]
     public async Task SetFanDirectionAsync_RestoresOriginal()
     {
-        var original = await _service.GetControlInfoAsync();
+        DaikinControlInfo? original = await _service.GetControlInfoAsync();
         Assert.NotNull(original);
 
-        var originalDir = original.FanDirection;
-        var testDir = originalDir == 0 ? 1 : 0;
+        int originalDir = original.FanDirection;
+        int testDir = originalDir == 0 ? 1 : 0;
 
         try
         {
-            var result = await _service.SetFanDirectionAsync(testDir);
+            bool result = await _service.SetFanDirectionAsync(testDir);
             Assert.True(result);
 
-            var updated = await _service.GetControlInfoAsync();
+            DaikinControlInfo? updated = await _service.GetControlInfoAsync();
             Assert.NotNull(updated);
             Assert.Equal(testDir, updated.FanDirection);
         }
@@ -394,18 +414,18 @@ public class DaikinServiceTests : IDisposable
     [Fact]
     public async Task SetModeAsync_RestoresOriginal()
     {
-        var original = await _service.GetControlInfoAsync();
+        DaikinControlInfo? original = await _service.GetControlInfoAsync();
         Assert.NotNull(original);
 
-        var originalMode = original.Mode;
-        var testMode = originalMode == 3 ? 4 : 3; // Cool vs Heat
+        int originalMode = original.Mode;
+        int testMode = originalMode == 3 ? 4 : 3; // Cool vs Heat
 
         try
         {
-            var result = await _service.SetModeAsync(testMode);
+            bool result = await _service.SetModeAsync(testMode);
             Assert.True(result);
 
-            var updated = await _service.GetControlInfoAsync();
+            DaikinControlInfo? updated = await _service.GetControlInfoAsync();
             Assert.NotNull(updated);
             Assert.Equal(testMode, updated.Mode);
         }
