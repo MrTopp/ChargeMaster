@@ -10,7 +10,7 @@ public class DaikinRemoteMethod
 public class DaikinDateTime
 {
     public int? Status { get; set; }
-    public string? Current { get; set; }
+    public DateTime? Current { get; set; }
     public string? Region { get; set; }
     public int? DaylightSaving { get; set; }
     public int? TimeZone { get; set; }
@@ -18,7 +18,7 @@ public class DaikinDateTime
 
 public class DaikinHoliday
 {
-    public int? Enabled { get; set; }
+    public bool IsHoliday { get; set; }
 }
 
 public class DaikinWifiSetting
@@ -56,8 +56,16 @@ public class DaikinPrice
 
 public class DaikinWeekPower
 {
+    /// <summary>
+    /// Dagens körtid i minuter.
+    /// </summary>
     public int? TodayRuntime { get; set; }
-    public string? WeeklyData { get; set; }
+
+    /// <summary>
+    /// Daglig energiförbrukning i 100W-enheter (dela med 10 för kWh).
+    /// Första värdet är idag, därefter bakåt.
+    /// </summary>
+    public int[] WeeklyData { get; set; } = [];
 }
 
 public class DaikinWeekPowerEx
@@ -82,32 +90,90 @@ public class DaikinWeekPowerEx
 
 public class DaikinDayPowerEx
 {
-    public string? CurrentDayHeat { get; set; }
-    public string? PreviousDayHeat { get; set; }
-    public string? CurrentDayCool { get; set; }
-    public string? PreviousDayCool { get; set; }
+    /// <summary>
+    /// Innevarande dags timförbrukning för uppvärmning i 100W-enheter (dela med 10 för kWh).
+    /// 24 värden för varje timme av dagen.
+    /// </summary>
+    public int[] CurrentDayHeat { get; set; } = [];
+
+    /// <summary>
+    /// Förra dags timförbrukning för uppvärmning i 100W-enheter (dela med 10 för kWh).
+    /// 24 värden för varje timme av dagen.
+    /// </summary>
+    public int[] PreviousDayHeat { get; set; } = [];
+
+    /// <summary>
+    /// Innevarande dags timförbrukning för kylning i 100W-enheter (dela med 10 för kWh).
+    /// 24 värden för varje timme av dagen.
+    /// </summary>
+    public int[] CurrentDayCool { get; set; } = [];
+
+    /// <summary>
+    /// Förra dags timförbrukning för kylning i 100W-enheter (dela med 10 för kWh).
+    /// 24 värden för varje timme av dagen.
+    /// </summary>
+    public int[] PreviousDayCool { get; set; } = [];
 }
 
 public class DaikinYearPower
 {
-    public string? PreviousYear { get; set; }
-    public string? ThisYear { get; set; }
+    /// <summary>
+    /// Förra årets månatlig energiförbrukning i 100W-enheter (dela med 10 för kWh).
+    /// 12 värden för varje månad.
+    /// </summary>
+    public int[] PreviousYear { get; set; } = [];
+
+    /// <summary>
+    /// Innevarande årets månatlig energiförbrukning i 100W-enheter (dela med 10 för kWh).
+    /// Värden för de månader som har passerat.
+    /// </summary>
+    public int[] ThisYear { get; set; } = [];
 }
 
 public class DaikinYearPowerEx
 {
-    public string? PreviousYearHeat { get; set; }
-    public string? PreviousYearCool { get; set; }
-    public string? ThisYearHeat { get; set; }
-    public string? ThisYearCool { get; set; }
+    /// <summary>
+    /// Förra årets månatlig energiförbrukning för uppvärmning i 100W-enheter.
+    /// </summary>
+    public int[] PreviousYearHeat { get; set; } = [];
+
+    /// <summary>
+    /// Förra årets månatlig energiförbrukning för kylning i 100W-enheter.
+    /// </summary>
+    public int[] PreviousYearCool { get; set; } = [];
+
+    /// <summary>
+    /// Innevarande årets månatlig energiförbrukning för uppvärmning i 100W-enheter.
+    /// </summary>
+    public int[] CurrentYearHeat { get; set; } = [];
+
+    /// <summary>
+    /// Innevarande årets månatlig energiförbrukning för kylning i 100W-enheter.
+    /// </summary>
+    public int[] CurrentYearCool { get; set; } = [];
 }
 
 public class DaikinMonthPowerEx
 {
-    public string? CurrentMonthHeat { get; set; }
-    public string? PreviousMonthHeat { get; set; }
-    public string? CurrentMonthCool { get; set; }
-    public string? PreviousMonthCool { get; set; }
+    /// <summary>
+    /// Innevarande månads daglig energiförbrukning för uppvärmning i 100W-enheter.
+    /// </summary>
+    public int[] CurrentMonthHeat { get; set; } = [];
+
+    /// <summary>
+    /// Förra månads daglig energiförbrukning för uppvärmning i 100W-enheter.
+    /// </summary>
+    public int[] PreviousMonthHeat { get; set; } = [];
+
+    /// <summary>
+    /// Innevarande månads daglig energiförbrukning för kylning i 100W-enheter.
+    /// </summary>
+    public int[] CurrentMonthCool { get; set; } = [];
+
+    /// <summary>
+    /// Förra månads daglig energiförbrukning för kylning i 100W-enheter.
+    /// </summary>
+    public int[] PreviousMonthCool { get; set; } = [];
 }
 
 public class DaikinScheduleTimerInfo

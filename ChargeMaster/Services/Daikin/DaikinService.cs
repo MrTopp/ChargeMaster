@@ -91,13 +91,14 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,sta=2,cur=2026/3/2 9:1:13,reg=eu,dst=1,zone=343
             var response = await httpClient.GetStringAsync("/common/get_datetime");
             var data = ParseResponse(response);
 
             return new DaikinDateTime
             {
                 Status = ParseInt(data.GetValueOrDefault("sta")),
-                Current = data.GetValueOrDefault("cur"),
+                Current = ParseDateTime(data.GetValueOrDefault("cur")),
                 Region = data.GetValueOrDefault("reg"),
                 DaylightSaving = ParseInt(data.GetValueOrDefault("dst")),
                 TimeZone = ParseInt(data.GetValueOrDefault("zone"))
@@ -117,12 +118,13 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,en_hol=0
             var response = await httpClient.GetStringAsync("/common/get_holiday");
             var data = ParseResponse(response);
 
             return new DaikinHoliday
             {
-                Enabled = ParseInt(data.GetValueOrDefault("en_hol"))
+                IsHoliday = ParseInt(data.GetValueOrDefault("en_hol")) != 0
             };
         }
         catch (Exception ex)
@@ -139,6 +141,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,ssid=%43%61%72%74%6f%6f%6e,security=mixed,key=,link=1
             var response = await httpClient.GetStringAsync("/common/get_wifi_setting");
             var data = ParseResponse(response);
 
@@ -205,6 +208,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,pow=1,mode=4,adv=,stemp=21.5,shum=0,dt1=25.0,dt2=M,dt3=25.0,dt4=21.5,dt5=21.5,dt7=25.0,dh1=AUTO,dh2=50,dh3=0,dh4=0,dh5=0,dh7=AUTO,dhh=50,b_mode=4,b_stemp=21.5,b_shum=0,alert=255,f_rate=A,b_f_rate=A,dfr1=A,dfr2=A,dfr3=A,dfr4=A,dfr5=A,dfr6=A,dfr7=A,dfrh=A,f_dir=0,b_f_dir=0,dfd1=0,dfd2=0,dfd3=0,dfd4=0,dfd5=0,dfd6=0,dfd7=0,dfdh=0,dmnd_run=0,en_demand=1
             var response = await httpClient.GetStringAsync("/aircon/get_control_info");
             var data = ParseResponse(response);
 
@@ -234,6 +238,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,htemp=23.0,hhum=-,otemp=0.0,err=0,cmpfreq=22,mompow=5
             var response = await httpClient.GetStringAsync("/aircon/get_sensor_info");
             var data = ParseResponse(response);
 
@@ -260,6 +265,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,model=1481,type=N,pv=3.2,cpv=3,cpv_minor=20,mid=NA,humd=0,s_humd=0,acled=0,land=0,elec=1,temp=1,temp_rng=0,m_dtct=0,ac_dst=--,disp_dry=0,dmnd=1,en_scdltmr=1,en_frate=1,en_rtemp_a=0,en_spmode=3,en_ipw_sep=1,en_mompow=1,en_patrol=0,en_filter_sign=0,shtyp=0,en_cjlink=1,en_onofftmr=1,hmlmt_l=10.0,en_fdir=1,s_fdir=3
             var response = await httpClient.GetStringAsync("/aircon/get_model_info");
             var data = ParseResponse(response);
 
@@ -314,6 +320,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,price_int=27,price_dec=0
             var response = await httpClient.GetStringAsync("/aircon/get_price");
             var data = ParseResponse(response);
 
@@ -337,13 +344,14 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,today_runtime=473,datas=500/400/500/0/500/400/200
             var response = await httpClient.GetStringAsync("/aircon/get_week_power");
             var data = ParseResponse(response);
 
             return new DaikinWeekPower
             {
                 TodayRuntime = ParseInt(data.GetValueOrDefault("today_runtime")),
-                WeeklyData = data.GetValueOrDefault("datas")
+                WeeklyData = ParseIntArray(data.GetValueOrDefault("datas"))
             };
         }
         catch (Exception ex)
@@ -384,15 +392,16 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,curr_day_heat=5/7/5/7/6/5/9/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0,prev_1day_heat=2/3/4/5/5/5/5/4/5/4/4/4/5/4/4/3/4/4/5/4/4/5/5/5,curr_day_cool=0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0,prev_1day_cool=0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0
             var response = await httpClient.GetStringAsync("/aircon/get_day_power_ex");
             var data = ParseResponse(response);
 
             return new DaikinDayPowerEx
             {
-                CurrentDayHeat = data.GetValueOrDefault("curr_day_heat"),
-                PreviousDayHeat = data.GetValueOrDefault("prev_1day_heat"),
-                CurrentDayCool = data.GetValueOrDefault("curr_day_cool"),
-                PreviousDayCool = data.GetValueOrDefault("prev_1day_cool")
+                CurrentDayHeat = ParseIntArray(data.GetValueOrDefault("curr_day_heat")),
+                PreviousDayHeat = ParseIntArray(data.GetValueOrDefault("prev_1day_heat")),
+                CurrentDayCool = ParseIntArray(data.GetValueOrDefault("curr_day_cool")),
+                PreviousDayCool = ParseIntArray(data.GetValueOrDefault("prev_1day_cool"))
             };
         }
         catch (Exception ex)
@@ -409,13 +418,14 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,previous_year=14/12/12/10/8/3/2/2/4/9/10/13,this_year=13/13/0
             var response = await httpClient.GetStringAsync("/aircon/get_year_power");
             var data = ParseResponse(response);
 
             return new DaikinYearPower
             {
-                PreviousYear = data.GetValueOrDefault("previous_year"),
-                ThisYear = data.GetValueOrDefault("this_year")
+                PreviousYear = ParseIntArray(data.GetValueOrDefault("previous_year")),
+                ThisYear = ParseIntArray(data.GetValueOrDefault("this_year"))
             };
         }
         catch (Exception ex)
@@ -432,15 +442,16 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,curr_year_heat=6422/6173/154/0/0/0/0/0/0/0/0/0,prev_year_heat=5171/4471/3535/2625/1848/568/118/299/793/2228/3270/4060,curr_year_cool=0/0/0/0/0/0/0/0/0/0/0/0,prev_year_cool=0/0/0/0/0/0/222/3/0/0/0/0
             var response = await httpClient.GetStringAsync("/aircon/get_year_power_ex");
             var data = ParseResponse(response);
 
             return new DaikinYearPowerEx
             {
-                PreviousYearHeat = data.GetValueOrDefault("previous_year_heat"),
-                PreviousYearCool = data.GetValueOrDefault("previous_year_cool"),
-                ThisYearHeat = data.GetValueOrDefault("this_year_heat"),
-                ThisYearCool = data.GetValueOrDefault("this_year_cool")
+                PreviousYearHeat = ParseIntArray(data.GetValueOrDefault("prev_year_heat")),
+                PreviousYearCool = ParseIntArray(data.GetValueOrDefault("prev_year_cool")),
+                CurrentYearHeat = ParseIntArray(data.GetValueOrDefault("curr_year_heat")),
+                CurrentYearCool = ParseIntArray(data.GetValueOrDefault("curr_year_cool"))
             };
         }
         catch (Exception ex)
@@ -457,15 +468,16 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,curr_month_heat=102/52/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0,prev_month_heat=199/222/278/279/265/272/220/226/271/237/277/260/286/288/242/240/238/269/206/227/179/196/174/147/171/128/77/99,curr_month_cool=0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0,prev_month_cool=0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0/0
             var response = await httpClient.GetStringAsync("/aircon/get_month_power_ex");
             var data = ParseResponse(response);
 
             return new DaikinMonthPowerEx
             {
-                CurrentMonthHeat = data.GetValueOrDefault("curr_month_heat"),
-                PreviousMonthHeat = data.GetValueOrDefault("prev_month_heat"),
-                CurrentMonthCool = data.GetValueOrDefault("curr_month_cool"),
-                PreviousMonthCool = data.GetValueOrDefault("prev_month_cool")
+                CurrentMonthHeat = ParseIntArray(data.GetValueOrDefault("curr_month_heat")),
+                PreviousMonthHeat = ParseIntArray(data.GetValueOrDefault("prev_month_heat")),
+                CurrentMonthCool = ParseIntArray(data.GetValueOrDefault("curr_month_cool")),
+                PreviousMonthCool = ParseIntArray(data.GetValueOrDefault("prev_month_cool"))
             };
         }
         catch (Exception ex)
@@ -482,6 +494,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            // ret=OK,format=v1,f_detail=total#18;_en#1;_pow#1;_mode#1;_temp#4;_time#4;_vol#1;_dir#1;_humi#3;_spmd#2,scdl_num=3,scdl_per_day=6,en_scdltimer=0,active_no=1,scdl1_name=,scdl2_name=,scdl3_name=
             var response = await httpClient.GetStringAsync("/aircon/get_scdltimer_info");
             var data = ParseResponse(response);
 
@@ -521,6 +534,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
                       $"&f_rate={controlInfo.FanRate ?? "A"}" +
                       $"&f_dir={controlInfo.FanDirection}";
 
+            // ret=OK,adv=
             var response = await httpClient.GetStringAsync(url);
             var data = ParseResponse(response);
 
@@ -690,5 +704,23 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
         return value.Split('/')
             .Select(s => int.TryParse(s.Trim(), out var v) ? v : 0)
             .ToArray();
+    }
+
+    /// <summary>
+    /// Parsar Daikins datetime-format (t.ex. "2026/3/2 9:1:13") till DateTime.
+    /// </summary>
+    private static DateTime? ParseDateTime(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        if (DateTime.TryParseExact(value, "yyyy/M/d H:m:ss",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var result))
+        {
+            return result;
+        }
+
+        return null;
     }
 }
