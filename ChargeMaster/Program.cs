@@ -117,6 +117,8 @@ namespace ChargeMaster
                     client.Timeout = TimeSpan.FromSeconds(10);
                 });
 
+                builder.Services.AddSingleton<DaikinFacade>();
+
                 // ----- Workers -----
                 builder.Services.AddSingleton<PriceFetchingWorker>();
                 builder.Services.AddSingleton<WallboxWorker>();
