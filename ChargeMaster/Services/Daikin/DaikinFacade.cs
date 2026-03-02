@@ -45,7 +45,7 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
     /// <summary>
     /// Läser upp aktuell status från Daikin värmepump vid uppstart.
     /// </summary>
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(bool forceEvent = false)
     {
         try
         {
@@ -63,7 +63,7 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
     /// <summary>
     /// Privat hjälpfunktion som hämtar och uppdaterar enhetens status.
     /// </summary>
-    private async Task UpdateStatusAsync()
+    private async Task UpdateStatusAsync(bool forceEvent = false)
     {
         var sensorInfo = await daikinService.GetSensorInfoAsync();
         var controlInfo = await daikinService.GetControlInfoAsync();
@@ -108,7 +108,7 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
         }
 
         // Raisa event endast om något ändrades
-        if (changes.HasChanges)
+        if (forceEvent || changes.HasChanges)
         {
             StatusChanged?.Invoke(this, changes);
         }

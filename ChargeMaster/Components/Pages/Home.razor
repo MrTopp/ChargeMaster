@@ -4,9 +4,11 @@
 @inject WallboxWorker WallboxWorker
 @inject ChargeWorker ChargeWorker
 @inject VWService VWService
+@inject DaikinFacade DaikinFacade
 @using ChargeMaster.Services.ElectricityPrice
 @using ChargeMaster.Services.Wallbox
 @using ChargeMaster.Services.VolksWagen
+@using ChargeMaster.Services.Daikin
 @using ChargeMaster.Workers
 
 <PageTitle>Charge Master</PageTitle>
@@ -60,23 +62,81 @@
 
     <section class="mb-3">
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
+            <h4 class="mb-2">Värmepump (Daikin)</h4>
+
+            <div class="row g-2 mb-3">
+                <div class="col-auto">
+                    <small class="text-muted">Innetemperatur:</small><br>
+                    <strong>@DaikinFacade.CurrentTemperature?.ToString("F1") °C</strong>
+                </div>
+                <div class="col-auto">
+                    <small class="text-muted">Utetemperatur:</small><br>
+                    <strong>@DaikinFacade.OutdoorTemperature?.ToString("F1") °C</strong>
+                </div>
+                <div class="col-auto">
+                    <small class="text-muted">Måltemperatur:</small><br>
+                    <strong>@DaikinFacade.TargetTemperature?.ToString("F1") °C</strong>
+                </div>
+                <div class="col-auto">
+                    <small class="text-muted">Läge:</small><br>
+                    <strong>@DaikinFacade.Mode</strong>
+                </div>
+                <div class="col-auto">
+                    <small class="text-muted">Status:</small><br>
+                    <strong>@(DaikinFacade.IsOn ? "PÅ" : "AV")</strong>
+                </div>
+            </div>
+
+            @if (LastStatusChange is not null)
+            {
+                <div class="alert alert-info mb-0" role="alert">
+                    <small>
+                        <strong>Senaste ändring:</strong> @LastStatusChange.ChangedAt.ToString("HH:mm")<br>
+                        @if (LastStatusChange.CurrentTemperatureChanged)
+                        {
+                            <span>✓ Innetemperatur ändrad</span><br>
+                        }
+                        @if (LastStatusChange.OutdoorTemperatureChanged)
+                        {
+                            <span>✓ Utetemperatur ändrad</span><br>
+                        }
+                        @if (LastStatusChange.TargetTemperatureChanged)
+                        {
+                            <span>✓ Måltemperatur ändrad</span><br>
+                        }
+                        @if (LastStatusChange.PowerChanged)
+                        {
+                            <span>✓ Strömstatus ändrad</span><br>
+                        }
+                        @if (LastStatusChange.ModeChanged)
+                        {
+                            <span>✓ Läge ändrat</span><br>
+                        }
+                    </small>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="mb-3">
+        <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
             <h4 class="mb-2">Bilens laddstatus</h4>
 
             @if (CurrentVWStatus is not null)
             {
                 <div class="row g-2">
-                <div class="col-auto">
-                    <small class="text-muted">Batterinivå:</small><br>
-                    <strong>@((CurrentVWStatus.BatteryLevel ?? 0.0).ToString("F0")) %</strong>
+                    <div class="col-auto">
+                        <small class="text-muted">Batterinivå:</small><br>
+                        <strong>@((CurrentVWStatus.BatteryLevel ?? 0.0).ToString("F0")) %</strong>
+                    </div>
+                    <div class="col-auto">
+                        <small class="text-muted">Målnivå:</small><br>
+                        <strong>@((CurrentVWStatus.ChargingSettingsTargetLevel ?? 0.0).ToString("F0")) %</strong>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <small class="text-muted">Målnivå:</small><br>
-                    <strong>@((CurrentVWStatus.ChargingSettingsTargetLevel ?? 0.0).ToString("F0")) %</strong>
-                </div>
-                        </div>
-                    }
-                </div>
-            </section>
+            }
+        </div>
+    </section>
 
             <section class="mb-3">
                 <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
@@ -212,6 +272,7 @@
     private HourlyEnergyUsage? HighestDailyHourlyUsage { get; set; }
     private long MonthlyUsage { get; set; }
     private VWStatusLimitet? CurrentVWStatus { get; set; }
+    private DaikinStatusChangedEventArgs? LastStatusChange { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -232,11 +293,15 @@
         WallboxWorker.MeterInfoCalculated += OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
         VWService.VWStatusRetrieved += OnVWStatusRetrieved;
+        DaikinFacade.StatusChanged += OnDaikinStatusChanged;
 
         // Trigga uppdatering av kvartlista
         CurrentKvartlista = ChargeWorker.GetKvartlista();
 
         _ = VWService.GetStatus();
+
+        // Initialisera Daikin-facade
+        await DaikinFacade.InitializeAsync();
 
         _ = UpdateHourlyEnergyLoop();
     }
@@ -259,6 +324,12 @@
     private void OnVWStatusRetrieved(object? sender, VWStatusEventArgs e)
     {
         CurrentVWStatus = e.VWStatusLimitet;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnDaikinStatusChanged(object? sender, DaikinStatusChangedEventArgs e)
+    {
+        LastStatusChange = e;
         InvokeAsync(StateHasChanged);
     }
 
@@ -293,6 +364,7 @@
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
         VWService.VWStatusRetrieved -= OnVWStatusRetrieved;
+        DaikinFacade.StatusChanged -= OnDaikinStatusChanged;
 
         if (_cts != null)
         {
