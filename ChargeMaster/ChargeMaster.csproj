@@ -14,6 +14,10 @@
     <InformationalVersion>$(VersionPrefix)-$(VersionSuffix)</InformationalVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);appsettings.Development.json</DefaultItemExcludes>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove=".github\**" />
     <Content Remove=".github\**" />
