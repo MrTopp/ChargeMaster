@@ -51,38 +51,4 @@ public class DaikinWorker(
             previous = nu;
         }
     }
-
-
-    private static async Task WaitUntilNextMinute(CancellationToken stoppingToken)
-    {
-        const int maxDelayMs = 50;
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            var remainingDelay = GetDelayUntilNextMinute();
-
-            if (remainingDelay.TotalMilliseconds <= 0)
-            {
-                break;
-            }
-
-            var delayMs = Math.Min((int)remainingDelay.TotalMilliseconds, maxDelayMs);
-            await Task.Delay(delayMs, stoppingToken);
-        }
-    }
-
-    private static TimeSpan GetDelayUntilNextMinute()
-    {
-        var now = DateTime.Now;
-        var nextMinute = now.AddMinutes(1)
-            .AddSeconds(-now.Second)
-            .AddMilliseconds(-now.Millisecond);
-        return nextMinute - now;
-    }
-
-    private Task ReadDaikinStatus(CancellationToken stoppingToken)
-    {
-        // TODO: Implementera läsning av Daikin-status
-        return Task.CompletedTask;
-    }
 }
