@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 
+using Microsoft.EntityFrameworkCore;
 using MQTTnet;
 
 namespace ChargeMaster.Services.Shelly;
@@ -8,7 +9,9 @@ namespace ChargeMaster.Services.Shelly;
 /// Tjänst för att läsa information från Shelly-enheter via MQTT.
 /// Använder MQTTnet v5 för kommunikation.
 /// </summary>
-public class ShellyMqttService(ILogger<ShellyMqttService> logger) : IAsyncDisposable
+public class ShellyMqttService(
+    IServiceScopeFactory serviceScopeFactory,
+    ILogger<ShellyMqttService> logger) : IAsyncDisposable
 {
     private IMqttClient? _mqttClient;
 
@@ -44,9 +47,9 @@ public class ShellyMqttService(ILogger<ShellyMqttService> logger) : IAsyncDispos
                 SubscriberConnected?.Invoke(this, EventArgs.Empty);
                 logger.LogInformation("Första prenumeranten anslöt till TemperatureChanged-eventet");
             }
-            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("arbetsrum", 10.0));
-            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("hall", 11.0));
-            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("sovrum", 13.0));
+            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("arbetsrum", Temperatures["arbetsrum"]));
+            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("hall", Temperatures["hall"]));
+            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("sovrum", Temperatures["sovrum"]));
 
         }
         remove
@@ -93,9 +96,51 @@ public class ShellyMqttService(ILogger<ShellyMqttService> logger) : IAsyncDispos
 
     private async Task InitiateTemperatures()
     {
-        Temperatures["arbetsrum"] = 20.0;
-        Temperatures["hall"] = 20.0;
-        Temperatures["sovrum"] = 20.0;
+        try
+        {
+            // Använd IServiceScopeFactory för att skapa ett scope för databaskall
+            // Detta är nödvändigt eftersom ShellyMqttService är Singleton men DbContext är Scoped
+            using var scope = serviceScopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ChargeMaster.Data.ApplicationDbContext>();
+
+            // Hämta senaste temperaturvärde för varje enhet från databasen
+            var latestTemperatures = await dbContext.ShellyTemperatures
+                .GroupBy(t => t.DeviceId)
+                .Select(g => g.OrderByDescending(t => t.Timestamp).FirstOrDefault())
+                .ToListAsync();
+
+            // Lägg till värdena i Temperatures-dictionary
+            foreach (var temp in latestTemperatures)
+            {
+                if (temp != null)
+                {
+                    Temperatures[temp.DeviceId] = temp.TemperatureCelsius;
+                    logger.LogInformation("Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
+                        temp.DeviceId, temp.TemperatureCelsius);
+                }
+            }
+
+            // Sätt defaultvärden för enheter som inte finns i databasen
+            var enhetIds = new[] { "arbetsrum", "hall", "sovrum" };
+            foreach (var enhetId in enhetIds)
+            {
+                if (!Temperatures.ContainsKey(enhetId))
+                {
+                    Temperatures[enhetId] = 20.0;
+                    logger.LogInformation("Ingen tidigare temperaturdata för {DeviceId}, använder defaultvärde 20.0 °C",
+                        enhetId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Fel vid hämtning av temperaturer från databasen, använder defaultvärden");
+
+            // Fallback till defaultvärden om något går fel
+            Temperatures["arbetsrum"] = 20.0;
+            Temperatures["hall"] = 20.0;
+            Temperatures["sovrum"] = 20.0;
+        }
     }
 
     /// <summary>
