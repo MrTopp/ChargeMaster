@@ -62,7 +62,8 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
 
         // Prenumerera på ämnen
         await _shellyService.SubscribeAsync(
-            "test/topic"
+            //"test/topic",
+            "shelly-arbetsrum/events/rpc"
         );
 
         // Vänta en stund för att ta emot meddelanden
@@ -71,30 +72,7 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
         // Koppla ifrån
         await _shellyService.DisconnectAsync();
     }
-
-    /// <summary>
-    /// Test för att publicera ett meddelande.
-    /// </summary>
-    [Fact(Skip = "Aktivera när du är redo att testa publicering")]
-    public async Task PublishMessage()
-    {
-        const string brokerAddress = "192.168.1.100";
-        const int brokerPort = 1883;
-
-        _shellyService.ConnectionStateChanged += OnConnectionStateChanged;
-
-        await _shellyService.ConnectAsync(brokerAddress, brokerPort);
-
-        // Publicera ett testmeddelande
-        await _shellyService.PublishAsync(
-            "test/topic",
-            @"{""action"":""toggle""}"
-        );
-
-        await Task.Delay(TimeSpan.FromSeconds(2));
-        await _shellyService.DisconnectAsync();
-    }
-
+    
     /// <summary>
     /// Test för att prenumerera på specifika Shelly-ämnen.
     /// </summary>
