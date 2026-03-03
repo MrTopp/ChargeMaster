@@ -5,10 +5,12 @@
 @inject ChargeWorker ChargeWorker
 @inject VWService VWService
 @inject DaikinFacade DaikinFacade
+@inject ShellyMqttService ShellyMqttService
 @using ChargeMaster.Services.ElectricityPrice
 @using ChargeMaster.Services.Wallbox
 @using ChargeMaster.Services.VolksWagen
 @using ChargeMaster.Services.Daikin
+@using ChargeMaster.Services.Shelly
 @using ChargeMaster.Workers
 
 <PageTitle>Charge Master</PageTitle>
@@ -84,6 +86,27 @@
                 <div class="col-auto" style="@(HighlightedProperties.Contains("Power") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
                     <small class="text-muted">Status:</small><br>
                     <strong>@(DaikinFacade.IsOn ? "PÅ" : "AV")</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-3">
+        <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
+            <h4 class="mb-2">Temperatur (Shelly)</h4>
+
+            <div class="row g-2 mb-3">
+                <div class="col-auto" style="@(HighlightedShellyProperties.Contains("sovrum") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                    <small class="text-muted">Sovrum:</small><br>
+                    <strong>@ShellyTemperatures["sovrum"]?.ToString("F1") °C</strong>
+                </div>
+                <div class="col-auto" style="@(HighlightedShellyProperties.Contains("hall") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                    <small class="text-muted">Hall:</small><br>
+                    <strong>@ShellyTemperatures["hall"]?.ToString("F1") °C</strong>
+                </div>
+                <div class="col-auto" style="@(HighlightedShellyProperties.Contains("arbetsrum") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                    <small class="text-muted">Arbetsrum:</small><br>
+                    <strong>@ShellyTemperatures["arbetsrum"]?.ToString("F1") °C</strong>
                 </div>
             </div>
         </div>
@@ -245,6 +268,14 @@
     private VWStatusLimitet? CurrentVWStatus { get; set; }
     private HashSet<string> HighlightedProperties { get; set; } = [];
     private CancellationTokenSource? _highlightCts;
+    private Dictionary<string, double?> ShellyTemperatures { get; set; } = new()
+    {
+        { "sovrum", null },
+        { "hall", null },
+        { "arbetsrum", null }
+    };
+    private HashSet<string> HighlightedShellyProperties { get; set; } = [];
+    private CancellationTokenSource? _highlightShellyCts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -266,6 +297,7 @@
         ChargeWorker.KvartlistaUpdated += OnKvartlistaUpdated;
         VWService.VWStatusRetrieved += OnVWStatusRetrieved;
         DaikinFacade.StatusChanged += OnDaikinStatusChanged;
+        ShellyMqttService.TemperatureChanged += OnShellyTemperatureChanged;
 
         // Trigga uppdatering av kvartlista
         CurrentKvartlista = ChargeWorker.GetKvartlista();
@@ -330,6 +362,32 @@
         });
     }
 
+    private void OnShellyTemperatureChanged(object? sender, ShellyTemperatureChangedEventArgs e)
+    {
+        // Avbryt tidigare highlight-timer
+        _highlightShellyCts?.Cancel();
+        _highlightShellyCts = new CancellationTokenSource();
+
+        // Uppdatera temperatur för motsvarande enhet
+        if (ShellyTemperatures.ContainsKey(e.DeviceId))
+        {
+            ShellyTemperatures[e.DeviceId] = e.TemperatureCelsius;
+            HighlightedShellyProperties.Add(e.DeviceId);
+        }
+
+        InvokeAsync(StateHasChanged);
+
+        // Ta bort highlight efter 55 sekunder
+        _ = Task.Delay(55000, _highlightShellyCts.Token).ContinueWith(async _ =>
+        {
+            if (!_highlightShellyCts.Token.IsCancellationRequested)
+            {
+                HighlightedShellyProperties.Clear();
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+    }
+
     private async Task LoadHighestHourlyUsageAsync()
     {
         HighestHourlyUsage = await WallboxWorker.GetHighestHourlyEnergyUsageAsync(DateTime.Now);
@@ -362,9 +420,12 @@
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
         VWService.VWStatusRetrieved -= OnVWStatusRetrieved;
         DaikinFacade.StatusChanged -= OnDaikinStatusChanged;
+        ShellyMqttService.TemperatureChanged -= OnShellyTemperatureChanged;
 
         _highlightCts?.Cancel();
         _highlightCts?.Dispose();
+        _highlightShellyCts?.Cancel();
+        _highlightShellyCts?.Dispose();
 
         if (_cts != null)
         {

@@ -54,75 +54,15 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
         const int brokerPort = 1883;
 
         // Prenumerera på events
-        _shellyService.MessageReceived += OnMessageReceived;
-        _shellyService.ConnectionStateChanged += OnConnectionStateChanged;
-
-        // Anslut
-        await _shellyService.ConnectAsync(brokerAddress, brokerPort);
-
-        // Prenumerera på ämnen
-        await _shellyService.SubscribeAsync(
-            //"test/topic",
-            "shelly-arbetsrum/events/rpc"
-        );
+        await _shellyService.SetupAsync();
 
         // Vänta en stund för att ta emot meddelanden
-        await Task.Delay(TimeSpan.FromSeconds(10));
+        await Task.Delay(TimeSpan.FromSeconds(30));
 
         // Koppla ifrån
         await _shellyService.DisconnectAsync();
     }
     
-    /// <summary>
-    /// Test för att prenumerera på specifika Shelly-ämnen.
-    /// </summary>
-    [Fact(Skip = "Aktivera när du är redo att testa prenumeration")]
-    public async Task SubscribeToShellyDevices()
-    {
-        const string brokerAddress = "192.168.1.100";
-        const int brokerPort = 1883;
-
-        _shellyService.MessageReceived += OnMessageReceived;
-        _shellyService.ConnectionStateChanged += OnConnectionStateChanged;
-
-        await _shellyService.ConnectAsync(brokerAddress, brokerPort);
-
-        // Prenumerera på alla Shelly-enheter
-        await _shellyService.SubscribeAsync(
-            "shellies/shellyswitch-1/relay/0",
-            "shellies/shellyswitch-1/relay/0/power",
-            "shellies/shellyswitch-1/info",
-            "shellies/shellyswitch-1/status"
-        );
-
-        // Vänta för att ta emot meddelanden
-        await Task.Delay(TimeSpan.FromSeconds(15));
-
-        await _shellyService.DisconnectAsync();
-    }
-
-    /// <summary>
-    /// Test för att lyssna på alla meddelanden från alla Shelly-enheter.
-    /// </summary>
-    [Fact]
-    public async Task ListenToAllShellyMessages()
-    {
-        const string brokerAddress = "192.168.1.10";
-        const int brokerPort = 1883;
-
-        _shellyService.MessageReceived += OnMessageReceived;
-        _shellyService.ConnectionStateChanged += OnConnectionStateChanged;
-
-        await _shellyService.ConnectAsync(brokerAddress, brokerPort);
-
-        // Prenumerera på alla ämnen med wildcard
-        await _shellyService.SubscribeAsync("#");
-
-        // Vänta på meddelanden
-        await Task.Delay(TimeSpan.FromSeconds(30));
-
-        await _shellyService.DisconnectAsync();
-    }
 
     // ===== EVENT HANDLERS =====
 

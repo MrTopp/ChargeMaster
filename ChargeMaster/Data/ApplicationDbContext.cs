@@ -1,4 +1,4 @@
-using ChargeMaster.Services.ElectricityPrice;
+Ôªøusing ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.Wallbox;
 
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +9,13 @@ namespace ChargeMaster.Data
     {
         public DbSet<ElectricityPrice> ElectricityPrices { get; set; }
         public DbSet<WallboxMeterReading> WallboxMeterReadings { get; set; }
+        public DbSet<ShellyTemperature> ShellyTemperatures { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // S‰kerst‰ll decimalprecision matchar migrations
+            // S√§kerst√§ll decimalprecision matchar migrations
             modelBuilder.Entity<ElectricityPrice>(b =>
             {
                 b.Property(e => e.SekPerKwh).HasColumnType("decimal(18,2)");
@@ -38,6 +39,15 @@ namespace ChargeMaster.Data
                     .HasConversion(
                         v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
                         v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
+            });
+            modelBuilder.Entity<ShellyTemperature>(b =>
+            {
+                b.Property(e => e.Timestamp)
+                    .HasColumnType("timestamp without time zone")
+                    .HasConversion(
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
+                b.HasIndex(e => new { e.DeviceId, e.Timestamp }).IsDescending(false, true);
             });
         }
     }
