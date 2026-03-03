@@ -4,6 +4,7 @@ using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.VolksWagen;
 using ChargeMaster.Services.Daikin;
 using ChargeMaster.Services.Wallbox;
+using ChargeMaster.Services.Shelly;
 using ChargeMaster.Workers;
 
 using Microsoft.AspNetCore.DataProtection;
@@ -119,17 +120,21 @@ namespace ChargeMaster
 
                 builder.Services.AddSingleton<DaikinFacade>();
 
+                builder.Services.AddSingleton<ShellyMqttService>();
+
                 // ----- Workers -----
                 builder.Services.AddSingleton<PriceFetchingWorker>();
                 builder.Services.AddSingleton<WallboxWorker>();
                 builder.Services.AddSingleton<ChargeWorker>();
                 builder.Services.AddSingleton<DaikinWorker>();
+                builder.Services.AddSingleton<ShellyWorker>();
 
                 builder.Services.AddHostedService(sp =>
                     sp.GetRequiredService<PriceFetchingWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<WallboxWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ChargeWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<DaikinWorker>());
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<ShellyWorker>());
 
                 var app = builder.Build();
 

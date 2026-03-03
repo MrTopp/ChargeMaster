@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+
 using MQTTnet;
 
 namespace ChargeMaster.Services.Shelly;
@@ -9,22 +10,93 @@ namespace ChargeMaster.Services.Shelly;
 /// </summary>
 public class ShellyMqttService(ILogger<ShellyMqttService> logger) : IAsyncDisposable
 {
-    /// <summary>
-    /// Event som triggas när ett meddelande mottas från MQTT-servern.
-    /// </summary>
-    public event EventHandler<ShellyMqttMessageEventArgs>? MessageReceived;
-
-    /// <summary>
-    /// Event som triggas när anslutningen ändras.
-    /// </summary>
-    public event EventHandler<ShellyMqttConnectionStateChangedEventArgs>? ConnectionStateChanged;
-
     private IMqttClient? _mqttClient;
+
+    const string BrokerAddress = "192.168.1.10";
+    const int BrokerPort = 1883;
+    const string ClientId = "chargemaster-shelly-mqtt";
+
+    private string[] _shellysTopics =
+    [
+        "shelly-arbetsrum/#",
+        "shelly-hall/#",
+        "shelly-sovrum/#"
+    ];
 
     /// <summary>
     /// Returnerar sant om tjänsten är ansluten till MQTT-servern.
     /// </summary>
     public bool IsConnected => _mqttClient?.IsConnected ?? false;
+
+    /// <summary>
+    /// Event som skickas när en temperaturmätning uppdateras från en Shelly-enhet.
+    /// </summary>
+    public event EventHandler<ShellyTemperatureChangedEventArgs>? TemperatureChanged
+    {
+        add
+        {
+            var hadSubscribers = _temperatureChangedHandlers != null;
+            _temperatureChangedHandlers += value;
+
+            // Trigga SubscriberConnected när första prenumeranten ansluter
+            if (!hadSubscribers && value != null)
+            {
+                SubscriberConnected?.Invoke(this, EventArgs.Empty);
+                logger.LogInformation("Första prenumeranten anslöt till TemperatureChanged-eventet");
+            }
+            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("arbetsrum", 10.0));
+            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("hall", 11.0));
+            _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("sovrum", 13.0));
+
+        }
+        remove
+        {
+            _temperatureChangedHandlers -= value;
+
+            // Trigga SubscriberDisconnected när sista prenumeranten kopplas från
+            if (_temperatureChangedHandlers == null)
+            {
+                SubscriberDisconnected?.Invoke(this, EventArgs.Empty);
+                logger.LogInformation("Sista prenumeranten kopplade från TemperatureChanged-eventet");
+            }
+        }
+    }
+
+    private EventHandler<ShellyTemperatureChangedEventArgs>? _temperatureChangedHandlers;
+
+    /// <summary>
+    /// Event som skickas när en klient prenumererar på TemperatureChanged-eventet.
+    /// </summary>
+    public event EventHandler? SubscriberConnected;
+
+    /// <summary>
+    /// Event som skickas när den sista klienten avprenumererar från TemperatureChanged-eventet.
+    /// </summary>
+    public event EventHandler? SubscriberDisconnected;
+
+    /// <summary>
+    /// Event som skickas när MQTT-anslutningen etableras eller försvinner.
+    /// </summary>
+    public event EventHandler<ShellyConnectionChangedEventArgs>? ConnectionChanged;
+
+    public async Task SetupAsync()
+    {
+        await InitiateTemperatures();
+
+        await ConnectAsync(BrokerAddress, BrokerPort, ClientId);
+
+        await SubscribeAsync(_shellysTopics);
+
+        // Här kan du lägga till eventuell setup-logik om det behövs
+        await Task.CompletedTask;
+    }
+
+    private async Task InitiateTemperatures()
+    {
+        Temperatures["arbetsrum"] = 20.0;
+        Temperatures["hall"] = 20.0;
+        Temperatures["sovrum"] = 20.0;
+    }
 
     /// <summary>
     /// Ansluter till en MQTT-server utan autentisering eller TLS.
@@ -102,26 +174,40 @@ public class ShellyMqttService(ILogger<ShellyMqttService> logger) : IAsyncDispos
         logger.LogDebug("MQTT-meddelande mottaget från {Topic}: {Payload}", topic, payload);
 
         var mess = ShellyRpcMessageParser.Parse(payload);
+        if (mess == null)
+            return Task.CompletedTask;
 
-        MessageReceived?.Invoke(this, new ShellyMqttMessageEventArgs
-        {
-            Topic = topic,
-            Payload = payload,
-            Timestamp = DateTime.UtcNow
-        });
+        HandleMessage(mess);
 
         return Task.CompletedTask;
     }
+
+    public readonly Dictionary<string, double> Temperatures = new();
+
+
+
+    private void HandleMessage(ShellyRpcMessage message)
+    {
+        double? temp = message?.@params?.Temperature0?.TemperatureCelsius;
+        string? src = message?.dst?.Split('/')?.FirstOrDefault()?.Replace("shelly-","");
+        if (temp.HasValue && src != null)
+        {
+       //     if (!Temperatures.ContainsKey(src) || Math.Abs(Temperatures[src] - temp.Value) > 0.1)
+            {
+                logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temp.Value);
+                Temperatures[src] = temp.Value;
+                _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs(src, temp.Value));
+            }
+        }
+    }
+
 
     private Task OnConnectedAsync(MqttClientConnectedEventArgs e)
     {
         logger.LogInformation("MQTT-anslutning etablerad");
 
-        ConnectionStateChanged?.Invoke(this, new ShellyMqttConnectionStateChangedEventArgs
-        {
-            IsConnected = true,
-            Timestamp = DateTime.UtcNow
-        });
+        // Trigga ConnectionChanged-eventet
+        ConnectionChanged?.Invoke(this, new ShellyConnectionChangedEventArgs(true));
 
         return Task.CompletedTask;
     }
@@ -131,12 +217,8 @@ public class ShellyMqttService(ILogger<ShellyMqttService> logger) : IAsyncDispos
         var reason = e.Reason.ToString();
         logger.LogWarning("MQTT-anslutning förlorad. Anledning: {Reason}", reason);
 
-        ConnectionStateChanged?.Invoke(this, new ShellyMqttConnectionStateChangedEventArgs
-        {
-            IsConnected = false,
-            Timestamp = DateTime.UtcNow,
-            Reason = reason
-        });
+        // Trigga ConnectionChanged-eventet
+        ConnectionChanged?.Invoke(this, new ShellyConnectionChangedEventArgs(false));
 
         return Task.CompletedTask;
     }

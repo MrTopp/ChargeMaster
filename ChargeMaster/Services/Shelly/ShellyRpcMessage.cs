@@ -8,7 +8,7 @@ public record ShellyRpcMessage(
     string src,
     string dst,
     string method,
-    ShellyRpcParams @params
+    ShellyRpcParams? @params
 );
 
 /// <summary>
