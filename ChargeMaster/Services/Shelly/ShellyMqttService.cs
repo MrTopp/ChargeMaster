@@ -94,26 +94,14 @@ public class ShellyMqttService(ILogger<ShellyMqttService> logger) : IAsyncDispos
         }
     }
 
-    /// <summary>
-    /// Publicerar ett strängmeddelande till ett MQTT-ämne.
-    /// </summary>
-    /// <param name="topic">MQTT-ämnet</param>
-    /// <param name="payload">Meddelandets innehåll</param>
-    public async Task PublishAsync(string topic, string payload)
-    {
-        if (_mqttClient is null || !_mqttClient.IsConnected)
-            throw new InvalidOperationException("Inte ansluten till MQTT-server");
-
-        await _mqttClient.PublishStringAsync(topic, payload);
-        logger.LogDebug("Publicerat meddelande på {Topic}: {Payload}", topic, payload);
-    }
-
     private Task OnApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs e)
     {
         var topic = e.ApplicationMessage.Topic;
         var payload = System.Text.Encoding.UTF8.GetString(e.ApplicationMessage.Payload.ToArray());
 
         logger.LogDebug("MQTT-meddelande mottaget från {Topic}: {Payload}", topic, payload);
+
+        var mess = ShellyRpcMessageParser.Parse(payload);
 
         MessageReceived?.Invoke(this, new ShellyMqttMessageEventArgs
         {
