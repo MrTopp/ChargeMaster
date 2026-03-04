@@ -67,23 +67,23 @@
             <h4 class="mb-2">Värmepump (Daikin)</h4>
 
             <div class="row g-2 mb-3">
-                <div class="col-auto" style="@(HighlightedProperties.Contains("CurrentTemperature") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("CurrentTemperature") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Innetemperatur:</small><br>
                     <strong>@DaikinFacade.CurrentTemperature?.ToString("F1") °C</strong>
                 </div>
-                <div class="col-auto" style="@(HighlightedProperties.Contains("OutdoorTemperature") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("OutdoorTemperature") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Utetemperatur:</small><br>
                     <strong>@DaikinFacade.OutdoorTemperature?.ToString("F1") °C</strong>
                 </div>
-                <div class="col-auto" style="@(HighlightedProperties.Contains("TargetTemperature") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("TargetTemperature") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Måltemperatur:</small><br>
                     <strong>@DaikinFacade.TargetTemperature?.ToString("F1") °C</strong>
                 </div>
-                <div class="col-auto" style="@(HighlightedProperties.Contains("Mode") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("Mode") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Läge:</small><br>
                     <strong>@DaikinFacade.Mode</strong>
                 </div>
-                <div class="col-auto" style="@(HighlightedProperties.Contains("Power") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("Power") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Status:</small><br>
                     <strong>@(DaikinFacade.IsOn ? "PÅ" : "AV")</strong>
                 </div>
@@ -96,15 +96,15 @@
             <h4 class="mb-2">Temperatur (Shelly)</h4>
 
             <div class="row g-2 mb-3">
-                <div class="col-auto" style="@(HighlightedShellyProperties.Contains("sovrum") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("sovrum") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Sovrum:</small><br>
                     <strong>@ShellyTemperatures["sovrum"]?.ToString("F1") °C</strong>
                 </div>
-                <div class="col-auto" style="@(HighlightedShellyProperties.Contains("hall") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("hall") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Hall:</small><br>
                     <strong>@ShellyTemperatures["hall"]?.ToString("F1") °C</strong>
                 </div>
-                <div class="col-auto" style="@(HighlightedShellyProperties.Contains("arbetsrum") ? "background-color: #cfe2ff; padding: 0.5rem; border-radius: 0.25rem;" : "")">
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("arbetsrum") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Arbetsrum:</small><br>
                     <strong>@ShellyTemperatures["arbetsrum"]?.ToString("F1") °C</strong>
                 </div>
