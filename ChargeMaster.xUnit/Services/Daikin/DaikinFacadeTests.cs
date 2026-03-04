@@ -190,7 +190,7 @@ public class DaikinFacadeTests : IDisposable
         await Task.Delay(500);
 
         // Uppdatera status
-        await _facade.RefreshAsync();
+        await _facade.InitializeAsync();
         var refreshedTemp = _facade.CurrentTemperature;
 
         Assert.NotNull(initialTemp);
@@ -209,7 +209,7 @@ public class DaikinFacadeTests : IDisposable
         _facade.StatusChanged += (sender, args) => { changedArgs = args; };
 
         // Uppdatera status igen
-        await _facade.RefreshAsync();
+        await _facade.InitializeAsync();
 
         // Event kan eller kan inte ha triggats beroende på om något ändrades
         // Vi bekräftar bara att event-systemet fungerar

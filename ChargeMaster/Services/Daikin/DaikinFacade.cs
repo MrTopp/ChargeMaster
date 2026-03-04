@@ -50,8 +50,8 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
         try
         {
             await UpdateStatusAsync();
-            logger.LogInformation(
-                "Daikin-status initialiserad. Inne: {Current}°C, Ute: {Outdoor}°C, Måltemperatur: {Target}°C, Läge: {Mode}, Status: {Status}",
+            logger.LogDebug(
+                "Daikin-status: Inne: {Current}°C, Ute: {Outdoor}°C, Måltemperatur: {Target}°C, Läge: {Mode}, Status: {Status}",
                 _currentTemperature, _outdoorTemperature, _targetTemperature, _mode, IsOn ? "PÅ" : "AV");
         }
         catch (Exception ex)
@@ -200,13 +200,5 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
             logger.LogError(ex, "Fel vid byte av värmepumpläge till {Mode}", mode);
             return false;
         }
-    }
-
-    /// <summary>
-    /// Uppdaterar status från Daikin-enheten.
-    /// </summary>
-    public async Task RefreshAsync()
-    {
-        await InitializeAsync();
     }
 }
