@@ -22,7 +22,7 @@ namespace ChargeMaster
         {
             var assembly = typeof(Program).Assembly;
             var versionInfo = assembly
-                .GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                 .InformationalVersion ?? assembly.GetName().Version?.ToString() ?? "Unknown";
 
             // Ta bort commit-hash om den finns (allt efter "+")

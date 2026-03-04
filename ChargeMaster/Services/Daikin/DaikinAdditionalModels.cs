@@ -32,7 +32,7 @@ public class DaikinModelInfo
 {
     public string? Model { get; set; }
     public string? Type { get; set; }
-    public string ProtocolVersion { get; set; }
+    public string? ProtocolVersion { get; set; }
     public int? ControlProtocolVersion { get; set; }
     public int HasHumidity { get; set; }
     public int HasHumiditySensor { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace ChargeMaster.Workers;
 
-using ChargeMaster.Services.Shelly;
+using Services.Shelly;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -57,7 +57,7 @@ public class ShellyWorker(
             // Använd IServiceScopeFactory för att skapa ett scope för databaskall
             // Detta är nödvändigt eftersom ShellyWorker är Singleton men DbContext är Scoped
             using var scope = serviceScopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ChargeMaster.Data.ApplicationDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<Data.ApplicationDbContext>();
 
             // Hämta senaste värdet för denna enhet från databasen
             var lastTemperature = await dbContext.ShellyTemperatures

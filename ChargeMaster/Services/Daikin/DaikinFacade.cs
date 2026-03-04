@@ -72,13 +72,13 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
 
         if (sensorInfo != null)
         {
-            if (_currentTemperature != sensorInfo.IndoorTemperature)
+            if (Math.Abs( (_currentTemperature ?? 0) - (sensorInfo.IndoorTemperature ?? 0)) > 0.01)
             {
                 _currentTemperature = sensorInfo.IndoorTemperature;
                 changes.CurrentTemperatureChanged = true;
             }
 
-            if (_outdoorTemperature != sensorInfo.OutdoorTemperature)
+            if (Math.Abs( (_outdoorTemperature ?? 0) - (sensorInfo.OutdoorTemperature ?? 0)) > 0.01)
             {
                 _outdoorTemperature = sensorInfo.OutdoorTemperature;
                 changes.OutdoorTemperatureChanged = true;
@@ -87,7 +87,7 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
 
         if (controlInfo != null)
         {
-            if (_targetTemperature != controlInfo.TargetTemperature)
+            if (Math.Abs( (_targetTemperature ?? 0) - (controlInfo.TargetTemperature ?? 0)) > 0.01)
             {
                 _targetTemperature = controlInfo.TargetTemperature;
                 changes.TargetTemperatureChanged = true;
