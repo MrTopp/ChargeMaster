@@ -45,7 +45,7 @@ public class WallboxWorker(
     /// <summary>
     /// Event raised when a new charging session starts (SessionStartTime changes).
     /// </summary>
-    public event EventHandler<ChargeSessionChangedEventArgs>? ChargeSessionChanged;
+    public event EventHandler<WallboxSessionData>? ChargeSessionChanged;
 
     /// <summary>
     /// Tracks the last recorded accumulated energy value to avoid storing duplicate readings.
@@ -195,7 +195,7 @@ public class WallboxWorker(
         if (ChargeSessionData?.SessionStartTime != wallboxStatus.MainCharger.SessionStartTime)
         {
             // Raise the event with the previous session data
-            ChargeSessionChanged?.Invoke(this, new ChargeSessionChangedEventArgs(ChargeSessionData));
+            if (ChargeSessionData != null) ChargeSessionChanged?.Invoke(this, ChargeSessionData);
         }
 
         ChargeSessionData = new WallboxSessionData(

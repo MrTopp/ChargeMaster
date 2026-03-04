@@ -303,6 +303,9 @@ public class ChargeWorker(
         }
     }
 
+    
+
+
     private bool BilenLaddar { get; set; }
 
     internal async Task StartaLaddningAsync()
