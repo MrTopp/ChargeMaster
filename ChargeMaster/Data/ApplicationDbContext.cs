@@ -10,7 +10,7 @@ namespace ChargeMaster.Data
         public DbSet<ElectricityPrice> ElectricityPrices { get; set; }
         public DbSet<WallboxMeterReading> WallboxMeterReadings { get; set; }
         public DbSet<ShellyTemperature> ShellyTemperatures { get; set; }
-        public DbSet<WallboxChargeSession> WallboxChargeSessions { get; set; }
+        public DbSet<ChargeSession> ChargeSessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,7 +50,7 @@ namespace ChargeMaster.Data
                         v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
                 b.HasIndex(e => new { e.DeviceId, e.Timestamp }).IsDescending(false, true);
             });
-            modelBuilder.Entity<WallboxChargeSession>(b =>
+            modelBuilder.Entity<ChargeSession>(b =>
             {
                 b.Property(e => e.Timestamp)
                     .HasColumnType("timestamp without time zone")

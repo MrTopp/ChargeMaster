@@ -15,11 +15,11 @@ Skapar tabellen för elpriser från API:et.
 - Lagrar prisperioder med start- och sluttider
 - Skapar 3 index för optimal prestanda
 
-### 003_CreateWallboxChargeSessionTable.sql
+### 003_CreateChargeSessionTable.sql
 Skapar tabellen för Wallbox laddningssessiondata.
 
 **Vad det gör:**
-- Skapar tabellen `WallboxChargeSession` med sessionsdata från Wallbox-laddaren
+- Skapar tabellen `ChargeSession` med sessionsdata från Wallbox-laddaren
 - Lagrar information om varje laddningssession inkl. energi, laddningsnivå och status
 - Skapar 2 index för optimal prestanda
 
@@ -39,14 +39,14 @@ Skapar tabellen för Wallbox mätningsdata.
 ```bash
 # Körning med psql från command line
 psql -U chargemasterapp -d chargemaster_db -f 002_CreateElectricityPricesTable.sql
-psql -U chargemasterapp -d chargemaster_db -f 003_CreateWallboxChargeSessionTable.sql
+psql -U chargemasterapp -d chargemaster_db -f 003_CreateChargeSessionTable.sql
 psql -U chargemasterapp -d chargemaster_db -f 004_CreateWallboxMeterReadingsTable.sql
 ```
 
 Eller direkt i psql-sessionen:
 ```sql
 \i 002_CreateElectricityPricesTable.sql
-\i 003_CreateWallboxChargeSessionTable.sql
+\i 003_CreateChargeSessionTable.sql
 \i 004_CreateWallboxMeterReadingsTable.sql
 ```
 
@@ -78,7 +78,7 @@ User: chargemasterapp
 | IX_ElectricityPrices_TimeEnd | TimeEnd DESC | Sökning av prisperioder |
 | IX_ElectricityPrices_TimeStart_TimeEnd | TimeStart ASC, TimeEnd ASC | Periodsökning |
 
-## Schema WallboxChargeSession
+## Schema ChargeSession
 
 | Kolumn | Typ | Beskrivning |
 |--------|-----|-------------|
@@ -121,8 +121,8 @@ User: chargemasterapp
 ```sql
 GRANT ALL PRIVILEGES ON TABLE public."ElectricityPrices" TO chargemasterapp;
 GRANT ALL PRIVILEGES ON SEQUENCE "ElectricityPrices_Id_seq" TO chargemasterapp;
-GRANT ALL PRIVILEGES ON TABLE public."WallboxChargeSession" TO chargemasterapp;
-GRANT ALL PRIVILEGES ON SEQUENCE "WallboxChargeSession_Id_seq" TO chargemasterapp;
+GRANT ALL PRIVILEGES ON TABLE public."ChargeSession" TO chargemasterapp;
+GRANT ALL PRIVILEGES ON SEQUENCE "ChargeSession_Id_seq" TO chargemasterapp;
 GRANT ALL PRIVILEGES ON TABLE public."WallboxMeterReadings" TO chargemasterapp;
 GRANT ALL PRIVILEGES ON SEQUENCE "WallboxMeterReadings_Id_seq" TO chargemasterapp;
 ```
@@ -131,7 +131,7 @@ GRANT ALL PRIVILEGES ON SEQUENCE "WallboxMeterReadings_Id_seq" TO chargemasterap
 
 ```sql
 DROP TABLE IF EXISTS public."ElectricityPrices" CASCADE;
-DROP TABLE IF EXISTS public."WallboxChargeSession" CASCADE;
+DROP TABLE IF EXISTS public."ChargeSession" CASCADE;
 DROP TABLE IF EXISTS public."WallboxMeterReadings" CASCADE;
 ```
 
@@ -140,19 +140,19 @@ DROP TABLE IF EXISTS public."WallboxMeterReadings" CASCADE;
 ```bash
 # Kopiera SQL-skripten
 scp 002_CreateElectricityPricesTable.sql chargemasterapp@raspberry-pi:/var/www/ChargeMaster/Data/Scripts/
-scp 003_CreateWallboxChargeSessionTable.sql chargemasterapp@raspberry-pi:/var/www/ChargeMaster/Data/Scripts/
+scp 003_CreateChargeSessionTable.sql chargemasterapp@raspberry-pi:/var/www/ChargeMaster/Data/Scripts/
 scp 004_CreateWallboxMeterReadingsTable.sql chargemasterapp@raspberry-pi:/var/www/ChargeMaster/Data/Scripts/
 
 # Anslut och kör skripten
 ssh chargemasterapp@raspberry-pi
 psql -U chargemasterapp -d chargemaster_db -f /var/www/ChargeMaster/Data/Scripts/002_CreateElectricityPricesTable.sql
-psql -U chargemasterapp -d chargemaster_db -f /var/www/ChargeMaster/Data/Scripts/003_CreateWallboxChargeSessionTable.sql
+psql -U chargemasterapp -d chargemaster_db -f /var/www/ChargeMaster/Data/Scripts/003_CreateChargeSessionTable.sql
 psql -U chargemasterapp -d chargemaster_db -f /var/www/ChargeMaster/Data/Scripts/004_CreateWallboxMeterReadingsTable.sql
 
 # Verifiera
 \dt
 \d "ElectricityPrices"
-\d "WallboxChargeSession"
+\d "ChargeSession"
 \d "WallboxMeterReadings"
 ```
 
@@ -163,8 +163,8 @@ psql -U chargemasterapp -d chargemaster_db -f /var/www/ChargeMaster/Data/Scripts
 DELETE FROM public."ElectricityPrices" 
 WHERE "TimeEnd" < NOW() - INTERVAL '1 year';
 
--- Ta bort WallboxChargeSession data äldre än 90 dagar
-DELETE FROM public."WallboxChargeSession" 
+-- Ta bort ChargeSession data äldre än 90 dagar
+DELETE FROM public."ChargeSession" 
 WHERE "Timestamp" < NOW() - INTERVAL '90 days';
 
 -- Ta bort WallboxMeterReadings data äldre än 1 år
@@ -173,6 +173,6 @@ WHERE "ReadAt" < NOW() - INTERVAL '1 year';
 
 -- Optimera tabellerna
 VACUUM ANALYZE public."ElectricityPrices";
-VACUUM ANALYZE public."WallboxChargeSession";
+VACUUM ANALYZE public."ChargeSession";
 VACUUM ANALYZE public."WallboxMeterReadings";
 ```

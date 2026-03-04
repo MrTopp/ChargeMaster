@@ -3,7 +3,7 @@
 /// <summary>
 /// Entity Framework model for storing Wallbox charging session data.
 /// </summary>
-public class WallboxChargeSession
+public class ChargeSession
 {
     /// <summary>
     /// Gets or sets the unique identifier for the charge session record.
