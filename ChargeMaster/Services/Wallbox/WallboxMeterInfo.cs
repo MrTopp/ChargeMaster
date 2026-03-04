@@ -93,9 +93,15 @@ public class WallboxMeterInfo
     /// </summary>
     public double EffektTimmeNu { get; set; }
 
+    public string EffektTimmeNuFormatted =>
+        EffektTimmeNu > 0 ? EffektTimmeNu.ToString("F0") : "-";
+
     /// <summary>
     /// Uppskattad effektförbrukning för innevarande timme
     /// </summary>
     public double EffektTimmeTotal { get; set; }
+
+    public string EffektTimmeTotalFormatted =>
+        EffektTimmeTotal > 0 ? EffektTimmeTotal.ToString("F0") : "-";
 
 }
