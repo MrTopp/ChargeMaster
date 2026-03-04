@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 
 using Microsoft.EntityFrameworkCore;
+
 using MQTTnet;
 
 namespace ChargeMaster.Services.Shelly;
@@ -63,6 +64,12 @@ public class ShellyMqttService(
                 logger.LogInformation("Sista prenumeranten kopplade från TemperatureChanged-eventet");
             }
         }
+    }
+
+    public ShellyMqttService()
+        : this(null, null)
+    {
+
     }
 
     private EventHandler<ShellyTemperatureChangedEventArgs>? _temperatureChangedHandlers;
@@ -227,17 +234,22 @@ public class ShellyMqttService(
         return Task.CompletedTask;
     }
 
-    public readonly Dictionary<string, double> Temperatures = new();
+    public readonly Dictionary<string, double> Temperatures = new()
+    {
+        {"arbetsrum", 0.0},
+        {"hall", 0.0},
+        {"sovrum", 0.0}
+    };
 
 
 
     private void HandleMessage(ShellyRpcMessage message)
     {
         double? temp = message?.@params?.Temperature0?.TemperatureCelsius;
-        string? src = message?.dst?.Split('/')?.FirstOrDefault()?.Replace("shelly-","");
+        string? src = message?.dst?.Split('/')?.FirstOrDefault()?.Replace("shelly-", "");
         if (temp.HasValue && src != null)
         {
-       //     if (!Temperatures.ContainsKey(src) || Math.Abs(Temperatures[src] - temp.Value) > 0.1)
+            //     if (!Temperatures.ContainsKey(src) || Math.Abs(Temperatures[src] - temp.Value) > 0.1)
             {
                 logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temp.Value);
                 Temperatures[src] = temp.Value;

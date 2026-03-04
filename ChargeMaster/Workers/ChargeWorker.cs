@@ -15,6 +15,7 @@ public class KvartlistaEventArgs(List<ElectricityPrice> kvartlista) : EventArgs
 /// </summary>
 public class ChargeWorker(
     IServiceProvider serviceProvider,
+    WallboxWorker wallboxWorker,
     ILogger<ChargeWorker> logger)
     : BackgroundService
 {
@@ -40,6 +41,15 @@ public class ChargeWorker(
     /// Uppräknat värde på timförbrukning.
     /// </summary>
     private long ForbrukningDennaTimme { get; set; }
+
+    /// <summary>
+    /// Nuvarande laddnivå i bilen, i procent. 
+    /// </summary>
+    private double _chargeLevelCurrent;
+    /// <summary>
+    /// Målvärde för laddningen i procent
+    /// </summary>
+    private double _chargeLevelTarget;
 
     /// <summary>
     /// Flagga att wallbox är panikstoppad.
@@ -198,6 +208,12 @@ public class ChargeWorker(
             }
 
             // ----- Bilen är hemma, dags att utvärdera laddning -----
+
+            await SaveChargeSessionAsync(currentConnectorStatus.ToString(),
+                (int)_chargeLevelCurrent,
+                (int)_chargeLevelTarget,
+                wallboxWorker,
+                stoppingToken);
 
             // ----- Nödstopp om bilen laddar när det inte är tillåtet
             if (ConnectorStatus == ConnectionEnum.Charging && !BilenLaddar)
@@ -370,6 +386,8 @@ public class ChargeWorker(
         try
         {
             VWStatus? response = await _vwService.GetStatus();
+            _chargeLevelCurrent = response?.BatteryLevel ?? 0;
+            _chargeLevelTarget = response?.ChargingSettingsTargetLevel ?? 0;
             return (response?.ChargingPower ?? 0) > 0;
         }
         catch (CarConnectionException ex)
@@ -473,10 +491,10 @@ public class ChargeWorker(
             return 0;
         if (status.BatteryLevel == null)
             return 0;
-        double level = status.BatteryLevel ?? 0;
-        double target = status.ChargingSettingsTargetLevel ?? 0;
+        _chargeLevelCurrent = status.BatteryLevel ?? 0;
+        _chargeLevelTarget = status.ChargingSettingsTargetLevel ?? 0;
 
-        return target - level;
+        return _chargeLevelTarget - _chargeLevelCurrent;
     }
 
     /// <summary>
