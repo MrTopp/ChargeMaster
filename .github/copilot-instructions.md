@@ -37,7 +37,7 @@
 - Use a local PostgreSQL instance for testing Entity Framework Core operations.
 
 ## Commit Messages
-- Format commit messages as a bullet list using '-' as a prefix to separate different concerns.
+- Format commit messages as a bullet list where each item starts with `-`. Example: `- Action 1\n- Action 2\n- Action 3`
 
 # Functionality
 

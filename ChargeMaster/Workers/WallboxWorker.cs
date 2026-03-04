@@ -43,6 +43,11 @@ public class WallboxWorker(
     public event EventHandler<MeterInfoEventArgs>? MeterInfoCalculated;
 
     /// <summary>
+    /// Event raised when a new charging session starts (SessionStartTime changes).
+    /// </summary>
+    public event EventHandler<ChargeSessionChangedEventArgs>? ChargeSessionChanged;
+
+    /// <summary>
     /// Tracks the last recorded accumulated energy value to avoid storing duplicate readings.
     /// </summary>
     private double? LastStoredAccEnergy { get; set; }
@@ -86,6 +91,9 @@ public class WallboxWorker(
             // Initiera genom att läsa upp status
             WallboxStatus wallboxStatus = await InitializeWallboxStatusAsync(stoppingToken);
 
+            // Extrahera status för aktuell laddning
+            ExtractChargeData(wallboxStatus);
+
             // Kontrollera klockan på wallboxen
             await CheckWallboxTimeAsync(wallboxStatus);
 
@@ -104,6 +112,11 @@ public class WallboxWorker(
     }
 
     public WallboxMeterInfo? MeterInfo { get; private set; }
+
+    /// <summary>
+    /// Gets the current charging session data extracted from the Wallbox status.
+    /// </summary>
+    public WallboxSessionData? ChargeSessionData { get; private set; }
 
     // Föregående mätning
     private DateTime _lastMeterInfoCalculationTime = DateTime.MinValue;
@@ -163,6 +176,34 @@ public class WallboxWorker(
         meterInfo.EffektTimmeTotal = _currentHourTotalEnergy;
         MeterInfoCalculated?.Invoke(this, new MeterInfoEventArgs(meterInfo));
 
+    }
+
+    /// <summary>
+    /// Extracts charging session data from the Wallbox status and updates the ChargeSessionData property.
+    /// Raises the ChargeSessionChanged event if SessionStartTime differs from the previous reading.
+    /// </summary>
+    /// <param name="wallboxStatus">The Wallbox status containing session information.</param>
+    private void ExtractChargeData(WallboxStatus wallboxStatus)
+    {
+        if (wallboxStatus.MainCharger is null)
+        {
+            ChargeSessionData = null;
+            return;
+        }
+
+        // Check if SessionStartTime has changed, indicating a new session
+        if (ChargeSessionData?.SessionStartTime != wallboxStatus.MainCharger.SessionStartTime)
+        {
+            // Raise the event with the previous session data
+            ChargeSessionChanged?.Invoke(this, new ChargeSessionChangedEventArgs(ChargeSessionData));
+        }
+
+        ChargeSessionData = new WallboxSessionData(
+            wallboxStatus.MainCharger.AccSessionEnergy,
+            wallboxStatus.MainCharger.SessionStartValue,
+            wallboxStatus.MainCharger.AccSessionMillis,
+            wallboxStatus.MainCharger.SessionStartTime
+        );
     }
 
     /// <summary>
