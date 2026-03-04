@@ -4,9 +4,9 @@
 /// Represents a charging session record extracted from WallboxStatus.MainCharger.
 /// Contains session energy consumption and timing information.
 /// </summary>
-public class WallboxSessionData
+public class ChargeSessionData
 {
-    public WallboxSessionData(double accSessionEnergy, double sessionStartValue, long accSessionMillis, long? sessionStartTime)
+    public ChargeSessionData(double accSessionEnergy, double sessionStartValue, long accSessionMillis, long? sessionStartTime)
     {
         AccSessionEnergy = accSessionEnergy;
         SessionStartValue = sessionStartValue;

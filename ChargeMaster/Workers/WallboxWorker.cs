@@ -45,7 +45,7 @@ public class WallboxWorker(
     /// <summary>
     /// Event raised when a new charging session starts (SessionStartTime changes).
     /// </summary>
-    public event EventHandler<WallboxSessionData>? ChargeSessionChanged;
+    public event EventHandler<ChargeSessionData>? ChargeSessionChanged;
 
     /// <summary>
     /// Tracks the last recorded accumulated energy value to avoid storing duplicate readings.
@@ -116,7 +116,7 @@ public class WallboxWorker(
     /// <summary>
     /// Gets the current charging session data extracted from the Wallbox status.
     /// </summary>
-    public WallboxSessionData? ChargeSessionData { get; private set; }
+    public ChargeSessionData? ChargeSessionData { get; private set; }
 
     // Föregående mätning
     private DateTime _lastMeterInfoCalculationTime = DateTime.MinValue;
@@ -198,7 +198,7 @@ public class WallboxWorker(
             if (ChargeSessionData != null) ChargeSessionChanged?.Invoke(this, ChargeSessionData);
         }
 
-        ChargeSessionData = new WallboxSessionData(
+        ChargeSessionData = new ChargeSessionData(
             wallboxStatus.MainCharger.AccSessionEnergy,
             wallboxStatus.MainCharger.SessionStartValue,
             wallboxStatus.MainCharger.AccSessionMillis,
