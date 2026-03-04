@@ -46,7 +46,6 @@ public class ShellyMqttService(
             if (!hadSubscribers && value != null)
             {
                 SubscriberConnected?.Invoke(this, EventArgs.Empty);
-                logger.LogInformation("Första prenumeranten anslöt till TemperatureChanged-eventet");
             }
             _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("arbetsrum", Temperatures["arbetsrum"]));
             _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs("hall", Temperatures["hall"]));
@@ -61,7 +60,6 @@ public class ShellyMqttService(
             if (_temperatureChangedHandlers == null)
             {
                 SubscriberDisconnected?.Invoke(this, EventArgs.Empty);
-                logger.LogInformation("Sista prenumeranten kopplade från TemperatureChanged-eventet");
             }
         }
     }
@@ -122,7 +120,7 @@ public class ShellyMqttService(
                 if (temp != null)
                 {
                     Temperatures[temp.DeviceId] = temp.TemperatureCelsius;
-                    logger.LogInformation("Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
+                    logger.LogDebug("Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
                         temp.DeviceId, temp.TemperatureCelsius);
                 }
             }
@@ -131,22 +129,12 @@ public class ShellyMqttService(
             var enhetIds = new[] { "arbetsrum", "hall", "sovrum" };
             foreach (var enhetId in enhetIds)
             {
-                if (!Temperatures.ContainsKey(enhetId))
-                {
-                    Temperatures[enhetId] = 20.0;
-                    logger.LogInformation("Ingen tidigare temperaturdata för {DeviceId}, använder defaultvärde 20.0 °C",
-                        enhetId);
-                }
+                Temperatures.TryAdd(enhetId, 20.0);
             }
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Fel vid hämtning av temperaturer från databasen, använder defaultvärden");
-
-            // Fallback till defaultvärden om något går fel
-            Temperatures["arbetsrum"] = 20.0;
-            Temperatures["hall"] = 20.0;
-            Temperatures["sovrum"] = 20.0;
         }
     }
 
@@ -189,7 +177,7 @@ public class ShellyMqttService(
         if (_mqttClient.IsConnected)
         {
             await _mqttClient.DisconnectAsync(MqttClientDisconnectOptionsReason.NormalDisconnection);
-            logger.LogInformation("Kopplad ifrån MQTT-server");
+            logger.LogDebug("Kopplad ifrån MQTT-server");
         }
     }
 
@@ -203,7 +191,7 @@ public class ShellyMqttService(
             throw new InvalidOperationException("Inte ansluten till MQTT-server");
 
         await _mqttClient.SubscribeAsync(topic, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
-        logger.LogInformation("Prenumererad på MQTT-ämne: {Topic}", topic);
+        logger.LogDebug("Prenumererad på MQTT-ämne: {Topic}", topic);
     }
 
     /// <summary>
@@ -249,7 +237,7 @@ public class ShellyMqttService(
         string? src = message?.dst?.Split('/')?.FirstOrDefault()?.Replace("shelly-", "");
         if (temp.HasValue && src != null)
         {
-            //     if (!Temperatures.ContainsKey(src) || Math.Abs(Temperatures[src] - temp.Value) > 0.1)
+            if (!Temperatures.ContainsKey(src) || Math.Abs(Temperatures[src] - temp.Value) > 0.1)
             {
                 logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temp.Value);
                 Temperatures[src] = temp.Value;
@@ -261,7 +249,7 @@ public class ShellyMqttService(
 
     private Task OnConnectedAsync(MqttClientConnectedEventArgs e)
     {
-        logger.LogInformation("MQTT-anslutning etablerad");
+        logger.LogDebug("MQTT-anslutning etablerad");
 
         // Trigga ConnectionChanged-eventet
         ConnectionChanged?.Invoke(this, new ShellyConnectionChangedEventArgs(true));
