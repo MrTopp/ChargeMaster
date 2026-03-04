@@ -343,9 +343,9 @@ public class WallboxWorker(
             var entry = new WallboxMeterReading
             {
                 ReadAt = DateTime.Now,
-                RawJson = System.Text.Json.JsonSerializer.Serialize(info),
+                RawJson = "",  // System.Text.Json.JsonSerializer.Serialize(info),
                 AccEnergy = info.AccEnergy,
-                MeterSerial = info.MeterSerial,
+                MeterSerial = "", // info.MeterSerial,
                 ApparentPower = info.ApparentPower
             };
 
