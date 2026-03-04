@@ -41,8 +41,8 @@ public class ElectricityPriceService(
         try
         {
             logger.LogInformation("Hämtar priser från {Url}", url);
-            List<ElectricityPrice>? prices
-                = await httpClient.GetFromJsonAsync<List<ElectricityPrice>>(url);
+            List<Data.ElectricityPrice>? prices
+                = await httpClient.GetFromJsonAsync<List<Data.ElectricityPrice>>(url);
 
             if (prices != null && prices.Any())
             {
@@ -70,7 +70,7 @@ public class ElectricityPriceService(
     /// <param name="prices">Listan med priser att validera</param>
     /// <param name="date">Det datum som priserna ska tillhöra</param>
     /// <exception cref="InvalidOperationException">Kastas om validering misslyckas</exception>
-    private void ValidatePrices(List<ElectricityPrice> prices, DateOnly date)
+    private void ValidatePrices(List<Data.ElectricityPrice> prices, DateOnly date)
     {
         // Kontrollera antal priser (96 = 24 timmar * 4 kvartar per timme)
         if (prices.Count != 96)
@@ -98,7 +98,7 @@ public class ElectricityPriceService(
         }
     }
 
-    public async Task<List<ElectricityPrice>> GetPricesForDateAsync(DateOnly date)
+    public async Task<List<Data.ElectricityPrice>> GetPricesForDateAsync(DateOnly date)
     {
         // Compare Date part of TimeStart
         var startOfDay = date.ToDateTime(TimeOnly.MinValue);

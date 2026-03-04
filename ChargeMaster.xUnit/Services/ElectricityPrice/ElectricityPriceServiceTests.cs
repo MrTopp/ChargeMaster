@@ -66,7 +66,7 @@ public class ElectricityPriceServiceTests : IDisposable
     {
         // Arrange
         var date = new DateOnly(2025, 10, 27);
-        _context.ElectricityPrices.Add(new ChargeMaster.Services.ElectricityPrice.ElectricityPrice
+        _context.ElectricityPrices.Add(new Data.ElectricityPrice
         {
             TimeStart = date.ToDateTime(new TimeOnly(13, 0)),
             TimeEnd = date.ToDateTime(new TimeOnly(13, 15)),
@@ -91,7 +91,7 @@ public class ElectricityPriceServiceTests : IDisposable
         var otherDate = new DateOnly(2025, 11, 28);
 
         _context.ElectricityPrices.AddRange(
-            new ChargeMaster.Services.ElectricityPrice.ElectricityPrice // Should match
+            new Data.ElectricityPrice // Should match
             {
                 TimeStart = targetDate.ToDateTime(new TimeOnly(10, 0)),
                 TimeEnd = targetDate.ToDateTime(new TimeOnly(11, 0)),
@@ -99,7 +99,7 @@ public class ElectricityPriceServiceTests : IDisposable
                 EurPerKwh = 0.1m,
                 ExchangeRate = 10
             },
-            new ChargeMaster.Services.ElectricityPrice.ElectricityPrice // Should not match
+            new Data.ElectricityPrice // Should not match
             {
                 TimeStart = otherDate.ToDateTime(new TimeOnly(10, 0)),
                 TimeEnd = otherDate.ToDateTime(new TimeOnly(11, 0)),
@@ -150,7 +150,7 @@ public class ElectricityPriceServiceTests : IDisposable
     {
         // Arrange
         var date = new DateOnly(2023, 10, 27);
-        _context.ElectricityPrices.Add(new ChargeMaster.Services.ElectricityPrice.ElectricityPrice
+        _context.ElectricityPrices.Add(new Data.ElectricityPrice
         {
             TimeStart = date.ToDateTime(new TimeOnly(12, 0)),
             TimeEnd = date.ToDateTime(new TimeOnly(13, 0)),

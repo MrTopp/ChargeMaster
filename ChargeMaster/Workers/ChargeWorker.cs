@@ -90,6 +90,12 @@ public class ChargeWorker(
                                             throw new InvalidOperationException(
                                                 "Initiering av VWService misslyckas");
 
+    /// <summary>
+    /// Tracks the last saved charge session data to avoid saving duplicates.
+    /// Used to detect changes in ChargeLevel and SessionEnergy.
+    /// </summary>
+    private ChargeSession? _lastSavedChargeSession;
+
 
     private async Task<long> InitieraFörbrukningAsync(CancellationToken cancellationToken)
     {
@@ -546,6 +552,102 @@ public class ChargeWorker(
 
             _kvartlista = kvartlista;
             return _kvartlista;
+        }
+    }
+
+    /// <summary>
+    /// Saves the current charge session data to the database if it differs from the previous save.
+    /// Compares ChargeLevel and SessionEnergy to detect changes.
+    /// </summary>
+    /// <param name="chargeState">The current state of charging (e.g., "CHARGING", "IDLE").</param>
+    /// <param name="chargeLevel">The current battery charge level in percentage (0-100).</param>
+    /// <param name="chargeTarget">The target charge level in percentage (0-100).</param>
+    /// <param name="wallboxWorker">The WallboxWorker instance to get session data from.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    internal async Task SaveChargeSessionAsync(
+        string chargeState,
+        int? chargeLevel,
+        int? chargeTarget,
+        WallboxWorker wallboxWorker,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Get session data from WallboxWorker
+            var sessionData = wallboxWorker.ChargeSessionData;
+            if (sessionData is null)
+            {
+                logger.LogInformation("SaveChargeSessionAsync: No session data available from WallboxWorker");
+                return;
+            }
+
+            if (!sessionData.HasData)
+            {
+                // gissar att det inte finns någon inkopplad bil, eller den har inte laddat något.
+                logger.LogInformation("SaveChargeSessionAsync: Incomplete session data. Skipping save.");
+                return;
+            }
+
+            // Initialize _lastSavedChargeSession from database if it's null
+            if (_lastSavedChargeSession is null)
+            {
+                try
+                {
+                    using var initScope = serviceProvider.CreateScope();
+                    var initContext = initScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    _lastSavedChargeSession = await initContext.ChargeSessions
+                        .OrderByDescending(x => x.Timestamp)
+                        .FirstOrDefaultAsync(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "SaveChargeSessionAsync: Error initializing _lastSavedChargeSession from database");
+                }
+                // fallback om databasen är tom eller det blev något fel vid inläsning
+                _lastSavedChargeSession ??= new ChargeSession();
+            }
+
+            // Check if data has changed compared to last save
+            var sessionEnergy = sessionData.AccSessionEnergy;
+            if (_lastSavedChargeSession.ChargeLevel == chargeLevel &&
+                _lastSavedChargeSession.SessionEnergy == sessionEnergy)
+            {
+                logger.LogDebug(
+                    "SaveChargeSessionAsync: No change detected. ChargeLevel={level}, SessionEnergy={energy}",
+                    chargeLevel, sessionEnergy);
+                return;
+            }
+
+
+            // Create new charge session record
+            var chargeSession = new ChargeSession
+            {
+                Timestamp = DateTime.Now,
+                ChargeState = chargeState,
+                ChargeLevel = chargeLevel,
+                ChargeTarget = chargeTarget,
+                SessionEnergy = sessionEnergy,
+                SessionStartValue = sessionData.SessionStartValue,
+                SessionStartTime = sessionData.SessionStartTime ?? 0
+            };
+
+
+            // Save to database
+            using var scope = serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            context.ChargeSessions.Add(chargeSession);
+            await context.SaveChangesAsync(cancellationToken);
+
+            // Update last saved data
+            _lastSavedChargeSession = chargeSession;
+
+            logger.LogInformation(
+                "SaveChargeSessionAsync: Charge session saved. State={state}, Level={level}%, Target={target}%, Energy={energy}Wh",
+                chargeState, chargeLevel, chargeTarget, sessionEnergy);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "SaveChargeSessionAsync: Error saving charge session");
         }
     }
 }

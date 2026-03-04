@@ -1,4 +1,6 @@
-﻿namespace ChargeMaster.Services.Wallbox;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ChargeMaster.Services.Wallbox;
 
 /// <summary>
 /// Represents a charging session record extracted from WallboxStatus.MainCharger.
@@ -6,7 +8,7 @@
 /// </summary>
 public class ChargeSessionData
 {
-    public ChargeSessionData(double accSessionEnergy, double sessionStartValue, long accSessionMillis, long? sessionStartTime)
+    public ChargeSessionData(int? accSessionEnergy, long? sessionStartValue, long? accSessionMillis, long? sessionStartTime)
     {
         AccSessionEnergy = accSessionEnergy;
         SessionStartValue = sessionStartValue;
@@ -17,20 +19,23 @@ public class ChargeSessionData
     /// <summary>
     /// Accumulated energy for the current charging session in Wh.
     /// </summary>
-    public double AccSessionEnergy { get; set; }
+    public int? AccSessionEnergy { get; set; }
 
     /// <summary>
     /// Starting energy value when the session began in Wh.
     /// </summary>
-    double SessionStartValue { get; set; }
+    public long? SessionStartValue { get; set; }
 
     /// <summary>
     /// Duration of the charging session in milliseconds.
     /// </summary>
-    public long AccSessionMillis { get; set; } = 0;
-
+    public long? AccSessionMillis { get; set; }
     /// <summary>
     /// Timestamp when the session started (Unix timestamp in seconds).
     /// </summary>
     public long? SessionStartTime { get; set; }
+
+    [NotMapped]
+    public bool HasData=> AccSessionEnergy.HasValue && SessionStartValue.HasValue && AccSessionMillis.HasValue && SessionStartTime.HasValue;
+
 }
