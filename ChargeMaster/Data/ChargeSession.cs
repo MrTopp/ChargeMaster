@@ -1,7 +1,7 @@
 ﻿namespace ChargeMaster.Data;
 
 /// <summary>
-/// Entity Framework model for storing Wallbox charging session data.
+/// Entity Framework model for storing charging session data.
 /// </summary>
 public class ChargeSession
 {
