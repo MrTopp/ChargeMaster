@@ -27,7 +27,7 @@ public class ElectricityPriceTests
     {
         // Arrange
         // Year and Day do not impact the logic, but must be valid
-        var price = new ChargeMaster.Services.ElectricityPrice.ElectricityPrice
+        var price = new Data.ElectricityPrice
         {
             TimeStart = new DateTime(2023, month, 15, hour, 0, 0)
         };

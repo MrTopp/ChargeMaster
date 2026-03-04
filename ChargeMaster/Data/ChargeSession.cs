@@ -1,4 +1,6 @@
-﻿namespace ChargeMaster.Data;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ChargeMaster.Data;
 
 /// <summary>
 /// Entity Framework model for storing charging session data.
@@ -18,30 +20,31 @@ public class ChargeSession
     /// <summary>
     /// Gets or sets the energy consumed during this session in Wh.
     /// </summary>
-    public int SessionEnergy { get; set; }
+    public long? SessionEnergy { get; set; }
 
     /// <summary>
     /// Gets or sets the starting energy value for the session in Wh.
     /// </summary>
-    public long SessionStartValue { get; set; }
+    public long? SessionStartValue { get; set; }
 
     /// <summary>
     /// Gets or sets the Unix timestamp when the charging session started (in seconds).
     /// </summary>
-    public long SessionStartTime { get; set; }
+    public long? SessionStartTime { get; set; }
 
     /// <summary>
     /// Gets or sets the current charge level percentage (0-100).
     /// </summary>
-    public int ChargeLevel { get; set; }
+    public int? ChargeLevel { get; set; }
 
     /// <summary>
     /// Gets or sets the target charge level percentage (0-100).
     /// </summary>
-    public int ChargeTarget { get; set; }
+    public int? ChargeTarget { get; set; }
 
     /// <summary>
     /// Gets or sets the current state of the charging session (e.g., "CHARGING", "IDLE", "FINISHED").
     /// </summary>
+    [MaxLength(20)]
     public string ChargeState { get; set; } = string.Empty;
 }
