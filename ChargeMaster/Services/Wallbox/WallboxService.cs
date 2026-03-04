@@ -37,22 +37,7 @@ namespace ChargeMaster.Services.Wallbox;
             return null;
         }
     }
-
-    /// <summary>
-    /// Läs wallbox-tid
-    /// </summary>
-    /// <returns></returns>
-    public async Task<DateTime?> GetTimeAsync()
-    {
-        var status = await GetStatusAsync();
-        if (status?.ChargeboxTime != null && TimeOnly.TryParse(status.ChargeboxTime, out var time))
-        {
-            return DateTime.Today.Add(time.ToTimeSpan());
-        }
-
-        return null;
-    }
-
+    
     /// <summary>
     /// Ställ in wallbox-tid
     /// </summary>

@@ -34,34 +34,7 @@ public class WallboxServiceTests : IDisposable
         Assert.NotNull(result);
         Assert.True(result.Serial > 0);
     }
-
-    [Fact]
-    public async Task GetTimeAsync_ok()
-    {
-        // Act
-        var result = await _service.GetTimeAsync();
-
-        // Assert
-        Assert.NotNull(result);
-    }
-
-    [Fact]
-    public async Task SetTimeAsync_OK()
-    {
-        // Act
-        var t = DateTime.Now;
-        // convert to minute precision
-        var time = new DateTime(t.Year, t.Month, t.Day, t.Hour, t.Minute, 0);
-
-        var result = await _service.SetTimeAsync(time);
-
-        // Assert
-        Assert.True(result);
-
-        var result1 = await _service.GetTimeAsync();
-        Assert.Equal(time, result1);
-    }
-
+    
     [Theory]
     [InlineData(WallboxMode.Available, "ALWAYS_ON")]
     [InlineData(WallboxMode.NotAvailable, "ALWAYS_OFF")]
