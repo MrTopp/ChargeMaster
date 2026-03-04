@@ -27,7 +27,7 @@ public static class ShellyRpcMessageParser
         {
             return JsonSerializer.Deserialize<ShellyRpcMessage>(json, JsonOptions);
         }
-        catch (JsonException ex)
+        catch (JsonException)
         {
             return null;
         }

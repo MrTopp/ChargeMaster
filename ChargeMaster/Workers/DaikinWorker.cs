@@ -29,8 +29,6 @@ public class DaikinWorker(
     {
         await daikin.InitializeAsync(forceEvent: true);
 
-        DateTime previous = DateTime.Now;
-
         while (!stoppingToken.IsCancellationRequested)
         {
             DateTime dt = DateTime.Now;
@@ -48,7 +46,6 @@ public class DaikinWorker(
             {
                 await Task.Delay(100, stoppingToken);
             }
-            previous = nu;
         }
     }
 }

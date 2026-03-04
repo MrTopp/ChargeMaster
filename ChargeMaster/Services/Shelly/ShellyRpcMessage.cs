@@ -1,4 +1,5 @@
-﻿namespace ChargeMaster.Services.Shelly;
+﻿// ReSharper disable InconsistentNaming
+namespace ChargeMaster.Services.Shelly;
 
 /// <summary>
 /// Represents a Shelly RPC message received via MQTT.
