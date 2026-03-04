@@ -1,7 +1,6 @@
 ﻿using ChargeMaster.Data;
 using Microsoft.EntityFrameworkCore;
 using ChargeMaster.Services.Wallbox;
-using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.VolksWagen;
 
 namespace ChargeMaster.Workers;
