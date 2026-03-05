@@ -97,7 +97,7 @@ public class ChargeWorkerTests
         //}
         var mockLogger = new Mock<ILogger<ChargeWorker>>();
 
-        var worker = new ChargeWorker(provider, null, mockLogger.Object);
+        var worker = new ChargeWorker(provider, null,null, mockLogger.Object);
         return Task.FromResult(worker);
     }
 

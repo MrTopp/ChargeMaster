@@ -16,6 +16,7 @@ public class KvartlistaEventArgs(List<ElectricityPrice> kvartlista) : EventArgs
 public class ChargeWorker(
     IServiceProvider serviceProvider,
     WallboxWorker wallboxWorker,
+    DaikinWorker daikinWorker,
     ILogger<ChargeWorker> logger)
     : BackgroundService
 {
@@ -200,6 +201,9 @@ public class ChargeWorker(
                 FörbrukningVidTimstart = wstat.AccEnergy;
                 ForbrukningDennaTimme = 0;
             }
+
+            // ----- Kontrollera om värmepumpen skall inaktiveras på grund av hög förbrukning
+            await daikinWorker.KontrolleraEffekt(nu, ForbrukningDennaTimme);
 
             // ----- Bilen inte ansluten, hoppa över utvärdering av laddning
             if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
