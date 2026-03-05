@@ -7,7 +7,6 @@
 @inject DaikinFacade DaikinFacade
 @inject ShellyMqttService ShellyMqttService
 @using ChargeMaster.Data
-@using ChargeMaster.Services.ElectricityPrice
 @using ChargeMaster.Services.Wallbox
 @using ChargeMaster.Services.VolksWagen
 @using ChargeMaster.Services.Daikin
@@ -194,7 +193,7 @@
                             <td>&nbsp;</td>
                             <td class="text-end">
                                 @(((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000)
-                                                            + (HighestDailyHourlyUsage.EnergyUsageWh * 50 / 1000.0)
+                                                            + ((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) * 50 / 1000.0)
                                                             + (3000 / 12.0)
                                                             + (ForbrukningManadTotalt * 0.175 / 1000)
                                                             + (ForbrukningManadTotalt * 0.5488 / 1000)
