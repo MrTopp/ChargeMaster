@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using Xunit;
 
-namespace ChargeMaster.xUnit.Services.Weather;
+namespace ChargeMaster.xUnit.Services.SMHI;
 
 public class SmhiWeatherServiceTests
 {
