@@ -5,6 +5,7 @@ using ChargeMaster.Services.VolksWagen;
 using ChargeMaster.Services.Daikin;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Services.Shelly;
+using ChargeMaster.Services.Weather;
 using ChargeMaster.Workers;
 
 using Microsoft.AspNetCore.DataProtection;
@@ -115,6 +116,11 @@ namespace ChargeMaster
                 builder.Services.AddHttpClient<DaikinService, DaikinService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.156/");
+                    client.Timeout = TimeSpan.FromSeconds(10);
+                });
+
+                builder.Services.AddHttpClient<SmhiWeatherService, SmhiWeatherService>(client =>
+                {
                     client.Timeout = TimeSpan.FromSeconds(10);
                 });
 
