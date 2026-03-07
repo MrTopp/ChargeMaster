@@ -1,5 +1,7 @@
-﻿using ChargeMaster.Services.Weather;
+﻿using ChargeMaster.Services.SMHI;
+
 using Microsoft.Extensions.Logging;
+
 using Xunit;
 
 namespace ChargeMaster.xUnit.Services.Weather;
