@@ -341,7 +341,7 @@ public class DaikinServiceTests : IDisposable
 
         try
         {
-            bool result = await _service.SetTargetTemperatureAsync(testTemp);
+            bool result = await _service.SetTargetTemperatureAsync(testTemp, true);
             Assert.True(result);
 
             DaikinControlInfo? updated = await _service.GetControlInfoAsync();
@@ -352,7 +352,7 @@ public class DaikinServiceTests : IDisposable
         {
             if (originalTemp.HasValue)
             {
-                await _service.SetTargetTemperatureAsync(originalTemp.Value);
+                await _service.SetTargetTemperatureAsync(originalTemp.Value, true);
             }
         }
     }
