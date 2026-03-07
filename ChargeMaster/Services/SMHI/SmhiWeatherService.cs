@@ -1,4 +1,4 @@
-﻿namespace ChargeMaster.Services.Weather;
+﻿namespace ChargeMaster.Services.SMHI;
 
 /// <summary>
 /// Tjänst för att hämta väderprognos från SMHI.

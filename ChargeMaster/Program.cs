@@ -5,7 +5,6 @@ using ChargeMaster.Services.VolksWagen;
 using ChargeMaster.Services.Daikin;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Services.Shelly;
-using ChargeMaster.Services.Weather;
 using ChargeMaster.Workers;
 
 using Microsoft.AspNetCore.DataProtection;
@@ -14,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 using System.Reflection;
+using ChargeMaster.Services.SMHI;
 
 namespace ChargeMaster
 {

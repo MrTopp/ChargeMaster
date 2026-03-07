@@ -1,4 +1,4 @@
-﻿namespace ChargeMaster.Services.Weather;
+﻿namespace ChargeMaster.Services.SMHI;
 
 /// <summary>
 /// Väderprognos för närmaste 12 timmarna.
