@@ -18,7 +18,8 @@ namespace ChargeMaster.Services.ElectricityPrice;
 /// <param name="logger">Loggern som används för att registrera informations- och felmeddelanden relaterade till elpriser.</param>
 public class ElectricityPriceService(
     HttpClient httpClient,
-    ApplicationDbContext context,
+    //ApplicationDbContext context,
+    IServiceScopeFactory serviceScopeFactory,
     ILogger<ElectricityPriceService> logger)
 {
     private const string PriceClass = "SE3";
@@ -50,6 +51,8 @@ public class ElectricityPriceService(
                 ValidatePrices(prices, date);
 
                 // Normalisera datum om nödvändigt, även om API vanligtvis skickar ISO8601.
+                using var scope = serviceScopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 context.ElectricityPrices.AddRange(prices);
                 await context.SaveChangesAsync();
                 logger.LogInformation("Lagrade {Count} priser för {Date}.",
@@ -104,6 +107,8 @@ public class ElectricityPriceService(
         var startOfDay = date.ToDateTime(TimeOnly.MinValue);
         var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
 
+        using var scope = serviceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         return await context.ElectricityPrices
             .Where(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay)
             .OrderBy(p => p.TimeStart)
@@ -115,6 +120,8 @@ public class ElectricityPriceService(
         var startOfDay = date.ToDateTime(TimeOnly.MinValue);
         var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
 
+        using var scope = serviceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         return await context.ElectricityPrices
             .AnyAsync(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay);
     }
@@ -124,6 +131,8 @@ public class ElectricityPriceService(
         var startOfDay = date.ToDateTime(TimeOnly.MinValue);
         var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
 
+        using var scope = serviceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var count = await context.ElectricityPrices
             .Where(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay)
             .ExecuteDeleteAsync();

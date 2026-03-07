@@ -33,7 +33,7 @@ public class MeterInfoEventArgs : EventArgs
 /// and recording energy consumption data.
 /// </summary>
 public class WallboxWorker(
-    IServiceProvider serviceProvider,
+    IServiceScopeFactory serviceScopeFactory,
     WallboxService wallboxService,
     ILogger<WallboxWorker> logger) : BackgroundService
 {
@@ -175,7 +175,7 @@ public class WallboxWorker(
     /// <returns></returns>
     private async Task InitieraFörbrukningAsync(CancellationToken cancellationToken)
     {
-        using var scope = serviceProvider.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         var now = DateTime.Now;
@@ -381,7 +381,7 @@ public class WallboxWorker(
             if (info is null)
                 return null;
 
-            using var scope = serviceProvider.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
 
             // Skip database operations if db context is not available
@@ -456,7 +456,7 @@ public class WallboxWorker(
     {
         try
         {
-            using var scope = serviceProvider.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
 
             if (db is null)
@@ -582,7 +582,7 @@ public class WallboxWorker(
     {
         try
         {
-            using var scope = serviceProvider.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
 
             if (db is null)

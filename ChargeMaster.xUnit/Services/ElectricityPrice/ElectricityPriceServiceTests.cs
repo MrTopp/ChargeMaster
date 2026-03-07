@@ -31,7 +31,7 @@ public class ElectricityPriceServiceTests : IDisposable
         
         _loggerMock = new Mock<ILogger<ElectricityPriceService>>();
         
-        _service = new ElectricityPriceService(_httpClient, _context, _loggerMock.Object);
+        //_service = new ElectricityPriceService(_httpClient, _context, _loggerMock.Object);
     }
 
     public void Dispose()

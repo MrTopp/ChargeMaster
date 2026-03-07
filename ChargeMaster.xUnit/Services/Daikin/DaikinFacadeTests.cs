@@ -70,14 +70,14 @@ public class DaikinFacadeTests : IDisposable
 
         try
         {
-            bool result = await _facade.SetTargetTemperatureAsync(testTemp);
+            bool result = await _facade.SetTargetTemperatureAsync(testTemp, true);
             Assert.True(result);
 
             Assert.Equal(testTemp, _facade.TargetTemperature);
         }
         finally
         {
-            await _facade.SetTargetTemperatureAsync(originalTemp.Value);
+            await _facade.SetTargetTemperatureAsync(originalTemp.Value, true);
         }
     }
 
@@ -256,7 +256,7 @@ public class DaikinFacadeTests : IDisposable
 
         try
         {
-            bool result = await _facade.SetTargetTemperatureAsync(testTemp);
+            bool result = await _facade.SetTargetTemperatureAsync(testTemp, true);
 
             if (result)
             {
@@ -266,7 +266,7 @@ public class DaikinFacadeTests : IDisposable
         }
         finally
         {
-            await _facade.SetTargetTemperatureAsync(originalTemp.Value);
+            await _facade.SetTargetTemperatureAsync(originalTemp.Value, true);
         }
     }
 }

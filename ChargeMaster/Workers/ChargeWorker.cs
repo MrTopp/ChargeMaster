@@ -14,7 +14,9 @@ public class KvartlistaEventArgs(List<ElectricityPrice> kvartlista) : EventArgs
 /// Övervakar och styr laddning av bilen baserat på elpriser, timförbrukning och bilens status.
 /// </summary>
 public class ChargeWorker(
-    IServiceProvider serviceProvider,
+    IServiceScopeFactory serviceScopeFactory,
+    WallboxService wallboxService,
+    VWService vwService,
     WallboxWorker wallboxWorker,
     DaikinWorker daikinWorker,
     ILogger<ChargeWorker> logger)
@@ -93,13 +95,13 @@ public class ChargeWorker(
     private DateTime ConnectorStatusTime { get; set; } = DateTime.Now;
 
 
-    private readonly WallboxService _wallbox = serviceProvider.GetService<WallboxService>() ??
-                                               throw new InvalidOperationException(
-                                                   "Initiering av WallboxService misslyckas");
+    //private readonly WallboxService _wallbox = serviceScopeFactory.GetService<WallboxService>() ??
+    //                                           throw new InvalidOperationException(
+    //                                               "Initiering av WallboxService misslyckas");
 
-    private readonly VWService _vwService = serviceProvider.GetService<VWService>() ??
-                                            throw new InvalidOperationException(
-                                                "Initiering av VWService misslyckas");
+    //private readonly VWService _vwService = serviceScopeFactory.GetService<VWService>() ??
+    //                                        throw new InvalidOperationException(
+    //                                            "Initiering av VWService misslyckas");
 
     /// <summary>
     /// Tracks the last saved charge session data to avoid saving duplicates.
@@ -110,7 +112,7 @@ public class ChargeWorker(
 
     private async Task<long> InitieraFörbrukningAsync(CancellationToken cancellationToken)
     {
-        using var scope = serviceProvider.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         var now = DateTime.Now;
@@ -184,7 +186,7 @@ public class ChargeWorker(
             DateTime nu = new DateTime(dt.Year, dt.Month, dt.Day,
                 dt.Hour, dt.Minute, 0);
             currentConnectorStatus = await GetConnectorStatusAsync();
-            WallboxMeterInfo? wstat = await _wallbox.GetMeterInfoAsync();
+            WallboxMeterInfo? wstat = await wallboxService.GetMeterInfoAsync();
             if (wstat == null)
             {
                 logger.LogError("Failed to get meter info from wallbox.");
@@ -345,7 +347,7 @@ public class ChargeWorker(
                     await StartWallbox();
                 }
 
-                BilenLaddar = await _vwService.StartChargingAsync();
+                BilenLaddar = await vwService.StartChargingAsync();
             }
             catch (CarConnectionException ex)
             {
@@ -367,7 +369,7 @@ public class ChargeWorker(
             try
             {
                 logger.LogInformation("StoppaLaddningAsync: stopping car charging");
-                success = await _vwService.StopChargingAsync();
+                success = await vwService.StopChargingAsync();
                 if (!success)
                 {
                     logger.LogError(
@@ -389,7 +391,7 @@ public class ChargeWorker(
     {
         try
         {
-            VWStatus? response = await _vwService.GetStatus();
+            VWStatus? response = await vwService.GetStatus();
             _chargeLevelCurrent = response?.BatteryLevel ?? 0;
             _chargeLevelTarget = response?.ChargingSettingsTargetLevel ?? 0;
             return (response?.ChargingPower ?? 0) > 0;
@@ -412,7 +414,7 @@ public class ChargeWorker(
         try
         {
             logger.LogInformation("StopWallbox:");
-            await _wallbox.SetModeAsync(WallboxMode.NotAvailable);
+            await wallboxService.SetModeAsync(WallboxMode.NotAvailable);
             WallboxStopped = true;
             BilenLaddar = false;
         }
@@ -428,7 +430,7 @@ public class ChargeWorker(
         try
         {
             logger.LogInformation("StartWallbox: ");
-            await _wallbox.SetModeAsync(WallboxMode.Available);
+            await wallboxService.SetModeAsync(WallboxMode.Available);
             WallboxStopped = false;
             return true;
         }
@@ -446,7 +448,7 @@ public class ChargeWorker(
     /// <returns></returns>
     internal async Task<ConnectionEnum> GetConnectorStatusAsync()
     {
-        WallboxStatus? response = await _wallbox.GetStatusAsync();
+        WallboxStatus? response = await wallboxService.GetStatusAsync();
         if (response == null)
             return ConnectionEnum.Unknown;
         switch (response.Connector)
@@ -482,7 +484,7 @@ public class ChargeWorker(
         VWStatus? status;
         try
         {
-            status = await _vwService.GetStatus();
+            status = await vwService.GetStatus();
         }
         catch (CarConnectionException ex)
         {
@@ -528,7 +530,7 @@ public class ChargeWorker(
             if (_kvartlista is { Count: > 0 })
                 return _kvartlista;
 
-            using var scope = serviceProvider.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var nu = DateTime.Now;
             var grans = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
@@ -615,7 +617,7 @@ public class ChargeWorker(
             {
                 try
                 {
-                    using var initScope = serviceProvider.CreateScope();
+                    using var initScope = serviceScopeFactory.CreateScope();
                     var initContext = initScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     _lastSavedChargeSession = await initContext.ChargeSessions
                         .OrderByDescending(x => x.Timestamp)
@@ -655,7 +657,7 @@ public class ChargeWorker(
 
 
             // Save to database
-            using var scope = serviceProvider.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             context.ChargeSessions.Add(chargeSession);
             await context.SaveChangesAsync(cancellationToken);
