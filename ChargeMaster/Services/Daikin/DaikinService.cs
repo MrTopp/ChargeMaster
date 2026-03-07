@@ -599,14 +599,15 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     }
 
     /// <summary>
-    /// Ställer in börvärdestemperaturen utan att ändra övriga inställningar.
+    /// Ställer in börvärdestemperaturen och värme/kyla
     /// </summary>
-    public async Task<bool> SetTargetTemperatureAsync(double temperature)
+    public async Task<bool> SetTargetTemperatureAsync(double temperature, bool heat)
     {
         var controlInfo = await GetControlInfoAsync();
         if (controlInfo is null) return false;
 
         controlInfo.TargetTemperature = temperature;
+        controlInfo.Mode = heat ? 4 : 3;
         return await SetControlInfoAsync(controlInfo);
     }
 

@@ -14,23 +14,25 @@ public class ShellyMqttService(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<ShellyMqttService> logger) : IAsyncDisposable
 {
-    private IMqttClient? _mqttClient;
-
-    const string BrokerAddress = "192.168.1.10";
-    const int BrokerPort = 1883;
-    const string ClientId = "chargemaster-shelly-mqtt";
-
-    private string[] _shellysTopics =
-    [
-        "shelly-arbetsrum/#",
-        "shelly-hall/#",
-        "shelly-sovrum/#"
-    ];
+    /// <summary>
+    /// Aktuella uppdaterade temperaturer
+    /// </summary>
+    public readonly Dictionary<string, double> Temperatures = new()
+    {
+        {"arbetsrum", 21.0},
+        {"hall", 21.0},
+        {"sovrum", 21.0}
+    };
 
     /// <summary>
-    /// Returnerar sant om tjänsten är ansluten till MQTT-servern.
+    /// Medelvärde av temperaturerna i arbetsrum och sovrum.
     /// </summary>
-    public bool IsConnected => _mqttClient?.IsConnected ?? false;
+    public double GetAverage()
+    {
+        Temperatures.TryGetValue("arbetsrum", out var temp1);   
+        Temperatures.TryGetValue("sovrum", out var temp3);
+        return (temp1 + temp3) / 2.0;
+    }
 
     /// <summary>
     /// Event som skickas när en temperaturmätning uppdateras från en Shelly-enhet.
@@ -63,6 +65,29 @@ public class ShellyMqttService(
             }
         }
     }
+
+    // ----- private parts -----
+
+
+    private IMqttClient? _mqttClient;
+
+    const string BrokerAddress = "192.168.1.10";
+    const int BrokerPort = 1883;
+    const string ClientId = "chargemaster-shelly-mqtt";
+
+    private readonly string[] _shellysTopics =
+    [
+        "shelly-arbetsrum/#",
+        "shelly-hall/#",
+        "shelly-sovrum/#"
+    ];
+
+    /// <summary>
+    /// Returnerar sant om tjänsten är ansluten till MQTT-servern.
+    /// </summary>
+    internal bool IsConnected => _mqttClient?.IsConnected ?? false;
+
+    
 
     public ShellyMqttService()
         : this(null, null)
@@ -99,11 +124,15 @@ public class ShellyMqttService(
         await Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Hämtar aktuella värden för temeratur från databasen.
+    /// </summary>
+    /// <returns></returns>
     private async Task InitiateTemperatures()
     {
         try
         {
-            // Använd IServiceScopeFactory för att skapa ett scope för databaskall
+            // Använd IServiceScopeFactory för att skapa ett scope för databasanrop
             // Detta är nödvändigt eftersom ShellyMqttService är Singleton men DbContext är Scoped
             using var scope = serviceScopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ChargeMaster.Data.ApplicationDbContext>();
@@ -221,15 +250,6 @@ public class ShellyMqttService(
 
         return Task.CompletedTask;
     }
-
-    public readonly Dictionary<string, double> Temperatures = new()
-    {
-        {"arbetsrum", 0.0},
-        {"hall", 0.0},
-        {"sovrum", 0.0}
-    };
-
-
 
     private void HandleMessage(ShellyRpcMessage message)
     {
