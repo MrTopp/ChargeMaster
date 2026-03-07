@@ -1,6 +1,7 @@
 ﻿using ChargeMaster.Data;
 using ChargeMaster.Services.Daikin;
 using ChargeMaster.Services.ElectricityPrice;
+using ChargeMaster.Services.Shelly;
 
 namespace ChargeMaster.Workers;
 
@@ -11,6 +12,7 @@ public class DaikinWorker(
     DaikinFacade daikinFacade,
     ElectricityPriceService electricityPriceService,
     WallboxWorker wallboxWorker,
+    ShellyMqttService shellyMqttService,
     ILogger<DaikinWorker> logger) : BackgroundService
 {
     /// <inheritdoc/>
@@ -48,14 +50,14 @@ public class DaikinWorker(
             }
 
             // Uppdatera börvärde mot schema och maxpris
-            double temp = await KalkyleraTemperatur(nu);
+            var (temp, heat) = await KalkyleraTemperatur(nu);
 
             // Uppdatera Daikin endast om börvärde är ändrad
             if (Math.Abs(temp - previousTemp) > 0.2)
             {
                 logger.LogInformation("Uppdaterar Daikin måltemperatur: {Temp}°C (tid: {Time})",
                     temp, nu.ToString("HH:mm"));
-                await daikinFacade.SetTargetTemperatureAsync(temp);
+                await daikinFacade.SetTargetTemperatureAsync(temp, heat);
                 previousTemp = temp;
             }
 
@@ -74,18 +76,19 @@ public class DaikinWorker(
     /// Beräkna börvärde för temperatur
     /// </summary>
     /// <param name="nu"></param>
-    /// <returns></returns>
-    private async Task<double> KalkyleraTemperatur(DateTime nu)
+    /// <returns>måltemperatur och true/false för heat/cool</returns>
+    private async Task<(double, bool)> KalkyleraTemperatur(DateTime nu)
     {
-        // Nödstopp draget
+        // ----- Nödstopp draget -----
         if (EmergencyStopped)
         {
-            return 16;
+            return (16, true);
         }
-        // Schema
+        // ----- Schema -----
+        bool heat = true;
         double temp = nu.Hour switch
         {
-            < 4 => 21,
+            < 4 => 22,
             < 7 => 24,
             < 11 => 20,
             < 14 => 24,
@@ -94,9 +97,29 @@ public class DaikinWorker(
             < 22 => 24,
             _ => 21
         };
-        // Justera mot elpris
+        // ----- Justera mot temperatur -----
+        var inneTemp = shellyMqttService.GetAverage();
+        temp = inneTemp switch
+        {
+            < 18 => 26,
+            < 20 => temp + 2,
+            < 21 => temp + 1,
+            > 24 => 16,
+            > 23 => temp - 1,
+            _ => temp
+        };
+
+        // ----- Justera mot elpris -----
         temp = await JusteraMotPris(nu, temp);
-        return temp;
+
+        // ----- Aktivera cool mode under varma sommardagar -----
+        if (inneTemp > 25)
+        {
+            temp = 20;
+            heat = false;
+        }
+
+        return (temp, heat);
     }
 
 
@@ -144,7 +167,7 @@ public class DaikinWorker(
     {
         logger.LogInformation("Emergency stop activated. Setting target temperature to 16°C.");
         EmergencyStopped = true;
-        await daikinFacade.SetTargetTemperatureAsync(16);
+        await daikinFacade.SetTargetTemperatureAsync(16, true);
     }
 
     private bool EmergencyStopped { get; set; }
@@ -162,7 +185,7 @@ public class DaikinWorker(
         }
 
         // Aktivera pumpen om förbrukningen går ner 
-        var  grans = await KalkyleraGrans(nu);
+        var grans = await KalkyleraGrans(nu);
         if (EmergencyStopped && forbrukningDennaTimme < grans * 0.8)
         {
             logger.LogInformation("Emergency stop restore. Forbrukning: {forbrukning} Wh, Grans: {grans} Wh.", forbrukningDennaTimme, grans);
@@ -197,7 +220,7 @@ public class DaikinWorker(
             max = usage.EnergyUsageWh;
             if (max < 2000)
             {
-                max = 1000; 
+                max = 1000;
             }
         }
         else
@@ -206,7 +229,7 @@ public class DaikinWorker(
             max = usage.EnergyUsageWh;
             if (max < 4000)
             {
-                max = 3000; 
+                max = 3000;
             }
         }
         return nu.Minute * max / 60 + 1000;

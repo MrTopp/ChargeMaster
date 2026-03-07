@@ -115,13 +115,13 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
     }
 
     /// <summary>
-    /// Ställer in måltemperatur.
+    /// Ställer in måltemperatur och ange om värme eller kyla skall användas.
     /// </summary>
-    public async Task<bool> SetTargetTemperatureAsync(double temperature)
+    public async Task<bool> SetTargetTemperatureAsync(double temperature, bool heat)
     {
         try
         {
-            bool result = await daikinService.SetTargetTemperatureAsync(temperature);
+            bool result = await daikinService.SetTargetTemperatureAsync(temperature, heat);
             if (result)
             {
                 await UpdateStatusAsync();
