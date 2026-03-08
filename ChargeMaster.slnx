@@ -2,6 +2,7 @@
   <Project Path="ChargeMaster/ChargeMaster.csproj" />
   <Folder Name="/Solution Items/">
     <File Path=".github/copilot-instructions.md" />
+    <File Path="copy_prod_to_dev.ps1" />
     <File Path="deploy_rasp5.ps1" />
   </Folder>
   <Project Path="ChargeMaster.xUnit/ChargeMaster.xUnit.csproj" Id="4ae7a13f-ae5e-45b3-8729-76a38cf7a498" />
