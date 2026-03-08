@@ -1,13 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ChargeMaster.Services.SMHI;
 
 namespace ChargeMaster.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
         public DbSet<ElectricityPrice> ElectricityPrices { get; set; }
-        public DbSet<WallboxMeterReading> WallboxMeterReadings { get; set; }
-        public DbSet<ShellyTemperature> ShellyTemperatures { get; set; }
-        public DbSet<ChargeSession> ChargeSessions { get; set; }
+            public DbSet<WallboxMeterReading> WallboxMeterReadings { get; set; }
+            public DbSet<ShellyTemperature> ShellyTemperatures { get; set; }
+            public DbSet<ChargeSession> ChargeSessions { get; set; }
+            public DbSet<WeatherForecast> WeatherForecasts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,6 +58,15 @@ namespace ChargeMaster.Data
                         v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
                 b.HasIndex(e => e.SessionStartTime).IsDescending();
                 b.HasIndex(e => e.Timestamp).IsDescending();
+            });
+            modelBuilder.Entity<WeatherForecast>(b =>
+            {
+                b.Property(e => e.Time)
+                    .HasColumnType("timestamp without time zone")
+                    .HasConversion(
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
+                b.HasIndex(e => e.Time).IsUnique();
             });
         }
     }

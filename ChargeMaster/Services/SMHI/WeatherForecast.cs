@@ -6,6 +6,11 @@
 public class WeatherForecast
 {
     /// <summary>
+    /// Primär nyckel för databasen
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
     /// Tid för prognosen
     /// </summary>
     public DateTime Time { get; set; }
