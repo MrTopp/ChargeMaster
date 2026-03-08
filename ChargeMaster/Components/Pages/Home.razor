@@ -6,11 +6,13 @@
 @inject VWService VWService
 @inject DaikinFacade DaikinFacade
 @inject ShellyMqttService ShellyMqttService
+@inject SmhiWorker SmhiWorker
 @using ChargeMaster.Data
 @using ChargeMaster.Services.Wallbox
 @using ChargeMaster.Services.VolksWagen
 @using ChargeMaster.Services.Daikin
 @using ChargeMaster.Services.Shelly
+@using ChargeMaster.Services.SMHI
 @using ChargeMaster.Workers
 
 <PageTitle>Charge Master</PageTitle>
@@ -109,6 +111,29 @@
                     <strong>@ShellyTemperatures["arbetsrum"]?.ToString("F1") °C</strong>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <section class="mb-3">
+        <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
+            <h4 class="mb-2">Väderprognos (SMHI)</h4>
+
+            @if (CurrentWeatherForecast.Count > 0)
+            {
+                <div class="row g-2 mb-3">
+                    @foreach (var forecast in CurrentWeatherForecast.Take(12))
+                    {
+                        <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                            <small class="text-muted">@forecast.Time.ToString("H:mm")</small><br>
+                            <strong>@forecast.Temperature.ToString("F1")°</strong>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0"><em>Ingen data tillgänglig</em></p>
+            }
         </div>
     </section>
 
@@ -276,6 +301,7 @@
     };
     private HashSet<string> HighlightedShellyProperties { get; set; } = [];
     private CancellationTokenSource? _highlightShellyCts;
+    private List<WeatherForecast> CurrentWeatherForecast { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -298,6 +324,7 @@
         VWService.VWStatusRetrieved += OnVWStatusRetrieved;
         DaikinFacade.StatusChanged += OnDaikinStatusChanged;
         ShellyMqttService.TemperatureChanged += OnShellyTemperatureChanged;
+        SmhiWorker.Subscribe(OnWeatherForecastUpdated);
 
         // Trigga uppdatering av kvartlista
         CurrentKvartlista = ChargeWorker.GetKvartlista();
@@ -388,6 +415,12 @@
         });
     }
 
+    private void OnWeatherForecastUpdated(object? sender, WeatherForecastUpdatedEventArgs e)
+    {
+        CurrentWeatherForecast = e.Forecast;
+        InvokeAsync(StateHasChanged);
+    }
+
     private async Task LoadHighestHourlyUsageAsync()
     {
         HighestHourlyUsage = await WallboxWorker.GetHighestHourlyEnergyUsageAsync(DateTime.Now);
@@ -421,6 +454,7 @@
         VWService.VWStatusRetrieved -= OnVWStatusRetrieved;
         DaikinFacade.StatusChanged -= OnDaikinStatusChanged;
         ShellyMqttService.TemperatureChanged -= OnShellyTemperatureChanged;
+        SmhiWorker.Unsubscribe(OnWeatherForecastUpdated);
 
         _highlightCts?.Cancel();
         _highlightCts?.Dispose();
