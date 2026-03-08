@@ -121,7 +121,7 @@
             @if (CurrentWeatherForecast.Count > 0)
             {
                 <div class="row g-2 mb-3">
-                    @foreach (var forecast in CurrentWeatherForecast.Take(12))
+                    @foreach (var forecast in CurrentWeatherForecast.Take(14))
                     {
                         <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; text-align: center;">
                             <small class="text-muted">@forecast.Time.ToString("H:mm")</small><br>
