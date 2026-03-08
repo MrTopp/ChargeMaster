@@ -1,4 +1,5 @@
 ﻿using System.Web;
+using Microsoft.Extensions.Hosting;
 
 namespace ChargeMaster.Services.Daikin;
 
@@ -9,7 +10,8 @@ namespace ChargeMaster.Services.Daikin;
 /// </summary>
 /// <param name="httpClient">HTTP-klienten konfigurerad med basadressen till Daikin-enheten.</param>
 /// <param name="logger">Logger för diagnostik och felrapportering.</param>
-public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
+/// <param name="environment">Miljö-information för att bestämma om skrivningar ska tillåtas.</param>
+public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger, IHostEnvironment environment)
 {
     // ==================== COMMON ENDPOINTS ====================
 
@@ -168,6 +170,12 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            if (environment.EnvironmentName == Environments.Development)
+            {
+                logger.LogInformation("🔒 [DEV MODE] Would set holiday mode to {Enabled}", enabled);
+                return true;
+            }
+
             var url = $"/common/set_holiday?en_hol={(enabled ? 1 : 0)}";
             var response = await httpClient.GetStringAsync(url);
             var data = ParseResponse(response);
@@ -187,6 +195,12 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            if (environment.EnvironmentName == Environments.Development)
+            {
+                logger.LogInformation("🔒 [DEV MODE] Would set region code to {Region}", region);
+                return true;
+            }
+
             var url = $"/common/set_regioncode?reg={region}";
             var response = await httpClient.GetStringAsync(url);
             var data = ParseResponse(response);
@@ -523,6 +537,13 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            if (environment.EnvironmentName == Environments.Development)
+            {
+                logger.LogInformation("🔒 [DEV MODE] Would set control info - Power: {Power}, Mode: {Mode}, Temp: {Temp}°C, FanRate: {FanRate}, FanDir: {FanDir}",
+                    controlInfo.Power, controlInfo.Mode, controlInfo.TargetTemperature, controlInfo.FanRate ?? "A", controlInfo.FanDirection);
+                return true;
+            }
+
             var stemp = controlInfo.TargetTemperature?.ToString("F1",
                 System.Globalization.CultureInfo.InvariantCulture) ?? "M";
 
@@ -560,6 +581,12 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger)
     {
         try
         {
+            if (environment.EnvironmentName == Environments.Development)
+            {
+                logger.LogInformation("🔒 [DEV MODE] Would set target to {Target}", target);
+                return true;
+            }
+
             var url = $"/aircon/set_target?target={target}";
             var response = await httpClient.GetStringAsync(url);
             var data = ParseResponse(response);

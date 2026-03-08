@@ -1,6 +1,8 @@
 ﻿using ChargeMaster.Services.Daikin;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
+using Moq;
 
 namespace ChargeMaster.xUnit.Services.Daikin;
 
@@ -17,7 +19,11 @@ public class DaikinFacadeTests : IDisposable
             BaseAddress = new Uri("http://192.168.1.156/"),
             Timeout = TimeSpan.FromSeconds(10)
         };
-        _daikinService = new DaikinService(_httpClient, new Logger<DaikinService>(new LoggerFactory()));
+
+        var mockEnvironment = new Mock<IHostEnvironment>();
+        mockEnvironment.Setup(x => x.EnvironmentName).Returns("Production");
+
+        _daikinService = new DaikinService(_httpClient, new Logger<DaikinService>(new LoggerFactory()), mockEnvironment.Object);
         _facade = new DaikinFacade(_daikinService, new Logger<DaikinFacade>(new LoggerFactory()));
     }
 
