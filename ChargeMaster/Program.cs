@@ -134,6 +134,7 @@ namespace ChargeMaster
                 builder.Services.AddSingleton<ChargeWorker>();
                 builder.Services.AddSingleton<DaikinWorker>();
                 builder.Services.AddSingleton<ShellyWorker>();
+                builder.Services.AddSingleton<SmhiWorker>();
 
                 builder.Services.AddHostedService(sp =>
                     sp.GetRequiredService<PriceFetchingWorker>());
@@ -141,6 +142,7 @@ namespace ChargeMaster
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ChargeWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<DaikinWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ShellyWorker>());
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<SmhiWorker>());
 
                 var app = builder.Build();
 
