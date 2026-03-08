@@ -48,7 +48,14 @@ public class SmhiWeatherService(HttpClient httpClient, ILogger<SmhiWeatherServic
                     Temperature = GetParameterValue(ts.Parameters, "t") ?? 0,
                     CloudCoverage = GetParameterValue(ts.Parameters, "n"),
                     Precipitation = GetParameterValue(ts.Parameters, "pmin"),
-                    WindSpeed = GetParameterValue(ts.Parameters, "ws")
+                    MaxPrecipitation = GetParameterValue(ts.Parameters, "pmax"),
+                    MeanPrecipitation = GetParameterValue(ts.Parameters, "pmean"),
+                    WindSpeed = GetParameterValue(ts.Parameters, "ws"),
+                    WindGust = GetParameterValue(ts.Parameters, "gust"),
+                    WindDirection = (int?)GetParameterValue(ts.Parameters, "wd"),
+                    Luftfuktighet = (int?)GetParameterValue(ts.Parameters, "r"),
+                    Lufttryck = GetParameterValue(ts.Parameters, "msl"),
+                    Sikt = GetParameterValue(ts.Parameters, "vis")
                 })
                 .OrderBy(f => f.Time)
                 .ToList();
