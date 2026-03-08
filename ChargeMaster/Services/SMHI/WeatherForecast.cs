@@ -16,11 +16,6 @@ public class WeatherForecast
     public double Temperature { get; set; }
 
     /// <summary>
-    /// Upplevd temperatur (°C)
-    /// </summary>
-    public double FeelsLike { get; set; }
-
-    /// <summary>
     /// Molnighet (0-100%)
     /// </summary>
     public double? CloudCoverage { get; set; }

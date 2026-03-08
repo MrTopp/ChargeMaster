@@ -46,7 +46,6 @@ public class SmhiWeatherService(HttpClient httpClient, ILogger<SmhiWeatherServic
                 {
                     Time = ts.Time,
                     Temperature = GetParameterValue(ts.Parameters, "t") ?? 0,
-                    FeelsLike = GetParameterValue(ts.Parameters, "vis") ?? GetParameterValue(ts.Parameters, "t") ?? 0,
                     CloudCoverage = GetParameterValue(ts.Parameters, "n"),
                     Precipitation = GetParameterValue(ts.Parameters, "pmin"),
                     WindSpeed = GetParameterValue(ts.Parameters, "ws")

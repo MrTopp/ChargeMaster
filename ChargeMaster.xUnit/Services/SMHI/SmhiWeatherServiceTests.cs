@@ -29,8 +29,6 @@ public class SmhiWeatherServiceTests
         {
             Assert.True(forecast.Temperature >= -50 && forecast.Temperature <= 60, 
                 "Temperature should be within reasonable range");
-            Assert.True(forecast.FeelsLike >= -50 && forecast.FeelsLike <= 60, 
-                "Feels like temperature should be within reasonable range");
         }
     }
 
