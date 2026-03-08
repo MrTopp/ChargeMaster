@@ -69,4 +69,34 @@ public class WeatherForecast
     /// Vindbyar (m/s)
     /// </summary>
     public double? WindGust { get; set; }
+
+    /// <summary>
+    /// Åskornadsannolikhet (%)
+    /// </summary>
+    public int? ThunderstormProbability { get; set; }
+
+    /// <summary>
+    /// Mediannedbörds (kg/m²/h)
+    /// </summary>
+    public double? PrecipitationMedian { get; set; }
+
+    /// <summary>
+    /// Nederbördsannolikhet (%)
+    /// </summary>
+    public int? PrecipitationProbability { get; set; }
+
+    /// <summary>
+    /// Nederbördskategori (1-7)
+    /// </summary>
+    public int? PrecipitationCategory { get; set; }
+
+    /// <summary>
+    /// Vädsymbol för visualisering (1-27)
+    /// </summary>
+    public int? WeatherSymbol { get; set; }
+
+    /// <summary>
+    /// Total niederbörd (kg/m²)
+    /// </summary>
+    public double? TotalPrecipitation { get; set; }
 }

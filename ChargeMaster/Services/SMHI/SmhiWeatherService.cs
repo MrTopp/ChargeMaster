@@ -52,7 +52,9 @@ public class SmhiWeatherService(
                 {
                     Time = ts.Time,
                     Temperature = GetParameterValue(ts.Parameters, "t") ?? 0,
-                    CloudCoverage = GetParameterValue(ts.Parameters, "n"),
+                    CloudCoverage = GetParameterValue(ts.Parameters, "tcc_mean") != null 
+                        ? (GetParameterValue(ts.Parameters, "tcc_mean") / 8.0 * 100) 
+                        : null,
                     Precipitation = GetParameterValue(ts.Parameters, "pmin"),
                     MaxPrecipitation = GetParameterValue(ts.Parameters, "pmax"),
                     MeanPrecipitation = GetParameterValue(ts.Parameters, "pmean"),
@@ -61,7 +63,13 @@ public class SmhiWeatherService(
                     WindDirection = (int?)GetParameterValue(ts.Parameters, "wd"),
                     Luftfuktighet = (int?)GetParameterValue(ts.Parameters, "r"),
                     Lufttryck = GetParameterValue(ts.Parameters, "msl"),
-                    Sikt = GetParameterValue(ts.Parameters, "vis")
+                    Sikt = GetParameterValue(ts.Parameters, "vis"),
+                    ThunderstormProbability = (int?)GetParameterValue(ts.Parameters, "tstm"),
+                    PrecipitationMedian = GetParameterValue(ts.Parameters, "pmedian"),
+                    PrecipitationProbability = (int?)GetParameterValue(ts.Parameters, "spp"),
+                    PrecipitationCategory = (int?)GetParameterValue(ts.Parameters, "pcat"),
+                    WeatherSymbol = (int?)GetParameterValue(ts.Parameters, "Wsymb2"),
+                    TotalPrecipitation = GetParameterValue(ts.Parameters, "tp")
                 })
                 .OrderBy(f => f.Time)
                 .ToList();
@@ -135,6 +143,12 @@ public class SmhiWeatherService(
                     existingForecast.Luftfuktighet = forecast.Luftfuktighet;
                     existingForecast.Lufttryck = forecast.Lufttryck;
                     existingForecast.Sikt = forecast.Sikt;
+                    existingForecast.ThunderstormProbability = forecast.ThunderstormProbability;
+                    existingForecast.PrecipitationMedian = forecast.PrecipitationMedian;
+                    existingForecast.PrecipitationProbability = forecast.PrecipitationProbability;
+                    existingForecast.PrecipitationCategory = forecast.PrecipitationCategory;
+                    existingForecast.WeatherSymbol = forecast.WeatherSymbol;
+                    existingForecast.TotalPrecipitation = forecast.TotalPrecipitation;
 
                     dbContext.WeatherForecasts.Update(existingForecast);
                 }

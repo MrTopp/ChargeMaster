@@ -1,6 +1,7 @@
 -- Script för att skapa WeatherForecasts-tabell i produktionsdatabasen
 -- PostgreSQL
 -- Datum: 2026-03-08
+-- Uppdaterad: 2026-03-08 för att lägga till ytterligare SMHI-parametrar
 -- Beskrivning: Skapar tabell för lagring av väderprognos från SMHI
 
 -- Skapa tabellen WeatherForecasts
@@ -18,6 +19,12 @@ CREATE TABLE IF NOT EXISTS "WeatherForecasts" (
     "MaxPrecipitation" double precision,
     "MeanPrecipitation" double precision,
     "WindGust" double precision,
+    "ThunderstormProbability" integer,
+    "PrecipitationMedian" double precision,
+    "PrecipitationProbability" integer,
+    "PrecipitationCategory" integer,
+    "WeatherSymbol" integer,
+    "TotalPrecipitation" double precision,
     CONSTRAINT "PK_WeatherForecasts" PRIMARY KEY ("Id")
 );
 
