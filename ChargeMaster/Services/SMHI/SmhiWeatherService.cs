@@ -1,10 +1,16 @@
 ﻿namespace ChargeMaster.Services.SMHI;
 
+using ChargeMaster.Data;
+using Microsoft.EntityFrameworkCore;
+
 /// <summary>
 /// Tjänst för att hämta väderprognos från SMHI.
 /// Hämtar temperatur (verklig och upplevd) för närmaste 12 timmarna.
 /// </summary>
-public class SmhiWeatherService(HttpClient httpClient, ILogger<SmhiWeatherService> logger)
+public class SmhiWeatherService(
+    HttpClient httpClient,
+    ILogger<SmhiWeatherService> logger,
+    IServiceScopeFactory serviceScopeFactory)
 {
     private const string SmhiBaseUrl = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point";
 
@@ -61,7 +67,10 @@ public class SmhiWeatherService(HttpClient httpClient, ILogger<SmhiWeatherServic
                 .ToList();
 
             logger.LogInformation("Retrieved {Count} weather forecast entries from SMHI", forecasts.Count);
-            
+
+            // Spara väderdata i databasen
+            await SaveForecastsToDatabaseAsync(forecasts);
+
             return forecasts;
         }
         catch (HttpRequestException ex)
@@ -89,6 +98,60 @@ public class SmhiWeatherService(HttpClient httpClient, ILogger<SmhiWeatherServic
     {
         // Koordinater för Stockholm
         return await GetForecastAsync(longitude: 18.0686, latitude: 59.3293);
+    }
+
+    /// <summary>
+    /// Extrahera värde från parameters-array baserat på parameternamn.
+    /// </summary>
+    /// <param name="parameters">SMHI parameters array</param>
+    /// <param name="name">Parameternamn (t.ex. "t", "vis", "ws")</param>
+    /// <returns>Första värdet från parametern, eller null om den inte finns</returns>
+    private async Task SaveForecastsToDatabaseAsync(List<WeatherForecast> forecasts)
+    {
+        try
+        {
+            // Använd IServiceScopeFactory för att skapa ett scope för databasanrop
+            // Detta är nödvändigt eftersom SmhiWeatherService är Scoped men kan förekommer i kontexten av en Singleton
+            using var scope = serviceScopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            foreach (var forecast in forecasts)
+            {
+                // Kontrollera om en prognos redan finns för denna tid
+                var existingForecast = await dbContext.WeatherForecasts
+                    .FirstOrDefaultAsync(f => f.Time == forecast.Time);
+
+                if (existingForecast != null)
+                {
+                    // Uppdatera befintligt värde
+                    existingForecast.Temperature = forecast.Temperature;
+                    existingForecast.CloudCoverage = forecast.CloudCoverage;
+                    existingForecast.Precipitation = forecast.Precipitation;
+                    existingForecast.MaxPrecipitation = forecast.MaxPrecipitation;
+                    existingForecast.MeanPrecipitation = forecast.MeanPrecipitation;
+                    existingForecast.WindSpeed = forecast.WindSpeed;
+                    existingForecast.WindGust = forecast.WindGust;
+                    existingForecast.WindDirection = forecast.WindDirection;
+                    existingForecast.Luftfuktighet = forecast.Luftfuktighet;
+                    existingForecast.Lufttryck = forecast.Lufttryck;
+                    existingForecast.Sikt = forecast.Sikt;
+
+                    dbContext.WeatherForecasts.Update(existingForecast);
+                }
+                else
+                {
+                    // Lägg till ny prognos
+                    dbContext.WeatherForecasts.Add(forecast);
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+            logger.LogInformation("Saved {Count} weather forecasts to database", forecasts.Count);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to save weather forecasts to database");
+        }
     }
 
     /// <summary>

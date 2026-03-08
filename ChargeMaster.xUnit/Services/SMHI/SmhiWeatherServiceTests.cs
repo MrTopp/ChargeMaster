@@ -1,6 +1,9 @@
 ﻿using ChargeMaster.Services.SMHI;
+using ChargeMaster.Data;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 using Xunit;
 
@@ -8,13 +11,32 @@ namespace ChargeMaster.xUnit.Services.SMHI;
 
 public class SmhiWeatherServiceTests
 {
+    private static IServiceScopeFactory CreateMockServiceScopeFactory()
+    {
+        var services = new ServiceCollection();
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql("Host=localhost;Database=chargemaster_test;Username=postgres;Password=postgres"));
+
+        var serviceProvider = services.BuildServiceProvider();
+        return serviceProvider.GetRequiredService<IServiceScopeFactory>();
+    }
+
+    private static ApplicationDbContext CreateTestDbContext()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseNpgsql("Host=localhost;Database=chargemaster_test;Username=postgres;Password=postgres")
+            .Options;
+        return new ApplicationDbContext(options);
+    }
+
     [Fact]
     public async Task GetForecastAsync_WithValidCoordinates_ReturnsWeatherForecasts()
     {
         // Arrange
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
-        var service = new SmhiWeatherService(httpClient, logger);
+        var serviceScopeFactory = CreateMockServiceScopeFactory();
+        var service = new SmhiWeatherService(httpClient, logger, serviceScopeFactory);
 
         // Act
         var forecasts = await service.GetForecastAsync(longitude: 14.416639, latitude: 59.250709);
@@ -38,7 +60,8 @@ public class SmhiWeatherServiceTests
         // Arrange
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
-        var service = new SmhiWeatherService(httpClient, logger);
+        var serviceScopeFactory = CreateMockServiceScopeFactory();
+        var service = new SmhiWeatherService(httpClient, logger, serviceScopeFactory);
 
         // Act
         var forecasts = await service.GetForecastForStockholmAsync();
