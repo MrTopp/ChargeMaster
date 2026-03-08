@@ -1,4 +1,6 @@
-﻿namespace ChargeMaster.Services.SMHI;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ChargeMaster.Services.SMHI;
 
 /// <summary>
 /// Väderprognos för närmaste 12 timmarna.
@@ -99,4 +101,84 @@ public class WeatherForecast
     /// Total niederbörd (kg/m²)
     /// </summary>
     public double? TotalPrecipitation { get; set; }
+
+    [NotMapped]
+    public string WeatherDescription
+    {
+        get
+        {
+            if (WeatherSymbol == null) return "Okänd vädertyp";
+            return WeatherSymbol switch
+            {
+                1 => "Klart väder",
+                2 => "Nästan klart",
+                3 => "Växlande molnighet",
+                4 => "Halv molnigt",
+                5 => "Molnigt",
+                6 => "Mulet",
+                7 => "Dimma",
+                8 => "Lätt regnskur",
+                9 => "Måttlig regnskur",
+                10 => "Kraftig regnskur",
+                11 => "Åskväder",
+                12 => "Lätt snöblandat regn",
+                13 => "Måttligt snöblandat regn",
+                14 => "Kraftigt snöblandat regn",
+                15 => "Lätt snöfall",
+                16 => "Måttligt snöfall",
+                17 => "Kraftigt snöfall",
+                18 => "Regn",
+                19 => "Åska",
+                20 => "Snöblandat regn",
+                21 => "Snö",
+                22 => "Regn och åska",
+                23 => "Snöblandat regn och åska",
+                24 => "Snö och åska",
+                25 => "Lätt regn och snö",
+                26 => "Måttligt/kraftigt regn och snö",
+                27 => "Hagelkorn",
+                _ => "Okänd vädertyp"
+            };
+        }
+    }
+
+    [NotMapped]
+    public string WeatherEmoji
+    {
+        get
+        {
+            if (WeatherSymbol == null) return "❓";
+            return WeatherSymbol switch
+            {
+                1 => "☀️",    // Klart väder
+                2 => "🌤️",   // Nästan klart
+                3 => "⛅",    // Växlande molnighet
+                4 => "🌥️",   // Halv molnigt
+                5 => "☁️",    // Molnigt
+                6 => "🌧️",   // Mulet
+                7 => "🌫️",   // Dimma
+                8 => "🌦️",   // Lätt regnskur
+                9 => "🌧️",   // Måttlig regnskur
+                10 => "⛈️",   // Kraftig regnskur
+                11 => "⛈️",   // Åskväder
+                12 => "🌧️",   // Lätt snöblandat regn
+                13 => "🌧️",   // Måttligt snöblandat regn
+                14 => "⛈️",   // Kraftigt snöblandat regn
+                15 => "🌨️",   // Lätt snöfall
+                16 => "❄️",    // Måttligt snöfall
+                17 => "❄️",    // Kraftigt snöfall
+                18 => "🌧️",   // Regn
+                19 => "⚡",    // Åska
+                20 => "🌨️",   // Snöblandat regn
+                21 => "❄️",    // Snö
+                22 => "⛈️",   // Regn och åska
+                23 => "⛈️",   // Snöblandat regn och åska
+                24 => "⛈️",   // Snö och åska
+                25 => "🌨️",   // Lätt regn och snö
+                26 => "🌨️",   // Måttligt/kraftigt regn och snö
+                27 => "🧊",    // Hagelkorn
+                _ => "❓"
+            };
+        }
+    }
 }
