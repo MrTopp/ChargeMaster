@@ -51,11 +51,11 @@
                         </tr>
                         <tr>
                             <td><strong>Förbrukning denna timme</strong></td>
-                            <td class="text-end">@(CurrentMeterInfo.EffektTimmeNuFormatted) W</td>
+                            <td class="text-end">@(CurrentMeterInfo.EffektTimmeNuFormatted) Wh</td>
                         </tr>
                         <tr class="@(CurrentMeterInfo.EffektTimmeTotal > 2500 ? "table-danger" : "")">
                             <td><strong>Uppskattad förbrukning denna timme</strong></td>
-                            <td class="text-end">@(CurrentMeterInfo.EffektTimmeTotalFormatted) W</td>
+                            <td class="text-end">@(CurrentMeterInfo.EffektTimmeTotalFormatted) Wh</td>
                         </tr>
                         </tbody>
                 </table>
@@ -71,15 +71,15 @@
             <div class="row g-2 mb-3">
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("CurrentTemperature") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Innetemperatur:</small><br>
-                    <strong>@DaikinFacade.CurrentTemperature?.ToString("F1") °C</strong>
+                    <strong>@DaikinFacade.CurrentTemperature?.ToString("F1")°</strong>
                 </div>
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("OutdoorTemperature") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Utetemperatur:</small><br>
-                    <strong>@DaikinFacade.OutdoorTemperature?.ToString("F1") °C</strong>
+                    <strong>@DaikinFacade.OutdoorTemperature?.ToString("F1")°</strong>
                 </div>
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("TargetTemperature") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Måltemperatur:</small><br>
-                    <strong>@DaikinFacade.TargetTemperature?.ToString("F1") °C</strong>
+                    <strong>@DaikinFacade.TargetTemperature?.ToString("F1")°</strong>
                 </div>
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("Mode") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Läge:</small><br>
@@ -87,7 +87,7 @@
                 </div>
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("Power") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Status:</small><br>
-                    <strong>@(DaikinFacade.IsOn ? "PÅ" : "AV")</strong>
+                    <strong>@(DaikinFacade.IsOn ? "på" : "av")</strong>
                 </div>
             </div>
         </div>
@@ -100,15 +100,15 @@
             <div class="row g-2 mb-3">
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("sovrum") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Sovrum:</small><br>
-                    <strong>@ShellyTemperatures["sovrum"]?.ToString("F1") °C</strong>
+                    <strong>@ShellyTemperatures["sovrum"]?.ToString("F1")°</strong>
                 </div>
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("hall") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Hall:</small><br>
-                    <strong>@ShellyTemperatures["hall"]?.ToString("F1") °C</strong>
+                    <strong>@ShellyTemperatures["hall"]?.ToString("F1")°</strong>
                 </div>
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("arbetsrum") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Arbetsrum:</small><br>
-                    <strong>@ShellyTemperatures["arbetsrum"]?.ToString("F1") °C</strong>
+                    <strong>@ShellyTemperatures["arbetsrum"]?.ToString("F1")°</strong>
                 </div>
             </div>
         </div>
