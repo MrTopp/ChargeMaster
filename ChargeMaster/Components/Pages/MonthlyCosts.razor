@@ -1,0 +1,211 @@
+﻿@page "/monthly-costs"
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@inject WallboxWorker WallboxWorker
+@inject ChargeWorker ChargeWorker
+@using ChargeMaster.Workers
+
+<PageTitle>Kostnader denna månad - Charge Master</PageTitle>
+
+<div class="container-md mb-3 px-2 px-sm-3 px-md-4" style="min-height: 100vh; display: flex; flex-direction: column;">
+    <div style="flex: 0.5 1 0; max-height: 3rem; min-height: 8px;"></div>
+
+    <section class="mb-3">
+        <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <button class="btn btn-outline-secondary btn-sm" @onclick="PreviousMonthAsync" disabled="@(SelectedMonth.AddMonths(-1) < new DateTime(2026, 2, 1))">← Föregående månad</button>
+                <h4 class="mb-0">@SelectedMonth.ToString("MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("sv-SE"))</h4>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="NextMonthAsync" disabled="@(SelectedMonth.AddMonths(1) > new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1))">Nästa månad →</button>
+            </div>
+            <h4 class="mb-2">Kostnader denna månad</h4>
+            @if (HighestHourlyUsage is not null)
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Avgiftstyp</th>
+                                <th class="text-end">Energi (kWh)</th>
+                                <th>Timme</th>
+                                <th class="text-end">Pris (SEK)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Effektavgift</strong></td>
+                                <td class="text-end">@((HighestHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
+                                <td>@(HighestHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
+                                <td class="text-end">@((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000).ToString("F2"))</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Högbelastningsavgift</strong></td>
+                                <td class="text-end">@(((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) / 1000.0).ToString("F2"))</td>
+                                <td>@((HighestDailyHourlyUsage?.Hour)?.ToString("yyyy-MM-dd HH:00") ?? "")</td>
+                                <td class="text-end">@(((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) * 50 / 1000.0).ToString("F2"))</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Nätavgift</strong></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td class="text-end">
+                                    @((3000 / (DateTime.IsLeapYear(SelectedMonth.Year) ? 366 : 365)
+                                                                * DateTime.DaysInMonth(SelectedMonth.Year, SelectedMonth.Month)).ToString("F2"))
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Överföring hittills</strong></td>
+                                <td class="text-end">@((MonthlyUsage / 1000.0).ToString("F2"))</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Överföring månad uppskattad</strong></td>
+                                <td class="text-end">@((ForbrukningManadTotalt / 1000.0).ToString("F3"))</td>
+                                <td>&nbsp;</td>
+                                <td class="text-end">@((ForbrukningManadTotalt * 0.175 / 1000).ToString("F2"))</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Energiskatt uppskattad</strong></td>
+                                <td class="text-end">@((ForbrukningManadTotalt / 1000.0).ToString("F3"))</td>
+                                <td>&nbsp;</td>
+                                <td class="text-end">@((ForbrukningManadTotalt * 0.5488 / 1000).ToString("F2"))</td>
+                            </tr>
+                            <tr class="table-active">
+                                <td><strong>Summa</strong></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td class="text-end">
+                                    <strong>
+                                        @(((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000)
+                                                                    + ((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) * 50 / 1000.0)
+                                                                    + (3000 / 12.0)
+                                                                    + (ForbrukningManadTotalt * 0.175 / 1000)
+                                                                    + (ForbrukningManadTotalt * 0.5488 / 1000)
+                                                                    ).ToString("F2"))
+                                    </strong>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0"><em>Ingen data tillgänglig</em></p>
+            }
+        </div>
+    </section>
+
+    <section>
+        <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
+            <p class="mb-0 d-flex gap-2">
+                <a href="/" class="btn btn-secondary btn-sm">Tillbaka till hem</a>
+                <a href="electricity-prices" class="btn btn-secondary btn-sm">Se elpriser</a>
+                <a href="energy-usage" class="btn btn-secondary btn-sm">Timförbrukning</a>
+            </p>
+        </div>
+    </section>
+</div>
+
+@code {
+    private PeriodicTimer? _hourlyUpdateTimer;
+    private CancellationTokenSource? _cts;
+    private HourlyEnergyUsage? HighestHourlyUsage { get; set; }
+    private HourlyEnergyUsage? HighestDailyHourlyUsage { get; set; }
+    private long MonthlyUsage { get; set; }
+    private DateTime SelectedMonth { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cts = new CancellationTokenSource();
+
+        // Sätt aktuell månad som standard
+        SelectedMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+
+        // Hämta högsta timförbrukning för denna månad vid sidladdning
+        await LoadHighestHourlyUsageAsync();
+
+        // Starta uppdateringsloop för timförbrukning (bara för innevarande månad)
+        if (SelectedMonth.Year == DateTime.Now.Year && SelectedMonth.Month == DateTime.Now.Month)
+        {
+            _ = UpdateHourlyEnergyLoop();
+        }
+    }
+
+    private long ForbrukningManadTotalt
+    {
+        get
+        {
+            int daysInMonth = DateTime.DaysInMonth(SelectedMonth.Year, SelectedMonth.Month);
+            int currentDay = SelectedMonth.Year == DateTime.Now.Year && SelectedMonth.Month == DateTime.Now.Month
+                ? DateTime.Now.Day
+                : daysInMonth;
+            return MonthlyUsage * daysInMonth / currentDay;
+        }
+    }
+
+    private async Task LoadHighestHourlyUsageAsync()
+    {
+        HighestHourlyUsage = await WallboxWorker.GetHighestHourlyEnergyUsageAsync(SelectedMonth);
+        HighestDailyHourlyUsage = await WallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(SelectedMonth);
+        MonthlyUsage = await WallboxWorker.GetMonthlyEnergyUsageAsync(SelectedMonth);
+    }
+
+    private async Task PreviousMonthAsync()
+    {
+        // Tillåt inte att gå längre bakåt än februari 2026
+        if (SelectedMonth.AddMonths(-1) >= new DateTime(2026, 2, 1))
+        {
+            SelectedMonth = SelectedMonth.AddMonths(-1);
+            await LoadHighestHourlyUsageAsync();
+        }
+    }
+
+    private async Task NextMonthAsync()
+    {
+        // Tillåt inte att gå längre fram än nästa månad
+        if (SelectedMonth.AddMonths(1) <= new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1))
+        {
+            SelectedMonth = SelectedMonth.AddMonths(1);
+            await LoadHighestHourlyUsageAsync();
+        }
+    }
+
+    private async Task UpdateHourlyEnergyLoop()
+    {
+        // Uppdatera vid nästa timgräns
+        var now = DateTime.Now;
+        var nextHour = now.AddHours(1).Date.AddHours(now.AddHours(1).Hour);
+        var timeUntilNextHour = nextHour - now;
+
+        await Task.Delay(timeUntilNextHour, _cts!.Token);
+
+        // Skapa en timer som uppdaterar varje timme efter det
+        _hourlyUpdateTimer = new PeriodicTimer(TimeSpan.FromHours(1));
+
+        while (_hourlyUpdateTimer is not null && await _hourlyUpdateTimer.WaitForNextTickAsync(_cts!.Token))
+        {
+            // Uppdatera bara om vi fortfarande visar innevarande månad
+            if (SelectedMonth.Year == DateTime.Now.Year && SelectedMonth.Month == DateTime.Now.Month)
+            {
+                await LoadHighestHourlyUsageAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_cts != null)
+        {
+            await _cts.CancelAsync();
+        }
+
+        if (_hourlyUpdateTimer is not null)
+        {
+            _hourlyUpdateTimer.Dispose();
+        }
+
+        _cts?.Dispose();
+    }
+}

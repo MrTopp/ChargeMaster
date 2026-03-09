@@ -289,7 +289,7 @@ public class WallboxWorker(
 
         return wallboxStatus;
     }
-    
+
     /// <summary>
     /// Checks that the Wallbox clock is synchronized with the server time and updates it if the drift exceeds 5 minutes.
     /// </summary>
@@ -505,15 +505,19 @@ public class WallboxWorker(
                 max = 3000;
             }
         }
-        return max *  nu.Minute/60;
+        return max * nu.Minute / 60;
     }
 
 
     public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
-        return hourlyUsage.OrderByDescending(x => x.EnergyUsageWh)
-            .FirstOrDefault(new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
+        lock (CacheLocker)
+        {
+            return hourlyUsage.OrderByDescending(x => x.EnergyUsageWh)
+                .FirstOrDefault(
+                    new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
+        }
     }
 
     /// <summary>
@@ -526,12 +530,15 @@ public class WallboxWorker(
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
 
         // Filter for October to March weekdays 7-19
-        return hourlyUsage
+        lock (CacheLocker)
+        {
+            return hourlyUsage
             .Where(x => x.Hour.Hour >= 7 && x.Hour.Hour < 19) // Hours between 7-19
             .Where(x => x.Hour.DayOfWeek >= DayOfWeek.Monday && x.Hour.DayOfWeek <= DayOfWeek.Friday) // Weekdays only
             .Where(x => x.Hour.Month >= 10 || x.Hour.Month <= 3) // October to March
             .OrderByDescending(x => x.EnergyUsageWh)
             .FirstOrDefault(new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
+        }
     }
 
     /// <summary>
@@ -542,13 +549,13 @@ public class WallboxWorker(
     /// <param name="dateInMonth">A date that determines which month to calculate for. Only readings from this month will be included.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A list of hourly energy usage data sorted by hour for the specified month.</returns>
-    public async Task<List<HourlyEnergyUsage>> GetHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    internal async Task<List<HourlyEnergyUsage>> GetHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         // Kontrollera om cachen är giltig (samma timme som nu)
         lock (CacheLocker)
         {
             var now = DateTime.Now;
-            var cacheHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+            var cacheHour = new DateTime(dateInMonth.Year, dateInMonth.Month, now.Day, now.Hour, 0, 0);
             var lastCacheHour = new DateTime(LastHourlyEnergyUsageCacheTime.Year, LastHourlyEnergyUsageCacheTime.Month,
                 LastHourlyEnergyUsageCacheTime.Day, LastHourlyEnergyUsageCacheTime.Hour, 0, 0);
 
