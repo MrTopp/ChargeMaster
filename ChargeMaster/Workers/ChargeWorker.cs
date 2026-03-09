@@ -35,17 +35,6 @@ public class ChargeWorker(
     private bool Timladdning { get; set; }
 
     /// <summary>
-    /// Laddboxens ackumulerade energimätarställning vid timstart,
-    /// används för att räkna ut förbrukning innevarande timme.
-    /// </summary>
-    private long FörbrukningVidTimstart { get; set; }
-
-    /// <summary>
-    /// Uppräknat värde på timförbrukning.
-    /// </summary>
-    private long ForbrukningDennaTimme { get; set; }
-
-    /// <summary>
     /// Nuvarande laddnivå i bilen, i procent. 
     /// </summary>
     private double _chargeLevelCurrent;
@@ -110,34 +99,7 @@ public class ChargeWorker(
     private ChargeSession? _lastSavedChargeSession;
 
 
-    private async Task<long> InitieraFörbrukningAsync(CancellationToken cancellationToken)
-    {
-        using var scope = serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var now = DateTime.Now;
-        var startOfHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
-
-        // Fetch the closest reading to start of hour
-        var before = await context.WallboxMeterReadings
-            .Where(x => x.ReadAt <= startOfHour)
-            .OrderByDescending(x => x.ReadAt)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        var after = await context.WallboxMeterReadings
-            .Where(x => x.ReadAt >= startOfHour)
-            .OrderBy(x => x.ReadAt)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (before == null && after == null) return 0;
-        if (before == null) return after!.AccEnergy;
-        if (after == null) return before.AccEnergy;
-
-        var diffBefore = startOfHour - before.ReadAt;
-        var diffAfter = after.ReadAt - startOfHour;
-
-        return diffBefore <= diffAfter ? before.AccEnergy : after.AccEnergy;
-    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -161,7 +123,7 @@ public class ChargeWorker(
 
     internal async Task ChargeLoop(CancellationToken stoppingToken)
     {
-        FörbrukningVidTimstart = await InitieraFörbrukningAsync(stoppingToken);
+        // TODO: vänta på att WallboxWorker är initierad
         DateTime previous = DateTime.Now;
         Timladdning = true;
         BilenLaddar = await LaddStatus();
@@ -186,26 +148,17 @@ public class ChargeWorker(
             DateTime nu = new DateTime(dt.Year, dt.Month, dt.Day,
                 dt.Hour, dt.Minute, 0);
             currentConnectorStatus = await GetConnectorStatusAsync();
-            WallboxMeterInfo? wstat = await wallboxService.GetMeterInfoAsync();
-            if (wstat == null)
-            {
-                logger.LogError("Failed to get meter info from wallbox.");
-                goto NextIteration;
-            }
 
-            // ----- Varje timme, nollställ timförbrukning
-            ForbrukningDennaTimme = wstat.AccEnergy - FörbrukningVidTimstart;
+            // ----- Varje timme
             if (nu.Hour != previous.Hour)
             {
                 logger.LogInformation("** Hourly consumption: {consumption} Wh **",
-                    ForbrukningDennaTimme);
+                    wallboxWorker.FörbrukningFöregåendeTimme);
                 Timladdning = true;
-                FörbrukningVidTimstart = wstat.AccEnergy;
-                ForbrukningDennaTimme = 0;
             }
 
-            // ----- Kontrollera om värmepumpen skall inaktiveras på grund av hög förbrukning
-            await daikinWorker.KontrolleraEffekt(nu, ForbrukningDennaTimme);
+            // ----- Effektvakt värmepump
+            await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningTotalDennaTimme, nu);
 
             // ----- Bilen inte ansluten, hoppa över utvärdering av laddning
             if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
@@ -268,20 +221,25 @@ public class ChargeWorker(
                         await StoppaLaddningAsync(force: true);
                     }
                 }
-
                 ConnectorStatus = currentConnectorStatus;
             }
 
             // ----- Kontrollera förväntad timförbrukning
-            int grans = nu.Minute * 2000 / 60 + 1500;
-            if (ForbrukningDennaTimme > grans && Timladdning)
+            if (Timladdning)
             {
-                //  För hög förbrukning -> stoppa laddning
-                logger.LogInformation(
-                    "! Charging disabled due to high consumption: {consumption} Wh.",
-                    ForbrukningDennaTimme);
-                Timladdning = false;
-                await StoppaLaddningAsync();
+                // TODO: kalkylera gränsen exclusive bilens laddade effekt
+                // kräver att vi räknar ut bilens laddade effekt i realtid.
+                var grans = await wallboxWorker.KalkyleraGrans((DateTime)nu);
+                if (nu.Minute < 30) grans = int.MaxValue;
+                if (wallboxWorker.FörbrukningDennaTimme > grans)
+                {
+                    //  För hög förbrukning -> stoppa laddning
+                    logger.LogInformation(
+                        "! Charging disabled due to high consumption: {consumption} Wh.",
+                        wallboxWorker.FörbrukningDennaTimme);
+                    Timladdning = false;
+                    await StoppaLaddningAsync();
+                }
             }
 
             // ***** Varje kvart
@@ -289,9 +247,9 @@ public class ChargeWorker(
             {
                 LaddBehovProcent = await LaddBehov();
                 // Starta/stoppa laddning beroende på om det är tillåtet eller inte
-                if (ForbrukningDennaTimme > 0)
+                if (wallboxWorker.FörbrukningDennaTimme > 0)
                     logger.LogInformation("-- Quarter, consumption: {consumption} Wh --",
-                        ForbrukningDennaTimme);
+                        wallboxWorker.FörbrukningDennaTimme);
                 if (Timladdning)
                 {
                     int numin = nu.Minute;
@@ -330,7 +288,7 @@ public class ChargeWorker(
         }
     }
 
-    
+
 
 
     private bool BilenLaddar { get; set; }

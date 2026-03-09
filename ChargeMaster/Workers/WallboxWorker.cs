@@ -43,21 +43,67 @@ public class WallboxWorker(
     public event EventHandler<MeterInfoEventArgs>? MeterInfoCalculated;
 
     /// <summary>
+    /// För extern konsumtion
+    /// </summary>
+    public WallboxMeterInfo? MeterInfo { get; private set; }
+
+    /// <summary>
     /// Event raised when a new charging session starts (SessionStartTime changes).
     /// </summary>
     public event EventHandler<ChargeSessionData>? ChargeSessionChanged;
 
     /// <summary>
-    /// Tracks the last recorded accumulated energy value to avoid storing duplicate readings.
+    /// Uppräknad förbrukning innevarande timme.
     /// </summary>
-    private double? LastStoredAccEnergy { get; set; }
+    public long FörbrukningDennaTimme { get; private set; }
+
+    /// <summary>
+    /// Uppskattad total förbrukning innevarande timme.
+    /// </summary>
+    public long FörbrukningTotalDennaTimme { get; private set; }
+
+    /// <summary>
+    /// Förbrukning föregående timme
+    /// </summary>
+    public long FörbrukningFöregåendeTimme
+    {
+        get
+        {
+            if (NästSistaMeterInfoFöregåendeTimme != null && SistaMeterInfoFöregåendeTimme != null)
+            {
+                return SistaMeterInfoFöregåendeTimme.AccEnergy -
+                       NästSistaMeterInfoFöregåendeTimme.AccEnergy;
+            }
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// Senaste läsningen från wallbox. Uppdateras endast vid förändring i ackumulerad energi.
+    /// </summary>
+    private WallboxMeterInfo? NuvarandeMeterInfo { get; set; }
+
+    /// <summary>
+    /// Föregående mätning med skillnad i ackumulerad energi från senaste mätningen. 
+    /// </summary> 
+    private WallboxMeterInfo? FöregåendeMeterInfo { get; set; }
+
+    /// <summary>
+    /// Sista mätning föregående timme. 
+    /// </summary>
+    private WallboxMeterInfo? SistaMeterInfoFöregåendeTimme { get; set; }
+
+    /// <summary>
+    /// Sista mätarställningen timmen före föregående timme
+    /// </summary>
+    private WallboxMeterInfo? NästSistaMeterInfoFöregåendeTimme { get; set; }
 
     /// <summary>
     /// Cache for hourly energy usage calculations. Stores data and timestamp of last calculation.
     /// </summary>
-    private DateTime _lastHourlyEnergyUsageCacheTime = DateTime.MinValue;
-    private List<HourlyEnergyUsage> _hourlyEnergyUsageCache = new();
-    private readonly object _cacheLocker = new object();
+    private DateTime LastHourlyEnergyUsageCacheTime { get; set; } = DateTime.MinValue;
+    private List<HourlyEnergyUsage> HourlyEnergyUsageCache { get; set; } = [];
+    private object CacheLocker { get; } = new();
 
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -68,10 +114,6 @@ public class WallboxWorker(
             {
                 await WallboxLoop(stoppingToken);
             }
-            //catch (OperationCanceledException)
-            //{
-            //    break;
-            //}
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error in WallboxMeterWorker loop");
@@ -96,111 +138,97 @@ public class WallboxWorker(
             // Extrahera status för aktuell laddning
             ExtractChargeData(wallboxStatus);
 
-            // Kontrollera klockan på wallboxen
+            // Kontrollera klockan på wallbox
             await CheckWallboxTimeAsync(wallboxStatus);
 
-            // Kontrollera schema 
-            //await CheckWallboxScheduleAsync();
-
-            // Spara status på förbrukad el
-            WallboxMeterInfo? meterInfo = await ReadEnergyAsync(stoppingToken);
-
             // Räkna ut nuvarande effekt
-            CalculateCurrentPowerAsync(meterInfo);
+            MeterInfo = await ReadEnergyAsync(stoppingToken, DateTime.Now);
+
+            // Posta mätarinfo
+            PostMeterInfo(MeterInfo);
 
             // vänta innan nästa iteration
             await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
         }
     }
 
-    public WallboxMeterInfo? MeterInfo { get; private set; }
-
     /// <summary>
     /// Gets the current charging session data extracted from the Wallbox status.
     /// </summary>
     public ChargeSessionData? ChargeSessionData { get; private set; }
 
-    // Föregående mätning
-    private DateTime _lastMeterInfoCalculationTime = DateTime.MinValue;
-    private long _lastStartAccEnergy;
-
-    // Sista mätningen i förra timmen
-    private DateTime _finalMeterInfoCalculationTime = DateTime.MinValue;
-    private long _finalStartAccEnergy;
-
-    private double _currentHourAccEnergy;     // Ackumulerad energi för innevarande timme
-    private double _currentHourTotalEnergy;   // Beräknad total energi för innevarande timme
-
     /// <summary>
-    /// Summera förbrukning innevarande timme baserat på senaste mätningen och startpunkt från föregående timme.
+    /// Posta förbrukning innevarande timme till prenumeranter på MeterInfoCalculated eventet.
     /// </summary>
-    /// <param name="meterInfo">Läsning från wallbox</param>
-    /// <param name="testNu">Inmatad tid för teständamål, annars används nuvarande tid</param>
-    internal void CalculateCurrentPowerAsync(WallboxMeterInfo? meterInfo, DateTime? testNu = null)
+    private void PostMeterInfo(WallboxMeterInfo? meterInfo)
     {
-        // Räknar ut förbrukning innevarande timme. Sista mätningen från föregående timme är startpunkt
-        // eftersom vi inte kan få exakt värde vid timskiftet.
-        MeterInfo = meterInfo;
-        if (meterInfo is null) return;
-
-        DateTime nu = testNu ?? DateTime.Now;
-        if (nu.Hour != _lastMeterInfoCalculationTime.Hour)
-        {
-            _finalMeterInfoCalculationTime = _lastMeterInfoCalculationTime;
-            _finalStartAccEnergy = _lastStartAccEnergy;
-        }
-        // Beräkna timmens effektvärden
-        _currentHourAccEnergy = meterInfo.AccEnergy - _finalStartAccEnergy;
-        var secondsSinceLastCalculation = (int)(nu - _finalMeterInfoCalculationTime).TotalSeconds;
-        _currentHourTotalEnergy = secondsSinceLastCalculation > 0
-            ? _currentHourAccEnergy * 3600 / secondsSinceLastCalculation
-            : 0;
-        if (_lastStartAccEnergy < meterInfo.AccEnergy)
-        {
-            // Ny mätning, uppdatera startpunkt
-            _lastMeterInfoCalculationTime = nu;
-            _lastStartAccEnergy = meterInfo.AccEnergy;
-        }
-
-        // Posta alltid event med aktuella värden.
-        meterInfo.EffektTimmeNu = _currentHourAccEnergy;
-        meterInfo.EffektTimmeTotal = _currentHourTotalEnergy;
+        if (meterInfo == null)
+            return;
+        meterInfo.EffektTimmeNu = FörbrukningDennaTimme;
+        meterInfo.EffektTimmeTotal = FörbrukningTotalDennaTimme;
         MeterInfoCalculated?.Invoke(this, new MeterInfoEventArgs(meterInfo));
     }
 
     /// <summary>
-    /// Hämta upp senaste mätvärde och sista föregående timme
+    /// Hämta upp den senaste mätarställningen före innevarande timme
     /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     private async Task InitieraFörbrukningAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var now = DateTime.Now;
-        var startOfHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+        var nu = DateTime.Now;
+        var startOfHour = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
 
-        // Hämta senaste mätningen
-        var latest = await context.WallboxMeterReadings
-            .OrderByDescending(x => x.ReadAt)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (latest != null)
-        {
-            _lastMeterInfoCalculationTime = latest.ReadAt;
-            _lastStartAccEnergy = latest.AccEnergy;
-        }
-
-        // Hämta sista mätningen från föregående timme
+        // Hämta sista mätningen föregående timme.
+        var hour = startOfHour;
         var before = await context.WallboxMeterReadings
-            .Where(x => x.ReadAt <= startOfHour)
+            .Where(x => x.ReadAt <= hour)
             .OrderByDescending(x => x.ReadAt)
             .FirstOrDefaultAsync(cancellationToken);
-        if (before != null)
+
+        SistaMeterInfoFöregåendeTimme = new WallboxMeterInfo
         {
-            _finalMeterInfoCalculationTime = before.ReadAt;
-            _finalStartAccEnergy = before.AccEnergy;
-        }
+            AccEnergy = before?.AccEnergy ?? 0,
+            ReadDateTime = before?.ReadAt ?? DateTime.Now
+        };
+
+        // Hämta sista mätarställningen 2 timmar bakåt
+        var now2 = SistaMeterInfoFöregåendeTimme.ReadDateTime;
+        var startOfHour2 = new DateTime(now2.Year, now2.Month, now2.Day, now2.Hour, 0, 0);
+
+        var before2 = await context.WallboxMeterReadings
+            .Where(x => x.ReadAt <= startOfHour2)
+            .OrderByDescending(x => x.ReadAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        NästSistaMeterInfoFöregåendeTimme = new WallboxMeterInfo
+        {
+            AccEnergy = before2?.AccEnergy ?? 0,
+            ReadDateTime = before2?.ReadAt ?? DateTime.Now
+        };
+
+        // Hämta upp sista mätningen 
+        var last = await context.WallboxMeterReadings
+            .OrderByDescending(x => x.ReadAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        NuvarandeMeterInfo = new WallboxMeterInfo
+        {
+            AccEnergy = last?.AccEnergy ?? 0,
+            ReadDateTime = last?.ReadAt ?? DateTime.Now
+        };
+        // hämta upp näst sista mätningen 
+        var previous = await context.WallboxMeterReadings
+            .Where(x => x.ReadAt < NuvarandeMeterInfo.ReadDateTime)
+            .OrderByDescending(x => x.ReadAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        FöregåendeMeterInfo = new WallboxMeterInfo
+        {
+            AccEnergy = previous?.AccEnergy ?? 0,
+            ReadDateTime = previous?.ReadAt ?? DateTime.Now
+        };
+
+        KalkyleraFörbrukningInnevarandeTimme(nu);
     }
 
     /// <summary>
@@ -249,103 +277,14 @@ public class WallboxWorker(
 
         return wallboxStatus;
     }
-
-    /// <summary>
-    /// Enforces the charging schedule on the Wallbox based on the current season (Summer/Winter).
-    /// </summary>
-    /// <remarks>
-    /// In summer (April-October), no schedule restrictions are applied.
-    /// In winter, specific charging slots (00:00-07:00 and 19:00-24:00) are enforced on weekdays.
-    /// </remarks>
-    internal async Task CheckWallboxScheduleAsync()
-    {
-        var schema = await wallboxService.GetSchemaAsync();
-        if (schema is null) return;
-
-        var now = DateTime.Now;
-        var start = new DateTime(now.Year, 4, 1);
-        var end = new DateTime(now.Year, 10, 31);
-        var isSummerPeriod = now.Date >= start && now.Date <= end;
-
-        if (isSummerPeriod)
-        {
-            if (schema.Count == 0) return;
-
-            foreach (var entry in schema)
-            {
-                await wallboxService.DeleteSchemaAsync(entry.SchemaId);
-            }
-
-            return;
-        }
-
-
-        var allowed = schema
-            .Where(e => IsAllowedWinterTimeSlot(e.Start, e.Stop))
-            .ToList();
-        if (allowed.Count == 10 && schema.Count == 10)
-            return;
-
-        // Remove all not allowed entries
-        foreach (var entry in schema.OrderByDescending(x => x.SchemaId))
-        {
-            if (!IsAllowedWinterTimeSlot(entry.Start, entry.Stop))
-                await wallboxService.DeleteSchemaAsync(entry.SchemaId);
-        }
-
-        // Add missing entries
-        for (int day = 1; day <= 5; day++)
-        {
-            WallboxSchemaEntry entry1 = new()
-            {
-                Start = "00:00:00",
-                Stop = "07:00:00",
-                Weekday = day.ToString(),
-                ChargeLimit = 0
-            };
-            if (!schema.Any(e => e.Equals(entry1)))
-                await wallboxService.SetSchemaAsync(entry1);
-            WallboxSchemaEntry entry2 = new()
-            {
-                Start = "19:00:00",
-                Stop = "24:00:00",
-                Weekday = day.ToString(),
-                ChargeLimit = 0
-            };
-            if (!schema.Any(e => e.Equals(entry2)))
-                await wallboxService.SetSchemaAsync(entry2);
-        }
-    }
-
-    /// <summary>
-    /// Determines if a given time slot is allowed during the winter period.
-    /// </summary>
-    /// <param name="start">Start time string.</param>
-    /// <param name="stop">Stop time string.</param>
-    /// <returns>True if the slot matches permitted winter hours; otherwise false.</returns>
-    private static bool IsAllowedWinterTimeSlot(string? start, string? stop)
-    {
-        if (string.IsNullOrWhiteSpace(start) || string.IsNullOrWhiteSpace(stop)) return false;
-
-        if (!TimeOnly.TryParse(start, out var startTime)) return false;
-        if (!TimeOnly.TryParse(stop, out var stopTime)) return false;
-
-        if (startTime == new TimeOnly(0, 0)
-            && stopTime == new TimeOnly(7, 0)) return true;
-
-        if (startTime == new TimeOnly(19, 0)
-            && stopTime == new TimeOnly(0, 0)) return true;
-
-        return false;
-    }
-
+    
     /// <summary>
     /// Checks that the Wallbox clock is synchronized with the server time and updates it if the drift exceeds 5 minutes.
     /// </summary>
     /// <param name="wallboxStatus">The current status object containing the Wallbox time.</param>
     internal async Task CheckWallboxTimeAsync(WallboxStatus wallboxStatus)
     {
-        // Wallboxens tid i format HH:mm
+        // Wallbox tid i format HH:mm
         string? wallboxTime = wallboxStatus.ChargeboxTime;
         if (wallboxTime is null) return;
         // Kontrollera om klockan är felaktig
@@ -365,22 +304,39 @@ public class WallboxWorker(
         }
     }
 
-    private DateTimeOffset? _lastReadingAt;
-    private long? _lastReading;
-
     /// <summary>
-    /// Reads the current meter information from the Wallbox and persists it to the database if the accumulated energy has changed.
+    /// Bearbetar senaste läsningen från wallbox
     /// </summary>
     /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
+    /// <param name="nu">Datum för beräkning, normalt DateTime.Now</param>
     /// <returns>The meter information that was read, or null if no information was available.</returns>
-    internal async Task<WallboxMeterInfo?> ReadEnergyAsync(CancellationToken stoppingToken)
+    internal async Task<WallboxMeterInfo?> ReadEnergyAsync(CancellationToken stoppingToken, DateTime nu)
     {
         try
         {
             WallboxMeterInfo? info = await wallboxService.GetMeterInfoAsync();
-            if (info is null)
-                return null;
+            if (info == null || FöregåendeMeterInfo?.AccEnergy == null ||
+                FöregåendeMeterInfo!.AccEnergy == info.AccEnergy)
+            {
+                // Avbryt om inget nytt värde eller ingen förändring i ackumulerad energi
+                return FöregåendeMeterInfo;
+            }
 
+            // OK - nytt värde från wallbox
+            NuvarandeMeterInfo = info;
+
+            // Ny timme, uppdatera föregående mätarställningar
+            if (FöregåendeMeterInfo != null && nu.Hour != FöregåendeMeterInfo.ReadDateTime.Hour)
+            {
+                NästSistaMeterInfoFöregåendeTimme = SistaMeterInfoFöregåendeTimme;
+                SistaMeterInfoFöregåendeTimme = FöregåendeMeterInfo;
+            }
+
+            KalkyleraFörbrukningInnevarandeTimme(nu);
+
+            FöregåendeMeterInfo = NuvarandeMeterInfo;
+
+            // ----- Spara i databasen -----
             using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
 
@@ -389,50 +345,22 @@ public class WallboxWorker(
             {
                 logger.LogCritical(
                     "Database context is not available. Meter info will not be persisted.");
-                return info;
+                return NuvarandeMeterInfo;
             }
-
-            // Initialize LastStoredAccEnergy if not set (first run)
-            if (!LastStoredAccEnergy.HasValue)
-            {
-                LastStoredAccEnergy = await db.WallboxMeterReadings
-                    .OrderByDescending(r => r.ReadAt)
-                    .Select(r => (double?)r.AccEnergy)
-                    .FirstOrDefaultAsync(stoppingToken);
-            }
-
-            // Skip if the accumulated energy is the same as last stored
-            if (LastStoredAccEnergy.HasValue &&
-                Math.Abs(LastStoredAccEnergy.Value - info.AccEnergy) < 0.01)
-                return info;
 
             var entry = new WallboxMeterReading
             {
                 ReadAt = DateTime.Now,
-                RawJson = "",  // System.Text.Json.JsonSerializer.Serialize(info),
-                AccEnergy = info.AccEnergy,
+                RawJson = "", // System.Text.Json.JsonSerializer.Serialize(info),
+                AccEnergy = NuvarandeMeterInfo.AccEnergy,
                 MeterSerial = "", // info.MeterSerial,
-                ApparentPower = info.ApparentPower
+                ApparentPower = 0  //info.ApparentPower
             };
 
             db.WallboxMeterReadings.Add(entry);
             await db.SaveChangesAsync(stoppingToken);
-            if (_lastReading != null && _lastReadingAt != null)
-            {
-                var tid = (TimeSpan)(DateTimeOffset.Now - _lastReadingAt);
-                var sec = (long)tid.TotalSeconds;
 
-                var effect = sec != 0 ? 3600.0 / sec / 10 : 0;
-
-                logger.LogInformation("Energy usage {effect:F1} kW", effect);
-            }
-
-            _lastReadingAt = DateTimeOffset.Now;
-            _lastReading = info.AccEnergy;
-
-            LastStoredAccEnergy = info.AccEnergy;
-
-            return info;
+            return NuvarandeMeterInfo;
         }
         catch (Exception ex)
         {
@@ -441,8 +369,35 @@ public class WallboxWorker(
         }
     }
 
+    private void KalkyleraFörbrukningInnevarandeTimme(DateTime nu)
+    {
+        try
+        {
+            // räkna ut förbrukning innevarande timme 
+            if (NuvarandeMeterInfo != null &&
+                FöregåendeMeterInfo != null &&
+                SistaMeterInfoFöregåendeTimme != null)
+            {
+                var timeSinceLast = NuvarandeMeterInfo!.ReadDateTime -
+                                    SistaMeterInfoFöregåendeTimme.ReadDateTime;
 
+                var totalFörbrukning = NuvarandeMeterInfo.AccEnergy -
+                                       SistaMeterInfoFöregåendeTimme.AccEnergy;
+                var forbrukningPerSecond = totalFörbrukning > 0
+                    ? totalFörbrukning / timeSinceLast.TotalSeconds
+                    : 0;
 
+                var sekunderDennaTimme = NuvarandeMeterInfo.ReadDateTime
+                    .Subtract(new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0)).TotalSeconds;
+                FörbrukningDennaTimme = (long)(forbrukningPerSecond * sekunderDennaTimme);
+                FörbrukningTotalDennaTimme = (long)(forbrukningPerSecond * 3600);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "KalkyleraFörbrukningInnevarandeTimme: oväntad exeption!");
+        }
+    }
 
 
     /// <summary>
@@ -512,6 +467,37 @@ public class WallboxWorker(
         }
     }
 
+    /// <summary>
+    /// Beräkna gränsvärde när timförbrukningen är för hög.
+    /// </summary>
+    /// <param name="nu">Justeringsvärde, används för att beräkna gränsvärdet baserat på aktuell tid.</param>
+    /// <returns></returns>
+    public async Task<long> KalkyleraGrans(DateTime nu)
+    {
+        long max;   // Högsta timförbrukningen i Wh
+        HourlyEnergyUsage usage;
+        if (IsHighEffect(nu))
+        {
+            usage = await GetHighestHourlyEnergyUsageDaytimeAsync(nu);
+            max = usage.EnergyUsageWh;
+            if (max < 1500)
+            {
+                max = 1500;
+            }
+        }
+        else
+        {
+            usage = await GetHighestHourlyEnergyUsageAsync(nu);
+            max = usage.EnergyUsageWh;
+            if (max < 3000)
+            {
+                max = 3000;
+            }
+        }
+        return max *  nu.Minute/60;
+    }
+
+
     public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
@@ -548,17 +534,17 @@ public class WallboxWorker(
     public async Task<List<HourlyEnergyUsage>> GetHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         // Kontrollera om cachen är giltig (samma timme som nu)
-        lock (_cacheLocker)
+        lock (CacheLocker)
         {
             var now = DateTime.Now;
             var cacheHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
-            var lastCacheHour = new DateTime(_lastHourlyEnergyUsageCacheTime.Year, _lastHourlyEnergyUsageCacheTime.Month,
-                _lastHourlyEnergyUsageCacheTime.Day, _lastHourlyEnergyUsageCacheTime.Hour, 0, 0);
+            var lastCacheHour = new DateTime(LastHourlyEnergyUsageCacheTime.Year, LastHourlyEnergyUsageCacheTime.Month,
+                LastHourlyEnergyUsageCacheTime.Day, LastHourlyEnergyUsageCacheTime.Hour, 0, 0);
 
             // Om cachen är från samma timme, returnera cachad data
-            if (cacheHour == lastCacheHour && _hourlyEnergyUsageCache.Count > 0)
+            if (cacheHour == lastCacheHour && HourlyEnergyUsageCache.Count > 0)
             {
-                return _hourlyEnergyUsageCache;
+                return HourlyEnergyUsageCache;
             }
         }
 
@@ -566,10 +552,10 @@ public class WallboxWorker(
         var result = await CalculateHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
 
         // Uppdatera cachen
-        lock (_cacheLocker)
+        lock (CacheLocker)
         {
-            _lastHourlyEnergyUsageCacheTime = DateTime.Now;
-            _hourlyEnergyUsageCache = result;
+            LastHourlyEnergyUsageCacheTime = DateTime.Now;
+            HourlyEnergyUsageCache = result;
         }
 
         return result;
@@ -644,5 +630,22 @@ public class WallboxWorker(
             logger.LogError(ex, "Error calculating hourly energy usage");
             return new List<HourlyEnergyUsage>();
         }
+    }
+
+    /// <summary>
+    /// Kontrollera om högbelastningstaxan är aktiv (oktober-mars kl 7-19).
+    /// </summary>
+    /// <param name="nu"></param>
+    /// <returns></returns>
+    private bool IsHighEffect(DateTime nu)
+    {
+        var month = nu.Month;
+        var hour = nu.Hour;
+
+        // Oktober till mars (10-12, 1-3) och mellan kl 7-19
+        bool isWinterMonth = month >= 10 || month <= 3;
+        bool isHighEffectHour = hour >= 7 && hour < 19;
+
+        return isWinterMonth && isHighEffectHour;
     }
 }
