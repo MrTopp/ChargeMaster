@@ -393,7 +393,10 @@
     private void OnShellyTemperatureChanged(object? sender, ShellyTemperatureChangedEventArgs e)
     {
         // Avbryt tidigare highlight-timer
-        _highlightShellyCts?.Cancel();
+        if (_highlightShellyCts is { IsCancellationRequested: false })
+        {
+            _highlightShellyCts.Cancel();
+        }
         _highlightShellyCts = new CancellationTokenSource();
 
         // Uppdatera temperatur för motsvarande enhet
