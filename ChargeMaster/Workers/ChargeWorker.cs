@@ -127,12 +127,6 @@ public class ChargeWorker(
         while(!wallboxWorker.WallboxInitierad)
             await Task.Delay(100, stoppingToken);
 
-        logger.LogDebug("++++ loggning nivå debug ++++");
-        logger.LogInformation("++++ loggning nivå information ++++");
-        logger.LogWarning("++++ loggning nivå warning ++++");
-        logger.LogError("!!!! loggning nivå error !!!!");
-        logger.LogCritical("!!!! loggning nivå critical !!!!");
-
         while (!stoppingToken.IsCancellationRequested)
         {
             logger.LogDebug("ChargeWorker tick at: {time}", DateTimeOffset.Now);
