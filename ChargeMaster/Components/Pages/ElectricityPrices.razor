@@ -1,7 +1,7 @@
 ﻿@page "/electricity-prices"
 @using ChargeMaster.Data
-@using ChargeMaster.Services
 @using ChargeMaster.Services.ElectricityPrice
+@using System.Globalization
 @inject ElectricityPriceService PriceService
 @inject IJSRuntime JS
 @rendermode InteractiveServer
@@ -14,9 +14,14 @@
 
     <section class="mb-3">
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
-            <h4 class="mb-3">Elpriser idag</h4>
-
-            @if (prices != null && prices.Count > 0)
+            <h4 class="mb-3">Elpriser</h4>
+            
+            <div class="mb-3 d-flex align-items-center gap-2">
+                <label for="price-date" class="form-label mb-0">Välj datum:</label>
+                <InputDate id="price-date" @bind-Value="selectedDate" @bind-Value:after="LoadPricesAsync" class="form-control w-auto" />
+            </div>
+            
+            @if (prices is { Count: > 0 })
             {
                 <div style="max-height: 300px; margin-bottom: 2rem;">
                     <canvas id="priceChart"></canvas>
@@ -27,13 +32,6 @@
 
     <section class="mb-3">
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
-            <h4 class="mb-3">Sök efter priser</h4>
-
-            <div class="mb-3 d-flex align-items-center gap-2">
-                <label for="price-date" class="form-label mb-0">Välj datum:</label>
-                <InputDate id="price-date" @bind-Value="selectedDate" @bind-Value:after="LoadPricesAsync" class="form-control w-auto" />
-            </div>
-
             @if (prices == null)
             {
                 <p><em>Laddar priser...</em></p>
@@ -60,8 +58,8 @@
                             {
                                 <tr>
                                     <td>@price.TimeStart.ToString("HH:mm") - @price.TimeEnd.ToString("HH:mm")</td>
-                                    <td class="text-end">@price.SekPerKwh.ToString("F4")</td>
-                                    <td class="text-end">@price.EurPerKwh.ToString("F4")</td>
+                                    <td class="text-end">@price.SekPerKwh.ToString("F2", CultureInfo.GetCultureInfo("sv-SE"))</td>
+                                    <td class="text-end">@price.EurPerKwh.ToString("F2", CultureInfo.GetCultureInfo("sv-SE"))</td>
                                 </tr>
                             }
                         </tbody>
