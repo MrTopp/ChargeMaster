@@ -144,7 +144,7 @@ public class ChargeWorker(
             }
 
             // ----- Effektvakt värmepump
-            await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningTotalDennaTimme, nu);
+            await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningDennaTimme, nu);
 
             // ----- Bilen inte ansluten, hoppa över utvärdering av laddning
             if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
