@@ -84,22 +84,11 @@ public class ChargeWorker(
     private DateTime ConnectorStatusTime { get; set; } = DateTime.Now;
 
 
-    //private readonly WallboxService _wallbox = serviceScopeFactory.GetService<WallboxService>() ??
-    //                                           throw new InvalidOperationException(
-    //                                               "Initiering av WallboxService misslyckas");
-
-    //private readonly VWService _vwService = serviceScopeFactory.GetService<VWService>() ??
-    //                                        throw new InvalidOperationException(
-    //                                            "Initiering av VWService misslyckas");
-
     /// <summary>
     /// Tracks the last saved charge session data to avoid saving duplicates.
     /// Used to detect changes in ChargeLevel and SessionEnergy.
     /// </summary>
     private ChargeSession? _lastSavedChargeSession;
-
-
-
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -111,6 +100,8 @@ public class ChargeWorker(
             }
             catch (OperationCanceledException)
             {
+                // Förväntat när tjänsten stoppas, ingen åtgärd krävs.
+                logger.LogInformation("ChargeWorker is stopping due to cancellation.");
                 break;
             }
             catch (Exception ex)
@@ -123,7 +114,6 @@ public class ChargeWorker(
 
     internal async Task ChargeLoop(CancellationToken stoppingToken)
     {
-        // TODO: vänta på att WallboxWorker är initierad
         DateTime previous = DateTime.Now;
         Timladdning = true;
         BilenLaddar = await LaddStatus();
@@ -134,6 +124,8 @@ public class ChargeWorker(
             WallboxStopped = true;
         }
         LaddBehovProcent = await LaddBehov();
+        while(!wallboxWorker.WallboxInitierad)
+            await Task.Delay(100, stoppingToken);
 
         logger.LogDebug("++++ loggning nivå debug ++++");
         logger.LogInformation("++++ loggning nivå information ++++");

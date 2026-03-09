@@ -24,6 +24,11 @@ public class DaikinWorker(
             {
                 await DaikinLoop(stoppingToken);
             }
+            catch (TaskCanceledException)
+            {
+                // Förväntat när tjänsten stoppas, ingen åtgärd krävs.
+                logger.LogInformation("DaikinWorker is stopping due to cancellation.");
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error in DaikinWorker loop");
