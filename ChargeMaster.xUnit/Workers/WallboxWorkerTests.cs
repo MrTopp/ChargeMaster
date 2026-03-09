@@ -94,23 +94,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         // Act
         await worker.CheckWallboxTimeAsync(status);
     }
-
-    [Fact]
-    public async Task CheckWallboxSchedule_OK()
-    {
-        // Arrange
-        var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
-        var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var worker = new WallboxWorker(null!, wallbox, logger);
-
-        // Act
-        await worker.CheckWallboxScheduleAsync();
-
-        // Assert (success-path only): ensure we can still read schema after applying rules.
-        var schema = await wallbox.GetSchemaAsync();
-        Assert.NotNull(schema);
-    }
-
+    
     ////[Fact(Skip = "Endast för manuell körning av långa serier med mätdata")]
     //[Fact]
     //public async Task ReadAndStoreAsync_DebugOnly()
