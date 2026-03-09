@@ -63,6 +63,11 @@ public class WallboxWorker(
     public long FörbrukningTotalDennaTimme { get; private set; }
 
     /// <summary>
+    /// Flagga att initieringen av förbrukningsberäkning är klar.
+    /// </summary>
+    public bool WallboxInitierad { get; private set; } = false;
+
+    /// <summary>
     /// Förbrukning föregående timme
     /// </summary>
     public long FörbrukningFöregåendeTimme
@@ -113,6 +118,11 @@ public class WallboxWorker(
             try
             {
                 await WallboxLoop(stoppingToken);
+            }
+            catch (TaskCanceledException)
+            {
+                // Förväntat när tjänsten stoppas, ingen åtgärd krävs.
+                logger.LogInformation("WallboxWorker is stopping due to cancellation request.");
             }
             catch (Exception ex)
             {
@@ -229,6 +239,8 @@ public class WallboxWorker(
         };
 
         KalkyleraFörbrukningInnevarandeTimme(nu);
+        // Släpp in patrasket
+        WallboxInitierad = true;
     }
 
     /// <summary>
