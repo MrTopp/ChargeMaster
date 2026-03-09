@@ -318,11 +318,10 @@ public class WallboxWorker(
             if (info == null || FöregåendeMeterInfo?.AccEnergy == null ||
                 FöregåendeMeterInfo!.AccEnergy == info.AccEnergy)
             {
-                // Avbryt om inget nytt värde eller ingen förändring i ackumulerad energi
-                return FöregåendeMeterInfo;
+                return info;
             }
 
-            // OK - nytt värde från wallbox
+            // OK - nytt värde på ackumulerad effekt från wallbox
             NuvarandeMeterInfo = info;
 
             // Ny timme, uppdatera föregående mätarställningar
