@@ -5,7 +5,7 @@
 @inject ChargeWorker ChargeWorker
 @using ChargeMaster.Workers
 
-<PageTitle>Kostnader denna månad - Charge Master</PageTitle>
+<PageTitle>Nätavgifter - Charge Master</PageTitle>
 
 <div class="container-md mb-3 px-2 px-sm-3 px-md-4" style="min-height: 100vh; display: flex; flex-direction: column;">
     <div style="flex: 0.5 1 0; max-height: 3rem; min-height: 8px;"></div>
@@ -17,7 +17,7 @@
                 <h4 class="mb-0">@SelectedMonth.ToString("MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("sv-SE"))</h4>
                 <button class="btn btn-outline-secondary btn-sm" @onclick="NextMonthAsync" disabled="@(SelectedMonth.AddMonths(1) > new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1))">Nästa månad →</button>
             </div>
-            <h4 class="mb-2">Kostnader denna månad</h4>
+            <h4 class="mb-2">Nätavgifter</h4>
             @if (HighestHourlyUsage is not null)
             {
                 <div class="table-responsive">
@@ -99,8 +99,8 @@
     <section>
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
             <p class="mb-0 d-flex gap-2">
-                <a href="/" class="btn btn-secondary btn-sm">Tillbaka till hem</a>
-                <a href="electricity-prices" class="btn btn-secondary btn-sm">Se elpriser</a>
+                <a href="index" class="btn btn-secondary btn-sm">Översikt</a>
+                <a href="electricity-prices" class="btn btn-secondary btn-sm">Elpriser</a>
                 <a href="energy-usage" class="btn btn-secondary btn-sm">Timförbrukning</a>
             </p>
         </div>
