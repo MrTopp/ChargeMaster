@@ -6,12 +6,12 @@
 /// </summary>
 public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> logger)
 {
-    private double? _currentTemperature;
-    private double? _outdoorTemperature;
-    private double? _targetTemperature;
+    private double? _currentTemperature = 0.0;
+    private double? _outdoorTemperature = 0.0;
+    private double? _targetTemperature = 0.0;
     private int _power; // 0 = Off, 1 = On
     private DaikinMode _mode; // 0=Auto, 1=Auto, 2=Dry, 3=Cool, 4=Heat, 6=Fan, 7=Auto
-    private int? _compressorFrequency;
+    private int? _compressorFrequency = 0;
 
     /// <summary>
     /// Event som triggas när Daikin-status ändras.
@@ -56,7 +56,7 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
         try
         {
             await UpdateStatusAsync();
-            logger.LogDebug(
+            logger.LogInformation(
                 "Daikin-status: Inne: {Current}°C, Ute: {Outdoor}°C, Måltemperatur: {Target}°C, Läge: {Mode}, Status: {Status}, Kompressor: {Compressor}",
                 _currentTemperature, _outdoorTemperature, _targetTemperature, _mode, IsOn ? "PÅ" : "AV", _compressorFrequency);
         }
