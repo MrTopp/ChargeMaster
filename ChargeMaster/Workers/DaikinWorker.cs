@@ -65,6 +65,10 @@ public class DaikinWorker(
                 await daikinFacade.SetTargetTemperatureAsync(temp, heat);
                 previousTemp = temp;
             }
+            else
+            {
+                await daikinFacade.UpdateStatusAsync(forceEvent: false);
+            }
 
             previous = nu;
 
