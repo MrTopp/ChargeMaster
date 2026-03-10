@@ -90,6 +90,10 @@
                     <small class="text-muted">Status:</small><br>
                     <strong>@(DaikinFacade.IsOn ? "på" : "av")</strong>
                 </div>
+                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("CompressorFrequency") ? "background-color: #cfe2ff;" : "")">
+                    <small class="text-muted">Kompressor:</small><br>
+                    <strong>@(DaikinFacade.CompressorFrequency ?? 0)</strong>
+                </div>
             </div>
         </div>
     </section>
@@ -287,6 +291,8 @@
             HighlightedProperties.Add("Power");
         if (e.ModeChanged)
             HighlightedProperties.Add("Mode");
+        if (e.CompressorFrequencyChanged)
+            HighlightedProperties.Add("CompressorFrequency");
 
         InvokeAsync(StateHasChanged);
 
