@@ -61,9 +61,10 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
     }
 
     /// <summary>
-    /// Privat hjälpfunktion som hämtar och uppdaterar enhetens status.
+    /// Hämta och uppdaterar enhetens status.
     /// </summary>
-    private async Task UpdateStatusAsync(bool forceEvent = false)
+    /// <param name="forceEvent">Om true, kommer event att triggas även om ingen status ändrades.</param>
+    public async Task UpdateStatusAsync(bool forceEvent = false)
     {
         var sensorInfo = await daikinService.GetSensorInfoAsync();
         var controlInfo = await daikinService.GetControlInfoAsync();
