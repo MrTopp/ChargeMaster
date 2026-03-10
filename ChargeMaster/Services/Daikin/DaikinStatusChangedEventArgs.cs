@@ -31,6 +31,11 @@ public class DaikinStatusChangedEventArgs : EventArgs
     public bool ModeChanged { get; set; }
 
     /// <summary>
+    /// Anger om kompressorfrekvensen ändrades.
+    /// </summary>
+    public bool CompressorFrequencyChanged { get; set; }
+
+    /// <summary>
     /// Tid när statusändringen registrerades.
     /// </summary>
     public DateTime ChangedAt { get; } = DateTime.UtcNow;
@@ -43,5 +48,6 @@ public class DaikinStatusChangedEventArgs : EventArgs
         OutdoorTemperatureChanged ||
         TargetTemperatureChanged ||
         PowerChanged ||
-        ModeChanged;
+        ModeChanged ||
+        CompressorFrequencyChanged;
 }

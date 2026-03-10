@@ -11,6 +11,7 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
     private double? _targetTemperature;
     private int _power; // 0 = Off, 1 = On
     private DaikinMode _mode; // 0=Auto, 1=Auto, 2=Dry, 3=Cool, 4=Heat, 6=Fan, 7=Auto
+    private int? _compressorFrequency;
 
     /// <summary>
     /// Event som triggas när Daikin-status ändras.
@@ -38,6 +39,11 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
     public DaikinMode Mode => _mode;
 
     /// <summary>
+    /// Kompressorfrekvens. 999 = vilande/av, 0 = av.
+    /// </summary>
+    public int? CompressorFrequency => _compressorFrequency;
+
+    /// <summary>
     /// Enkel property för att kontrollera om värmepumpen är på.
     /// </summary>
     public bool IsOn => _power != 0;
@@ -51,8 +57,8 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
         {
             await UpdateStatusAsync();
             logger.LogDebug(
-                "Daikin-status: Inne: {Current}°C, Ute: {Outdoor}°C, Måltemperatur: {Target}°C, Läge: {Mode}, Status: {Status}",
-                _currentTemperature, _outdoorTemperature, _targetTemperature, _mode, IsOn ? "PÅ" : "AV");
+                "Daikin-status: Inne: {Current}°C, Ute: {Outdoor}°C, Måltemperatur: {Target}°C, Läge: {Mode}, Status: {Status}, Kompressor: {Compressor}",
+                _currentTemperature, _outdoorTemperature, _targetTemperature, _mode, IsOn ? "PÅ" : "AV", _compressorFrequency);
         }
         catch (Exception ex)
         {
@@ -66,8 +72,8 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
     /// <param name="forceEvent">Om true, kommer event att triggas även om ingen status ändrades.</param>
     public async Task UpdateStatusAsync(bool forceEvent = false)
     {
-        var sensorInfo = await daikinService.GetSensorInfoAsync();
-        var controlInfo = await daikinService.GetControlInfoAsync();
+        DaikinSensorInfo? sensorInfo = await daikinService.GetSensorInfoAsync();
+        DaikinControlInfo? controlInfo = await daikinService.GetControlInfoAsync();
 
         var changes = new DaikinStatusChangedEventArgs();
 
@@ -83,6 +89,12 @@ public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> log
             {
                 _outdoorTemperature = sensorInfo.OutdoorTemperature;
                 changes.OutdoorTemperatureChanged = true;
+            }
+
+            if (_compressorFrequency != sensorInfo.CompressorFrequency)
+            {
+                _compressorFrequency = sensorInfo.CompressorFrequency;
+                changes.CompressorFrequencyChanged = true;
             }
         }
 
