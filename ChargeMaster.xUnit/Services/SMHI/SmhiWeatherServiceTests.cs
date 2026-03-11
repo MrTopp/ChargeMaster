@@ -5,8 +5,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using Xunit;
-
 namespace ChargeMaster.xUnit.Services.SMHI;
 
 public class SmhiWeatherServiceTests
@@ -44,7 +42,7 @@ public class SmhiWeatherServiceTests
         // Assert
         Assert.NotNull(forecasts);
         Assert.NotEmpty(forecasts);
-        Assert.True(forecasts.Count <= 12, "Should return at most 12 hours of forecast");
+        Assert.True(forecasts.Count >= 12, "Should return at least 12 hours of forecast");
 
         // Verify that each forecast has reasonable temperature values
         foreach (var forecast in forecasts)
@@ -55,7 +53,7 @@ public class SmhiWeatherServiceTests
     }
 
     [Fact]
-    public async Task GetForecastForStockholmAsync_ReturnsWeatherForecasts()
+    public async Task GetForecastForStromtorpAsync_ReturnsWeatherForecasts()
     {
         // Arrange
         var httpClient = new HttpClient();
@@ -64,7 +62,7 @@ public class SmhiWeatherServiceTests
         var service = new SmhiWeatherService(httpClient, logger, serviceScopeFactory);
 
         // Act
-        var forecasts = await service.GetForecastForStockholmAsync();
+        var forecasts = await service.GetForecast();
 
         // Assert
         Assert.NotNull(forecasts);
