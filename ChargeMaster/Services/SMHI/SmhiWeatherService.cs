@@ -15,16 +15,17 @@ public class SmhiWeatherService(
     private const string SmhiBaseUrl = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point";
 
     /// <summary>
-    /// Hämta väderprognos för närmaste 12 timmarna för en specifik plats.
+    /// Hämta väderprognos för en specifik plats.
     /// </summary>
     /// <param name="longitude">Longitud (t.ex. 18.0686 för Stockholm)</param>
     /// <param name="latitude">Latitud (t.ex. 59.3293 för Stockholm)</param>
-    /// <returns>Lista med väderdata för närmaste 12 timmarna</returns>
+    /// <returns>Lista med väderdata, för närvarande 3 dygn framåt</returns>
     public async Task<List<WeatherForecast>> GetForecastAsync(double longitude, double latitude)
     {
         try
         {
-            var url = $"{SmhiBaseUrl}/lon/{longitude.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}/lat/{latitude.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}/data.json";
+            var url = $"{SmhiBaseUrl}/lon/{longitude.ToString("F4", 
+                System.Globalization.CultureInfo.InvariantCulture)}/lat/{latitude.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}/data.json";
             
             logger.LogInformation("Fetching weather forecast from SMHI for coordinates: {Lat},{Lon}", 
                 latitude, longitude);
@@ -47,7 +48,7 @@ public class SmhiWeatherService(
 
             var now = DateTime.UtcNow;
             var forecasts = data.TimeSeries
-                .Where(ts => ts.Time >= now && ts.Time <= now.AddHours(16))
+                .Where(ts => ts.Time >= now)
                 .Select(ts => new WeatherForecast
                 {
                     Time = ts.Time,
@@ -74,7 +75,7 @@ public class SmhiWeatherService(
                 .OrderBy(f => f.Time)
                 .ToList();
 
-            logger.LogInformation("Retrieved {Count} weather forecast entries from SMHI", forecasts.Count);
+            logger.LogDebug("Retrieved {Count} weather forecast entries from SMHI", forecasts.Count);
 
             // Spara väderdata i databasen
             await SaveForecastsToDatabaseAsync(forecasts);
@@ -99,13 +100,13 @@ public class SmhiWeatherService(
     }
 
     /// <summary>
-    /// Hämta väderprognos för Stockholm (default position).
+    /// Hämta väderprognos för strömtorp
     /// </summary>
-    /// <returns>Lista med väderdata för närmaste 12 timmarna</returns>
-    public async Task<List<WeatherForecast>> GetForecastForStockholmAsync()
+    /// <returns>Lista med väderdata</returns>
+    public async Task<List<WeatherForecast>> GetForecast()
     {
-        // Koordinater för Stockholm
-        return await GetForecastAsync(longitude: 18.0686, latitude: 59.3293);
+        // Koordinater för strömtorp
+        return await GetForecastAsync(longitude: 14.4308, latitude: 59.2301);
     }
 
     /// <summary>

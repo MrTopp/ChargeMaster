@@ -29,7 +29,7 @@ public class SmhiWorker(
     private const int HourlyIntervalMinutes = 60;
 
     /// <summary>
-    /// Aktuell väderprognos för Stockholm (lagras efter senaste hämtningen).
+    /// Aktuell väderprognos för Strömtorp (lagras efter senaste hämtningen).
     /// </summary>
     public List<WeatherForecast> CurrentForecast { get; private set; } = [];
 
@@ -71,13 +71,13 @@ public class SmhiWorker(
     }
 
     /// <summary>
-    /// Hämtar väderprognos från SMHI för Stockholm.
+    /// Hämtar väderprognos från SMHI för Strömtorp.
     /// </summary>
     private async Task FetchWeatherAsync(CancellationToken stoppingToken)
     {
         try
         {
-            var forecast = await smhiWeatherService.GetForecastForStockholmAsync();
+            var forecast = await smhiWeatherService.GetForecast();
 
             if (forecast.Count > 0)
             {
