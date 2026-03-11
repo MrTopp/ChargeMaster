@@ -84,7 +84,7 @@ public class DaikinWorker(
     /// <summary>
     /// Beräkna börvärde för temperatur
     /// </summary>
-    /// <param name="nu"></param>
+    /// <param name="nu">Referenstid, normalt DateTime.Now</param>
     /// <returns>Börvärde temperatur och true/false för heat/cool</returns>
     private async Task<(double, bool)> KalkyleraTemperatur(DateTime nu)
     {
