@@ -19,6 +19,16 @@ if ($LASTEXITCODE -ne 0) {
     exit
 }
 
+# Säkerhetskontroll: Verifiera att Development-filen INTE är med i publish
+Write-Host "1b. Verifierar att appsettings.Development.json inte är med i publish..." -ForegroundColor Yellow
+if (Test-Path "$LocalPublishPath\appsettings.Development.json") {
+    Write-Host "VARNING: appsettings.Development.json finns i publish-mappen! Detta bör inte hända." -ForegroundColor Red
+    Write-Host "Installationen avbryts för säkerhet." -ForegroundColor Red
+    exit
+} else {
+    Write-Host "✓ Bekräftat: appsettings.Development.json är korrekt exkluderad från publish" -ForegroundColor Green
+}
+
 # 2. Stoppa ChargeMaster på rasp5
 Write-Host "2. Stoppar tjänsten på Raspberry Pi..." -ForegroundColor Yellow
 ssh $PiUser@$PiHost "sudo systemctl stop chargemaster-dotnet.service"

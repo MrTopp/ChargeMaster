@@ -5,6 +5,7 @@ using ChargeMaster.Services.VolksWagen;
 using ChargeMaster.Services.Daikin;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Services.Shelly;
+using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Workers;
 
 using Microsoft.AspNetCore.DataProtection;
@@ -127,6 +128,11 @@ namespace ChargeMaster
                 builder.Services.AddSingleton<DaikinFacade>();
 
                 builder.Services.AddSingleton<ShellyMqttService>();
+
+                // ----- InfluxDB -----
+                builder.Services.Configure<InfluxDBOptions>(
+                    builder.Configuration.GetSection("InfluxDB"));
+                builder.Services.AddSingleton<InfluxDbService>();
 
                 // ----- Workers -----
                 builder.Services.AddSingleton<PriceFetchingWorker>();
