@@ -8,6 +8,11 @@ namespace ChargeMaster.Services.Daikin;
 /// Daikins API returnerar data i formatet key=value separerade med komma.
 /// Baserad på dokumentation för BRP069C4x WiFi-modul med firmware &lt; 2.8.0.
 /// </summary>
+/// <remarks>
+/// Den här klassen är generad mot API-specifikationen och innehåller metoder
+/// som inte används av ChargeMaster. Kommunicera mot den här via DaikinFacade
+/// som är begränsad till de funktioner som ChargeMaster behöver. 
+/// </remarks> 
 /// <param name="httpClient">HTTP-klienten konfigurerad med basadressen till Daikin-enheten.</param>
 /// <param name="logger">Logger för diagnostik och felrapportering.</param>
 /// <param name="environment">Miljö-information för att bestämma om skrivningar ska tillåtas.</param>

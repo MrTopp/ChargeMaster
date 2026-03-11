@@ -1,8 +1,7 @@
 ﻿namespace ChargeMaster.Services.Daikin;
 
 /// <summary>
-/// Facade för förenklad kontroll av Daikin värmepump.
-/// Tillhandahåller hjälpfunktioner och cachelagrar status lokalt.
+/// Facade för förenklad kommunikation mot Daikin värmepump. Den innehåller bara funktioner som används av ChargeMaster.
 /// </summary>
 public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> logger)
 {
