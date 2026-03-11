@@ -265,6 +265,11 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
                 ErrorCode = ParseInt(data.GetValueOrDefault("err"))
             };
         }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogInformation("Fel vid hämtning av Daikin sensordata: {Message}", ex.Message);
+            return null;
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Fel vid hämtning av Daikin sensordata");
