@@ -111,7 +111,8 @@ public class DaikinWorker(
         temp = inneTemp switch
         {
             < 18 => 26,
-            < 20 => temp + 2,
+            < 20 => temp + 4,
+            < 20.5 => temp + 2,
             < 21 => temp + 1,
             > 24 => 16,
             > 23 => temp - 1,
