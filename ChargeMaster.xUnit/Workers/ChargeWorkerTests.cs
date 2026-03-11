@@ -1,4 +1,5 @@
 ﻿using ChargeMaster.Data;
+using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.VolksWagen;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Workers;
@@ -126,7 +127,11 @@ public class ChargeWorkerTests
         var provider = services.BuildServiceProvider();
 
         var mockLogger = new Mock<ILogger<WallboxWorker>>();
-        var worker = new WallboxWorker(null, null, mockLogger.Object);
+        var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
+        var influxDbService = new InfluxDbService(
+            Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }),
+            influxLogger);
+        var worker = new WallboxWorker(null, null, influxDbService, mockLogger.Object);
 
         return Task.FromResult(worker);
     }

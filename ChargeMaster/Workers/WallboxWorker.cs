@@ -1,4 +1,5 @@
 ﻿using ChargeMaster.Data;
+using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.Wallbox;
 
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ public class MeterInfoEventArgs : EventArgs
 public class WallboxWorker(
     IServiceScopeFactory serviceScopeFactory,
     WallboxService wallboxService,
+    InfluxDbService influxDbService,
     ILogger<WallboxWorker> logger) : BackgroundService
 {
     /// <summary>
@@ -153,6 +155,12 @@ public class WallboxWorker(
 
             // Räkna ut nuvarande effekt
             MeterInfo = await ReadEnergyAsync(stoppingToken, DateTime.Now);
+
+            // Uppdatera InfluxDB
+            if (MeterInfo != null)
+            {
+                    await influxDbService.WriteWallboxMeterInfoAsync(MeterInfo);
+            }
 
             // Posta mätarinfo
             PostMeterInfo(MeterInfo);
