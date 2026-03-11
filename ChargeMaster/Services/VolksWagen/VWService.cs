@@ -63,18 +63,24 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         try
         {
             var json = await httpClient.GetStringAsync("/status");
-            VWStatusResponse? response = JsonSerializer.Deserialize<VWStatusResponse>(json, JsonOptions);
+            VWStatusResponse? response
+                = JsonSerializer.Deserialize<VWStatusResponse>(json, JsonOptions);
             if (response?.Status != null)
             {
                 VWStatusRetrieved?.Invoke(this, new VWStatusEventArgs(response.Status));
             }
+
             return response?.Status;
+        }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogInformation("GetStatus: Förfrågan avbröts {message}", ex.Message);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "GetStatus: Fel vid hämtning av VW-status");
-            throw new CarConnectionException("GetStatus: Kunde inte hämta VW-status");
         }
+        throw new CarConnectionException("GetStatus: Kunde inte hämta VW-status");
     }
 
     public async Task<VWVehiclesResponse?> GetVehiclesAsync()
