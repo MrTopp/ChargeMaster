@@ -84,11 +84,7 @@
                 </div>
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("Mode") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Läge:</small><br>
-                    <strong>@DaikinFacade.Mode</strong>
-                </div>
-                <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("Power") ? "background-color: #cfe2ff;" : "")">
-                    <small class="text-muted">Status:</small><br>
-                    <strong>@(DaikinFacade.IsOn ? "på" : "av")</strong>
+                    <strong>@(DaikinFacade.IsOn ? DaikinFacade.Mode.ToString() : "Av")</strong>
                 </div>
                 <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("CompressorFrequency") ? "background-color: #cfe2ff;" : "")">
                     <small class="text-muted">Kompressor:</small><br>
@@ -287,9 +283,7 @@
             HighlightedProperties.Add("OutdoorTemperature");
         if (e.TargetTemperatureChanged)
             HighlightedProperties.Add("TargetTemperature");
-        if (e.PowerChanged)
-            HighlightedProperties.Add("Power");
-        if (e.ModeChanged)
+        if (e.PowerChanged || e.ModeChanged)
             HighlightedProperties.Add("Mode");
         if (e.CompressorFrequencyChanged)
             HighlightedProperties.Add("CompressorFrequency");
