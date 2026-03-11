@@ -432,7 +432,7 @@ public class ChargeWorker(
         }
         catch (CarConnectionException ex)
         {
-            logger.LogError(ex, "Error fetching VW status");
+            logger.LogError( "Error fetching VW status: {message}", ex.Message);
             await StopWallbox();
             return 0;
         }
