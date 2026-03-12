@@ -151,9 +151,10 @@ public class SmhiWorker(
     /// Hämtar den aktuella temperaturen från den senaste prognosen.
     /// Returnerar null om ingen prognos är tillgänglig.
     /// </summary>
-    public double? GetCurrentTemperature()
+    public double? GetCurrentTemperature(int hours = 0)
     {
-        return CurrentForecast.FirstOrDefault()?.Temperature;
+        var forecast = CurrentForecast.Skip(hours).FirstOrDefault();
+        return forecast?.Temperature;
     }
 
     /// <summary>

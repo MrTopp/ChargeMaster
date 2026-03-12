@@ -12,6 +12,7 @@ public class DaikinWorker(
     DaikinFacade daikinFacade,
     ElectricityPriceService electricityPriceService,
     WallboxWorker wallboxWorker,
+    SmhiWorker smhiWorker,
     ShellyMqttService shellyMqttService,
     ILogger<DaikinWorker> logger) : BackgroundService
 {
@@ -118,6 +119,20 @@ public class DaikinWorker(
             > 23 => temp - 1,
             _ => temp
         };
+
+        // ----- Justera mot utetemperatur -----
+        var temperature = smhiWorker.GetCurrentTemperature(2);
+        if (temperature != null)
+        {
+            temp = temperature switch
+            {
+                < -15 => temp + 6,
+                < -10 => temp + 4,
+                < -5 => temp + 2,
+                < 0 => temp + 1,
+                _ => temp
+            };
+        }
 
         // ----- Justera mot elpris -----
         temp = await JusteraMotPris(nu, temp);
