@@ -19,9 +19,10 @@ public class ShellyMqttService(
     /// </summary>
     public readonly Dictionary<string, double> Temperatures = new()
     {
-        {"arbetsrum", 21.0},
-        {"hall", 21.0},
-        {"sovrum", 21.0}
+        // Defaultvärden, kommer att uppdateras vid start från databasen
+        {"arbetsrum", 21.5},
+        {"hall", 21.5},
+        {"sovrum", 21.5}
     };
 
     /// <summary>
@@ -29,9 +30,24 @@ public class ShellyMqttService(
     /// </summary>
     public double GetAverage()
     {
-        Temperatures.TryGetValue("arbetsrum", out var temp1);   
-        Temperatures.TryGetValue("sovrum", out var temp3);
+        var temp1 = GetArbetsrumTemperature();
+        var temp3 = GetSovrumTemperature();
         return (temp1 + temp3) / 2.0;
+    }
+
+    public double GetHallTemperature()
+    {
+        return Temperatures.TryGetValue("hall", out var temp) ? temp : 21.5;
+    }
+
+    public double GetArbetsrumTemperature()
+    {
+        return Temperatures.TryGetValue("arbetsrum", out var temp) ? temp : 21.5;
+    }
+
+    public double GetSovrumTemperature()
+    {
+        return Temperatures.TryGetValue("sovrum", out var temp) ? temp : 21.5;
     }
 
     /// <summary>
