@@ -458,12 +458,22 @@ public class WallboxWorker(
                 return 0;
             }
 
-            // Hämta sista läsningen i månaden
+            // Första läsningen i nästa månad.
             var lastReading = await db.WallboxMeterReadings
                 .Where(x => x.ReadAt > endOfMonth)
                 .OrderBy(x => x.ReadAt)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
+
+            if (lastReading is null)
+            {
+                // Månaden är innevarande månad, hämta senaste läsningen istället
+                lastReading = await db.WallboxMeterReadings
+                    .Where(x => x.ReadAt <= endOfMonth)
+                    .OrderByDescending(x => x.ReadAt)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
 
             if (lastReading is null)
             {
