@@ -445,9 +445,9 @@ public class WallboxWorker(
 
             logger.LogDebug("Calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
 
-            // Hämta första läsningen i månaden
+            // Hämta sista läsningen i föregående månad
             var firstReading = await db.WallboxMeterReadings
-                .Where(x => x.ReadAt >= startOfMonth && x.ReadAt <= endOfMonth)
+                .Where(x => x.ReadAt >= startOfMonth)
                 .OrderBy(x => x.ReadAt)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
@@ -460,8 +460,8 @@ public class WallboxWorker(
 
             // Hämta sista läsningen i månaden
             var lastReading = await db.WallboxMeterReadings
-                .Where(x => x.ReadAt >= startOfMonth && x.ReadAt <= endOfMonth)
-                .OrderByDescending(x => x.ReadAt)
+                .Where(x => x.ReadAt > endOfMonth)
+                .OrderBy(x => x.ReadAt)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
