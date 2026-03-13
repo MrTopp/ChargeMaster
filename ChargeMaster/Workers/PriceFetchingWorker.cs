@@ -14,7 +14,7 @@ namespace ChargeMaster.Workers;
 /// <param name="serviceProvider">Tjänsteleverantören som används för att lösa programtjänster som krävs för prishämtningsoperationer.</param>
 /// <param name="logger">Loggern som används för att registrera informations- och felmeddelanden relaterade till arbetarens körning.</param>
 public class PriceFetchingWorker(
-    IServiceProvider serviceProvider,
+    IServiceScopeFactory serviceScopeFactory,
     ILogger<PriceFetchingWorker> logger) : BackgroundService
 {
     /// <summary>
@@ -95,7 +95,7 @@ public class PriceFetchingWorker(
                 return true;
             }
 
-            using var scope = serviceProvider.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             ElectricityPriceService priceService
                 = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
 

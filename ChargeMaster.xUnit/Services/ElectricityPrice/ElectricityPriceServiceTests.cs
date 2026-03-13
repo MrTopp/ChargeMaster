@@ -2,6 +2,7 @@
 using ChargeMaster.Services.ElectricityPrice;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Moq;
@@ -14,6 +15,7 @@ public class ElectricityPriceServiceTests : IDisposable
     private readonly ApplicationDbContext _context;
     private readonly Mock<ILogger<ElectricityPriceService>> _loggerMock;
     private readonly ElectricityPriceService _service;
+    private readonly IServiceProvider _serviceProvider;
 
     public ElectricityPriceServiceTests()
     {
@@ -24,14 +26,29 @@ public class ElectricityPriceServiceTests : IDisposable
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseNpgsql(connectionString)
             .Options;
-        
+
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
         _context.Database.BeginTransaction();
-        
+
         _loggerMock = new Mock<ILogger<ElectricityPriceService>>();
-        
-        //_service = new ElectricityPriceService(_httpClient, _context, _loggerMock.Object);
+
+        // Setup IServiceScopeFactory with IServiceProvider
+        var services = new ServiceCollection();
+        services.AddScoped(_ => _context);
+        _serviceProvider = services.BuildServiceProvider();
+
+        var scopeFactoryMock = new Mock<IServiceScopeFactory>();
+        scopeFactoryMock
+            .Setup(x => x.CreateScope())
+            .Returns(() =>
+            {
+                var scope = new Mock<IServiceScope>();
+                scope.Setup(s => s.ServiceProvider).Returns(_serviceProvider);
+                return scope.Object;
+            });
+
+        _service = new ElectricityPriceService(_httpClient, scopeFactoryMock.Object, _loggerMock.Object);
     }
 
     public void Dispose()
@@ -40,10 +57,11 @@ public class ElectricityPriceServiceTests : IDisposable
         // Since we never committed, simply disposing the transaction (if we held a reference) or context handles it,
         // but explicit Rollback is clearer.
         if (_context.Database.CurrentTransaction != null)
-        { 
+        {
             _context.Database.RollbackTransaction();
         }
         _context.Dispose();
+        //_serviceProvider?.Dispose();
         _httpClient.Dispose();
         GC.SuppressFinalize(this);
     }
@@ -164,14 +182,14 @@ public class ElectricityPriceServiceTests : IDisposable
         await _service.FetchAndStorePricesForDateAsync(date);
 
         // Assert - Verify logs indicate existing prices
-         _loggerMock.Verify(
-             x => x.Log(
-                 LogLevel.Information,
-                 It.IsAny<EventId>(),
-                 It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("exist")),
-                 It.IsAny<Exception>(),
-                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-             Times.Once);
+        _loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("exist")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
     }
 
     [Fact]
@@ -180,17 +198,74 @@ public class ElectricityPriceServiceTests : IDisposable
         // Arrange
         // Use a real valid date for the API. 
         var date = new DateTime(2026, 1, 1);
-        
+
         // Act
         await _service.FetchAndStorePricesForDateAsync(DateOnly.FromDateTime(date));
 
         // Assert -
         // Verify database content, prices from day 'date' should be 24*4 = 96 entries
         var prices = await _context.ElectricityPrices
-            .Where(x => x.TimeStart >= date 
+            .Where(x => x.TimeStart >= date
                         && x.TimeStart < date.AddDays(1)).ToListAsync(TestContext.Current.CancellationToken);
         Assert.InRange(prices.Count, 96, 96);
 
+    }
+
+    /// <summary>
+    /// Fyll på databasen med priser från 1 oktober 2025 till idag. 
+    /// </summary>
+    /// <returns></returns>
+    [Fact]
+    public async Task GetPriceForDateTimeAsync_ReturnsCorrectPrice_ForSpecificDateTime()
+    {
+        // Arrange
+        var date = new DateOnly(2026, 2, 15);
+        var targetTime = date.ToDateTime(new TimeOnly(13, 30));
+
+        // Act
+        var result = await _service.GetPriceForDateTimeAsync(targetTime);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.TimeStart <= targetTime);
+        Assert.True(result.TimeEnd > targetTime);
+        // The quarter containing 14:30 should be 14:15-14:30 (quarter 58)
+        Assert.Equal(0.84m, result.SekPerKwh);
+    }
+
+    [Fact]
+    public async Task GetPriceForDateTimeAsync_UsesCacheForSameDay()
+    {
+        // Arrange
+        var date = new DateOnly(2026, 2, 15);
+        var targetTime = date.ToDateTime(new TimeOnly(13, 33));
+
+        // Act - First call (cache miss)
+        var result1 = await _service.GetPriceForDateTimeAsync(targetTime);
+
+        // Act - Second call (cache hit) - same day, different time
+        var result2 = await _service.GetPriceForDateTimeAsync(targetTime);
+
+        // Assert
+        Assert.NotNull(result1);
+        Assert.NotNull(result2);
+        Assert.Same(result1, result2); // Should be the same instance from cache
+    }
+
+    [Fact]
+    public async Task GetPriceForDateTimeAsync_ReturnsNull_WhenNoPriceExists()
+    {
+        // Arrange
+        var date = new DateOnly(2010, 12, 25);
+        var targetTime = date.ToDateTime(new TimeOnly(15, 45));
+
+        // Don't add any prices - database is clean for this date
+
+        // Act
+        var result = await _service.GetPriceForDateTimeAsync(targetTime);
+
+        // Assert
+        Assert.Null(result);
     }
 
     /// <summary>
