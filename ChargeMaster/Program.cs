@@ -129,6 +129,9 @@ namespace ChargeMaster
 
                 builder.Services.AddSingleton<ShellyMqttService>();
 
+                // ----- Logging -----
+                builder.Services.AddLogging();
+
                 // ----- InfluxDB -----
                 builder.Services.Configure<InfluxDBOptions>(
                     builder.Configuration.GetSection("InfluxDB"));

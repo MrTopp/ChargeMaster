@@ -1,7 +1,12 @@
-﻿using ChargeMaster.Services.Wallbox;
+﻿using ChargeMaster.Services.ElectricityPrice;
+using ChargeMaster.Services.VolksWagen;
+using ChargeMaster.Services.Wallbox;
+
 using InfluxDB.Client;
 using InfluxDB.Client.Api.Domain;
+using InfluxDB.Client.Api.Service;
 using InfluxDB.Client.Writes;
+
 using Microsoft.Extensions.Options;
 
 namespace ChargeMaster.Services.InfluxDB;
@@ -14,11 +19,13 @@ public class InfluxDbService
     private readonly InfluxDBClient _client;
     private readonly InfluxDBOptions _options;
     private readonly ILogger<InfluxDbService> _logger;
+    private readonly ElectricityPriceService _priceService;
 
-    public InfluxDbService(IOptions<InfluxDBOptions> options, ILogger<InfluxDbService> logger)
+    public InfluxDbService(IOptions<InfluxDBOptions> options, ElectricityPriceService priceService, ILogger<InfluxDbService> logger)
     {
         _options = options.Value;
         _logger = logger;
+        _priceService = priceService;
 
         try
         {
@@ -39,6 +46,16 @@ public class InfluxDbService
         }
     }
 
+    public static InfluxDbService CreateInstance(IOptions<InfluxDBOptions> options, 
+        ElectricityPriceService priceService, ILogger<InfluxDbService> logger)
+    {
+        return new InfluxDbService(options, priceService, logger);
+    }
+
+    private long _lastPhase1Energy = 0;
+    private long _lastPhase2Energy = 0;
+    private long _lastPhase3Energy = 0;
+
     /// <summary>
     /// Skriver innehållet i en WallboxMeterInfo-instans till InfluxDB.
     /// </summary>
@@ -48,7 +65,15 @@ public class InfluxDbService
     {
         try
         {
+            if (meterInfo.Phase1CurrentEnergy == _lastPhase1Energy &&
+                meterInfo.Phase2CurrentEnergy == _lastPhase2Energy &&
+                meterInfo.Phase3CurrentEnergy == _lastPhase3Energy)
+            {
+                return; // Ingen förändring i energi, hoppa över skrivning
+            }
+
             var timestamp = DateTime.UtcNow;
+            var elpris = await _priceService.GetPriceForDateTimeAsync(timestamp);
 
             var points = new List<PointData>
             {
@@ -59,12 +84,15 @@ public class InfluxDbService
                     .Field("phase2_current_energy_w", meterInfo.Phase2CurrentEnergy)
                     .Field("phase3_current_energy_w", meterInfo.Phase3CurrentEnergy)
                     .Field("current_energy_w", meterInfo.CurrentEnergy)
+                    .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
                     .Timestamp(timestamp, WritePrecision.Ns)
             };
-
             await _client.GetWriteApiAsync().WritePointsAsync(points, _options.Bucket, _options.Org);
+            _logger.LogDebug(">> Writing WallboxMeterInfo to InfluxDB: {current}", meterInfo.CurrentEnergy);
 
-            _logger.LogDebug("WallboxMeterInfo written to InfluxDB: {Serial}", meterInfo.MeterSerial);
+            _lastPhase1Energy = meterInfo.Phase1CurrentEnergy;
+            _lastPhase2Energy = meterInfo.Phase2CurrentEnergy;
+            _lastPhase3Energy = meterInfo.Phase3CurrentEnergy;
         }
         catch (Exception ex)
         {

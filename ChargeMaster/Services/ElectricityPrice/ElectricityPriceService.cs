@@ -24,6 +24,13 @@ public class ElectricityPriceService(
 {
     private const string PriceClass = "SE3";
 
+    /// <summary>
+    /// Cache för elprisor lagrat per dag. Nyckel är datumet, värde är listan med priser för dagen.
+    /// </summary>
+    private DateOnly? _cachedDate;
+    private List<Data.ElectricityPrice>? _cachedPrices;
+    private readonly object _cacheLock = new();
+
     public async Task FetchAndStorePricesForDateAsync(DateOnly date)
     {
         if (await HasPricesForDateAsync(date))
@@ -138,5 +145,38 @@ public class ElectricityPriceService(
             .ExecuteDeleteAsync();
 
         logger.LogInformation("Deleted {Count} prices for {Date}.", count, date);
+    }
+
+    public async Task<Data.ElectricityPrice?> GetPriceForDateTimeAsync(DateTime dateTime)
+    {
+        var requestedDate = DateOnly.FromDateTime(dateTime);
+
+        // Kontrollera cache
+        lock (_cacheLock)
+        {
+            if (_cachedDate == requestedDate && _cachedPrices != null)
+            {
+                logger.LogDebug("Returning cached price for {DateTime}", dateTime);
+                return _cachedPrices.FirstOrDefault(p => p.TimeStart <= dateTime && p.TimeEnd > dateTime);
+            }
+        }
+
+        // Cache miss - hämta från databas
+        using var scope = serviceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var prices = await context.ElectricityPrices
+            .Where(p => p.TimeStart >= dateTime.Date && p.TimeStart < dateTime.Date.AddDays(1))
+            .OrderBy(p => p.TimeStart)
+            .ToListAsync();
+
+        // Uppdatera cache
+        lock (_cacheLock)
+        {
+            _cachedDate = requestedDate;
+            _cachedPrices = prices;
+        }
+
+        logger.LogDebug("Loaded and cached {Count} prices for {Date}", prices.Count, requestedDate);
+        return prices.FirstOrDefault(p => p.TimeStart <= dateTime && p.TimeEnd > dateTime);
     }
 }
