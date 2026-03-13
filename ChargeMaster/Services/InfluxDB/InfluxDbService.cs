@@ -55,6 +55,8 @@ public class InfluxDbService
     private long _lastPhase1Energy = 0;
     private long _lastPhase2Energy = 0;
     private long _lastPhase3Energy = 0;
+    private decimal _lastPrice = 0;
+    private int _lastQuarter = -1;
 
     /// <summary>
     /// Skriver innehållet i en WallboxMeterInfo-instans till InfluxDB.
@@ -65,15 +67,27 @@ public class InfluxDbService
     {
         try
         {
-            if (meterInfo.Phase1CurrentEnergy == _lastPhase1Energy &&
-                meterInfo.Phase2CurrentEnergy == _lastPhase2Energy &&
-                meterInfo.Phase3CurrentEnergy == _lastPhase3Energy)
+            var timestamp = DateTime.UtcNow;
+            int currentQuarter = timestamp.Minute / 15;
+
+            if (currentQuarter != _lastQuarter)
             {
-                return; // Ingen förändring i energi, hoppa över skrivning
+                // Första läsningen i kvarten, nolla sekunderna så det blir exakt, t.ex. 12:00:00, 12:15:00, 12:30:00 eller 12:45:00
+                timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day,
+                    timestamp.Hour, timestamp.Minute, 0, DateTimeKind.Utc);
             }
 
-            var timestamp = DateTime.UtcNow;
-            var elpris = await _priceService.GetPriceForDateTimeAsync(timestamp);
+            var elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
+
+            if (currentQuarter == _lastQuarter &&
+                meterInfo.Phase1CurrentEnergy == _lastPhase1Energy &&
+                meterInfo.Phase2CurrentEnergy == _lastPhase2Energy &&
+                meterInfo.Phase3CurrentEnergy == _lastPhase3Energy &&
+                elpris?.SekPerKwh == _lastPrice)
+            {
+                return; // Ingen förändring, hoppa över skrivning
+            }
+
 
             var points = new List<PointData>
             {
@@ -93,6 +107,8 @@ public class InfluxDbService
             _lastPhase1Energy = meterInfo.Phase1CurrentEnergy;
             _lastPhase2Energy = meterInfo.Phase2CurrentEnergy;
             _lastPhase3Energy = meterInfo.Phase3CurrentEnergy;
+            _lastPrice = elpris?.SekPerKwh ?? 0;
+            _lastQuarter = currentQuarter;
         }
         catch (Exception ex)
         {
