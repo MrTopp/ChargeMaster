@@ -48,8 +48,7 @@
                                 <td>&nbsp;</td>
                                 <td>&nbsp;</td>
                                 <td class="text-end">
-                                    @((3000 / (DateTime.IsLeapYear(SelectedMonth.Year) ? 366 : 365)
-                                                                * DateTime.DaysInMonth(SelectedMonth.Year, SelectedMonth.Month)).ToString("F2"))
+                                    @(Nätavgift(SelectedMonth).ToString("F2"))
                                 </td>
                             </tr>
                             <tr>
@@ -130,6 +129,13 @@
         {
             _ = UpdateHourlyEnergyLoop();
         }
+    }
+
+    private double Nätavgift(DateTime selectedMonth) 
+    {
+        double dagspris = 3000.0 / (DateTime.IsLeapYear(selectedMonth.Year) ? 366 : 365);
+        double avgift = Math.Floor(DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month) * dagspris * 100) / 100.0;
+        return avgift;
     }
 
     private long ForbrukningManadTotalt
