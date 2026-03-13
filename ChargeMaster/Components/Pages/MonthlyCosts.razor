@@ -75,12 +75,7 @@
                                 <td>&nbsp;</td>
                                 <td class="text-end">
                                     <strong>
-                                        @(((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000)
-                                                                    + ((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) * 50 / 1000.0)
-                                                                    + (3000 / 12.0)
-                                                                    + (ForbrukningManadTotalt * 0.175 / 1000)
-                                                                    + (ForbrukningManadTotalt * 0.5488 / 1000)
-                                                                    ).ToString("F2"))
+                                        @(SummeradKostnadManad.ToString("F2"))
                                     </strong>
                                 </td>
                             </tr>
@@ -136,6 +131,19 @@
         double dagspris = 3000.0 / (DateTime.IsLeapYear(selectedMonth.Year) ? 366 : 365);
         double avgift = Math.Floor(DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month) * dagspris * 100) / 100.0;
         return avgift;
+    }
+
+    private double SummeradKostnadManad
+    {
+        get
+        {
+            double effektavgift = (HighestHourlyUsage?.EnergyUsageWh ?? 0L) * 62.5 / 1000.0;
+            double hogbelastningsavgift = ((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) * 50 / 1000.0);
+            double natavgift = Nätavgift(SelectedMonth);
+            double energiskatt = ForbrukningManadTotalt * 0.45 / 1000.0;
+            double overforing = ForbrukningManadTotalt * 0.175 / 1000.0;
+            return effektavgift + hogbelastningsavgift + natavgift + energiskatt + overforing;
+        }
     }
 
     private long ForbrukningManadTotalt
