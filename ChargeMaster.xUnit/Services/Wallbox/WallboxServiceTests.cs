@@ -9,9 +9,11 @@ public class WallboxServiceTests : IDisposable
 {
     private readonly HttpClient _httpClient;
     private readonly WallboxService _service;
+    private readonly ITestOutputHelper _output;
 
-    public WallboxServiceTests()
+    public WallboxServiceTests(ITestOutputHelper output)
     {
+        _output = output;
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri("http://192.168.1.205:8080/")
@@ -116,4 +118,18 @@ public class WallboxServiceTests : IDisposable
         Assert.NotEmpty(result);
         Assert.All(result, r => Assert.True(r.SerialNumber > 0));
     }
+
+    [Fact(Skip="Skriver ut effekten i laddboxen många gånger, inget riktigt testfall")]
+    public async Task GetMeterInfoAsyncListning_OK()
+    {
+        for (int i = 0; i < 200; i++)
+        {
+            var result = await _service.GetMeterInfoAsync();
+            if (result == null) continue;   
+            // Skriv ut resultatet för att se att det uppdateras
+            _output.WriteLine($"{i}. {result.Phase1CurrentEnergy} {result.Phase2CurrentEnergy} {result.Phase3CurrentEnergy} {result.AccEnergy}");
+            await Task.Delay(1000, TestContext.Current.CancellationToken);
+        }
+    }
+
 }
