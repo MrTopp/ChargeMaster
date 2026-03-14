@@ -107,20 +107,27 @@ public class DaikinWorker(
             < 22 => 24,
             _ => 22
         };
-        // ----- Justera mot temperatur -----
+        // ----- Helg -----
+        if (nu.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        {
+            temp = 23;
+        }
+
+        // ----- Justera mot temperatur inne -----
         var inneTemp = shellyMqttService.GetAverage();
         temp = inneTemp switch
         {
             < 18 => 26,
             < 20 => temp + 4,
-            < 20.5 => temp + 2,
-            < 21 => temp + 1,
+            < 20.5 => temp + 3,
+            < 21 => temp + 2,
+            < 22.5 => temp,
             > 24 => 16,
-            > 23 => temp - 1,
+            > 23 => 20,
             _ => temp
         };
 
-        // ----- Justera mot utetemperatur -----
+        // ----- Justera mot temperatur ute -----
         var temperature = smhiWorker.GetCurrentTemperature(2);
         if (temperature != null)
         {
