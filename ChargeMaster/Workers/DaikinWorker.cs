@@ -9,6 +9,7 @@ namespace ChargeMaster.Workers;
 /// Bakgrundstjänst som en gång i timmen läser status från Daikin värmepump.
 /// </summary>
 public class DaikinWorker(
+    IServiceScopeFactory serviceScopeFactory,
     DaikinFacade daikinFacade,
     ElectricityPriceService electricityPriceService,
     WallboxWorker wallboxWorker,
@@ -64,6 +65,7 @@ public class DaikinWorker(
                 logger.LogInformation("Uppdaterar Daikin måltemperatur: {Temp}°C (tid: {Time})",
                     temp, nu.ToString("HH:mm"));
                 await daikinFacade.SetTargetTemperatureAsync(temp, heat);
+                await SaveDaikinSession(nu, temp, heat);
                 previousTemp = temp;
             }
             else
@@ -154,7 +156,6 @@ public class DaikinWorker(
         return (temp, heat);
     }
 
-
     private (DateOnly, List<ElectricityPrice>)? _cachedPrices;
 
     /// <summary>
@@ -202,8 +203,55 @@ public class DaikinWorker(
         await daikinFacade.SetTargetTemperatureAsync(16, true);
     }
 
-    private bool EmergencyStopped { get; set; }
+    /// <summary>
+    /// Hämta aktuell elpris för given tid.
+    /// </summary>
+    private async Task<decimal?> GetCurrentPrice(DateTime nu)
+    {
+        try
+        {
+            var prices = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
+            var currentPriceData = prices.FirstOrDefault(p => p.TimeStart <= nu && p.TimeEnd > nu);
+            return currentPriceData?.SekPerKwh;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting current electricity price");
+            return null;
+        }
+    }
 
+    /// <summary>
+    /// Spara Daikin sessiondata till databasen.
+    /// </summary>
+    private async Task SaveDaikinSession(DateTime timestamp, double targetTemperature, bool isHeating)
+    {
+        try
+        {
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            var session = new DaikinSession
+            {
+                Timestamp = timestamp,
+                TargetTemperature = targetTemperature,
+                IsHeating = isHeating,
+                ArbetsrumTemperature = shellyMqttService.GetArbetsrumTemperature(),
+                HallTemperature = shellyMqttService.GetHallTemperature(),
+                SovrumTemperature = shellyMqttService.GetSovrumTemperature(),
+                CurrentPrice = await GetCurrentPrice(timestamp)
+            };
+
+            dbContext.DaikinSessions.Add(session);
+            await dbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error saving Daikin session data");
+        }
+    }
+
+    private bool EmergencyStopped { get; set; }
 
     /// <summary>
     /// Kontrollera om timmens förbrukning överstiger gränsvärdet.

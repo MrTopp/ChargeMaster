@@ -3,6 +3,7 @@ using System;
 using ChargeMaster.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChargeMaster.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260314103313_AddDaikinSessionsTable")]
+    partial class AddDaikinSessionsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,9 +77,6 @@ namespace ChargeMaster.Migrations
 
                     b.Property<double?>("ArbetsrumTemperature")
                         .HasColumnType("double precision");
-
-                    b.Property<decimal?>("CurrentPrice")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<double?>("HallTemperature")
                         .HasColumnType("double precision");

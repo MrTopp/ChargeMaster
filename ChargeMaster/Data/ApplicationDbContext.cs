@@ -10,6 +10,7 @@ namespace ChargeMaster.Data
             public DbSet<ShellyTemperature> ShellyTemperatures { get; set; }
             public DbSet<ChargeSession> ChargeSessions { get; set; }
             public DbSet<WeatherForecast> WeatherForecasts { get; set; }
+            public DbSet<DaikinSession> DaikinSessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,6 +68,16 @@ namespace ChargeMaster.Data
                         v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
                         v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
                 b.HasIndex(e => e.Time).IsUnique();
+            });
+            modelBuilder.Entity<DaikinSession>(b =>
+            {
+                b.Property(e => e.Timestamp)
+                    .HasColumnType("timestamp without time zone")
+                    .HasConversion(
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified));
+                b.Property(e => e.CurrentPrice).HasColumnType("decimal(18,2)");
+                b.HasIndex(e => e.Timestamp).IsDescending();
             });
         }
     }
