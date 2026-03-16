@@ -40,7 +40,15 @@ public class TibberPulseService(
         var client = new TibberApiClient(opts.ApiToken, UserAgent);
 
         logger.LogInformation("Startar Tibber Pulse-lyssnare för HomeId: {HomeId}", homeId);
-        var listener = await client.StartRealTimeMeasurementListener(homeId);
+        IObservable<RealTimeMeasurement>? listener;
+        try
+        {
+            listener = await client.StartRealTimeMeasurementListener(homeId, cancellationToken: cancellationToken);
+        } catch (Exception ex)
+        {
+            logger.LogError(ex, "Misslyckades att starta Tibber Pulse-lyssnare");
+            throw;
+        }
 
         var streamErrorTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         using var subscription = listener.Subscribe(new TibberObserver(this, streamErrorTcs));

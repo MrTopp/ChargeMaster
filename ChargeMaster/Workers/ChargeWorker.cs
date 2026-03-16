@@ -545,14 +545,14 @@ public class ChargeWorker(
             var sessionData = wallboxWorker.ChargeSessionData;
             if (sessionData is null)
             {
-                logger.LogInformation("SaveChargeSessionAsync: No session data available from WallboxWorker");
+                //logger.LogInformation("SaveChargeSessionAsync: No session data available from WallboxWorker");
                 return;
             }
 
             if (!sessionData.HasData)
             {
                 // gissar att det inte finns någon inkopplad bil, eller den har inte laddat något.
-                logger.LogInformation("SaveChargeSessionAsync: Incomplete session data. Skipping save.");
+                //logger.LogInformation("SaveChargeSessionAsync: Incomplete session data. Skipping save.");
                 return;
             }
 

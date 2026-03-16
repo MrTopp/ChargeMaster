@@ -1,4 +1,5 @@
-﻿using ChargeMaster.Services.TibberPulse;
+﻿using ChargeMaster.Services.InfluxDB;
+using ChargeMaster.Services.TibberPulse;
 
 using Tibber.Sdk;
 
@@ -10,6 +11,7 @@ namespace ChargeMaster.Workers;
 /// </summary>
 public class TibberWorker(
     TibberPulseService tibberPulseService,
+    InfluxDbService influxDbService,
     ILogger<TibberWorker> logger) : BackgroundService
 {
     /// <inheritdoc/>
@@ -29,8 +31,8 @@ public class TibberWorker(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Fel i TibberWorker, försöker återansluta om 30 sekunder...");
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                logger.LogError(ex, "Fel i TibberWorker, försöker återansluta om 5 minuter...");
+                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
             finally
             {
@@ -41,7 +43,10 @@ public class TibberWorker(
 
     private void OnMeasurementReceived(object? sender, TibberMeasurementEventArgs e)
     {
-        var m = e.Measurement;
+        RealTimeMeasurement m = e.Measurement;
+
+        _ = influxDbService.WriteTibberMeasurementAsync(m);
+
         logger.LogInformation(
             "Tibber Pulse [{Time}] Effekt: {Power} W | " +
             "Timme: {Hour:F4} kWh | Dag: {Day:F4} kWh | " +
