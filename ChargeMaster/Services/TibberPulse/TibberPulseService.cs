@@ -1,31 +1,24 @@
-﻿using System.Net.WebSockets;
-using System.Text;
-using System.Text.Json;
+﻿using System.Net.Http.Headers;
 
 using Microsoft.Extensions.Options;
+
+using Tibber.Sdk;
 
 namespace ChargeMaster.Services.TibberPulse;
 
 /// <summary>
-/// Tjänst för att prenumerera på realtidsdata från Tibber Pulse via GraphQL-subscription och WebSocket.
-/// Använder protokollet graphql-transport-ws mot Tibbers API.
+/// Tjänst för att prenumerera på realtidsdata från Tibber Pulse via Tibber SDK.
 /// </summary>
 public class TibberPulseService(
     IOptions<TibberPulseOptions> options,
     ILogger<TibberPulseService> logger)
 {
-    private static readonly Uri SubscriptionEndpoint =
-        new("wss://api.tibber.com/v1-beta/gql/subscriptions");
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    private static readonly ProductInfoHeaderValue UserAgent = new("ChargeMaster", "1.0");
 
     /// <summary>
     /// Senast mottagna mätdata från Tibber Pulse.
     /// </summary>
-    public TibberLiveMeasurement? LastMeasurement { get; private set; }
+    public RealTimeMeasurement? LastMeasurement { get; private set; }
 
     /// <summary>
     /// Event som höjs när ny mätdata tas emot från Tibber Pulse.
@@ -40,183 +33,56 @@ public class TibberPulseService(
     {
         var opts = options.Value;
 
-        using var ws = new ClientWebSocket();
-        ws.Options.AddSubProtocol("graphql-transport-ws");
-        ws.Options.SetRequestHeader("Authorization", $"Bearer {opts.ApiToken}");
-
-        logger.LogInformation("Ansluter till Tibber API...");
-        await ws.ConnectAsync(SubscriptionEndpoint, cancellationToken);
-        logger.LogInformation("WebSocket-anslutning upprättad");
-
-        // Skicka connection_init med token i payload
-        await SendAsync(ws, new
-        {
-            type = "connection_init",
-            payload = new { token = opts.ApiToken }
-        }, cancellationToken);
-
-        // Vänta på connection_ack
-        var ackMessage = await ReceiveMessageAsync(ws, cancellationToken);
-        var ackType = GetMessageType(ackMessage);
-        if (ackType != "connection_ack")
-        {
+        if (!Guid.TryParse(opts.HomeId, out var homeId))
             throw new InvalidOperationException(
-                $"Oväntat svar från Tibber API: '{ackType}'. Förväntade 'connection_ack'. Fullständigt svar: {ackMessage}");
-        }
-        logger.LogInformation("Tibber API anslutning bekräftad (connection_ack)");
+                $"HomeId '{opts.HomeId}' är inte ett giltigt GUID. Kontrollera appsettings.Developer.json.");
 
-        // Skicka subscribe med GraphQL-query
-        await SendAsync(ws, new
-        {
-            id = "1",
-            type = "subscribe",
-            payload = new { query = BuildSubscriptionQuery(opts.HomeId) }
-        }, cancellationToken);
+        var client = new TibberApiClient(opts.ApiToken, UserAgent);
 
-        logger.LogInformation("Tibber Pulse-prenumeration startad för HomeId: {HomeId}", opts.HomeId);
+        logger.LogInformation("Startar Tibber Pulse-lyssnare för HomeId: {HomeId}", homeId);
+        var listener = await client.StartRealTimeMeasurementListener(homeId);
 
-        // Mottagningsloop tills avbruten eller fel
-        while (!cancellationToken.IsCancellationRequested && ws.State == WebSocketState.Open)
-        {
-            var message = await ReceiveMessageAsync(ws, cancellationToken);
-            await HandleMessageAsync(ws, message, cancellationToken);
-        }
+        var streamErrorTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var subscription = listener.Subscribe(new TibberObserver(this, streamErrorTcs));
+
+        logger.LogInformation("Tibber Pulse-prenumeration aktiv");
+
+        // Vänta tills avbruten eller tills strömmen rapporterar ett fel
+        var waitTask = Task.Delay(Timeout.Infinite, cancellationToken);
+        var completedTask = await Task.WhenAny(waitTask, streamErrorTcs.Task);
+
+        await client.StopRealTimeMeasurementListener(homeId);
+        logger.LogInformation("Tibber Pulse-lyssnare stoppad");
+
+        // Kasta vidare strömfel så att TibberWorker kan återansluta
+        if (completedTask == streamErrorTcs.Task)
+            await streamErrorTcs.Task;
     }
 
-    private async Task HandleMessageAsync(ClientWebSocket ws, string message, CancellationToken cancellationToken)
+    private void HandleMeasurement(RealTimeMeasurement measurement)
     {
-        using var doc = JsonDocument.Parse(message);
-        var root = doc.RootElement;
-
-        if (!root.TryGetProperty("type", out var typeElement))
-        {
-            logger.LogWarning("Mottog meddelande utan 'type'-fält: {Message}", message);
-            return;
-        }
-
-        switch (typeElement.GetString())
-        {
-            case "next":
-                HandleNext(root);
-                break;
-
-            case "ping":
-                await SendAsync(ws, new { type = "pong" }, cancellationToken);
-                break;
-
-            case "error":
-                logger.LogError("Tibber API subscription-fel: {Message}", message);
-                throw new InvalidOperationException($"Tibber API subscription-fel: {message}");
-
-            case "complete":
-                logger.LogInformation("Tibber API subscription avslutad av servern");
-                break;
-
-            case "connection_keepalive":
-                // Äldre protokollsversion, ignorera
-                break;
-
-            default:
-                logger.LogDebug("Okänd meddelandetyp från Tibber API: {Message}", message);
-                break;
-        }
+        LastMeasurement = measurement;
+        MeasurementReceived?.Invoke(this, new TibberMeasurementEventArgs(measurement));
     }
 
-    private void HandleNext(JsonElement root)
+    private void HandleStreamError(Exception error) =>
+        logger.LogError(error, "Fel i Tibber Pulse-ström");
+
+    private void HandleStreamCompleted() =>
+        logger.LogInformation("Tibber Pulse-ström avslutad av servern");
+
+    private sealed class TibberObserver(
+        TibberPulseService service,
+        TaskCompletionSource<bool> errorTcs) : IObserver<RealTimeMeasurement>
     {
-        try
+        public void OnNext(RealTimeMeasurement value) => service.HandleMeasurement(value);
+
+        public void OnError(Exception error)
         {
-            var measurementElement = root
-                .GetProperty("payload")
-                .GetProperty("data")
-                .GetProperty("liveMeasurement");
-
-            var measurement = measurementElement.Deserialize<TibberLiveMeasurement>(JsonOptions);
-            if (measurement == null)
-            {
-                logger.LogWarning("Kunde inte deserialisera mätdata från Tibber API");
-                return;
-            }
-
-            LastMeasurement = measurement;
-            MeasurementReceived?.Invoke(this, new TibberMeasurementEventArgs(measurement));
+            service.HandleStreamError(error);
+            errorTcs.TrySetException(error);
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Fel vid hantering av 'next'-meddelande från Tibber API");
-        }
+
+        public void OnCompleted() => service.HandleStreamCompleted();
     }
-
-    private static string GetMessageType(string message)
-    {
-        using var doc = JsonDocument.Parse(message);
-        return doc.RootElement.TryGetProperty("type", out var type)
-            ? type.GetString() ?? string.Empty
-            : string.Empty;
-    }
-
-    private static async Task SendAsync(ClientWebSocket ws, object payload, CancellationToken cancellationToken)
-    {
-        var json = JsonSerializer.Serialize(payload);
-        var bytes = Encoding.UTF8.GetBytes(json);
-        await ws.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, cancellationToken);
-    }
-
-    private static async Task<string> ReceiveMessageAsync(ClientWebSocket ws, CancellationToken cancellationToken)
-    {
-        var buffer = new byte[8192];
-        using var ms = new MemoryStream();
-        WebSocketReceiveResult result;
-
-        do
-        {
-            result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
-
-            if (result.MessageType == WebSocketMessageType.Close)
-            {
-                throw new InvalidOperationException(
-                    $"WebSocket-anslutningen stängdes av servern: {result.CloseStatusDescription}");
-            }
-
-            ms.Write(buffer, 0, result.Count);
-        }
-        while (!result.EndOfMessage);
-
-        return Encoding.UTF8.GetString(ms.ToArray());
-    }
-
-    private static string BuildSubscriptionQuery(string homeId) =>
-        $$"""
-        subscription {
-          liveMeasurement(homeId: "{{homeId}}") {
-            timestamp
-            power
-            lastMeterConsumption
-            accumulatedConsumption
-            accumulatedProduction
-            accumulatedConsumptionLastHour
-            accumulatedProductionLastHour
-            accumulatedCost
-            accumulatedReward
-            currency
-            minPower
-            averagePower
-            maxPower
-            powerProduction
-            powerReactive
-            powerProductionReactive
-            minPowerProduction
-            maxPowerProduction
-            lastMeterProduction
-            powerFactor
-            voltagePhase1
-            voltagePhase2
-            voltagePhase3
-            currentL1
-            currentL2
-            currentL3
-            signalStrength
-          }
-        }
-        """;
 }

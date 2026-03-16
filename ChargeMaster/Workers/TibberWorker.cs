@@ -1,5 +1,7 @@
 ﻿using ChargeMaster.Services.TibberPulse;
 
+using Tibber.Sdk;
+
 namespace ChargeMaster.Workers;
 
 /// <summary>
@@ -51,7 +53,7 @@ public class TibberWorker(
             m.AccumulatedConsumptionLastHour,
             m.AccumulatedConsumption,
             m.VoltagePhase1, m.VoltagePhase2, m.VoltagePhase3,
-            m.CurrentL1, m.CurrentL2, m.CurrentL3,
+            m.CurrentPhase1, m.CurrentPhase2, m.CurrentPhase3,
             m.SignalStrength);
     }
 }

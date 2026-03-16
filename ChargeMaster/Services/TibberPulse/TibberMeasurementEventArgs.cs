@@ -1,12 +1,14 @@
-﻿namespace ChargeMaster.Services.TibberPulse;
+﻿using Tibber.Sdk;
+
+namespace ChargeMaster.Services.TibberPulse;
 
 /// <summary>
 /// Eventargument som innehåller mätdata från Tibber Pulse.
 /// </summary>
-public class TibberMeasurementEventArgs(TibberLiveMeasurement measurement) : EventArgs
+public class TibberMeasurementEventArgs(RealTimeMeasurement measurement) : EventArgs
 {
     /// <summary>
     /// Mätdata från Tibber Pulse.
     /// </summary>
-    public TibberLiveMeasurement Measurement { get; } = measurement;
+    public RealTimeMeasurement Measurement { get; } = measurement;
 }
