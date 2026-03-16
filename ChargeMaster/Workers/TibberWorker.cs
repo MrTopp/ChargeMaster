@@ -1,0 +1,57 @@
+﻿using ChargeMaster.Services.TibberPulse;
+
+namespace ChargeMaster.Workers;
+
+/// <summary>
+/// Bakgrundstjänst som prenumererar på realtidsdata från Tibber Pulse och bearbetar inkommande mätdata.
+/// Återansluter automatiskt vid anslutningsfel.
+/// </summary>
+public class TibberWorker(
+    TibberPulseService tibberPulseService,
+    ILogger<TibberWorker> logger) : BackgroundService
+{
+    /// <inheritdoc/>
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                tibberPulseService.MeasurementReceived += OnMeasurementReceived;
+                await tibberPulseService.SubscribeAsync(stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                logger.LogInformation("TibberWorker avslutas");
+                break;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Fel i TibberWorker, försöker återansluta om 30 sekunder...");
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            }
+            finally
+            {
+                tibberPulseService.MeasurementReceived -= OnMeasurementReceived;
+            }
+        }
+    }
+
+    private void OnMeasurementReceived(object? sender, TibberMeasurementEventArgs e)
+    {
+        var m = e.Measurement;
+        logger.LogInformation(
+            "Tibber Pulse [{Time}] Effekt: {Power} W | " +
+            "Timme: {Hour:F4} kWh | Dag: {Day:F4} kWh | " +
+            "U1: {V1} V | U2: {V2} V | U3: {V3} V | " +
+            "I1: {A1} A | I2: {A2} A | I3: {A3} A | " +
+            "Signal: {Signal} dBm",
+            m.Timestamp.ToLocalTime().ToString("HH:mm:ss"),
+            m.Power,
+            m.AccumulatedConsumptionLastHour,
+            m.AccumulatedConsumption,
+            m.VoltagePhase1, m.VoltagePhase2, m.VoltagePhase3,
+            m.CurrentL1, m.CurrentL2, m.CurrentL3,
+            m.SignalStrength);
+    }
+}
