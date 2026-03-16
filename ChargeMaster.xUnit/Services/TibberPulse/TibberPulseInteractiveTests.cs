@@ -39,11 +39,11 @@ public class TibberPulseInteractiveTests(ITestOutputHelper output)
             var m = e.Measurement;
             output.WriteLine(
                 $"[{m.Timestamp.ToLocalTime():HH:mm:ss}] " +
-                $"Effekt: {m.Power,8:F0} W | " +
+                $"Effekt: {m.Power,8} W | " +
                 $"Timme: {m.AccumulatedConsumptionLastHour:F4} kWh | " +
                 $"Dag: {m.AccumulatedConsumption:F4} kWh | " +
                 $"U1/U2/U3: {m.VoltagePhase1}/{m.VoltagePhase2}/{m.VoltagePhase3} V | " +
-                $"I1/I2/I3: {m.CurrentL1}/{m.CurrentL2}/{m.CurrentL3} A | " +
+                $"I1/I2/I3: {m.CurrentPhase1}/{m.CurrentPhase2}/{m.CurrentPhase3} A | " +
                 $"PF: {m.PowerFactor} | " +
                 $"Signal: {m.SignalStrength} dBm");
         };
