@@ -6,6 +6,7 @@ using ChargeMaster.Services.Daikin;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Services.Shelly;
 using ChargeMaster.Services.InfluxDB;
+using ChargeMaster.Services.TibberPulse;
 using ChargeMaster.Workers;
 
 using Microsoft.AspNetCore.DataProtection;
@@ -137,6 +138,11 @@ namespace ChargeMaster
                     builder.Configuration.GetSection("InfluxDB"));
                 builder.Services.AddSingleton<InfluxDbService>();
 
+                // ----- Tibber Pulse -----
+                builder.Services.Configure<TibberPulseOptions>(
+                    builder.Configuration.GetSection("Tibber"));
+                builder.Services.AddSingleton<TibberPulseService>();
+
                 // ----- Workers -----
                 builder.Services.AddSingleton<PriceFetchingWorker>();
                 builder.Services.AddSingleton<WallboxWorker>();
@@ -144,6 +150,7 @@ namespace ChargeMaster
                 builder.Services.AddSingleton<DaikinWorker>();
                 builder.Services.AddSingleton<ShellyWorker>();
                 builder.Services.AddSingleton<SmhiWorker>();
+                builder.Services.AddSingleton<TibberWorker>();
 
                 builder.Services.AddHostedService(sp =>
                     sp.GetRequiredService<PriceFetchingWorker>());
@@ -152,6 +159,7 @@ namespace ChargeMaster
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<DaikinWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ShellyWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<SmhiWorker>());
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<TibberWorker>());
 
                 var app = builder.Build();
 
