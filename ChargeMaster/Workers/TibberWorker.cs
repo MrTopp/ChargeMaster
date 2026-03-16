@@ -47,18 +47,18 @@ public class TibberWorker(
 
         _ = influxDbService.WriteTibberMeasurementAsync(m);
 
-        logger.LogInformation(
-            "Tibber Pulse [{Time}] Effekt: {Power} W | " +
-            "Timme: {Hour:F4} kWh | Dag: {Day:F4} kWh | " +
-            "U1: {V1} V | U2: {V2} V | U3: {V3} V | " +
-            "I1: {A1} A | I2: {A2} A | I3: {A3} A | " +
-            "Signal: {Signal} dBm",
-            m.Timestamp.ToLocalTime().ToString("HH:mm:ss"),
-            m.Power,
-            m.AccumulatedConsumptionLastHour,
-            m.AccumulatedConsumption,
-            m.VoltagePhase1, m.VoltagePhase2, m.VoltagePhase3,
-            m.CurrentPhase1, m.CurrentPhase2, m.CurrentPhase3,
-            m.SignalStrength);
+        //logger.LogInformation(
+        //    "Tibber Pulse [{Time}] Effekt: {Power} W | " +
+        //    "Timme: {Hour:F4} kWh | Dag: {Day:F4} kWh | " +
+        //    "U1: {V1} V | U2: {V2} V | U3: {V3} V | " +
+        //    "I1: {A1} A | I2: {A2} A | I3: {A3} A | " +
+        //    "Signal: {Signal} dBm",
+        //    m.Timestamp.ToLocalTime().ToString("HH:mm:ss"),
+        //    m.Power,
+        //    m.AccumulatedConsumptionLastHour,
+        //    m.AccumulatedConsumption,
+        //    m.VoltagePhase1, m.VoltagePhase2, m.VoltagePhase3,
+        //    m.CurrentPhase1, m.CurrentPhase2, m.CurrentPhase3,
+        //    m.SignalStrength);
     }
 }
