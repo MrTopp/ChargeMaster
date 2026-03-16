@@ -173,7 +173,7 @@ public class InfluxDbService
 
 
             await _client.GetWriteApiAsync().WritePointAsync(point, _options.Bucket, _options.Org);
-            _logger.LogInformation(">> Writing Tibber measurement to InfluxDB: {Power}W", m.Power);
+            _logger.LogDebug(">> Writing Tibber measurement to InfluxDB: {Power}W", m.Power);
         }
         catch (Exception ex)
         {
