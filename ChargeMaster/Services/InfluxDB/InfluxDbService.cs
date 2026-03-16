@@ -1,4 +1,5 @@
 ﻿using ChargeMaster.Services.ElectricityPrice;
+using ChargeMaster.Services.TibberPulse;
 using ChargeMaster.Services.VolksWagen;
 using ChargeMaster.Services.Wallbox;
 
@@ -8,6 +9,7 @@ using InfluxDB.Client.Api.Service;
 using InfluxDB.Client.Writes;
 
 using Microsoft.Extensions.Options;
+using Tibber.Sdk;
 
 namespace ChargeMaster.Services.InfluxDB;
 
@@ -92,7 +94,7 @@ public class InfluxDbService
             var points = new List<PointData>
             {
                 PointData.Measurement("wallbox_meter")
-                    .Tag("meter_serial", meterInfo.MeterSerial ?? "unknown")
+                    //.Tag("meter_serial", meterInfo.MeterSerial ?? "unknown")
                     .Field("acc_energy_wh", meterInfo.AccEnergy)
                     .Field("phase1_current_energy_w", meterInfo.Phase1CurrentEnergy)
                     .Field("phase2_current_energy_w", meterInfo.Phase2CurrentEnergy)
@@ -113,6 +115,69 @@ public class InfluxDbService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to write WallboxMeterInfo to InfluxDB");
+        }
+    }
+
+    /// <summary>
+    /// Skriver mätdata från Tibber Pulse till InfluxDB.
+    /// </summary>
+    /// <param name="e">Mätdata från Tibber Pulse</param>
+    public async Task WriteTibberMeasurementAsync(RealTimeMeasurement m)
+    {
+        try
+        {
+            var timestamp = m.Timestamp.UtcDateTime;
+
+            var elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
+
+            var point = PointData.Measurement("tibber_pulse")
+                .Field("power_w", (double)m.Power)
+                //.Field("accumulated_consumption_kwh", (double)m.AccumulatedConsumption)
+                .Field("accumulated_consumption_last_hour_kwh", (double)m.AccumulatedConsumptionLastHour)
+                //.Field("accumulated_production_kwh", (double)m.AccumulatedProduction)
+                //.Field("accumulated_production_last_hour_kwh", (double)m.AccumulatedProductionLastHour)
+                //.Field("min_power_w", (double)m.MinPower)
+                //.Field("avg_power_w", (double)m.AveragePower)
+                //.Field("max_power_w", (double)m.MaxPower)
+                .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
+                .Timestamp(timestamp, WritePrecision.Ns);
+
+            //if (m.PowerProduction.HasValue)
+            //    point = point.Field("power_production_w", (double)m.PowerProduction.Value);
+            //if (m.VoltagePhase1.HasValue)
+            //    point = point.Field("voltage_phase1_v", (double)m.VoltagePhase1.Value);
+            //if (m.VoltagePhase2.HasValue)
+            //    point = point.Field("voltage_phase2_v", (double)m.VoltagePhase2.Value);
+            //if (m.VoltagePhase3.HasValue)
+            //    point = point.Field("voltage_phase3_v", (double)m.VoltagePhase3.Value);
+            //if (m.CurrentPhase1.HasValue)
+            //    point = point.Field("current_phase1_a", (double)m.CurrentPhase1.Value);
+            //if (m.CurrentPhase2.HasValue)
+            //    point = point.Field("current_phase2_a", (double)m.CurrentPhase2.Value);
+            //if (m.CurrentPhase3.HasValue)
+            //    point = point.Field("current_phase3_a", (double)m.CurrentPhase3.Value);
+            if (m.PowerFactor.HasValue)
+                point = point.Field("power_factor", (double)m.PowerFactor.Value);
+            if (m.AccumulatedCost.HasValue)
+                point = point.Field("accumulated_cost", (double)m.AccumulatedCost.Value);
+            if (m.SignalStrength.HasValue)
+                point = point.Field("signal_strength_db", m.SignalStrength.Value);
+
+            // Aktiv effekt per fas: P = U × I × PF
+            if (m.VoltagePhase1.HasValue && m.CurrentPhase1.HasValue && m.PowerFactor.HasValue)
+                point = point.Field("power_phase1_w", (double)(m.VoltagePhase1.Value * m.CurrentPhase1.Value * m.PowerFactor.Value));
+            if (m.VoltagePhase2.HasValue && m.CurrentPhase2.HasValue && m.PowerFactor.HasValue)
+                point = point.Field("power_phase2_w", (double)(m.VoltagePhase2.Value * m.CurrentPhase2.Value * m.PowerFactor.Value));
+            if (m.VoltagePhase3.HasValue && m.CurrentPhase3.HasValue && m.PowerFactor.HasValue)
+                point = point.Field("power_phase3_w", (double)(m.VoltagePhase3.Value * m.CurrentPhase3.Value * m.PowerFactor.Value));
+
+
+            await _client.GetWriteApiAsync().WritePointAsync(point, _options.Bucket, _options.Org);
+            _logger.LogInformation(">> Writing Tibber measurement to InfluxDB: {Power}W", m.Power);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to write Tibber measurement to InfluxDB");
         }
     }
 }
