@@ -126,6 +126,7 @@ public class DaikinWorker(
             < 22.5 => temp,
             > 24 => 16,
             > 23 => 20,
+            > 22.5 => temp - 2,
             _ => temp
         };
 
