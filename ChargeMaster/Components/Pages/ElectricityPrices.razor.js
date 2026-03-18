@@ -1,4 +1,4 @@
-export function initializeChart(labels, data) {
+export function initializeChart(labels, data, currentTime) {
     console.log('initializeChart called with', labels.length, 'labels and', data.length, 'data points');
 
     // Ladda Chart.js från CDN om det inte redan är laddat
@@ -8,7 +8,7 @@ export function initializeChart(labels, data) {
         script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
         script.onload = () => {
             console.log('Chart.js loaded successfully');
-            createChart(labels, data);
+            createChart(labels, data, currentTime);
         };
         script.onerror = () => {
             console.error('Failed to load Chart.js');
@@ -16,11 +16,11 @@ export function initializeChart(labels, data) {
         document.head.appendChild(script);
     } else {
         console.log('Chart.js already loaded');
-        createChart(labels, data);
+        createChart(labels, data, currentTime);
     }
 }
 
-function createChart(labels, data) {
+function createChart(labels, data, currentTime) {
     console.log('createChart called');
     const ctx = document.getElementById('priceChart');
     if (!ctx) {
@@ -72,6 +72,10 @@ function createChart(labels, data) {
                 },
                 title: {
                     display: false
+                },
+                annotation: {
+                    currentTime: currentTime,
+                    currentTimeLabels: labels
                 }
             },
             scales: {
@@ -96,7 +100,40 @@ function createChart(labels, data) {
                     }
                 }
             }
-        }
+        },
+        plugins: [{
+            id: 'currentTimeIndicator',
+            afterDraw(chart) {
+                if (!currentTime) return;
+
+                const ctx = chart.ctx;
+                const xScale = chart.scales.x;
+                const yScale = chart.scales.y;
+
+                // Hitta index för aktuell tid
+                const timeIndex = labels.findIndex(label => label === currentTime);
+                if (timeIndex === -1) {
+                    console.log('Current time not found in labels:', currentTime, 'available:', labels);
+                    return;
+                }
+
+                console.log('Drawing current time indicator at index:', timeIndex);
+
+                // Beräkna x-position för aktuell tid
+                const xPos = xScale.getPixelForValue(timeIndex);
+
+                // Rita lodrätt linje
+                ctx.save();
+                ctx.strokeStyle = '#0d6efd';
+                ctx.lineWidth = 2;
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.beginPath();
+                ctx.moveTo(xPos, yScale.top);
+                ctx.lineTo(xPos, yScale.bottom);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }]
     });
 
     console.log('Chart created successfully');

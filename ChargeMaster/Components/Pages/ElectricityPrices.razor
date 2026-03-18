@@ -16,9 +16,19 @@
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
             <h4 class="mb-3">Elpriser</h4>
             
-            <div class="mb-3 d-flex align-items-center gap-2">
+            <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                <button class="btn btn-secondary btn-sm" 
+                        @onclick="PreviousDayAsync" 
+                        disabled="@(isCheckingPrevious || !hasPreviousDayPrices)">
+                    ← Föregående dag
+                </button>
                 <label for="price-date" class="form-label mb-0">Välj datum:</label>
-                <InputDate id="price-date" @bind-Value="selectedDate" @bind-Value:after="LoadPricesAsync" class="form-control w-auto" />
+                <InputDate id="price-date" @bind-Value="selectedDate" @bind-Value:after="LoadPricesAsync" class="form-control w-auto" min="2025-10-01" max="@maxSelectableDate.ToString("yyyy-MM-dd")" />
+                <button class="btn btn-secondary btn-sm" 
+                        @onclick="NextDayAsync" 
+                        disabled="@(isCheckingNext || !hasNextDayPrices)">
+                    Nästa dag →
+                </button>
             </div>
             
             @if (prices is { Count: > 0 })
@@ -56,7 +66,8 @@
                         <tbody>
                             @foreach (var price in prices)
                             {
-                                <tr>
+                                var isCurrentPrice = IsCurrentPrice(price);
+                                <tr style="@(isCurrentPrice ? "--bs-table-bg: rgba(13, 110, 253, 0.1); font-weight: 500;" : "")">
                                     <td>@price.TimeStart.ToString("HH:mm") - @price.TimeEnd.ToString("HH:mm")</td>
                                     <td class="text-end">@price.SekPerKwh.ToString("F2", CultureInfo.GetCultureInfo("sv-SE"))</td>
                                     <td class="text-end">@price.EurPerKwh.ToString("F2", CultureInfo.GetCultureInfo("sv-SE"))</td>
@@ -82,30 +93,67 @@
 
 @code {
     private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Now);
+    private DateOnly maxSelectableDate;
     private List<ElectricityPrice>? prices;
     private IJSObjectReference? module;
+    private bool hasPreviousDayPrices = true;
+    private bool hasNextDayPrices = true;
+    private bool isCheckingPrevious = false;
+    private bool isCheckingNext = false;
+    private bool _isDisposed = false;
 
     protected override async Task OnInitializedAsync()
     {
+        var now = DateTime.Now;
+        var today = DateOnly.FromDateTime(now);
+
+        // If time is after 13:10, next day's prices are likely available
+        if (now.Hour > 13 || (now.Hour == 13 && now.Minute >= 10))
+        {
+            maxSelectableDate = today.AddDays(1);
+        }
+        else
+        {
+            maxSelectableDate = today;
+        }
+
         await LoadPricesAsync();
+        await UpdateNavigationAvailabilityAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/ElectricityPrices.razor.js");
+        if (_isDisposed)
+            return;
 
-            // Initialize chart if prices are already loaded
-            if (prices?.Count > 0)
+        try
+        {
+            if (firstRender)
             {
+                try
+                {
+                    module = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/ElectricityPrices.razor.js");
+                }
+                catch (JSDisconnectedException)
+                {
+                    return;
+                }
+
+                // Initialize chart if prices are already loaded
+                if (prices?.Count > 0)
+                {
+                    await RenderChartAsync();
+                }
+            }
+            else if (module != null && prices?.Count > 0)
+            {
+                // Render chart when prices are updated
                 await RenderChartAsync();
             }
         }
-        else if (module != null && prices?.Count > 0)
+        catch (JSDisconnectedException)
         {
-            // Render chart when prices are updated
-            await RenderChartAsync();
+            // Circuit disconnected, ignore
         }
     }
 
@@ -118,23 +166,97 @@
 
         // Trigger re-render which will call OnAfterRenderAsync
         await InvokeAsync(StateHasChanged);
+
+        await UpdateNavigationAvailabilityAsync();
+    }
+
+    private async Task UpdateNavigationAvailabilityAsync()
+    {
+        isCheckingPrevious = true;
+        isCheckingNext = true;
+        await InvokeAsync(StateHasChanged);
+
+        var previousDayPrices = await PriceService.GetPricesForDateAsync(selectedDate.AddDays(-1));
+        var nextDayPrices = await PriceService.GetPricesForDateAsync(selectedDate.AddDays(1));
+
+        hasPreviousDayPrices = previousDayPrices?.Count > 0;
+        hasNextDayPrices = nextDayPrices?.Count > 0;
+        isCheckingPrevious = false;
+        isCheckingNext = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task PreviousDayAsync()
+    {
+        selectedDate = selectedDate.AddDays(-1);
+        await LoadPricesAsync();
+    }
+
+    private async Task NextDayAsync()
+    {
+        selectedDate = selectedDate.AddDays(1);
+        await LoadPricesAsync();
     }
 
     private async Task RenderChartAsync()
     {
-        if (module == null || prices?.Count == 0)
+        if (_isDisposed || module == null || prices?.Count == 0)
             return;
 
         var labels = prices.Select(p => p.TimeStart.ToString("HH:mm")).ToList();
         var data = prices.Select(p => p.SekPerKwh).ToList();
-        await module.InvokeVoidAsync("initializeChart", labels, data);
+
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        string? currentTime = null;
+
+        if (selectedDate == today)
+        {
+            var now = DateTime.Now;
+            var minutes = now.Minute;
+            var roundedMinutes = (minutes / 15) * 15;
+            var roundedTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, roundedMinutes, 0);
+            currentTime = roundedTime.ToString("HH:mm");
+        }
+
+        try
+        {
+            await module.InvokeVoidAsync("initializeChart", labels, data, currentTime);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit disconnected, ignore
+        }
+    }
+
+    private bool IsCurrentPrice(ElectricityPrice price)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        if (selectedDate != today)
+            return false;
+
+        var now = DateTime.Now;
+        var minutes = now.Minute;
+        var roundedMinutes = (minutes / 15) * 15;
+        var roundedTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, roundedMinutes, 0);
+        var nextIntervalTime = roundedTime.AddMinutes(15);
+
+        return price.TimeStart >= roundedTime && price.TimeStart < nextIntervalTime;
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        _isDisposed = true;
         if (module is not null)
         {
-            await module.DisposeAsync();
+            try
+            {
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit already disconnected, resources will be cleaned up by the browser
+            }
         }
     }
 }
