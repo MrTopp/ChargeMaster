@@ -58,20 +58,39 @@
                     <table class="table table-striped table-hover table-sm">
                         <thead>
                             <tr>
-                                <th>Tidsintervall</th>
-                                <th class="text-end">SEK / kWh</th>
-                                <th class="text-end">EUR / kWh</th>
+                                <th>Timme</th>
+                                <th class="text-end">KV1</th>
+                                <th class="text-end">KV2</th>
+                                <th class="text-end">KV3</th>
+                                <th class="text-end">KV4</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var price in prices)
-                            {
-                                var isCurrentPrice = IsCurrentPrice(price);
-                                <tr style="@(isCurrentPrice ? "--bs-table-bg: rgba(13, 110, 253, 0.1); font-weight: 500;" : "")">
-                                    <td>@price.TimeStart.ToString("HH:mm") - @price.TimeEnd.ToString("HH:mm")</td>
-                                    <td class="text-end">@price.SekPerKwh.ToString("F2", CultureInfo.GetCultureInfo("sv-SE"))</td>
-                                    <td class="text-end">@price.EurPerKwh.ToString("F2", CultureInfo.GetCultureInfo("sv-SE"))</td>
-                                </tr>
+                            @{
+                                var groupedByHour = prices.GroupBy(p => p.TimeStart.Hour).OrderBy(g => g.Key);
+                                foreach (var hourGroup in groupedByHour)
+                                {
+                                    var hour = hourGroup.Key;
+                                    var pricesInHour = hourGroup.OrderBy(p => p.TimeStart).ToList();
+                                    <tr>
+                                        <td>@hour.ToString("00"):00</td>
+                                        @for (int quarter = 0; quarter < 4; quarter++)
+                                        {
+                                            var price = pricesInHour.FirstOrDefault(p => p.TimeStart.Minute == quarter * 15);
+                                            var isCurrentQuarter = IsCurrentQuarter(hour, quarter);
+                                            <td class="text-end" style="@(isCurrentQuarter ? "background-color: rgba(13, 110, 253, 0.1); font-weight: 500;" : "")">
+                                                @if (price != null)
+                                                {
+                                                    @price.SekPerKwh.ToString("F2", CultureInfo.GetCultureInfo("sv-SE"))
+                                                }
+                                                else
+                                                {
+                                                    @:—
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>
@@ -86,6 +105,12 @@
                 <a href="index" class="btn btn-secondary btn-sm">Översikt</a>
                 <a href="energy-usage" class="btn btn-secondary btn-sm">Timförbrukning</a>
                 <a href="monthly-costs" class="btn btn-secondary btn-sm">Nätavgifter</a>
+            </p>
+            <p/>
+            <p>
+                <a href="https://www.elprisetjustnu.se">
+                    <img src="https://i.bnfcl.io/hva-koster-strommen/elpriser-tillhandahalls-av-elprisetjustnu_ttNExOIU_.png" alt="Elpriser tillhandahålls av Elpriset just nu.se" width="200" height="45">
+                </a>
             </p>
         </div>
     </section>
@@ -229,7 +254,7 @@
         }
     }
 
-    private bool IsCurrentPrice(ElectricityPrice price)
+    private bool IsCurrentQuarter(int hour, int quarter)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
         if (selectedDate != today)
@@ -238,10 +263,8 @@
         var now = DateTime.Now;
         var minutes = now.Minute;
         var roundedMinutes = (minutes / 15) * 15;
-        var roundedTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, roundedMinutes, 0);
-        var nextIntervalTime = roundedTime.AddMinutes(15);
 
-        return price.TimeStart >= roundedTime && price.TimeStart < nextIntervalTime;
+        return now.Hour == hour && roundedMinutes == quarter * 15;
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
