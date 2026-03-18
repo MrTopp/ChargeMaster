@@ -23,6 +23,9 @@ public class PriceFetchingWorker(
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Hämta historiska priser från 1 oktober för att initiera databasen.
+        // await FetchPricesFromOctoberAsync(stoppingToken);
+
         bool success = await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now), stoppingToken);
 
         var now = DateTime.Now;
@@ -55,6 +58,8 @@ public class PriceFetchingWorker(
         }
     }
 
+
+
     /// <summary>
     /// Beräknar nästa gång för att köra prishämtningen baserat på aktuell tid och framgång för den senaste hämtningen.
     /// </summary>
@@ -76,6 +81,40 @@ public class PriceFetchingWorker(
         }
 
         return nextRun;
+    }
+
+    /// <summary>
+    /// Hämtar alla elpriser från 1 oktober framåt till idag genom att anropa CheckAndFetchAsync för varje datum.
+    /// </summary>
+    /// <param name="stoppingToken">En avbytningstoken som kan användas för att avbryta operationen.</param>
+    private async Task FetchPricesFromOctoberAsync(CancellationToken stoppingToken)
+    {
+        var startDate = new DateOnly(2025, 10, 1);
+        var endDate = DateOnly.FromDateTime(DateTime.Now);
+        var currentDate = startDate;
+
+        logger.LogInformation("Börjar hämta historiska priser från {StartDate} till {EndDate}", startDate, endDate);
+
+        while (currentDate <= endDate)
+        {
+            try
+            {
+                if (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                await CheckAndFetchAsync(currentDate, stoppingToken);
+                currentDate = currentDate.AddDays(1);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "PriceFetchingWorker: kunde inte hämta priser för {Date}", currentDate);
+                currentDate = currentDate.AddDays(1);
+            }
+        }
+
+        logger.LogInformation("Slutförde hämtning av historiska priser från 1 oktober");
     }
 
     /// <summary>
