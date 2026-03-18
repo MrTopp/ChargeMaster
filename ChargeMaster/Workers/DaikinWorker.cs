@@ -160,18 +160,25 @@ public class DaikinWorker(
     private (DateOnly, List<ElectricityPrice>)? _cachedPrices;
 
     /// <summary>
-    /// Sänk temperaturen till 16°C under de 10 dyraste kvartarna (om de överstiger 3 kr/kWh).
+    /// Justera temperaturen om elpriset är extremt
     /// </summary>
     /// <param name="nu"></param>
     /// <param name="temp"></param>
     /// <returns></returns>
     private async Task<double> JusteraMotPris(DateTime nu, double temp)
     {
+        // Om priset är riktigt lågt, kosta på lite extra värme
+         var currentPrice = await GetCurrentPrice(nu);
+         if (currentPrice != null && currentPrice < 0.1m)
+         {
+             return temp + 2;
+        }
         if (_cachedPrices == null || _cachedPrices.Value.Item1 != DateOnly.FromDateTime(nu))
         {
             // Hämta upp dagens elpris 
             var l
                 = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
+            // Lista 10 kvartar där priset är över 3 kr/kWh
             var l2 = l.OrderByDescending(p => p.SekPerKwh)
                 .Where(p => p.SekPerKwh >= (decimal)3.0)
                 .Take(10).ToList();
