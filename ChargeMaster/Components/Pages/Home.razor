@@ -27,39 +27,31 @@
 
             @if (CurrentMeterInfo is not null)
             {
-                <div>
-                    <table class="table table-striped table-sm">
-                        <tbody>
-@*                         <tr>
-                            <td><strong>Uppdaterad</strong></td>
-                            <td class="text-end">@((LastMeterInfoUpdate).ToString("HH:mm:ss"))</td>
-                        </tr>
- *@                        <tr>
-                            <td><strong>Effekt fas 1</strong></td>
-                            <td class="text-end">@CurrentMeterInfo.Phase1CurrentEnergy W</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Effekt fas 2</strong></td>
-                            <td class="text-end">@CurrentMeterInfo.Phase2CurrentEnergy W</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Effekt fas 3</strong></td>
-                            <td class="text-end">@CurrentMeterInfo.Phase3CurrentEnergy W</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Effekt total</strong></td>
-                            <td class="text-end">@CurrentMeterInfo.CurrentEnergy W</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Förbrukning denna timme</strong></td>
-                            <td class="text-end">@(CurrentMeterInfo.EffektTimmeNuFormatted) Wh</td>
-                        </tr>
-                        <tr class="@(CurrentMeterInfo.EffektTimmeTotal > 2500 ? "table-danger" : "")">
-                            <td><strong>Uppskattad förbrukning denna timme</strong></td>
-                            <td class="text-end">@(CurrentMeterInfo.EffektTimmeTotalFormatted) Wh</td>
-                        </tr>
-                        </tbody>
-                </table>
+                <div class="row g-2 mb-3">
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">Fas 1:</small><br>
+                        <strong>@CurrentMeterInfo.Phase1CurrentEnergy W</strong>
+                    </div>
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">Fas 2:</small><br>
+                        <strong>@CurrentMeterInfo.Phase2CurrentEnergy W</strong>
+                    </div>
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">Fas 3:</small><br>
+                        <strong>@CurrentMeterInfo.Phase3CurrentEnergy W</strong>
+                    </div>
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">Total:</small><br>
+                        <strong>@CurrentMeterInfo.CurrentEnergy W</strong>
+                    </div>
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">Denna timme:</small><br>
+                        <strong>@CurrentMeterInfo.EffektTimmeNuFormatted Wh</strong>
+                    </div>
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(CurrentMeterInfo.EffektTimmeTotal > 2500 ? "background-color: #f8d7da;" : "")">
+                        <small class="text-muted">Uppskattad timme:</small><br>
+                        <strong>@CurrentMeterInfo.EffektTimmeTotalFormatted Wh</strong>
+                    </div>
                 </div>
             }
         </div>
@@ -207,7 +199,6 @@
 
 @code {
     private CancellationTokenSource? _cts;
-    private DateTime LastMeterInfoUpdate { get; set; }
     private WallboxMeterInfo? CurrentMeterInfo { get; set; }
     private List<ElectricityPrice>? CurrentKvartlista { get; set; }
     private VWStatusLimitet? CurrentVWStatus { get; set; }
@@ -231,7 +222,6 @@
         if (WallboxWorker.MeterInfo is not null)
         {
             CurrentMeterInfo = WallboxWorker.MeterInfo;
-            LastMeterInfoUpdate = DateTime.Now;
         }
 
         // Prenumerera på events för real-time uppdateringar
@@ -254,7 +244,6 @@
     private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
     {
         CurrentMeterInfo = e.MeterInfo;
-        LastMeterInfoUpdate = e.Timestamp;
         InvokeAsync(StateHasChanged);
     }
 
