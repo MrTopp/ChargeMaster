@@ -62,8 +62,7 @@ public class DaikinWorker(
             // Uppdatera Daikin endast om börvärde är ändrad
             if (Math.Abs(temp - previousTemp) > 0.2)
             {
-                logger.LogInformation("Uppdaterar Daikin måltemperatur: {Temp}°C (tid: {Time})",
-                    temp, nu.ToString("HH:mm"));
+                logger.LogDebug("Uppdaterar Daikin måltemperatur: {Temp}°C", temp);
                 await daikinFacade.SetTargetTemperatureAsync(temp, heat);
                 await SaveDaikinSession(nu, temp, heat);
                 previousTemp = temp;
