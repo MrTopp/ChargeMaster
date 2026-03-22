@@ -18,7 +18,10 @@ namespace ChargeMaster.Services.Daikin;
 /// <param name="environment">Miljö-information för att bestämma om skrivningar ska tillåtas.</param>
 public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger, IHostEnvironment environment)
 {
-    private string? _previousAdvanced;
+    /// <summary>
+    /// Spåra "adv" värdet i control info för att upptäcka när det ändras
+    /// </summary>
+    private string? PreviousAdvanced { get; set; } = "";
 
     // ==================== COMMON ENDPOINTS ====================
 
@@ -234,10 +237,10 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
             var data = ParseResponse(response);
 
             var advanced = data.GetValueOrDefault("adv");
-            if (_previousAdvanced != advanced)
+            if (PreviousAdvanced != advanced)
             {
-                logger.LogInformation("Daikin control info: Advanced värde ändrat från '{PreviousAdvanced}' till '{CurrentAdvanced}'", _previousAdvanced, advanced);
-                _previousAdvanced = advanced;
+                logger.LogWarning("Daikin control info: Advanced värde ändrat från '{PreviousAdvanced}' till '{CurrentAdvanced}'", PreviousAdvanced, advanced);
+                PreviousAdvanced = advanced;
             }
 
             return new DaikinControlInfo
