@@ -367,16 +367,14 @@ public class WallboxWorker(
                 return NuvarandeMeterInfo;
             }
 
-            var entry = new WallboxMeterReading
-            {
-                ReadAt = DateTime.Now,
-                RawJson = "", // System.Text.Json.JsonSerializer.Serialize(info),
-                AccEnergy = NuvarandeMeterInfo.AccEnergy,
-                MeterSerial = "", // info.MeterSerial,
-                ApparentPower = 0  //info.ApparentPower
-            };
+            // Generera poster för varje timgräns
+            var entries = GenerateHourBoundaryReadings(
+                FöregåendeMeterInfo!.ReadDateTime,
+                FöregåendeMeterInfo.AccEnergy,
+                NuvarandeMeterInfo.ReadDateTime,
+                NuvarandeMeterInfo.AccEnergy);
 
-            db.WallboxMeterReadings.Add(entry);
+            db.WallboxMeterReadings.AddRange(entries);
             await db.SaveChangesAsync(stoppingToken);
 
             return NuvarandeMeterInfo;
@@ -416,6 +414,78 @@ public class WallboxWorker(
         {
             logger.LogError(ex, "KalkyleraFörbrukningInnevarandeTimme: oväntad exeption!");
         }
+    }
+
+    /// <summary>
+    /// Genererar mätarposter för varje timgräns mellan två mätningar.
+    /// Om mätningarna är inom samma timme returneras endast en post med slutvärdet.
+    /// Om de spänner över timgränser skapas en post vid varje jämn timme med interpolerat AccEnergy.
+    /// </summary>
+    /// <param name="previousTime">Tidpunkt för föregående mätning.</param>
+    /// <param name="previousEnergy">Ackumulerad energi vid föregående mätning.</param>
+    /// <param name="currentTime">Tidpunkt för aktuell mätning.</param>
+    /// <param name="currentEnergy">Ackumulerad energi vid aktuell mätning.</param>
+    /// <returns>Lista med mätarposter, en för varje timgräns plus slutmätningen.</returns>
+    internal List<WallboxMeterReading> GenerateHourBoundaryReadings(
+        DateTime previousTime,
+        long previousEnergy,
+        DateTime currentTime,
+        long currentEnergy)
+    {
+        var entries = new List<WallboxMeterReading>();
+
+        var previousHour = new DateTime(previousTime.Year, previousTime.Month, previousTime.Day, previousTime.Hour, 0, 0);
+        var currentHour = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day, currentTime.Hour, 0, 0);
+
+        // Om samma timme, skapa bara en post med slutvärdet
+        if (previousHour == currentHour)
+        {
+            entries.Add(new WallboxMeterReading
+            {
+                ReadAt = currentTime,
+                RawJson = "",
+                AccEnergy = currentEnergy,
+                MeterSerial = "",
+                ApparentPower = 0
+            });
+            return entries;
+        }
+
+        // Beräkna energiökning per sekund för interpolering
+        var totalSeconds = (currentTime - previousTime).TotalSeconds;
+        var totalEnergyDiff = currentEnergy - previousEnergy;
+        var energyPerSecond = totalSeconds > 0 ? totalEnergyDiff / totalSeconds : 0;
+
+        // Skapa poster för varje timgräns
+        var hourBoundary = previousHour.AddHours(1);
+        while (hourBoundary <= currentHour)
+        {
+            var secondsFromPrevious = (hourBoundary - previousTime).TotalSeconds;
+            var interpolatedEnergy = previousEnergy + (long)(energyPerSecond * secondsFromPrevious);
+
+            entries.Add(new WallboxMeterReading
+            {
+                ReadAt = hourBoundary,
+                RawJson = "",
+                AccEnergy = interpolatedEnergy,
+                MeterSerial = "",
+                ApparentPower = 0
+            });
+
+            hourBoundary = hourBoundary.AddHours(1);
+        }
+
+        // Lägg till slutmätningen med faktiskt värde
+        entries.Add(new WallboxMeterReading
+        {
+            ReadAt = currentTime,
+            RawJson = "",
+            AccEnergy = currentEnergy,
+            MeterSerial = "",
+            ApparentPower = 0
+        });
+
+        return entries;
     }
 
 
