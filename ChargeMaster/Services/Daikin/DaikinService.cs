@@ -18,6 +18,8 @@ namespace ChargeMaster.Services.Daikin;
 /// <param name="environment">Miljö-information för att bestämma om skrivningar ska tillåtas.</param>
 public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger, IHostEnvironment environment)
 {
+    private string? _previousAdvanced;
+
     // ==================== COMMON ENDPOINTS ====================
 
     /// <summary>
@@ -231,6 +233,13 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
             var response = await httpClient.GetStringAsync("/aircon/get_control_info");
             var data = ParseResponse(response);
 
+            var advanced = data.GetValueOrDefault("adv");
+            if (_previousAdvanced != advanced)
+            {
+                logger.LogInformation("Daikin control info: Advanced värde ändrat från '{PreviousAdvanced}' till '{CurrentAdvanced}'", _previousAdvanced, advanced);
+                _previousAdvanced = advanced;
+            }
+
             return new DaikinControlInfo
             {
                 Power = ParseInt(data.GetValueOrDefault("pow")) ?? 0,
@@ -239,7 +248,8 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
                 TargetHumidity = data.GetValueOrDefault("shum"),
                 FanRate = data.GetValueOrDefault("f_rate"),
                 FanDirection = ParseInt(data.GetValueOrDefault("f_dir")) ?? 0,
-                Alert = ParseInt(data.GetValueOrDefault("alert"))
+                Alert = ParseInt(data.GetValueOrDefault("alert")),
+                Advanced = advanced
             };
         }
         catch (Exception ex)
@@ -563,7 +573,8 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
                       $"&stemp={stemp}" +
                       $"&shum={controlInfo.TargetHumidity ?? "0"}" +
                       $"&f_rate={controlInfo.FanRate ?? "A"}" +
-                      $"&f_dir={controlInfo.FanDirection}";
+                      $"&f_dir={controlInfo.FanDirection}" + 
+                      $"&adv={controlInfo.Advanced ?? ""}";
 
             // ret=OK,adv=
             var response = await httpClient.GetStringAsync(url);

@@ -60,4 +60,9 @@ public class DaikinControlInfo
     /// Returnerar om enheten är påslagen.
     /// </summary>
     public bool IsOn => Power == 1;
+
+    /// <summary>
+    /// "12"=Econo, "2"=Powerful
+    /// </summary>
+    public string? Advanced { get; set; }
 }
