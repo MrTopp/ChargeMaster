@@ -88,22 +88,22 @@ public class WallboxWorker(
     /// <summary>
     /// Senaste läsningen från wallbox. Uppdateras endast vid förändring i ackumulerad energi.
     /// </summary>
-    private WallboxMeterInfo? NuvarandeMeterInfo { get; set; }
+    internal WallboxMeterInfo? NuvarandeMeterInfo { get; set; }
 
     /// <summary>
     /// Föregående mätning med skillnad i ackumulerad energi från senaste mätningen. 
     /// </summary> 
-    private WallboxMeterInfo? FöregåendeMeterInfo { get; set; }
+    internal WallboxMeterInfo? FöregåendeMeterInfo { get; set; }
 
     /// <summary>
     /// Sista mätning föregående timme. 
     /// </summary>
-    private WallboxMeterInfo? SistaMeterInfoFöregåendeTimme { get; set; }
+    internal WallboxMeterInfo? SistaMeterInfoFöregåendeTimme { get; set; }
 
     /// <summary>
     /// Sista mätarställningen timmen före föregående timme
     /// </summary>
-    private WallboxMeterInfo? NästSistaMeterInfoFöregåendeTimme { get; set; }
+    internal WallboxMeterInfo? NästSistaMeterInfoFöregåendeTimme { get; set; }
 
     /// <summary>
     /// Cache for hourly energy usage calculations. Stores data and timestamp of last calculation.
@@ -159,7 +159,7 @@ public class WallboxWorker(
             // Uppdatera InfluxDB
             if (MeterInfo != null)
             {
-                    await influxDbService.WriteWallboxMeterInfoAsync(MeterInfo);
+                await influxDbService.WriteWallboxMeterInfoAsync(MeterInfo);
             }
 
             // Posta mätarinfo
@@ -190,12 +190,12 @@ public class WallboxWorker(
     /// <summary>
     /// Hämta upp den senaste mätarställningen före innevarande timme
     /// </summary>
-    private async Task InitieraFörbrukningAsync(CancellationToken cancellationToken)
+    internal async Task InitieraFörbrukningAsync(CancellationToken cancellationToken, DateTime? testNu = null)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        var nu = DateTime.Now;
+        DateTime nu = testNu ?? DateTime.Now;
         var startOfHour = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
 
         // Hämta sista mätningen föregående timme.
@@ -212,7 +212,7 @@ public class WallboxWorker(
         };
 
         // Hämta sista mätarställningen 2 timmar bakåt
-        var now2 = SistaMeterInfoFöregåendeTimme.ReadDateTime;
+        var now2 = SistaMeterInfoFöregåendeTimme.ReadDateTime.AddMinutes(-1);
         var startOfHour2 = new DateTime(now2.Year, now2.Month, now2.Day, now2.Hour, 0, 0);
 
         var before2 = await context.WallboxMeterReadings
