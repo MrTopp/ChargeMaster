@@ -157,25 +157,15 @@
 
             @if (CurrentKvartlista is not null && CurrentKvartlista.Count > 0)
             {
-                <div class="table-responsive">
-                <table class="table table-striped table-sm">
-                    <thead>
-                        <tr>
-                            <th>Tid</th>
-                            <th class="text-end">Pris (SEK/kWh)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var kvart in CurrentKvartlista.OrderBy(x => x.TimeStart))
-                        {
-                            <tr>
-                                <td>@kvart.TimeStart.ToString("yyyy-MM-dd HH:mm")</td>
-                                <td class="text-end">@kvart.SekPerKwh.ToString("F2")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.5rem;" class="mb-3">
+                    @foreach (var kvart in CurrentKvartlista.OrderBy(x => x.TimeStart))
+                    {
+                        <div style="padding: 0.5rem; border-radius: 0.25rem; text-align: center; background-color: #f8f9fa;">
+                            <small class="text-muted">@kvart.TimeStart.ToString("MM-dd HH:mm")</small><br>
+                            <strong>@kvart.SekPerKwh.ToString("F2") kr</strong>
+                        </div>
+                    }
+                </div>
             }
             else
             {
