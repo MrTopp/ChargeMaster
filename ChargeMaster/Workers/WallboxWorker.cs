@@ -670,7 +670,7 @@ public class WallboxWorker(
     }
 
     /// <summary>
-    /// Kontrollera om högbelastningstaxan är aktiv (oktober-mars kl 7-19).
+    /// Kontrollera om högbelastningstaxan är aktiv (oktober-mars vardagar kl 7-19).
     /// </summary>
     /// <param name="nu"></param>
     /// <returns></returns>
@@ -679,10 +679,11 @@ public class WallboxWorker(
         var month = nu.Month;
         var hour = nu.Hour;
 
-        // Oktober till mars (10-12, 1-3) och mellan kl 7-19
+        // Oktober till mars (10-12, 1-3) och mellan kl 7-19, endast vardagar
         bool isWinterMonth = month >= 10 || month <= 3;
         bool isHighEffectHour = hour >= 7 && hour < 19;
+        bool isWeekday = nu.DayOfWeek >= DayOfWeek.Monday && nu.DayOfWeek <= DayOfWeek.Friday;
 
-        return isWinterMonth && isHighEffectHour;
+        return isWinterMonth && isHighEffectHour && isWeekday;
     }
 }
