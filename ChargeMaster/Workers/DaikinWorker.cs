@@ -269,9 +269,9 @@ public class DaikinWorker(
     /// <param name="nu">Datum för beräkning</param>
     public async Task KontrolleraEffekt(long forbrukningDennaTimme, DateTime nu)
     {
-        if (nu.Minute < 10)
+        if (nu.Minute < 20)
         {
-            return; // Vänta 10 minuter in i timmen innan vi börjar kolla.
+            return; // Vänta 20 minuter in i timmen innan vi börjar kolla.
         }
 
         var grans = await wallboxWorker.KalkyleraGrans(nu);

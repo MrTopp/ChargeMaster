@@ -1,5 +1,6 @@
 ﻿using ChargeMaster.Workers;
 using ChargeMaster.Data;
+using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.InfluxDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -143,12 +144,31 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         }
     }
 
+    [Fact]
+    public async Task KalkyleraGrans_NoAssertion()
+    {
+        // Arrange - Set up services with database and wallbox
+        var services = CreateServiceCollection();
+
+        await using var provider = services.BuildServiceProvider();
+
+        var wallboxService = provider.GetRequiredService<WallboxService>();
+        var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var influxDbService = provider.GetRequiredService<InfluxDbService>();
+
+        var worker = new WallboxWorker(scopeFactory, wallboxService, influxDbService, logger);
+
+        // Act
+        await worker.KalkyleraGrans(DateTime.Now);
+    }
+
     private ServiceCollection CreateServiceCollection()
     {
         var services = new ServiceCollection();
         var config = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.Development.json", optional: false)
+            .AddJsonFile(FindAppSettings(), optional: false)
             .Build();
         var connectionString = config.GetConnectionString("DefaultConnection")
                                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -156,11 +176,28 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
         services.AddLogging(builder => builder.AddConsole());
+        services.AddHttpClient();
         services.Configure<InfluxDBOptions>(config.GetSection("InfluxDB"));
         services.AddSingleton(new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory())));
+        services.AddSingleton<ElectricityPriceService>();
         services.AddSingleton<InfluxDbService>();
         return services;
     }
 
+    /// <summary>
+    /// Söker upp huvudprojektets appsettings.json relativt testbinärens katalog.
+    /// </summary>
+    private static string FindAppSettings()
+    {
+        var path = Path.GetFullPath(
+            Path.Combine(AppContext.BaseDirectory, "../../../../ChargeMaster/appsettings.Development.json"));
 
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException(
+                $"Kunde inte hitta appsettings.json. Sökte på: {path}");
+        }
+
+        return path;
+    }
 }
