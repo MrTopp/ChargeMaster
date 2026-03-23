@@ -127,6 +127,7 @@ namespace ChargeMaster
                 {
                     client.Timeout = TimeSpan.FromSeconds(10);
                 });
+                builder.Services.AddScoped<IWeatherForecastRepository, WeatherForecastRepository>();
 
                 builder.Services.AddSingleton<DaikinFacade>();
 
