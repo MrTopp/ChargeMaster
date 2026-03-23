@@ -116,11 +116,12 @@ namespace ChargeMaster
                     client.Timeout = TimeSpan.FromSeconds(20);
                 });
 
-                builder.Services.AddHttpClient<DaikinService, DaikinService>(client =>
+                builder.Services.AddHttpClient<DaikinService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.156/");
                     client.Timeout = TimeSpan.FromSeconds(10);
                 });
+                builder.Services.AddSingleton<IDaikinService>(sp => sp.GetRequiredService<DaikinService>());
 
                 builder.Services.AddHttpClient<SmhiWeatherService, SmhiWeatherService>(client =>
                 {

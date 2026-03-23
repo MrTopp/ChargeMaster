@@ -3,7 +3,7 @@
 /// <summary>
 /// Facade för förenklad kommunikation mot Daikin värmepump. Den innehåller bara funktioner som används av ChargeMaster.
 /// </summary>
-public class DaikinFacade(DaikinService daikinService, ILogger<DaikinFacade> logger)
+public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> logger)
 {
     private double? _currentTemperature = 0.0;
     private double? _outdoorTemperature = 0.0;

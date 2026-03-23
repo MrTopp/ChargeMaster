@@ -16,7 +16,7 @@ namespace ChargeMaster.Services.Daikin;
 /// <param name="httpClient">HTTP-klienten konfigurerad med basadressen till Daikin-enheten.</param>
 /// <param name="logger">Logger för diagnostik och felrapportering.</param>
 /// <param name="environment">Miljö-information för att bestämma om skrivningar ska tillåtas.</param>
-public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger, IHostEnvironment environment)
+public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger, IHostEnvironment environment) : IDaikinService
 {
     /// <summary>
     /// Spåra "adv" värdet i control info för att upptäcka när det ändras
