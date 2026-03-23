@@ -14,6 +14,37 @@ using Tibber.Sdk;
 namespace ChargeMaster.Services.InfluxDB;
 
 /// <summary>
+/// Interface for creating InfluxDBClient instances.
+/// Allows for dependency injection and testing without creating actual InfluxDB connections.
+/// </summary>
+public interface IInfluxDBClientFactory
+{
+    /// <summary>
+    /// Creates an InfluxDBClient with the provided options.
+    /// </summary>
+    /// <param name="options">InfluxDB configuration options</param>
+    /// <returns>A configured InfluxDBClient instance</returns>
+    InfluxDBClient CreateClient(InfluxDBOptions options);
+}
+
+/// <summary>
+/// Default implementation of IInfluxDBClientFactory that creates real InfluxDBClient instances.
+/// </summary>
+public class InfluxDBClientFactory : IInfluxDBClientFactory
+{
+    public InfluxDBClient CreateClient(InfluxDBOptions options)
+    {
+        var clientOptions = new InfluxDBClientOptions(options.Url)
+        {
+            Token = options.Token,
+            Org = options.Org,
+            Bucket = options.Bucket
+        };
+        return new InfluxDBClient(clientOptions);
+    }
+}
+
+/// <summary>
 /// Tjänst för att skriva data till InfluxDB.
 /// </summary>
 public class InfluxDbService
@@ -24,6 +55,11 @@ public class InfluxDbService
     private readonly ElectricityPriceService _priceService;
 
     public InfluxDbService(IOptions<InfluxDBOptions> options, ElectricityPriceService priceService, ILogger<InfluxDbService> logger)
+        : this(options, priceService, logger, new InfluxDBClientFactory())
+    {
+    }
+
+    public InfluxDbService(IOptions<InfluxDBOptions> options, ElectricityPriceService priceService, ILogger<InfluxDbService> logger, IInfluxDBClientFactory clientFactory)
     {
         _options = options.Value;
         _logger = logger;
@@ -34,13 +70,7 @@ public class InfluxDbService
             ValidateUrl(_options.Url);
 
             // InfluxDB 2.0 autentisering med token
-            var clientOptions = new InfluxDBClientOptions(_options.Url)
-            {
-                Token = _options.Token,
-                Org = _options.Org,
-                Bucket = _options.Bucket
-            };
-            _client = new InfluxDBClient(clientOptions);
+            _client = clientFactory.CreateClient(_options);
             _logger.LogInformation("InfluxDbService initialized successfully");
         }
         catch (Exception ex)
@@ -76,6 +106,12 @@ public class InfluxDbService
         ElectricityPriceService priceService, ILogger<InfluxDbService> logger)
     {
         return new InfluxDbService(options, priceService, logger);
+    }
+
+    public static InfluxDbService CreateInstance(IOptions<InfluxDBOptions> options, 
+        ElectricityPriceService priceService, ILogger<InfluxDbService> logger, IInfluxDBClientFactory clientFactory)
+    {
+        return new InfluxDbService(options, priceService, logger, clientFactory);
     }
 
     private long _lastPhase1Energy = 0;
