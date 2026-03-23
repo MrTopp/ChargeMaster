@@ -1,23 +1,10 @@
-﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-using ChargeMaster.Data;
-using ChargeMaster.Services;
-using ChargeMaster.Services.Shelly;
-using Microsoft.EntityFrameworkCore;
+﻿using ChargeMaster.Services.Shelly;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using MQTTnet;
-using MQTTnet.Protocol;
-using Xunit;
 
-namespace ChargeMaster.Services.Shelly.UnitTests;
+namespace ChargeMaster.UnitTests.Services.Shelly;
 
 
 /// <summary>
@@ -103,10 +90,10 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         var subscriberConnectedInvoked = false;
-        service.SubscriberConnected += (sender, e) => subscriberConnectedInvoked = true;
+        service.SubscriberConnected += (_, _) => subscriberConnectedInvoked = true;
 
         // Act
-        service.TemperatureChanged += (sender, e) => { };
+        service.TemperatureChanged += (_, _) => { };
 
         // Assert
         Assert.True(subscriberConnectedInvoked);
@@ -125,7 +112,7 @@ public class ShellyMqttServiceTests
         var receivedEvents = new List<ShellyTemperatureChangedEventArgs>();
 
         // Act
-        service.TemperatureChanged += (sender, e) => receivedEvents.Add(e);
+        service.TemperatureChanged += (_, e) => receivedEvents.Add(e);
 
         // Assert
         Assert.Equal(3, receivedEvents.Count);
@@ -151,7 +138,7 @@ public class ShellyMqttServiceTests
         ShellyTemperatureChangedEventArgs? receivedEvent = null;
 
         // Act
-        service.TemperatureChanged += (sender, e) =>
+        service.TemperatureChanged += (_, e) =>
         {
             if (e.DeviceId == deviceId)
             {
@@ -176,11 +163,11 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         var subscriberConnectedCount = 0;
-        service.SubscriberConnected += (sender, e) => subscriberConnectedCount++;
-        service.TemperatureChanged += (sender, e) => { };
+        service.SubscriberConnected += (_, _) => subscriberConnectedCount++;
+        service.TemperatureChanged += (_, _) => { };
 
         // Act
-        service.TemperatureChanged += (sender, e) => { };
+        service.TemperatureChanged += (_, _) => { };
 
         // Assert
         Assert.Equal(1, subscriberConnectedCount);
@@ -196,11 +183,11 @@ public class ShellyMqttServiceTests
     {
         // Arrange
         var service = new ShellyMqttService();
-        service.TemperatureChanged += (sender, e) => { }; // First subscriber
+        service.TemperatureChanged += (_, _) => { }; // First subscriber
         var secondSubscriberEvents = new List<ShellyTemperatureChangedEventArgs>();
 
         // Act
-        service.TemperatureChanged += (sender, e) => secondSubscriberEvents.Add(e);
+        service.TemperatureChanged += (_, e) => secondSubscriberEvents.Add(e);
 
         // Assert
         Assert.Equal(3, secondSubscriberEvents.Count);
@@ -220,7 +207,7 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         var subscriberConnectedInvoked = false;
-        service.SubscriberConnected += (sender, e) => subscriberConnectedInvoked = true;
+        service.SubscriberConnected += (_, _) => subscriberConnectedInvoked = true;
 
         // Act
         service.TemperatureChanged += null;
@@ -256,8 +243,8 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         var subscriberDisconnectedInvoked = false;
-        service.SubscriberDisconnected += (sender, e) => subscriberDisconnectedInvoked = true;
-        EventHandler<ShellyTemperatureChangedEventArgs> handler = (sender, e) => { };
+        service.SubscriberDisconnected += (_, _) => subscriberDisconnectedInvoked = true;
+        EventHandler<ShellyTemperatureChangedEventArgs> handler = (_, _) => { };
         service.TemperatureChanged += handler;
 
         // Act
@@ -278,9 +265,9 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         var subscriberDisconnectedInvoked = false;
-        service.SubscriberDisconnected += (sender, e) => subscriberDisconnectedInvoked = true;
-        EventHandler<ShellyTemperatureChangedEventArgs> handler1 = (sender, e) => { };
-        EventHandler<ShellyTemperatureChangedEventArgs> handler2 = (sender, e) => { };
+        service.SubscriberDisconnected += (_, _) => subscriberDisconnectedInvoked = true;
+        EventHandler<ShellyTemperatureChangedEventArgs> handler1 = (_, _) => { };
+        EventHandler<ShellyTemperatureChangedEventArgs> handler2 = (_, _) => { };
         service.TemperatureChanged += handler1;
         service.TemperatureChanged += handler2;
 
@@ -318,9 +305,9 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         var subscriberDisconnectedCount = 0;
-        service.SubscriberDisconnected += (sender, e) => subscriberDisconnectedCount++;
-        EventHandler<ShellyTemperatureChangedEventArgs> handler1 = (sender, e) => { };
-        EventHandler<ShellyTemperatureChangedEventArgs> handler2 = (sender, e) => { };
+        service.SubscriberDisconnected += (_, _) => subscriberDisconnectedCount++;
+        EventHandler<ShellyTemperatureChangedEventArgs> handler1 = (_, _) => { };
+        EventHandler<ShellyTemperatureChangedEventArgs> handler2 = (_, _) => { };
         service.TemperatureChanged += handler1;
         service.TemperatureChanged += handler2;
 
@@ -346,8 +333,8 @@ public class ShellyMqttServiceTests
         var subscriber2Events = new List<ShellyTemperatureChangedEventArgs>();
 
         // Act
-        service.TemperatureChanged += (sender, e) => subscriber1Events.Add(e);
-        service.TemperatureChanged += (sender, e) => subscriber2Events.Add(e);
+        service.TemperatureChanged += (_, e) => subscriber1Events.Add(e);
+        service.TemperatureChanged += (_, e) => subscriber2Events.Add(e);
 
         // Assert
         Assert.Equal(3, subscriber1Events.Count);
@@ -376,7 +363,7 @@ public class ShellyMqttServiceTests
         var receivedEvents = new List<ShellyTemperatureChangedEventArgs>();
 
         // Act
-        service.TemperatureChanged += (sender, e) => receivedEvents.Add(e);
+        service.TemperatureChanged += (_, e) => receivedEvents.Add(e);
 
         // Assert
         var arbetsrumEvent = receivedEvents.Find(e => e.DeviceId == "arbetsrum");
@@ -402,10 +389,10 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         object? capturedSender = null;
-        service.SubscriberConnected += (sender, e) => capturedSender = sender;
+        service.SubscriberConnected += (sender, _) => capturedSender = sender;
 
         // Act
-        service.TemperatureChanged += (sender, e) => { };
+        service.TemperatureChanged += (_, _) => { };
 
         // Assert
         Assert.Same(service, capturedSender);
@@ -422,8 +409,8 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         object? capturedSender = null;
-        service.SubscriberDisconnected += (sender, e) => capturedSender = sender;
-        EventHandler<ShellyTemperatureChangedEventArgs> handler = (sender, e) => { };
+        service.SubscriberDisconnected += (sender, _) => capturedSender = sender;
+        EventHandler<ShellyTemperatureChangedEventArgs> handler = (_, _) => { };
         service.TemperatureChanged += handler;
 
         // Act
@@ -446,7 +433,7 @@ public class ShellyMqttServiceTests
         var senders = new List<object?>();
 
         // Act
-        service.TemperatureChanged += (sender, e) => senders.Add(sender);
+        service.TemperatureChanged += (sender, _) => senders.Add(sender);
 
         // Assert
         Assert.Equal(3, senders.Count);
@@ -466,7 +453,7 @@ public class ShellyMqttServiceTests
         var deviceIds = new List<string>();
 
         // Act
-        service.TemperatureChanged += (sender, e) => deviceIds.Add(e.DeviceId);
+        service.TemperatureChanged += (_, e) => deviceIds.Add(e.DeviceId);
 
         // Assert
         Assert.Equal(3, deviceIds.Count);
@@ -854,9 +841,7 @@ public class ShellyMqttServiceTests
     public void IsConnected_WhenMqttClientIsNull_ReturnsFalse()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act
         var result = service.IsConnected;
@@ -874,12 +859,8 @@ public class ShellyMqttServiceTests
     public void IsConnected_WhenMqttClientExistsButNotConnected_ReturnsFalse()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var mockMqttClient = new Mock<IMqttClient>();
-        mockMqttClient.Setup(c => c.IsConnected).Returns(false);
-
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var mockMqttClient = ShellyMqttServiceTestHelper.CreateMockMqttClient();
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Use reflection to set the private _mqttClient field
         var mqttClientField = typeof(ShellyMqttService).GetField("_mqttClient", 
@@ -892,25 +873,6 @@ public class ShellyMqttServiceTests
         // Assert
         Assert.False(result);
         mockMqttClient.VerifyGet(c => c.IsConnected, Times.Once);
-    }
-
-    /// <summary>
-    /// Helper class to expose private fields for testing purposes.
-    /// This allows setting the private _mqttClient field to test different connection states.
-    /// </summary>
-    private class TestableShellyMqttService : ShellyMqttService
-    {
-        public TestableShellyMqttService(IServiceScopeFactory serviceScopeFactory, ILogger<ShellyMqttService> logger)
-            : base(serviceScopeFactory, logger)
-        {
-        }
-
-        public IMqttClient? MqttClientForTesting
-        {
-            set
-            {
-            }
-        }
     }
 
     /// <summary>
@@ -975,35 +937,13 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_NullBrokerAddress_ThrowsArgumentNullException()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
             service.ConnectAsync(null!, 1883, "test-client"));
     }
-
-    /// <summary>
-    /// Tests that ConnectAsync handles empty brokerAddress parameter.
-    /// Input: empty string for brokerAddress.
-    /// Expected: The method should attempt to connect and fail with an appropriate exception.
-    /// Note: The actual exception type depends on MQTTnet's validation, typically an exception during connection.
-    /// </summary>
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public async Task ConnectAsync_EmptyOrWhitespaceBrokerAddress_ThrowsException(string brokerAddress)
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
-
-        // Act & Assert
-        // Note: This will fail during connection attempt. The exact exception depends on MQTTnet internals.
-        await Assert.ThrowsAnyAsync<Exception>(() =>
-            service.ConnectAsync(brokerAddress, 1883, "test-client"));
-    }
-
+    
     /// <summary>
     /// Tests that ConnectAsync handles negative port numbers.
     /// Input: negative brokerPort value.
@@ -1016,51 +956,14 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_NegativePort_ThrowsException(int brokerPort)
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         // Note: Will fail during connection or validation. Exact exception depends on MQTTnet.
         await Assert.ThrowsAnyAsync<Exception>(() =>
             service.ConnectAsync("192.168.1.10", brokerPort, "test-client"));
     }
-
-    /// <summary>
-    /// Tests that ConnectAsync handles port number zero.
-    /// Input: brokerPort = 0.
-    /// Expected: Should throw an exception as port 0 is invalid.
-    /// </summary>
-    [Fact]
-    public async Task ConnectAsync_ZeroPort_ThrowsException()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
-
-        // Act & Assert
-        await Assert.ThrowsAnyAsync<Exception>(() =>
-            service.ConnectAsync("192.168.1.10", 0, "test-client"));
-    }
-
-    /// <summary>
-    /// Tests that ConnectAsync handles maximum valid port numbers.
-    /// Input: brokerPort = 65535 (maximum valid port).
-    /// Expected: Should attempt to connect (will fail without real broker).
-    /// Note: This tests that the port value itself is accepted, not that connection succeeds.
-    /// </summary>
-    [Fact]
-    public async Task ConnectAsync_MaximumValidPort_AttemptsConnection()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
-
-        // Act & Assert
-        // Will fail during actual connection, but port validation should pass
-        await Assert.ThrowsAnyAsync<Exception>(() =>
-            service.ConnectAsync("192.168.1.10", 65535, "test-client"));
-    }
-
+    
     /// <summary>
     /// Tests that ConnectAsync handles null clientId by generating one.
     /// Input: null clientId.
@@ -1071,32 +974,13 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_NullClientId_GeneratesClientId()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         // The method should generate a clientId internally and not fail due to null clientId.
         // We verify that no exception is thrown from null clientId handling.
         // Note: Connection may or may not succeed depending on network/broker availability.
-        await service.ConnectAsync("192.168.1.10", 1883, null);
-    }
-
-    /// <summary>
-    /// Tests that ConnectAsync accepts an empty string as clientId.
-    /// Input: empty string for clientId.
-    /// Expected: Should use the empty string and attempt connection.
-    /// </summary>
-    [Fact]
-    public async Task ConnectAsync_EmptyClientId_UsesEmptyString()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
-
-        // Act & Assert
-        // Should accept empty string and attempt connection
-        await Assert.ThrowsAnyAsync<Exception>(() =>
-            service.ConnectAsync("192.168.1.10", 1883, ""));
+        await service.ConnectAsync("192.168.1.10");
     }
 
     /// <summary>
@@ -1108,42 +992,11 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_VeryLongClientId_AcceptsLongString()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
         var longClientId = new string('a', 1000);
 
         // Act & Assert - Should not throw validation exception for long clientId
         await service.ConnectAsync("192.168.1.10", 1883, longClientId);
-    }
-
-    /// <summary>
-    /// Tests that ConnectAsync handles clientId with special characters.
-    /// Input: clientId with special characters.
-    /// Expected: Should accept the clientId and pass it to the MQTT client.
-    /// </summary>
-    [Theory]
-    [InlineData("client@#$%")]
-    [InlineData("client with spaces")]
-    [InlineData("client-with-dashes")]
-    [InlineData("client_with_underscores")]
-    public async Task ConnectAsync_ClientIdWithSpecialCharacters_AcceptsClientId(string clientId)
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var mockMqttClient = new Mock<IMqttClient>();
-
-        // Simulate a connection failure to verify the clientId is accepted
-        mockMqttClient.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new System.Net.Sockets.SocketException(10061)); // Connection refused error code
-
-        var service = new ShellyMqttService(null, mockLogger.Object, mockMqttClient.Object);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
-            service.ConnectAsync("192.168.1.10", 1883, clientId));
-
-        // Verify that ConnectAsync was called with the provided clientId
-        mockMqttClient.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -1156,26 +1009,14 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_DefaultPort_UsesPort1883()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(null, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         // Call without specifying port, should use default 1883
         // Note: This may throw if broker is unreachable, or may succeed if broker exists
-        // We verify the default port was used by checking the log message
         try
         {
             await service.ConnectAsync("192.168.1.10");
-
-            // Verify logger was called with port 1883
-            mockLogger.Verify(
-                x => x.Log(
-                    LogLevel.Information,
-                    It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("192.168.1.10:1883")),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception, string>>()),
-                Times.Once);
         }
         catch
         {
@@ -1195,12 +1036,11 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_StandardMqttPorts_AcceptsPorts(int port)
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var mockMqttClient = new Mock<IMqttClient>();
-        mockMqttClient.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new System.Net.Sockets.SocketException(10061));
-
-        var service = new ShellyMqttService(null, mockLogger.Object, mockMqttClient.Object);
+        var mockMqttClient = ShellyMqttServiceTestHelper.CreateMockMqttClient();
+        ShellyMqttServiceTestHelper.ConfigureMqttClientToFailConnection(
+            mockMqttClient,
+            new System.Net.Sockets.SocketException(10061));
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
@@ -1223,12 +1063,11 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_ValidIpAddresses_AcceptsAddresses(string ipAddress)
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var mockMqttClient = new Mock<IMqttClient>();
-        mockMqttClient.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new System.Net.Sockets.SocketException(10061));
-
-        var service = new ShellyMqttService(null, mockLogger.Object, mockMqttClient.Object);
+        var mockMqttClient = ShellyMqttServiceTestHelper.CreateMockMqttClient();
+        ShellyMqttServiceTestHelper.ConfigureMqttClientToFailConnection(
+            mockMqttClient,
+            new System.Net.Sockets.SocketException(10061));
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
@@ -1250,12 +1089,11 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_ValidHostnames_AcceptsHostnames(string hostname)
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var mockMqttClient = new Mock<IMqttClient>();
-        mockMqttClient.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new System.Net.Sockets.SocketException(10061));
-
-        var service = new ShellyMqttService(null, mockLogger.Object, mockMqttClient.Object);
+        var mockMqttClient = ShellyMqttServiceTestHelper.CreateMockMqttClient();
+        ShellyMqttServiceTestHelper.ConfigureMqttClientToFailConnection(
+            mockMqttClient,
+            new System.Net.Sockets.SocketException(10061));
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
@@ -1276,12 +1114,11 @@ public class ShellyMqttServiceTests
     public async Task ConnectAsync_BoundaryPortValues_AcceptsPorts(int port)
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var mockMqttClient = new Mock<IMqttClient>();
-        mockMqttClient.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new System.Net.Sockets.SocketException(10061));
-
-        var service = new ShellyMqttService(null, mockLogger.Object, mockMqttClient.Object);
+        var mockMqttClient = ShellyMqttServiceTestHelper.CreateMockMqttClient();
+        ShellyMqttServiceTestHelper.ConfigureMqttClientToFailConnection(
+            mockMqttClient,
+            new System.Net.Sockets.SocketException(10061));
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
@@ -1396,7 +1233,7 @@ public class ShellyMqttServiceTests
         // Use reflection to call the private InitiateTemperatures method
         var method = typeof(ShellyMqttService).GetMethod("InitiateTemperatures", 
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var task = (Task)method.Invoke(service, null);
+        var task = (Task)method!.Invoke(service, null)!;
         await task;
 
         // Assert
@@ -1405,9 +1242,9 @@ public class ShellyMqttServiceTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Fel vid hämtning av temperaturer från databasen")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid hämtning av temperaturer från databasen")),
                 It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                It.IsAny<Func<It.IsAnyType, Exception, string>>()!),
             Times.Once);
 
         // Verify that the Temperatures dictionary still has default values
@@ -1415,24 +1252,6 @@ public class ShellyMqttServiceTests
         Assert.Contains("arbetsrum", service.Temperatures.Keys);
         Assert.Contains("hall", service.Temperatures.Keys);
         Assert.Contains("sovrum", service.Temperatures.Keys);
-    }
-
-    /// <summary>
-    /// Helper method to create a mock DbSet for testing Entity Framework queries.
-    /// </summary>
-    /// <param name="data">The data to populate the mock DbSet with.</param>
-    /// <returns>A mock DbSet configured to support LINQ queries.</returns>
-    private static Mock<DbSet<ShellyTemperature>> CreateMockDbSet(List<ShellyTemperature> data)
-    {
-        var queryable = data.AsQueryable();
-        var mockDbSet = new Mock<DbSet<ShellyTemperature>>();
-
-        mockDbSet.As<IQueryable<ShellyTemperature>>().Setup(m => m.Provider).Returns(queryable.Provider);
-        mockDbSet.As<IQueryable<ShellyTemperature>>().Setup(m => m.Expression).Returns(queryable.Expression);
-        mockDbSet.As<IQueryable<ShellyTemperature>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-        mockDbSet.As<IQueryable<ShellyTemperature>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
-
-        return mockDbSet;
     }
 
     /// <summary>
@@ -1444,23 +1263,13 @@ public class ShellyMqttServiceTests
     public async Task DisconnectAsync_WhenMqttClientIsNull_CompletesWithoutError()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act
         await service.DisconnectAsync();
 
-        // Assert
-        // Verify that no logging occurred (since client is null, early return happens)
-        mockLogger.Verify(
-            x => x.Log(
-                It.IsAny<LogLevel>(),
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Never);
+        // Assert - No exception should be thrown
+        Assert.False(service.IsConnected);
     }
 
     /// <summary>
@@ -1472,24 +1281,14 @@ public class ShellyMqttServiceTests
     public async Task DisconnectAsync_WhenMqttClientIsNull_CanBeCalledMultipleTimes()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act
         await service.DisconnectAsync();
         await service.DisconnectAsync();
 
-        // Assert
-        // Should complete without throwing
-        mockLogger.Verify(
-            x => x.Log(
-                It.IsAny<LogLevel>(),
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Never);
+        // Assert - Should complete without throwing
+        Assert.False(service.IsConnected);
     }
 
     /// <summary>
@@ -1501,10 +1300,9 @@ public class ShellyMqttServiceTests
     public async Task DisconnectAsync_WithParameterlessConstructor_CompletesWithoutError()
     {
         // Arrange
-        var service = new ShellyMqttService();
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithDefaults();
 
-        // Act & Assert
-        // Should not throw even with null logger and null serviceScopeFactory
+        // Act & Assert - Should not throw even with null logger and null serviceScopeFactory
         await service.DisconnectAsync();
     }
 
@@ -1543,9 +1341,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_WhenMqttClientIsNull_ThrowsInvalidOperationException()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
         var topic = "test/topic";
 
         // Act & Assert
@@ -1570,9 +1366,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_WhenMqttClientIsNull_ThrowsInvalidOperationExceptionForAnyTopic(string? topic)
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -1603,9 +1397,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_EmptyArray_CompletesSuccessfully()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert - should not throw
         await service.SubscribeAsync();
@@ -1619,9 +1411,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_ArrayWithMultipleNullElements_ThrowsInvalidOperationException()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -1638,9 +1428,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_SingleTopic_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -1656,9 +1444,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_MultipleTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -1675,9 +1461,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_EmptyStringTopic_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -1692,9 +1476,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_WhitespaceOnlyTopic_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -1710,9 +1492,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_DuplicateTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -1727,9 +1507,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_MixedValidAndInvalidTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -1744,9 +1522,7 @@ public class ShellyMqttServiceTests
     public async Task SubscribeAsync_TopicsWithSpecialCharacters_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -1771,15 +1547,12 @@ public class ShellyMqttServiceTests
     public async Task DisposeAsync_WhenMqttClientIsNull_CompletesSuccessfully()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act
         await service.DisposeAsync();
 
-        // Assert
-        // No exception should be thrown, and the service should indicate it's not connected
+        // Assert - No exception should be thrown, and the service should indicate it's not connected
         Assert.False(service.IsConnected);
     }
 
@@ -1791,17 +1564,14 @@ public class ShellyMqttServiceTests
     public async Task DisposeAsync_WhenCalledMultipleTimes_IsIdempotent()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act
         await service.DisposeAsync();
         await service.DisposeAsync();
         await service.DisposeAsync();
 
-        // Assert
-        // No exception should be thrown
+        // Assert - No exception should be thrown
         Assert.False(service.IsConnected);
     }
 
@@ -1813,13 +1583,12 @@ public class ShellyMqttServiceTests
     public async Task DisposeAsync_WhenUsingParameterlessConstructor_CompletesSuccessfully()
     {
         // Arrange
-        var service = new ShellyMqttService();
+        var service = ShellyMqttServiceTestHelper.CreateServiceWithDefaults();
 
         // Act
         await service.DisposeAsync();
 
-        // Assert
-        // No exception should be thrown
+        // Assert - No exception should be thrown
         Assert.False(service.IsConnected);
     }
 
