@@ -5,11 +5,11 @@
 /// </summary>
 public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> logger)
 {
-    private double? _currentTemperature = 0.0;
-    private double? _outdoorTemperature = 0.0;
-    private double? _targetTemperature = 0.0;
+    private double? _currentTemperature;
+    private double? _outdoorTemperature;
+    private double? _targetTemperature;
     private int _power; // 0 = Off, 1 = On
-    private DaikinMode _mode; // 0=Auto, 1=Auto, 2=Dry, 3=Cool, 4=Heat, 6=Fan, 7=Auto
+    private DaikinMode _mode = DaikinMode.Heat; // 0=Auto, 1=Auto, 2=Dry, 3=Cool, 4=Heat, 6=Fan, 7=Auto
     private int? _compressorFrequency = 0;
 
     /// <summary>
@@ -78,19 +78,19 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
 
         if (sensorInfo != null)
         {
-            if (Math.Abs( (_currentTemperature ?? 0) - (sensorInfo.IndoorTemperature ?? 0)) > 0.01)
+            if (sensorInfo.IndoorTemperature != null && Math.Abs( (_currentTemperature ?? Int32.MinValue) - (sensorInfo.IndoorTemperature ?? Int32.MaxValue)) > 0.015)
             {
                 _currentTemperature = sensorInfo.IndoorTemperature;
                 changes.CurrentTemperatureChanged = true;
             }
 
-            if (Math.Abs( (_outdoorTemperature ?? 0) - (sensorInfo.OutdoorTemperature ?? 0)) > 0.01)
+            if (sensorInfo.OutdoorTemperature !=null && Math.Abs( (_outdoorTemperature ?? Int32.MinValue) - (sensorInfo.OutdoorTemperature ?? Int32.MaxValue)) > 0.015)
             {
                 _outdoorTemperature = sensorInfo.OutdoorTemperature;
                 changes.OutdoorTemperatureChanged = true;
             }
 
-            if (_compressorFrequency != sensorInfo.CompressorFrequency)
+            if (sensorInfo.CompressorFrequency != null & _compressorFrequency != sensorInfo.CompressorFrequency)
             {
                 _compressorFrequency = sensorInfo.CompressorFrequency;
                 changes.CompressorFrequencyChanged = true;
@@ -99,7 +99,7 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
 
         if (controlInfo != null)
         {
-            if (Math.Abs( (_targetTemperature ?? 0) - (controlInfo.TargetTemperature ?? 0)) > 0.01)
+            if (controlInfo.TargetTemperature != null &&Math.Abs( (_targetTemperature ?? Int32.MinValue) - (controlInfo.TargetTemperature ?? Int32.MaxValue)) > 0.015)
             {
                 _targetTemperature = controlInfo.TargetTemperature;
                 changes.TargetTemperatureChanged = true;
