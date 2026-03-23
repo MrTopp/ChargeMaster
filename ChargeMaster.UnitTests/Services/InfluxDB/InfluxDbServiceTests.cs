@@ -1,20 +1,13 @@
 ﻿using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.InfluxDB;
-using ChargeMaster.Services.Wallbox;
-using InfluxDB.Client;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Tibber.Sdk;
-using Xunit;
 
-namespace ChargeMaster.Services.InfluxDB.UnitTests;
+namespace ChargeMaster.UnitTests.Services.InfluxDB;
 /// <summary>
 /// Unit tests for the InfluxDbService class.
 /// </summary>
@@ -357,7 +350,7 @@ public class InfluxDbServiceTests
         var mockOptions = Mock.Of<IOptions<InfluxDBOptions>>(o => o.Value == options);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
-        var exception = Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, null!, mockLogger.Object));
+        Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, null!, mockLogger.Object));
         mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to initialize InfluxDbService")), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
     }
 
@@ -382,7 +375,7 @@ public class InfluxDbServiceTests
         var mockPriceService = new ElectricityPriceService(mockHttpClient, mockServiceScopeFactory, mockPriceServiceLogger);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
-        var exception = Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
+        Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
         mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to initialize InfluxDbService")), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
     }
 
@@ -401,10 +394,10 @@ public class InfluxDbServiceTests
             Bucket = "test-bucket"
         };
         var mockOptions = Mock.Of<IOptions<InfluxDBOptions>>(o => o.Value == options);
-        var mockPriceService = new Mock<ElectricityPriceService>(null, null, null).Object;
+        ElectricityPriceService mockPriceService = new Mock<ElectricityPriceService>(null!, null!, null!).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
-        var exception = Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
+        Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
         mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
     }
 
@@ -476,7 +469,7 @@ public class InfluxDbServiceTests
             Bucket = "bucket_with_underscores_and_numbers_123"
         };
         var mockOptions = Mock.Of<IOptions<InfluxDBOptions>>(o => o.Value == options);
-        var mockPriceService = new Mock<ElectricityPriceService>(null, null, null).Object;
+        ElectricityPriceService mockPriceService = new Mock<ElectricityPriceService>(null!, null!, null!).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
@@ -509,7 +502,7 @@ public class InfluxDbServiceTests
         var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
-        var exception = Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
+        Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
         mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to initialize InfluxDbService")), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
     }
 
