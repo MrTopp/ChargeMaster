@@ -31,6 +31,8 @@ public class InfluxDbService
 
         try
         {
+            ValidateUrl(_options.Url);
+
             // InfluxDB 2.0 autentisering med token
             var clientOptions = new InfluxDBClientOptions(_options.Url)
             {
@@ -45,6 +47,28 @@ public class InfluxDbService
         {
             _logger.LogError(ex, "Failed to initialize InfluxDbService");
             throw;
+        }
+    }
+
+    private static void ValidateUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            throw new ArgumentException("URL cannot be null or empty", nameof(url));
+        }
+
+        try
+        {
+            var uri = new Uri(url, UriKind.Absolute);
+
+            if (uri.Scheme != "http" && uri.Scheme != "https")
+            {
+                throw new ArgumentException($"URL scheme must be http or https, but got: {uri.Scheme}", nameof(url));
+            }
+        }
+        catch (UriFormatException ex)
+        {
+            throw new ArgumentException($"Invalid URL format: {url}", nameof(url), ex);
         }
     }
 

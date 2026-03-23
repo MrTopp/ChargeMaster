@@ -14,7 +14,7 @@
 ## Production environment
 - The application will be hosted on a Raspberry Pi running Ubuntu 25.10.
 - nginx is used as a reverse proxy to forward requests to the ASP.NET Core application.
-- Logging is done by serilog sending output to stdout and stderr, which will be captured by the hosting environment.
+- Logging is done by Serilog sending output to stdout and stderr, which will be captured by the hosting environment.
 - Path to application is `/var/www/ChargeMaster`
 - User running the application is `chargemasterapp`
 - Use systemd to manage the application as a service, ensuring it starts on boot and restarts on failure.
@@ -32,7 +32,7 @@
 
 ## Configuration
 - Use `appsettings.json` for configuration, with environment-specific overrides (`appsettings.Production.json` and `appsettings.Development.json`).
-- In producion environment, secret parts of the configuration is provided by the environment and overrides the values in `appsettings.Production.json`. 
+- In production environment, secret parts of the configuration are provided by the environment and override the values in `appsettings.Production.json`. 
 - In development environment, secrets are stored in `appsettings.Development.json` which is not committed to version control.
 
 ## Blazor Specifics
@@ -43,7 +43,7 @@
 - Use xUnit test framework.
 - Two test projects are used:
   - **ChargeMaster.UnitTests**: Contains unit tests with mocked external dependencies. Use `Moq` for mocking services, repositories, and other external dependencies. These tests verify isolated business logic and behavior of individual components without hitting real external services.
-  - **ChargeMaster.xUnit**: Contains exploratory tests used to understand and validate behavior of external dependencies. These tests may use real services or integration with external systems.
+  - **ChargeMaster.xUnit**: Contains exploratory tests used to understand and validate behavior of external dependencies. These tests may use real services or integration with external systems. **Never run tests in ChargeMaster.xUnit project automatically. Only run tests in this project when the user explicitly requests it with specific instructions.**
 - Do not mock external dependencies in unit tests unless explicitly required for isolation.
 - Use a local PostgreSQL instance for testing Entity Framework Core operations (primarily in exploratory tests).
 - If a private method needs to be tested, change its access modifier to `internal` instead of using reflection. Avoid reflection in tests.
@@ -53,15 +53,12 @@
 
 # Functionality
 The application, named "ChargeMaster", handles charging of the electric vehicle and manages the heatpump.
-The main purpose is to optimize the usage of electricity by activate the heatpump and charge the electric vehicle when the electricity price is low.
-It also limits the total usage of electricity for each hour. There is a cost for the maximum usage of electricity for 
-the hour in the month where the usage is the highest. The application monitors the usage and stops the heatpump and electric vehicle charging if 
-the usage is close to the maximum for the month.
+The main purpose is to optimize the usage of electricity by activating the heatpump and charging the electric vehicle when the electricity price is low.
+It also limits the total usage of electricity for each hour. There is a cost for the maximum usage of electricity for the hour in the month where the usage is the highest. The application monitors the usage and stops the heatpump and electric vehicle charging if the usage is close to the maximum for the month.
 
-# project structure
+# Project Structure
 
 ## Workers
-
 Workers are background services that run continuously to perform tasks such as monitoring electricity prices, 
 controlling the heatpump, and managing electric vehicle charging. They are implemented as hosted services in ASP.NET Core.
 
@@ -70,7 +67,7 @@ The `ChargeWorker` is responsible for managing the charging of the electric vehi
 and controls the charging process based on the current electricity price and usage limits.
 
 ### DaikinWorker
-The `DaikinWorker` is responsible for controlling the heatpump. It monitors electricity usage and controls the heatpump
+The `DaikinWorker` is responsible for controlling the heatpump. It monitors electricity usage and controls the heatpump.
 
 ### PriceFetchingWorker
 The `PriceFetchingWorker` is responsible for fetching the current electricity prices from an external API. 
@@ -90,10 +87,9 @@ a Websocket stream using Tibber SDK. Data is stored in an InfluxDB database.
 ### WallboxWorker
 The `WallboxWorker` is responsible for controlling the Wallbox electric vehicle charger. It monitors 
 the charging process and controls it based on the current electricity price and usage limits. 
- Data is stored in the InfluxDB database.
+Data is stored in the InfluxDB database.
 
 ## Services
-
 Services contain the core business logic and external communication. They are registered as singletons
 and injected into workers and Blazor components. Each service is located in its own subfolder under `Services/`.
 
