@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ChargeMaster.Services.ElectricityPrice;
+using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace ChargeMaster.Services.ElectricityPrice.UnitTests;
+namespace ChargeMaster.UnitTests.Services.ElectricityPrice;
 
 
 /// <summary>
