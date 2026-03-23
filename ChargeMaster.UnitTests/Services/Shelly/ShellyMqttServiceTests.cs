@@ -337,8 +337,7 @@ public class ShellyMqttServiceTests
     /// Input: Multiple event handler subscriptions
     /// Expected: Each handler receives events for all three locations with matching values
     /// </summary>
-    [Fact(Skip="ProductionBugSuspected")]
-    [Trait("Category", "ProductionBugSuspected")]
+    [Fact]
     public void TemperatureChanged_MultipleSubscribers_AllReceiveIdenticalInitialValues()
     {
         // Arrange
