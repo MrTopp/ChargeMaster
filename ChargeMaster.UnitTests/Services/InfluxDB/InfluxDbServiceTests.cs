@@ -554,9 +554,9 @@ public class InfluxDbServiceTests
         };
         var mockOptions = Mock.Of<IOptions<InfluxDBOptions>>(o => o.Value == options);
         var mockHttpClient = Mock.Of<HttpClient>();
-        var mockServiceScopeFactory = Mock.Of<IServiceScopeFactory>();
+        var mockRepository = Mock.Of<IElectricityPriceRepository>();
         var mockPriceServiceLogger = Mock.Of<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient, mockServiceScopeFactory, mockPriceServiceLogger).Object;
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient, mockRepository, mockPriceServiceLogger).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         var exception = Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));

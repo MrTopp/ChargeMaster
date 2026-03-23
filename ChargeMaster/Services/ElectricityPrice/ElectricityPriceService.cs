@@ -115,7 +115,7 @@ public class ElectricityPriceService(
     public async Task DeletePricesForDateAsync(DateOnly date)
     {
         var count = await repository.DeletePricesForDateAsync(date);
-        logger.LogInformation("Deleted {Count} prices for {Date}.", count, date);
+        logger.LogInformation("Deleted {Count} prices for {Date}.", count, date.ToString("yyyy-MM-dd"));
     }
 
     public virtual async Task<Data.ElectricityPrice?> GetPriceForDateTimeAsync(DateTime dateTime)
