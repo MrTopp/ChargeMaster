@@ -41,8 +41,12 @@
 
 ## Testing
 - Use xUnit test framework.
-- Do not mock external dependencies in unit tests unless explicitly required.
-- Use a local PostgreSQL instance for testing Entity Framework Core operations.
+- Two test projects are used:
+  - **ChargeMaster.UnitTests**: Contains unit tests with mocked external dependencies. Use `Moq` for mocking services, repositories, and other external dependencies. These tests verify isolated business logic and behavior of individual components without hitting real external services.
+  - **ChargeMaster.xUnit**: Contains exploratory tests used to understand and validate behavior of external dependencies. These tests may use real services or integration with external systems.
+- Do not mock external dependencies in unit tests unless explicitly required for isolation.
+- Use a local PostgreSQL instance for testing Entity Framework Core operations (primarily in exploratory tests).
+- If a private method needs to be tested, change its access modifier to `internal` instead of using reflection. Avoid reflection in tests.
 
 ## Commit Messages
 - Format commit messages as a bullet list where each item starts with `-`. Example: `- Action 1\n- Action 2\n- Action 3`
