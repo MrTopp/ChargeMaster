@@ -95,6 +95,7 @@ namespace ChargeMaster
                     options.UseNpgsql(connectionString));
 
                 // ----- Application Services -----
+                builder.Services.AddScoped<IElectricityPriceRepository, ElectricityPriceRepository>();
                 builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>(client =>
                 {
                     client.Timeout = TimeSpan.FromSeconds(15);
