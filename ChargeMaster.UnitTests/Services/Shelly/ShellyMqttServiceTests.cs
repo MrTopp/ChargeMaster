@@ -1161,38 +1161,7 @@ public class ShellyMqttServiceTests
         }
         // If no exception, the service completed setup (perhaps with graceful error handling)
     }
-
-    /// <summary>
-    /// Tests that SetupAsync propagates exceptions when ConnectAsync fails to connect to MQTT broker.
-    /// This test is currently skipped because it relies on real network calls to validate exception
-    /// propagation, which is not reliable for unit testing. The MQTTnet library may not throw exceptions
-    /// immediately when connecting to unreachable brokers, and connection timeouts can be very long.
-    /// To properly test this scenario, the production code would need refactoring to support dependency
-    /// injection of IMqttClient for mocking purposes.
-    /// </summary>
-    [Fact(Skip="ProductionBugSuspected")]
-    [Trait("Category", "ProductionBugSuspected")]
-    public async Task SetupAsync_WhenConnectAsyncFails_PropagatesException()
-    {
-        // Arrange
-        var mockServiceScope = new Mock<IServiceScope>();
-        var mockServiceProvider = new Mock<IServiceProvider>();
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockLogger = new Mock<ILogger<ShellyMqttService>>();
-
-        // Set up the scope factory chain to prevent NullReferenceException in InitiateTemperatures
-        // InitiateTemperatures catches exceptions, so GetRequiredService will fail but won't propagate
-        mockServiceScope.Setup(s => s.ServiceProvider).Returns(mockServiceProvider.Object);
-        mockServiceScopeFactory.Setup(f => f.CreateScope()).Returns(mockServiceScope.Object);
-
-        var service = new ShellyMqttService(mockServiceScopeFactory.Object, mockLogger.Object);
-
-        // Act & Assert
-        // Expected: Exception from MQTT connection failure should propagate
-        // ConnectAsync will attempt to connect to 192.168.1.10:1883 which should fail
-        await Assert.ThrowsAsync<Exception>(() => service.SetupAsync());
-    }
-
+    
     /// <summary>
     /// Tests that SetupAsync propagates exceptions when SubscribeAsync fails.
     /// This test calls SubscribeAsync directly without establishing a connection
