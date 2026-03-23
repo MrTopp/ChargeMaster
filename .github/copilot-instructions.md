@@ -3,7 +3,7 @@
 ## Tech Stack
 - **Framework**: .NET 10 (ASP.NET Core, Blazor Interactive Server)
 - **Language**: C# latest
-- **Database**: Entity Framework Core with PostgreSQL for both development and production
+- **Database**: Entity Framework Core with PostgreSQL for both development and production. Database schema is managed with SQL scripts in `Data/Scripts/`, not EF migrations.
 - **Hosting**: ASP.NET Core Web Application
 - **Testing**: xUnit for unit testing
 - **Logging**: Serilog through ILogger interface
