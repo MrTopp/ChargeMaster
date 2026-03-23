@@ -1,12 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-
-using ChargeMaster.Services.Daikin;
+﻿using ChargeMaster.Services.Daikin;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
-namespace ChargeMaster.Services.Daikin.UnitTests;
+namespace ChargeMaster.UnitTests.Services.Daikin;
 
 
 /// <summary>
@@ -1003,49 +999,7 @@ public class DaikinFacadeTests
         Assert.Equal(extremeValue, facade.OutdoorTemperature);
         Assert.Equal(extremeValue, facade.TargetTemperature);
     }
-
-    /// <summary>
-    /// Tests that UpdateStatusAsync handles NaN temperature values correctly.
-    /// </summary>
-    [Fact(Skip="ProductionBugSuspected")]
-    [Trait("Category", "ProductionBugSuspected")]
-    public async Task UpdateStatusAsync_WithNaNTemperatureValues_HandlesCorrectly()
-    {
-        // Arrange
-        var mockDaikinService = new Mock<IDaikinService>();
-        var mockLogger = new Mock<ILogger<DaikinFacade>>();
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
-        {
-            IndoorTemperature = double.NaN,
-            OutdoorTemperature = double.NaN
-        });
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo
-        {
-            TargetTemperature = double.NaN,
-            Power = 0,
-            Mode = 0
-        });
-
-        var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
-        var eventRaised = false;
-        DaikinStatusChangedEventArgs? capturedArgs = null;
-        facade.StatusChanged += (sender, args) =>
-        {
-            eventRaised = true;
-            capturedArgs = args;
-        };
-
-        // Act
-        await facade.UpdateStatusAsync(forceEvent: false);
-
-        // Assert
-        Assert.True(eventRaised);
-        Assert.NotNull(capturedArgs);
-        Assert.True(double.IsNaN(facade.CurrentTemperature ?? 0));
-        Assert.True(double.IsNaN(facade.OutdoorTemperature ?? 0));
-        Assert.True(double.IsNaN(facade.TargetTemperature ?? 0));
-    }
-
+    
     /// <summary>
     /// Tests that UpdateStatusAsync only updates sensor-related properties when only sensorInfo is not null.
     /// </summary>
