@@ -147,7 +147,7 @@ public class ElectricityPriceService(
         logger.LogInformation("Deleted {Count} prices for {Date}.", count, date);
     }
 
-    public async Task<Data.ElectricityPrice?> GetPriceForDateTimeAsync(DateTime dateTime)
+    public virtual async Task<Data.ElectricityPrice?> GetPriceForDateTimeAsync(DateTime dateTime)
     {
         var requestedDate = DateOnly.FromDateTime(dateTime);
 
