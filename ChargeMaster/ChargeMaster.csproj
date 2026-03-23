@@ -52,4 +52,8 @@
     <Folder Include="logs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChargeMaster.UnitTests" />
+  </ItemGroup>
+
 </Project>
