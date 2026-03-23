@@ -9,14 +9,16 @@ namespace ChargeMaster.xUnit.Services.SMHI;
 
 public class SmhiWeatherServiceTests
 {
-    private static IServiceScopeFactory CreateMockServiceScopeFactory()
+    private static IWeatherForecastRepository CreateWeatherForecastRepository()
     {
         var services = new ServiceCollection();
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql("Host=localhost;Database=chargemaster_test;Username=postgres;Password=postgres"));
+        services.AddLogging();
+        services.AddScoped<IWeatherForecastRepository, WeatherForecastRepository>();
 
         var serviceProvider = services.BuildServiceProvider();
-        return serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        return serviceProvider.GetRequiredService<IWeatherForecastRepository>();
     }
 
     private static ApplicationDbContext CreateTestDbContext()
@@ -33,8 +35,8 @@ public class SmhiWeatherServiceTests
         // Arrange
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
-        var serviceScopeFactory = CreateMockServiceScopeFactory();
-        var service = new SmhiWeatherService(httpClient, logger, serviceScopeFactory);
+        var repository = CreateWeatherForecastRepository();
+        var service = new SmhiWeatherService(httpClient, logger, repository);
 
         // Act
         var forecasts = await service.GetForecastAsync(longitude: 14.416639, latitude: 59.250709);
@@ -58,8 +60,8 @@ public class SmhiWeatherServiceTests
         // Arrange
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
-        var serviceScopeFactory = CreateMockServiceScopeFactory();
-        var service = new SmhiWeatherService(httpClient, logger, serviceScopeFactory);
+        var repository = CreateWeatherForecastRepository();
+        var service = new SmhiWeatherService(httpClient, logger, repository);
 
         // Act
         var forecasts = await service.GetForecast();
