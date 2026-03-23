@@ -1,6 +1,4 @@
-﻿using ChargeMaster.Data;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Services.ElectricityPrice;
 
@@ -14,12 +12,11 @@ namespace ChargeMaster.Services.ElectricityPrice;
 /// körning. Tjänsten är inte trådsäker; samtidiga operationer på samma datum kan resultera i tävlingstillstånd.
 /// </remarks>
 /// <param name="httpClient">HTTP-klienten som används för att hämta elprisdata från det externa API:et.</param>
-/// <param name="context">Databaskontext som används för att komma åt och lagra elprisposten.</param>
+/// <param name="repository">Repository för databasåtkomst av elprisdata.</param>
 /// <param name="logger">Loggern som används för att registrera informations- och felmeddelanden relaterade till elpriser.</param>
 public class ElectricityPriceService(
     HttpClient httpClient,
-    //ApplicationDbContext context,
-    IServiceScopeFactory serviceScopeFactory,
+    IElectricityPriceRepository repository,
     ILogger<ElectricityPriceService> logger)
 {
     private const string PriceClass = "SE3";
@@ -33,7 +30,7 @@ public class ElectricityPriceService(
 
     public async Task FetchAndStorePricesForDateAsync(DateOnly date)
     {
-        if (await HasPricesForDateAsync(date))
+        if (await repository.HasPricesForDateAsync(date))
         {
             logger.LogInformation("Priser för {Date} finns redan.", date.ToString("yyyy-MM-dd"));
             return;
@@ -57,11 +54,8 @@ public class ElectricityPriceService(
                 // Validera prisdata före lagring
                 ValidatePrices(prices, date);
 
-                // Normalisera datum om nödvändigt, även om API vanligtvis skickar ISO8601.
-                using var scope = serviceScopeFactory.CreateScope();
-                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                context.ElectricityPrices.AddRange(prices);
-                await context.SaveChangesAsync();
+                // Lagra priser via repository
+                await repository.AddPricesAsync(prices);
                 logger.LogInformation("Lagrade {Count} priser för {Date}.",
                     prices.Count, date.ToString("yyyy-MM-dd"));
             }
@@ -110,40 +104,17 @@ public class ElectricityPriceService(
 
     public async Task<List<Data.ElectricityPrice>> GetPricesForDateAsync(DateOnly date)
     {
-        // Compare Date part of TimeStart
-        var startOfDay = date.ToDateTime(TimeOnly.MinValue);
-        var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
-
-        using var scope = serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        return await context.ElectricityPrices
-            .Where(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay)
-            .OrderBy(p => p.TimeStart)
-            .ToListAsync();
+        return await repository.GetPricesForDateAsync(date);
     }
 
     public async Task<bool> HasPricesForDateAsync(DateOnly date)
     {
-        var startOfDay = date.ToDateTime(TimeOnly.MinValue);
-        var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
-
-        using var scope = serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        return await context.ElectricityPrices
-            .AnyAsync(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay);
+        return await repository.HasPricesForDateAsync(date);
     }
 
     public async Task DeletePricesForDateAsync(DateOnly date)
     {
-        var startOfDay = date.ToDateTime(TimeOnly.MinValue);
-        var endOfDay = date.ToDateTime(TimeOnly.MaxValue);
-
-        using var scope = serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var count = await context.ElectricityPrices
-            .Where(p => p.TimeStart >= startOfDay && p.TimeStart <= endOfDay)
-            .ExecuteDeleteAsync();
-
+        var count = await repository.DeletePricesForDateAsync(date);
         logger.LogInformation("Deleted {Count} prices for {Date}.", count, date);
     }
 
@@ -162,12 +133,7 @@ public class ElectricityPriceService(
         }
 
         // Cache miss - hämta från databas
-        using var scope = serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var prices = await context.ElectricityPrices
-            .Where(p => p.TimeStart >= dateTime.Date && p.TimeStart < dateTime.Date.AddDays(1))
-            .OrderBy(p => p.TimeStart)
-            .ToListAsync();
+        var prices = await repository.GetPricesForDateAsync(requestedDate);
 
         // Uppdatera cache
         lock (_cacheLock)

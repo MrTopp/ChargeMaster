@@ -22,10 +22,10 @@ public class InfluxDbServiceTests
         // Arrange
         var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
         mockOptions.Setup(o => o.Value).Returns(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test-token", Org = "test-org", Bucket = "test-bucket" });
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
+        var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, mockRepository.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
@@ -42,10 +42,10 @@ public class InfluxDbServiceTests
     public void CreateInstance_WithNullOptions_ThrowsNullReferenceException()
     {
         // Arrange
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
+        var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, mockRepository.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         Assert.Throws<NullReferenceException>(() => InfluxDbService.CreateInstance(null!, priceService, mockLogger.Object));
@@ -81,7 +81,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
@@ -102,7 +102,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         Assert.Throws<NullReferenceException>(() => InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object));
@@ -121,7 +121,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => 
@@ -142,7 +142,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
@@ -166,7 +166,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
@@ -187,7 +187,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
@@ -213,7 +213,7 @@ public class InfluxDbServiceTests
         mockServiceScopeFactory.Setup(x => x.CreateScope()).Returns(mockScope.Object);
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var options = InfluxDbServiceTestHelper.CreateValidOptions();
         var service = new InfluxDbService(options, priceService, mockLogger.Object);
         var meterInfo = InfluxDbServiceTestHelper.CreateMeterInfo();
@@ -247,7 +247,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
 
         // Mock the client factory - we don't need a real InfluxDBClient instance for initialization testing
         // The factory is only used during construction, not during the initialization verification
@@ -292,7 +292,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new InfluxDbService(mockOptions, mockPriceService.Object, null!));
     }
@@ -370,9 +370,9 @@ public class InfluxDbServiceTests
         };
         var mockOptions = Mock.Of<IOptions<InfluxDBOptions>>(o => o.Value == options);
         var mockHttpClient = new HttpClient();
-        var mockServiceScopeFactory = Mock.Of<IServiceScopeFactory>();
+        var mockRepository = Mock.Of<IElectricityPriceRepository>();
         var mockPriceServiceLogger = Mock.Of<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new ElectricityPriceService(mockHttpClient, mockServiceScopeFactory, mockPriceServiceLogger);
+        var mockPriceService = new ElectricityPriceService(mockHttpClient, mockRepository, mockPriceServiceLogger);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
@@ -419,7 +419,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var service = new InfluxDbService(mockOptions, mockPriceService.Object, mockLogger.Object);
@@ -446,7 +446,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
@@ -499,7 +499,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object).Object;
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
@@ -528,7 +528,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object).Object;
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
@@ -584,7 +584,7 @@ public class InfluxDbServiceTests
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var mockPriceService = new Mock<ElectricityPriceService>(
             mockHttpClient.Object,
-            mockServiceScopeFactory.Object,
+            new Mock<IElectricityPriceRepository>().Object,
             mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
@@ -746,7 +746,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -790,7 +790,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -840,7 +840,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -877,7 +877,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -921,7 +921,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -1013,7 +1013,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -1057,7 +1057,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 

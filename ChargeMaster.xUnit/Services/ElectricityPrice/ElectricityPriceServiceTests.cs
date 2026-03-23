@@ -48,7 +48,8 @@ public class ElectricityPriceServiceTests : IDisposable
                 return scope.Object;
             });
 
-        _service = new ElectricityPriceService(_httpClient, scopeFactoryMock.Object, _loggerMock.Object);
+        var repositoryMock = new Mock<IElectricityPriceRepository>();
+        _service = new ElectricityPriceService(_httpClient, repositoryMock.Object, _loggerMock.Object);
     }
 
     public void Dispose()

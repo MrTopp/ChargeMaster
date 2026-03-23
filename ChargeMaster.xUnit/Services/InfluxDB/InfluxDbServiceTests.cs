@@ -1,4 +1,4 @@
-﻿using ChargeMaster.Data;
+using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.InfluxDB;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,7 +68,7 @@ public class InfluxDbServiceTests
 
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
 
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(options, priceService, mockLogger.Object);
