@@ -11,6 +11,8 @@ using InfluxDB.Client.Writes;
 using Microsoft.Extensions.Options;
 using Tibber.Sdk;
 
+using System.Threading.Channels;
+
 namespace ChargeMaster.Services.InfluxDB;
 
 /// <summary>
@@ -52,13 +54,22 @@ public class InfluxDBClientFactory : IInfluxDBClientFactory
 
 /// <summary>
 /// Tjänst för att skriva data till InfluxDB.
+/// Serialiserar alla skrivningar via en queue för att undvika concurrency-problem.
 /// </summary>
-public class InfluxDbService
+public class InfluxDbService : IAsyncDisposable
 {
     private readonly InfluxDBClient _client;
     private readonly InfluxDBOptions _options;
     private readonly ILogger<InfluxDbService> _logger;
     private readonly ElectricityPriceService _priceService;
+    private readonly Channel<WriteOperation> _writeChannel;
+    private readonly CancellationTokenSource _cancellationTokenSource;
+
+    private long _lastPhase1Energy = 0;
+    private long _lastPhase2Energy = 0;
+    private long _lastPhase3Energy = 0;
+    private decimal _lastPrice = 0;
+    private int _lastQuarter = -1;
 
     public InfluxDbService(IOptions<InfluxDBOptions> options, ElectricityPriceService priceService, ILogger<InfluxDbService> logger)
         : this(options, priceService, logger, new InfluxDBClientFactory())
@@ -70,12 +81,11 @@ public class InfluxDbService
         _options = options.Value;
         _logger = logger;
         _priceService = priceService;
+        _cancellationTokenSource = new CancellationTokenSource();
 
         try
         {
             ValidateUrl(_options.Url);
-
-            // InfluxDB 2.0 autentisering med token
             _client = clientFactory.CreateClient(_options);
             _logger.LogInformation("InfluxDbService initialized successfully");
         }
@@ -84,47 +94,86 @@ public class InfluxDbService
             _logger.LogError(ex, "Failed to initialize InfluxDbService");
             throw;
         }
+
+        // Skapa channel för att serialisera skrivningar
+        _writeChannel = Channel.CreateUnbounded<WriteOperation>(
+            new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
+
+        // Starta background task som processerar skrivningar
+        _ = ProcessWriteQueueAsync(_cancellationTokenSource.Token);
     }
 
-    private static void ValidateUrl(string? url)
+    /// <summary>
+    /// Background task som processar skrivningar från kanalen en åt gången.
+    /// </summary>
+    private async Task ProcessWriteQueueAsync(CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            throw new ArgumentException("URL cannot be null or empty", nameof(url));
-        }
+        var operationCount = 0;
+        var errorCount = 0;
 
         try
         {
-            var uri = new Uri(url, UriKind.Absolute);
+            _logger.LogInformation("InfluxDB write queue processor started");
 
-            if (uri.Scheme != "http" && uri.Scheme != "https")
+            await foreach (var operation in _writeChannel.Reader.ReadAllAsync(cancellationToken))
             {
-                throw new ArgumentException($"URL scheme must be http or https, but got: {uri.Scheme}", nameof(url));
+                operationCount++;
+                try
+                {
+                    var operationType = operation.GetType().Name;
+                    _logger.LogDebug("Processing InfluxDB write operation #{Count}: {OperationType}", operationCount, operationType);
+
+                    await operation.ExecuteAsync(_client, _options, _logger);
+
+                    _logger.LogDebug("Successfully completed write operation #{Count}: {OperationType}", operationCount, operationType);
+                }
+                catch (TaskCanceledException ex)
+                {
+                    errorCount++;
+                    _logger.LogWarning(ex, 
+                        "Write operation #{Count} was canceled (timeout). Queue may be slow or InfluxDB unresponsive",
+                        operationCount);
+                }
+                catch (HttpRequestException ex)
+                {
+                    errorCount++;
+                    _logger.LogError(ex,
+                        "Write operation #{Count} failed with HTTP error. InfluxDB connection issue? Status: {Status}",
+                        operationCount, ex.StatusCode);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    errorCount++;
+                    _logger.LogError(ex,
+                        "Write operation #{Count} failed with invalid operation. Data validation error?",
+                        operationCount);
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                    _logger.LogError(ex,
+                        "Write operation #{Count} failed with unexpected error. Type: {ExceptionType}, Message: {Message}",
+                        operationCount, ex.GetType().Name, ex.Message);
+                }
             }
+
+            _logger.LogInformation(
+                "InfluxDB write queue processor completed. Total operations: {Total}, Errors: {Errors}, Success rate: {SuccessRate:P}",
+                operationCount, errorCount, (operationCount - errorCount) / (double)Math.Max(operationCount, 1));
         }
-        catch (UriFormatException ex)
+        catch (OperationCanceledException)
         {
-            throw new ArgumentException($"Invalid URL format: {url}", nameof(url), ex);
+            _logger.LogInformation(
+                "InfluxDB write queue processor canceled. Processed {Count} operations with {Errors} errors before shutdown",
+                operationCount, errorCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex,
+                "InfluxDB write queue processor crashed unexpectedly. Processed {Count} operations with {Errors} errors",
+                operationCount, errorCount);
         }
     }
-
-    public static InfluxDbService CreateInstance(IOptions<InfluxDBOptions> options, 
-        ElectricityPriceService priceService, ILogger<InfluxDbService> logger)
-    {
-        return new InfluxDbService(options, priceService, logger);
-    }
-
-    public static InfluxDbService CreateInstance(IOptions<InfluxDBOptions> options, 
-        ElectricityPriceService priceService, ILogger<InfluxDbService> logger, IInfluxDBClientFactory clientFactory)
-    {
-        return new InfluxDbService(options, priceService, logger, clientFactory);
-    }
-
-    private long _lastPhase1Energy = 0;
-    private long _lastPhase2Energy = 0;
-    private long _lastPhase3Energy = 0;
-    private decimal _lastPrice = 0;
-    private int _lastQuarter = -1;
 
     /// <summary>
     /// Skriver innehållet i en WallboxMeterInfo-instans till InfluxDB.
@@ -133,55 +182,8 @@ public class InfluxDbService
     /// <returns>Task som representerar den asynkrona operationen</returns>
     public async Task WriteWallboxMeterInfoAsync(WallboxMeterInfo meterInfo)
     {
-        try
-        {
-            var timestamp = DateTime.UtcNow;
-            int currentQuarter = timestamp.Minute / 15;
-
-            if (currentQuarter != _lastQuarter)
-            {
-                // Första läsningen i kvarten, nolla sekunderna så det blir exakt, t.ex. 12:00:00, 12:15:00, 12:30:00 eller 12:45:00
-                timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day,
-                    timestamp.Hour, timestamp.Minute, 0, DateTimeKind.Utc);
-            }
-
-            var elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
-
-            if (currentQuarter == _lastQuarter &&
-                meterInfo.Phase1CurrentEnergy == _lastPhase1Energy &&
-                meterInfo.Phase2CurrentEnergy == _lastPhase2Energy &&
-                meterInfo.Phase3CurrentEnergy == _lastPhase3Energy &&
-                elpris?.SekPerKwh == _lastPrice)
-            {
-                return; // Ingen förändring, hoppa över skrivning
-            }
-
-
-            var points = new List<PointData>
-            {
-                PointData.Measurement("wallbox_meter")
-                    //.Tag("meter_serial", meterInfo.MeterSerial ?? "unknown")
-                    .Field("acc_energy_wh", meterInfo.AccEnergy)
-                    .Field("phase1_current_energy_w", meterInfo.Phase1CurrentEnergy)
-                    .Field("phase2_current_energy_w", meterInfo.Phase2CurrentEnergy)
-                    .Field("phase3_current_energy_w", meterInfo.Phase3CurrentEnergy)
-                    .Field("current_energy_w", meterInfo.CurrentEnergy)
-                    .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
-                    .Timestamp(timestamp, WritePrecision.Ns)
-            };
-            await _client.GetWriteApiAsync().WritePointsAsync(points, _options.Bucket, _options.Org);
-            _logger.LogInformation(">> Writing WallboxMeterInfo to InfluxDB: {current}", meterInfo.CurrentEnergy);
-
-            _lastPhase1Energy = meterInfo.Phase1CurrentEnergy;
-            _lastPhase2Energy = meterInfo.Phase2CurrentEnergy;
-            _lastPhase3Energy = meterInfo.Phase3CurrentEnergy;
-            _lastPrice = elpris?.SekPerKwh ?? 0;
-            _lastQuarter = currentQuarter;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to write WallboxMeterInfo to InfluxDB");
-        }
+        var operation = new WallboxWriteOperation(meterInfo, _priceService, this);
+        await _writeChannel.Writer.WriteAsync(operation);
     }
 
     /// <summary>
@@ -190,61 +192,120 @@ public class InfluxDbService
     /// <param name="e">Mätdata från Tibber Pulse</param>
     public async Task WriteTibberMeasurementAsync(RealTimeMeasurement m)
     {
-        try
-        {
-            var timestamp = m.Timestamp.UtcDateTime;
+        var operation = new TibberWriteOperation(m, _priceService);
+        await _writeChannel.Writer.WriteAsync(operation);
+    }
 
-            var elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
+    // ==================== WRITE OPERATIONS ====================
+
+    private abstract record WriteOperation
+    {
+        public abstract Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger);
+    }
+
+    private sealed record WallboxWriteOperation(WallboxMeterInfo MeterInfo, ElectricityPriceService PriceService, InfluxDbService Service) : WriteOperation
+    {
+        public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
+        {
+            var timestamp = DateTime.UtcNow;
+            int currentQuarter = timestamp.Minute / 15;
+
+            if (currentQuarter != Service._lastQuarter)
+            {
+                timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day,
+                    timestamp.Hour, timestamp.Minute, 0, DateTimeKind.Utc);
+            }
+
+            var elpris = await PriceService.GetPriceForDateTimeAsync(DateTime.Now);
+
+            if (currentQuarter == Service._lastQuarter &&
+                MeterInfo.Phase1CurrentEnergy == Service._lastPhase1Energy &&
+                MeterInfo.Phase2CurrentEnergy == Service._lastPhase2Energy &&
+                MeterInfo.Phase3CurrentEnergy == Service._lastPhase3Energy &&
+                elpris?.SekPerKwh == Service._lastPrice)
+            {
+                return; // Ingen förändring
+            }
+
+            var points = new List<PointData>
+            {
+                PointData.Measurement("wallbox_meter")
+                    .Field("acc_energy_wh", MeterInfo.AccEnergy)
+                    .Field("phase1_current_energy_w", MeterInfo.Phase1CurrentEnergy)
+                    .Field("phase2_current_energy_w", MeterInfo.Phase2CurrentEnergy)
+                    .Field("phase3_current_energy_w", MeterInfo.Phase3CurrentEnergy)
+                    .Field("current_energy_w", MeterInfo.CurrentEnergy)
+                    .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
+                    .Timestamp(timestamp, WritePrecision.Ns)
+            };
+
+            await client.GetWriteApiAsync().WritePointsAsync(points, options.Bucket, options.Org);
+            logger.LogDebug(">> Writing WallboxMeterInfo to InfluxDB: {current}", MeterInfo.CurrentEnergy);
+
+            Service._lastPhase1Energy = MeterInfo.Phase1CurrentEnergy;
+            Service._lastPhase2Energy = MeterInfo.Phase2CurrentEnergy;
+            Service._lastPhase3Energy = MeterInfo.Phase3CurrentEnergy;
+            Service._lastPrice = elpris?.SekPerKwh ?? 0;
+            Service._lastQuarter = currentQuarter;
+        }
+    }
+
+    private sealed record TibberWriteOperation(RealTimeMeasurement Measurement, ElectricityPriceService PriceService) : WriteOperation
+    {
+        public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
+        {
+            var timestamp = Measurement.Timestamp.UtcDateTime;
+            var elpris = await PriceService.GetPriceForDateTimeAsync(DateTime.Now);
 
             var point = PointData.Measurement("tibber_pulse")
-                .Field("power_w", (double)m.Power)
-                //.Field("accumulated_consumption_kwh", (double)m.AccumulatedConsumption)
-                .Field("accumulated_consumption_last_hour_kwh", (double)m.AccumulatedConsumptionLastHour)
-                //.Field("accumulated_production_kwh", (double)m.AccumulatedProduction)
-                //.Field("accumulated_production_last_hour_kwh", (double)m.AccumulatedProductionLastHour)
-                //.Field("min_power_w", (double)m.MinPower)
-                //.Field("avg_power_w", (double)m.AveragePower)
-                //.Field("max_power_w", (double)m.MaxPower)
+                .Field("power_w", (double)Measurement.Power)
+                .Field("accumulated_consumption_last_hour_kwh", (double)Measurement.AccumulatedConsumptionLastHour)
                 .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
                 .Timestamp(timestamp, WritePrecision.Ns);
 
-            //if (m.PowerProduction.HasValue)
-            //    point = point.Field("power_production_w", (double)m.PowerProduction.Value);
-            //if (m.VoltagePhase1.HasValue)
-            //    point = point.Field("voltage_phase1_v", (double)m.VoltagePhase1.Value);
-            //if (m.VoltagePhase2.HasValue)
-            //    point = point.Field("voltage_phase2_v", (double)m.VoltagePhase2.Value);
-            //if (m.VoltagePhase3.HasValue)
-            //    point = point.Field("voltage_phase3_v", (double)m.VoltagePhase3.Value);
-            //if (m.CurrentPhase1.HasValue)
-            //    point = point.Field("current_phase1_a", (double)m.CurrentPhase1.Value);
-            //if (m.CurrentPhase2.HasValue)
-            //    point = point.Field("current_phase2_a", (double)m.CurrentPhase2.Value);
-            //if (m.CurrentPhase3.HasValue)
-            //    point = point.Field("current_phase3_a", (double)m.CurrentPhase3.Value);
-            if (m.PowerFactor.HasValue)
-                point = point.Field("power_factor", (double)m.PowerFactor.Value);
-            if (m.AccumulatedCost.HasValue)
-                point = point.Field("accumulated_cost", (double)m.AccumulatedCost.Value);
-            if (m.SignalStrength.HasValue)
-                point = point.Field("signal_strength_db", m.SignalStrength.Value);
+            if (Measurement.PowerFactor.HasValue)
+                point = point.Field("power_factor", (double)Measurement.PowerFactor.Value);
+            if (Measurement.AccumulatedCost.HasValue)
+                point = point.Field("accumulated_cost", (double)Measurement.AccumulatedCost.Value);
+            if (Measurement.SignalStrength.HasValue)
+                point = point.Field("signal_strength_db", Measurement.SignalStrength.Value);
 
-            // Aktiv effekt per fas: P = U × I × PF
-            if (m.VoltagePhase1.HasValue && m.CurrentPhase1.HasValue && m.PowerFactor.HasValue)
-                point = point.Field("power_phase1_w", (double)(m.VoltagePhase1.Value * m.CurrentPhase1.Value * m.PowerFactor.Value));
-            if (m.VoltagePhase2.HasValue && m.CurrentPhase2.HasValue && m.PowerFactor.HasValue)
-                point = point.Field("power_phase2_w", (double)(m.VoltagePhase2.Value * m.CurrentPhase2.Value * m.PowerFactor.Value));
-            if (m.VoltagePhase3.HasValue && m.CurrentPhase3.HasValue && m.PowerFactor.HasValue)
-                point = point.Field("power_phase3_w", (double)(m.VoltagePhase3.Value * m.CurrentPhase3.Value * m.PowerFactor.Value));
+            if (Measurement.VoltagePhase1.HasValue && Measurement.CurrentPhase1.HasValue && Measurement.PowerFactor.HasValue)
+                point = point.Field("power_phase1_w", (double)(Measurement.VoltagePhase1.Value * Measurement.CurrentPhase1.Value * Measurement.PowerFactor.Value));
+            if (Measurement.VoltagePhase2.HasValue && Measurement.CurrentPhase2.HasValue && Measurement.PowerFactor.HasValue)
+                point = point.Field("power_phase2_w", (double)(Measurement.VoltagePhase2.Value * Measurement.CurrentPhase2.Value * Measurement.PowerFactor.Value));
+            if (Measurement.VoltagePhase3.HasValue && Measurement.CurrentPhase3.HasValue && Measurement.PowerFactor.HasValue)
+                point = point.Field("power_phase3_w", (double)(Measurement.VoltagePhase3.Value * Measurement.CurrentPhase3.Value * Measurement.PowerFactor.Value));
 
-
-            await _client.GetWriteApiAsync().WritePointAsync(point, _options.Bucket, _options.Org);
-            _logger.LogInformation(">> Writing Tibber measurement to InfluxDB: {Power}W", m.Power);
+            await client.GetWriteApiAsync().WritePointAsync(point, options.Bucket, options.Org);
+            logger.LogDebug(">> Writing Tibber measurement to InfluxDB: {Power}W", Measurement.Power);
         }
-        catch (Exception ex)
+    }
+
+    // ==================== HELPER METHODS ====================
+
+    private static void ValidateUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            throw new ArgumentException("URL cannot be null or empty", nameof(url));
+
+        try
         {
-            _logger.LogError(ex, "Failed to write Tibber measurement to InfluxDB");
+            var uri = new Uri(url, UriKind.Absolute);
+            if (uri.Scheme != "http" && uri.Scheme != "https")
+                throw new ArgumentException($"URL scheme must be http or https, but got: {uri.Scheme}", nameof(url));
         }
+        catch (UriFormatException ex)
+        {
+            throw new ArgumentException($"Invalid URL format: {url}", nameof(url), ex);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _writeChannel.Writer.Complete();
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
     }
 }
 
