@@ -8,6 +8,7 @@
 @inject DaikinFacade DaikinFacade
 @inject ShellyMqttService ShellyMqttService
 @inject SmhiWorker SmhiWorker
+@inject LinuxWorker LinuxWorker
 @using ChargeMaster.Data
 @using ChargeMaster.Services.Wallbox
 @using ChargeMaster.Services.VolksWagen
@@ -148,7 +149,35 @@
         </div>
     </section>
 
-            <section class="mb-3">
+@if (SystemLoad is not null)
+    {
+        <section class="mb-3">
+            <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
+                <h4 class="mb-2">Systemlast (Linux)</h4>
+
+                <div class="row g-2">
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">1 minut:</small><br>
+                        <strong>@SystemLoad.Load1.ToString("F2")</strong>
+                    </div>
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">5 minuter:</small><br>
+                        <strong>@SystemLoad.Load5.ToString("F2")</strong>
+                    </div>
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">15 minuter:</small><br>
+                        <strong>@SystemLoad.Load15.ToString("F2")</strong>
+                    </div>
+                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                        <small class="text-muted">Processer:</small><br>
+                        <strong>@SystemLoad.RunningProcesses/@SystemLoad.TotalProcesses</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+
+    <section class="mb-3">
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
             <h4 class="mb-2">Planerad laddning</h4>
 
@@ -189,6 +218,7 @@
     private WallboxMeterInfo? CurrentMeterInfo { get; set; }
     private List<ElectricityPrice>? CurrentKvartlista { get; set; }
     private VWStatusLimitet? CurrentVWStatus { get; set; }
+    private SystemLoadEventArgs? SystemLoad { get; set; }
     private HashSet<string> HighlightedProperties { get; set; } = [];
     private CancellationTokenSource? _highlightCts;
     private Dictionary<string, double?> ShellyTemperatures { get; set; } = new()
@@ -218,6 +248,7 @@
         DaikinFacade.StatusChanged += OnDaikinStatusChanged;
         ShellyMqttService.TemperatureChanged += OnShellyTemperatureChanged;
         SmhiWorker.Subscribe(OnWeatherForecastUpdated);
+        LinuxWorker.SystemLoadUpdated += OnSystemLoadUpdated;
 
         // Trigga uppdatering av kvartlista
         CurrentKvartlista = ChargeWorker.GetKvartlista();
@@ -312,6 +343,12 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private void OnSystemLoadUpdated(object? sender, SystemLoadEventArgs e)
+    {
+        SystemLoad = e;
+        InvokeAsync(StateHasChanged);
+    }
+
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
@@ -320,6 +357,7 @@
         DaikinFacade.StatusChanged -= OnDaikinStatusChanged;
         ShellyMqttService.TemperatureChanged -= OnShellyTemperatureChanged;
         SmhiWorker.Unsubscribe(OnWeatherForecastUpdated);
+        LinuxWorker.SystemLoadUpdated -= OnSystemLoadUpdated;
 
         _highlightCts?.Cancel();
         _highlightCts?.Dispose();

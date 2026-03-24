@@ -3,13 +3,49 @@
 namespace ChargeMaster.Workers;
 
 /// <summary>
+/// Event args för systemlast-data.
+/// </summary>
+public class SystemLoadEventArgs(double load1, double load5, double load15, int runningProcesses, int totalProcesses) : EventArgs
+{
+    /// <summary>
+    /// Genomsnittlig last över senaste 1 minut.
+    /// </summary>
+    public double Load1 { get; } = load1;
+
+    /// <summary>
+    /// Genomsnittlig last över senaste 5 minuter.
+    /// </summary>
+    public double Load5 { get; } = load5;
+
+    /// <summary>
+    /// Genomsnittlig last över senaste 15 minuter.
+    /// </summary>
+    public double Load15 { get; } = load15;
+
+    /// <summary>
+    /// Antal processer som för närvarande körs.
+    /// </summary>
+    public int RunningProcesses { get; } = runningProcesses;
+
+    /// <summary>
+    /// Totalt antal processer i systemet.
+    /// </summary>
+    public int TotalProcesses { get; } = totalProcesses;
+}
+
+/// <summary>
 /// Worker som övervakar systemlasten på Linux-maskiner.
 /// Läser från /proc/loadavg var 5:e minut.
 /// </summary>
 public class LinuxWorker(ILogger<LinuxWorker> logger) : BackgroundService
 {
-    private const int CheckIntervalSeconds = 300; // 5 minuter
+    private const int CheckIntervalSeconds = 10; //300; // 5 minuter
     private const string LoadavgPath = "/proc/loadavg";
+
+    /// <summary>
+    /// Event som höjs när ny systemlast-data läses in.
+    /// </summary>
+    public event EventHandler<SystemLoadEventArgs>? SystemLoadUpdated;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -38,6 +74,14 @@ public class LinuxWorker(ILogger<LinuxWorker> logger) : BackgroundService
                         systemLoad.Load15.ToString("F2"),
                         systemLoad.RunningProcesses,
                         systemLoad.TotalProcesses);
+
+                    // Publicera event med systemlast-informationen
+                    SystemLoadUpdated?.Invoke(this, new SystemLoadEventArgs(
+                        systemLoad.Load1,
+                        systemLoad.Load5,
+                        systemLoad.Load15,
+                        systemLoad.RunningProcesses,
+                        systemLoad.TotalProcesses));
                 }
             }
             catch (OperationCanceledException)
