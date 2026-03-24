@@ -14,148 +14,106 @@ namespace ChargeMaster.UnitTests.Services.InfluxDB;
 public class InfluxDbServiceTests
 {
     /// <summary>
-    /// Tests that CreateInstance returns a non-null InfluxDbService instance when provided with valid parameters.
+    /// Tests that the constructor returns a non-null InfluxDbService instance when provided with valid parameters.
     /// </summary>
     [Fact]
-    public void CreateInstance_WithValidParameters_ReturnsInfluxDbServiceInstance()
+    public void Constructor_WithValidParameters_ReturnsInfluxDbServiceInstance()
     {
         // Arrange
         var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
         mockOptions.Setup(o => o.Value).Returns(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test-token", Org = "test-org", Bucket = "test-bucket" });
-        var mockRepository = new Mock<IElectricityPriceRepository>();
+        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockRepository.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
-        var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
+        var result = new InfluxDbService(mockOptions.Object, priceService, mockLogger.Object);
         // Assert
         Assert.NotNull(result);
         Assert.IsType<InfluxDbService>(result);
     }
 
     /// <summary>
-    /// Tests that CreateInstance throws NullReferenceException when options parameter is null.
+    /// Tests that constructor throws NullReferenceException when options parameter is null.
     /// The constructor accesses options.Value which will throw when options is null.
     /// </summary>
     [Fact]
-    public void CreateInstance_WithNullOptions_ThrowsNullReferenceException()
+    public void Constructor_WithNullOptions_ThrowsNullReferenceException()
     {
         // Arrange
-        var mockRepository = new Mock<IElectricityPriceRepository>();
+        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, mockRepository.Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
-        Assert.Throws<NullReferenceException>(() => InfluxDbService.CreateInstance(null!, priceService, mockLogger.Object));
+        Assert.Throws<NullReferenceException>(() => new InfluxDbService(null!, priceService, mockLogger.Object));
     }
 
     /// <summary>
-    /// Tests that CreateInstance accepts null priceService parameter without throwing immediately.
+    /// Tests that constructor accepts null priceService parameter without throwing immediately.
     /// The constructor stores the priceService but does not use it during initialization.
     /// </summary>
     [Fact]
-    public void CreateInstance_WithNullPriceService_ReturnsInstanceWithoutImmediateException()
+    public void Constructor_WithNullPriceService_ReturnsInstanceWithoutImmediateException()
     {
         // Arrange
         var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
         mockOptions.Setup(o => o.Value).Returns(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test-token", Org = "test-org", Bucket = "test-bucket" });
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
-        var result = InfluxDbService.CreateInstance(mockOptions.Object, null!, mockLogger.Object);
+        var result = new InfluxDbService(mockOptions.Object, null!, mockLogger.Object);
         // Assert
         Assert.NotNull(result);
     }
 
     /// <summary>
-    /// Tests that CreateInstance accepts null logger parameter without throwing immediately.
-    /// The constructor uses logger only in catch block and for logging, so null may not throw during initialization.
-    /// </summary>
-    [Fact]
-    public void CreateInstance_WithNullLogger_ReturnsInstanceWithoutImmediateException()
-    {
-        // Arrange
-        var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
-        mockOptions.Setup(o => o.Value).Returns(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test-token", Org = "test-org", Bucket = "test-bucket" });
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
-        var mockLogger = new Mock<ILogger<InfluxDbService>>();
-        // Act
-        var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
-        // Assert
-        Assert.NotNull(result);
-    }
-
-    /// <summary>
-    /// Tests that CreateInstance throws when options.Value is null.
-    /// The constructor accesses properties of options.Value which will throw NullReferenceException.
-    /// </summary>
-    [Fact]
-    public void CreateInstance_WithNullOptionsValue_ThrowsNullReferenceException()
-    {
-        // Arrange
-        var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
-        mockOptions.Setup(o => o.Value).Returns((InfluxDBOptions)null!);
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
-        var mockLogger = new Mock<ILogger<InfluxDbService>>();
-        // Act & Assert
-        Assert.Throws<NullReferenceException>(() => InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object));
-    }
-
-    /// <summary>
-    /// Tests that CreateInstance handles empty string values in InfluxDBOptions.
+    /// Tests that constructor handles empty string values in InfluxDBOptions.
     /// Tests boundary condition where connection parameters are empty strings.
     /// </summary>
     [Fact]
-    public void CreateInstance_WithEmptyStringOptionsValues_ReturnsInstance()
+    public void Constructor_WithEmptyStringOptionsValues_ThrowsArgumentException()
     {
         // Arrange
         var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
         mockOptions.Setup(o => o.Value).Returns(new InfluxDBOptions { Url = string.Empty, Token = string.Empty, Org = string.Empty, Bucket = string.Empty });
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IServiceScopeFactory>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => 
-            InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object));
+            new InfluxDbService(mockOptions.Object, priceService, mockLogger.Object));
         Assert.Contains("url", exception.Message.ToLower());
     }
 
     /// <summary>
-    /// Tests that CreateInstance handles whitespace-only string values in InfluxDBOptions.
+    /// Tests that constructor handles whitespace-only string values in InfluxDBOptions.
     /// Tests edge case where connection parameters are whitespace strings.
     /// </summary>
     [Fact]
-    public void CreateInstance_WithWhitespaceOptionsValues_ReturnsInstance()
+    public void Constructor_WithWhitespaceOptionsValues_ThrowsException()
     {
         // Arrange
         var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
         mockOptions.Setup(o => o.Value).Returns(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test-token", Org = "test-org", Bucket = "test-bucket" });
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IServiceScopeFactory>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
-        var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
+        var result = new InfluxDbService(mockOptions.Object, priceService, mockLogger.Object);
         // Assert
         Assert.NotNull(result);
     }
 
     /// <summary>
-    /// Tests that CreateInstance handles very long string values in InfluxDBOptions.
+    /// Tests that constructor handles very long string values in InfluxDBOptions.
     /// Tests edge case with extremely long connection parameters.
     /// </summary>
     [Fact]
-    public void CreateInstance_WithVeryLongStringOptionsValues_ReturnsInstance()
+    public void Constructor_WithVeryLongStringOptionsValues_InitializesSuccessfully()
     {
         // Arrange
         var longPath = new string ('a', 9970);
@@ -163,34 +121,32 @@ public class InfluxDbServiceTests
         var longString = new string ('a', 10000);
         var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
         mockOptions.Setup(o => o.Value).Returns(new InfluxDBOptions { Url = longUrl, Token = longString, Org = longString, Bucket = longString });
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IServiceScopeFactory>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
-        var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
+        var result = new InfluxDbService(mockOptions.Object, priceService, mockLogger.Object);
         // Assert
         Assert.NotNull(result);
     }
 
     /// <summary>
-    /// Tests that CreateInstance handles special characters in InfluxDBOptions string values.
+    /// Tests that constructor handles special characters in InfluxDBOptions string values.
     /// Tests edge case with special, unicode, and control characters in connection parameters.
     /// </summary>
     [Fact]
-    public void CreateInstance_WithSpecialCharactersInOptionsValues_ReturnsInstance()
+    public void Constructor_WithSpecialCharactersInOptionsValues_InitializesSuccessfully()
     {
         // Arrange
         var mockOptions = new Mock<IOptions<InfluxDBOptions>>();
         mockOptions.Setup(o => o.Value).Returns(new InfluxDBOptions { Url = "http://test-host.example.com:8086", Token = "token!@#$%^&*()_+-=日本語\u0020chars", Org = "org-with-日本語-chars", Bucket = "bucket_with-special.chars" });
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, new Mock<IServiceScopeFactory>().Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
-        var result = InfluxDbService.CreateInstance(mockOptions.Object, priceService, mockLogger.Object);
+        var result = new InfluxDbService(mockOptions.Object, priceService, mockLogger.Object);
         // Assert
         Assert.NotNull(result);
     }
@@ -213,7 +169,7 @@ public class InfluxDbServiceTests
         mockServiceScopeFactory.Setup(x => x.CreateScope()).Returns(mockScope.Object);
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var options = InfluxDbServiceTestHelper.CreateValidOptions();
         var service = new InfluxDbService(options, priceService, mockLogger.Object);
         var meterInfo = InfluxDbServiceTestHelper.CreateMeterInfo();
@@ -370,9 +326,9 @@ public class InfluxDbServiceTests
         };
         var mockOptions = Mock.Of<IOptions<InfluxDBOptions>>(o => o.Value == options);
         var mockHttpClient = new HttpClient();
-        var mockRepository = Mock.Of<IElectricityPriceRepository>();
+        var mockServiceScopeFactory = Mock.Of<IServiceScopeFactory>();
         var mockPriceServiceLogger = Mock.Of<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new ElectricityPriceService(mockHttpClient, mockRepository, mockPriceServiceLogger);
+        var mockPriceService = new ElectricityPriceService(mockHttpClient, mockServiceScopeFactory, mockPriceServiceLogger);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
@@ -419,7 +375,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var service = new InfluxDbService(mockOptions, mockPriceService.Object, mockLogger.Object);
@@ -446,7 +402,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
@@ -499,7 +455,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object).Object;
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
@@ -528,7 +484,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object).Object;
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
@@ -554,9 +510,9 @@ public class InfluxDbServiceTests
         };
         var mockOptions = Mock.Of<IOptions<InfluxDBOptions>>(o => o.Value == options);
         var mockHttpClient = Mock.Of<HttpClient>();
-        var mockRepository = Mock.Of<IElectricityPriceRepository>();
+        var mockServiceScopeFactory = Mock.Of<IServiceScopeFactory>();
         var mockPriceServiceLogger = Mock.Of<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient, mockRepository, mockPriceServiceLogger).Object;
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient, mockServiceScopeFactory, mockPriceServiceLogger).Object;
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act & Assert
         var exception = Assert.ThrowsAny<Exception>(() => new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object));
@@ -584,7 +540,7 @@ public class InfluxDbServiceTests
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var mockPriceService = new Mock<ElectricityPriceService>(
             mockHttpClient.Object,
-            new Mock<IElectricityPriceRepository>().Object,
+            mockServiceScopeFactory.Object,
             mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         // Act
@@ -746,7 +702,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -790,7 +746,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -840,7 +796,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -877,7 +833,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -921,7 +877,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -1013,7 +969,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 
@@ -1057,7 +1013,7 @@ public class InfluxDbServiceTests
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var mockPriceService = new ElectricityPriceService(httpClient, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new ElectricityPriceService(httpClient, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(mockOptions, mockPriceService, mockLogger.Object);
 

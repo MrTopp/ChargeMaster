@@ -22,12 +22,12 @@ public static class InfluxDbServiceTestHelper
     public static Mock<ElectricityPriceService> CreateMockPriceService()
     {
         var mockHttpClient = new Mock<HttpClient>();
-        var mockRepository = new Mock<IElectricityPriceRepository>();
+        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
 
         var mockPriceService = new Mock<ElectricityPriceService>(
             mockHttpClient.Object,
-            mockRepository.Object,
+            mockServiceScopeFactory.Object,
             mockLogger.Object);
 
         // Configure default behavior: returns null for price queries
