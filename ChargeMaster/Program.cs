@@ -7,6 +7,7 @@ using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Services.Shelly;
 using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.TibberPulse;
+using ChargeMaster.Services.ErrorLog;
 using ChargeMaster.Workers;
 
 using Microsoft.AspNetCore.DataProtection;
@@ -16,6 +17,7 @@ using Serilog;
 
 using System.Reflection;
 using ChargeMaster.Services.SMHI;
+using Serilog.Events;
 
 namespace ChargeMaster
 {
@@ -31,6 +33,9 @@ namespace ChargeMaster
             // Ta bort commit-hash om den finns (allt efter "+")
             versionInfo = versionInfo.Split('+')[0];
 
+            // Skapa ErrorLogService innan vi sätter upp Serilog
+            var errorLogService = new ErrorLogService();
+
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console(
                     outputTemplate:
@@ -38,6 +43,7 @@ namespace ChargeMaster
                 .WriteTo.File($"logs/log-.txt",
                     outputTemplate:
                     "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.Sink(new ErrorEventSink(errorLogService.OnErrorLogged))
                 .CreateLogger();
 
             try
@@ -74,7 +80,8 @@ namespace ChargeMaster
                     configuration
                         .ReadFrom.Configuration(context.Configuration)
                         .ReadFrom.Services(services)
-                        .Enrich.FromLogContext();
+                        .Enrich.FromLogContext()
+                        .WriteTo.Sink(new ErrorEventSink(errorLogService.OnErrorLogged));
 
                     // Error och Fatal skrivs även till stderr (utöver stdout från appsettings)
                     if (!context.HostingEnvironment.IsDevelopment())
@@ -135,6 +142,7 @@ namespace ChargeMaster
 
                 // ----- Logging -----
                 builder.Services.AddLogging();
+                builder.Services.AddSingleton(errorLogService);
 
                 // ----- InfluxDB -----
                 builder.Services.Configure<InfluxDBOptions>(
