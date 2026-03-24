@@ -132,10 +132,6 @@ public class SmhiWorker(
                 UpdateTime = LastUpdate
             });
         }
-        else
-        {
-            logger.LogInformation("Ny prenumeration på väderdata, men ingen data tillgänglig ännu");
-        }
     }
 
     /// <summary>
