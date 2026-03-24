@@ -113,7 +113,7 @@ public class InfluxDbService : IAsyncDisposable
 
         try
         {
-            _logger.LogInformation("InfluxDB write queue processor started");
+            _logger.LogDebug("InfluxDB write queue processor started");
 
             await foreach (var operation in _writeChannel.Reader.ReadAllAsync(cancellationToken))
             {
