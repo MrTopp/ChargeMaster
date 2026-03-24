@@ -34,11 +34,17 @@ public class InfluxDBClientFactory : IInfluxDBClientFactory
 {
     public InfluxDBClient CreateClient(InfluxDBOptions options)
     {
+        var httpClient = new HttpClient(new SocketsHttpHandler())
+        {
+            Timeout = TimeSpan.FromSeconds(10) // Set timeout to 10 seconds for HTTP operations
+        };
+
         var clientOptions = new InfluxDBClientOptions(options.Url)
         {
             Token = options.Token,
             Org = options.Org,
-            Bucket = options.Bucket
+            Bucket = options.Bucket,
+            HttpClient = httpClient
         };
         return new InfluxDBClient(clientOptions);
     }
@@ -164,7 +170,7 @@ public class InfluxDbService
                     .Timestamp(timestamp, WritePrecision.Ns)
             };
             await _client.GetWriteApiAsync().WritePointsAsync(points, _options.Bucket, _options.Org);
-            _logger.LogDebug(">> Writing WallboxMeterInfo to InfluxDB: {current}", meterInfo.CurrentEnergy);
+            _logger.LogInformation(">> Writing WallboxMeterInfo to InfluxDB: {current}", meterInfo.CurrentEnergy);
 
             _lastPhase1Energy = meterInfo.Phase1CurrentEnergy;
             _lastPhase2Energy = meterInfo.Phase2CurrentEnergy;
@@ -233,7 +239,7 @@ public class InfluxDbService
 
 
             await _client.GetWriteApiAsync().WritePointAsync(point, _options.Bucket, _options.Org);
-            _logger.LogDebug(">> Writing Tibber measurement to InfluxDB: {Power}W", m.Power);
+            _logger.LogInformation(">> Writing Tibber measurement to InfluxDB: {Power}W", m.Power);
         }
         catch (Exception ex)
         {
