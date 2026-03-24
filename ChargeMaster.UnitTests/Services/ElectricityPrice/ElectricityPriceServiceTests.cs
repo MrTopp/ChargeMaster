@@ -1,4 +1,5 @@
 ﻿using ChargeMaster.Services.ElectricityPrice;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -20,7 +21,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDate = new DateOnly(2024, 1, 15);
         var expectedPrices = new List<Data.ElectricityPrice>
@@ -51,7 +53,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDate = new DateOnly(2024, 6, 20);
         var emptyList = new List<Data.ElectricityPrice>();
@@ -78,7 +81,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var minDate = DateOnly.MinValue;
         var expectedPrices = new List<Data.ElectricityPrice>
@@ -108,7 +112,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var maxDate = DateOnly.MaxValue;
         var expectedPrices = new List<Data.ElectricityPrice>
@@ -147,7 +152,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDate = new DateOnly(year, month, day);
         var expectedPrices = new List<Data.ElectricityPrice>
@@ -178,7 +184,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDate = new DateOnly(2024, 3, 10);
         var expectedException = new InvalidOperationException("Database connection failed");
@@ -204,7 +211,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDate = new DateOnly(2024, 5, 1);
         var singlePrice = new Data.ElectricityPrice
@@ -242,7 +250,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDate = new DateOnly(2024, 7, 15);
         var manyPrices = new List<Data.ElectricityPrice>();
@@ -282,7 +291,8 @@ public partial class ElectricityPriceServiceTests
             .ReturnsAsync(true);
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         var result = await service.HasPricesForDateAsync(date);
@@ -305,7 +315,8 @@ public partial class ElectricityPriceServiceTests
             .ReturnsAsync(false);
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         var result = await service.HasPricesForDateAsync(date);
@@ -328,7 +339,8 @@ public partial class ElectricityPriceServiceTests
             .ReturnsAsync(false);
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         var result = await service.HasPricesForDateAsync(date);
@@ -351,7 +363,8 @@ public partial class ElectricityPriceServiceTests
             .ReturnsAsync(true);
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         var result = await service.HasPricesForDateAsync(date);
@@ -382,7 +395,8 @@ public partial class ElectricityPriceServiceTests
             .ReturnsAsync(expectedResult);
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         var result = await service.HasPricesForDateAsync(date);
@@ -403,12 +417,13 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new System.Net.Http.HttpClient();
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
 
         mockRepository
             .Setup(r => r.DeletePricesForDateAsync(date))
             .ReturnsAsync(0);
 
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         await service.DeletePricesForDateAsync(date);
@@ -436,12 +451,13 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new System.Net.Http.HttpClient();
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
 
         mockRepository
             .Setup(r => r.DeletePricesForDateAsync(date))
             .ReturnsAsync(1);
 
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         await service.DeletePricesForDateAsync(date);
@@ -472,12 +488,13 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new System.Net.Http.HttpClient();
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
 
         mockRepository
             .Setup(r => r.DeletePricesForDateAsync(date))
             .ReturnsAsync(count);
 
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         await service.DeletePricesForDateAsync(date);
@@ -505,12 +522,13 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new System.Net.Http.HttpClient();
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
 
         mockRepository
             .Setup(r => r.DeletePricesForDateAsync(date))
             .ReturnsAsync(5);
 
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         await service.DeletePricesForDateAsync(date);
@@ -538,12 +556,13 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new System.Net.Http.HttpClient();
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
 
         mockRepository
             .Setup(r => r.DeletePricesForDateAsync(date))
             .ReturnsAsync(3);
 
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         await service.DeletePricesForDateAsync(date);
@@ -572,12 +591,13 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new System.Net.Http.HttpClient();
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
 
         mockRepository
             .Setup(r => r.DeletePricesForDateAsync(date))
             .ReturnsAsync(42);
 
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         // Act
         await service.DeletePricesForDateAsync(date);
@@ -603,7 +623,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = new DateTime(2024, 1, 15, 10, 30, 0);
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -637,7 +658,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = new DateTime(2024, 1, 15, 23, 59, 0);
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -667,7 +689,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = new DateTime(2024, 1, 15, 10, 30, 0);
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -693,7 +716,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime1 = new DateTime(2024, 1, 15, 10, 30, 0);
         var testDateTime2 = new DateTime(2024, 1, 15, 14, 45, 0);
@@ -728,7 +752,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime1 = new DateTime(2024, 1, 15, 10, 30, 0);
         var testDateTime2 = new DateTime(2024, 1, 16, 10, 30, 0);
@@ -770,7 +795,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime1 = new DateTime(2024, 1, 15, 10, 30, 0);
         var testDateTime2 = new DateTime(2024, 1, 15, 23, 59, 0);
@@ -802,7 +828,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = new DateTime(2024, 1, 15, 10, 0, 0);
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -831,7 +858,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = new DateTime(2024, 1, 15, 10, 15, 0);
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -859,7 +887,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = DateTime.MinValue;
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -887,7 +916,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = DateTime.MaxValue;
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -915,7 +945,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = new DateTime(2024, 1, 15, 10, 7, 30);
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -945,7 +976,8 @@ public partial class ElectricityPriceServiceTests
         var mockRepository = new Mock<IElectricityPriceRepository>();
         var mockLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var service = new ElectricityPriceService(httpClient, mockRepository.Object, mockLogger.Object);
+        var mockScopeFactory = CreateMockScopeFactory(mockRepository.Object);
+        var service = new ElectricityPriceService(httpClient, mockScopeFactory.Object, mockLogger.Object);
 
         var testDateTime = new DateTime(2024, 1, 15, 10, 20, 0);
         var testDate = DateOnly.FromDateTime(testDateTime);
@@ -966,5 +998,23 @@ public partial class ElectricityPriceServiceTests
         Assert.Equal(2, result.Id);
         Assert.Equal(new DateTime(2024, 1, 15, 10, 15, 0), result.TimeStart);
         Assert.Equal(new DateTime(2024, 1, 15, 10, 30, 0), result.TimeEnd);
+    }
+
+    private static Mock<IServiceScopeFactory> CreateMockScopeFactory(IElectricityPriceRepository repository)
+    {
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        mockServiceProvider
+            .Setup(sp => sp.GetService(typeof(IElectricityPriceRepository)))
+            .Returns(repository);
+
+        var mockScope = new Mock<IServiceScope>();
+        mockScope.Setup(s => s.ServiceProvider).Returns(mockServiceProvider.Object);
+
+        var mockScopeFactory = new Mock<IServiceScopeFactory>();
+        mockScopeFactory
+            .Setup(f => f.CreateScope())
+            .Returns(mockScope.Object);
+
+        return mockScopeFactory;
     }
 }

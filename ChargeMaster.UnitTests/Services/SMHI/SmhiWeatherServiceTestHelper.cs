@@ -1,4 +1,5 @@
 ﻿using ChargeMaster.Services.SMHI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -11,19 +12,21 @@ namespace ChargeMaster.UnitTests.Services.SMHI;
 public static class SmhiWeatherServiceTestHelper
 {
     /// <summary>
-    /// Creates a mock IWeatherForecastRepository with default behavior for basic testing.
+    /// Creates a mock IServiceScopeFactory with default behavior for basic testing.
     /// </summary>
-    /// <returns>A mock IWeatherForecastRepository instance</returns>
-    public static Mock<IWeatherForecastRepository> CreateMockRepository()
+    /// <returns>A mock IServiceScopeFactory instance</returns>
+    public static Mock<IServiceScopeFactory> CreateMockServiceScopeFactory()
     {
-        var mockRepository = new Mock<IWeatherForecastRepository>();
+        var mockFactory = new Mock<IServiceScopeFactory>();
 
-        // Configure default behavior: SaveForecastsAsync returns successfully
-        mockRepository
-            .Setup(x => x.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>()))
-            .Returns(Task.CompletedTask);
+        // Configure default behavior: returns a mock scope
+        var mockScope = new Mock<IServiceScope>();
+        var mockServiceProvider = new Mock<IServiceProvider>();
 
-        return mockRepository;
+        mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
+        mockFactory.Setup(x => x.CreateScope()).Returns(mockScope.Object);
+
+        return mockFactory;
     }
 
     /// <summary>
@@ -48,22 +51,22 @@ public static class SmhiWeatherServiceTestHelper
     /// Creates a fully configured SmhiWeatherService for unit testing with all dependencies mocked.
     /// </summary>
     /// <param name="httpClient">Optional custom HttpClient. If null, a real instance is created.</param>
-    /// <param name="repository">Optional custom repository mock. If null, default mock is used.</param>
+    /// <param name="serviceScopeFactory">Optional custom service scope factory mock. If null, default mock is used.</param>
     /// <param name="logger">Optional custom logger mock. If null, default mock is used.</param>
     /// <returns>A configured SmhiWeatherService instance with all dependencies properly mocked</returns>
     public static SmhiWeatherService CreateServiceWithMocks(
         HttpClient? httpClient = null,
-        Mock<IWeatherForecastRepository>? repository = null,
+        Mock<IServiceScopeFactory>? serviceScopeFactory = null,
         Mock<ILogger<SmhiWeatherService>>? logger = null)
     {
         var clientToUse = httpClient ?? new HttpClient();
-        var repositoryToUse = repository ?? CreateMockRepository();
+        var serviceScopeFactoryToUse = serviceScopeFactory ?? CreateMockServiceScopeFactory();
         var loggerToUse = logger ?? CreateMockLogger();
 
-        if (repositoryToUse == null)
-            throw new InvalidOperationException("Repository mock cannot be null");
-        if (repositoryToUse.Object == null)
-            throw new InvalidOperationException("Repository mock object cannot be null");
+        if (serviceScopeFactoryToUse == null)
+            throw new InvalidOperationException("Service scope factory mock cannot be null");
+        if (serviceScopeFactoryToUse.Object == null)
+            throw new InvalidOperationException("Service scope factory mock object cannot be null");
         if (loggerToUse == null)
             throw new InvalidOperationException("Logger mock cannot be null");
         if (loggerToUse.Object == null)
@@ -71,7 +74,7 @@ public static class SmhiWeatherServiceTestHelper
 
         try
         {
-            return new SmhiWeatherService(clientToUse, loggerToUse.Object, repositoryToUse.Object);
+            return new SmhiWeatherService(clientToUse, loggerToUse.Object, serviceScopeFactoryToUse.Object);
         }
         catch (Exception ex)
         {

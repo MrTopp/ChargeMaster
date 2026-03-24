@@ -177,7 +177,7 @@ public class WallboxWorkerInitieraFörbrukningTests
 
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = InfluxDbService.CreateInstance(
+        var influxDbService = new InfluxDbService(
             Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
             {
                 Url = "http://localhost:8086",

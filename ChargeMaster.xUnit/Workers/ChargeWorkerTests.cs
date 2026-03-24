@@ -128,7 +128,7 @@ public class ChargeWorkerTests
 
         var mockLogger = new Mock<ILogger<WallboxWorker>>();
         var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = InfluxDbService.CreateInstance(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), null,
+        var influxDbService = new InfluxDbService(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), null,
             influxLogger);
         var worker = new WallboxWorker(null, null, influxDbService, mockLogger.Object);
 

@@ -40,7 +40,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = InfluxDbService.CreateInstance(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), null,
+        var influxDbService = new InfluxDbService(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), null,
             influxLogger);
         var worker = new WallboxWorker(null!, wallbox, influxDbService, logger);
 
@@ -61,7 +61,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = InfluxDbService.CreateInstance(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), 
+        var influxDbService = new InfluxDbService(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), 
                 null, influxLogger);
 
         var worker = new WallboxWorker(null!, wallbox, influxDbService, logger);
@@ -308,7 +308,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     {
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = InfluxDbService.CreateInstance(
+        var influxDbService = new InfluxDbService(
             Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions 
             { 
                 Url = "http://localhost:8086", 

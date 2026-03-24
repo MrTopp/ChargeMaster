@@ -1,4 +1,5 @@
 ﻿using ChargeMaster.Services.SMHI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -19,10 +20,9 @@ public class SmhiWeatherServiceTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger<SmhiWeatherService>>();
-        var mockRepository = new Mock<IWeatherForecastRepository>();
+        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var httpClient = new HttpClient();
-        mockRepository.Setup(r => r.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>())).Returns(Task.CompletedTask);
-        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockRepository.Object);
+        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
         var result = await service.GetForecast();
         // Assert
@@ -39,14 +39,13 @@ public class SmhiWeatherServiceTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger<SmhiWeatherService>>();
-        var mockRepository = new Mock<IWeatherForecastRepository>();
+        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         // Using an HttpClient with invalid base address to simulate failure
         var httpClient = new HttpClient
         {
             Timeout = TimeSpan.FromMilliseconds(1)
         };
-        mockRepository.Setup(r => r.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>())).Returns(Task.CompletedTask);
-        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockRepository.Object);
+        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
         var result = await service.GetForecast();
         // Assert
@@ -63,13 +62,12 @@ public class SmhiWeatherServiceTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger<SmhiWeatherService>>();
-        var mockRepository = new Mock<IWeatherForecastRepository>();
+        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var httpClient = new HttpClient
         {
             Timeout = TimeSpan.FromMilliseconds(1)
         };
-        mockRepository.Setup(r => r.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>())).Returns(Task.CompletedTask);
-        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockRepository.Object);
+        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
         var task = service.GetForecast();
         var result = await task;

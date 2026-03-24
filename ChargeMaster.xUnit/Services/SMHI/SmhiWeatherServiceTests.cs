@@ -4,6 +4,7 @@ using ChargeMaster.Data;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 
 namespace ChargeMaster.xUnit.Services.SMHI;
 
@@ -36,7 +37,7 @@ public class SmhiWeatherServiceTests
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
         var repository = CreateWeatherForecastRepository();
-        var service = new SmhiWeatherService(httpClient, logger, repository);
+        var service = new SmhiWeatherService(httpClient, logger, new Mock<IServiceScopeFactory>().Object);
 
         // Act
         var forecasts = await service.GetForecastAsync(longitude: 14.416639, latitude: 59.250709);
@@ -61,7 +62,7 @@ public class SmhiWeatherServiceTests
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
         var repository = CreateWeatherForecastRepository();
-        var service = new SmhiWeatherService(httpClient, logger, repository);
+        var service = new SmhiWeatherService(httpClient, logger, new Mock<IServiceScopeFactory>().Object);
 
         // Act
         var forecasts = await service.GetForecast();
