@@ -144,8 +144,6 @@ public class WallboxWorker(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            logger.LogError(new Exception("Test error"), $"Klockan är {DateTime.Now}");
-
             // Initiera genom att läsa upp status
             WallboxStatus wallboxStatus = await InitializeWallboxStatusAsync(stoppingToken);
 
