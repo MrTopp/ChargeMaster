@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 public class SmhiWeatherService(
     HttpClient httpClient,
     ILogger<SmhiWeatherService> logger,
-    IWeatherForecastRepository repository)
+    IServiceScopeFactory serviceScopeFactory)
 {
     private const string SmhiBaseUrl = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point";
 
@@ -78,6 +78,8 @@ public class SmhiWeatherService(
             logger.LogDebug("Retrieved {Count} weather forecast entries from SMHI", forecasts.Count);
 
             // Spara väderdata i databasen via repository
+            using var scope = serviceScopeFactory.CreateScope();
+            var repository = scope.ServiceProvider.GetRequiredService<IWeatherForecastRepository>();
             await repository.SaveForecastsAsync(forecasts);
 
             return forecasts;

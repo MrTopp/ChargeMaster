@@ -218,6 +218,8 @@ public class DaikinWorker(
     {
         try
         {
+            using var scope = serviceScopeFactory.CreateScope();
+            var electricityPriceService = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
             var prices = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
             var currentPriceData = prices.FirstOrDefault(p => p.TimeStart <= nu && p.TimeEnd > nu);
             return currentPriceData?.SekPerKwh;

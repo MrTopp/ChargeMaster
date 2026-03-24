@@ -35,12 +35,15 @@ public class SystemLoadEventArgs(double load1, double load5, double load15, int 
 
 /// <summary>
 /// Worker som övervakar systemlasten på Linux-maskiner.
-/// Läser från /proc/loadavg var 5:e minut.
+/// Läser från /proc/loadavg var 10:e sekund och publicerar event, 
+/// men loggar endast vid uppstart och sedan var 15:e minut.
 /// </summary>
 public class LinuxWorker(ILogger<LinuxWorker> logger) : BackgroundService
 {
-    private const int CheckIntervalSeconds = 10; //300; // 5 minuter
+    private const int CheckIntervalSeconds = 10; // Läs och posta event var 10:e sekund
+    private const int LogIntervalSeconds = 900; // Logga var 15:e minut (900 sekunder)
     private const string LoadavgPath = "/proc/loadavg";
+    private DateTime _lastLogTime = DateTime.MinValue;
 
     /// <summary>
     /// Event som höjs när ny systemlast-data läses in.
@@ -67,15 +70,22 @@ public class LinuxWorker(ILogger<LinuxWorker> logger) : BackgroundService
                 var systemLoad = await ReadSystemLoadAsync();
                 if (systemLoad != null)
                 {
-                    logger.LogInformation(
-                        "Systemlast - 1min: {Load1}, 5min: {Load5}, 15min: {Load15} | Processer: {Running}/{Total}",
-                        systemLoad.Load1.ToString("F2"),
-                        systemLoad.Load5.ToString("F2"),
-                        systemLoad.Load15.ToString("F2"),
-                        systemLoad.RunningProcesses,
-                        systemLoad.TotalProcesses);
+                    // Logga endast vid uppstart eller om LogIntervalSeconds har passerat
+                    var now = DateTime.UtcNow;
+                    if (_lastLogTime == DateTime.MinValue || (now - _lastLogTime).TotalSeconds >= LogIntervalSeconds)
+                    {
+                        logger.LogInformation(
+                            "Systemlast - 1min: {Load1}, 5min: {Load5}, 15min: {Load15} | Processer: {Running}/{Total}",
+                            systemLoad.Load1.ToString("F2"),
+                            systemLoad.Load5.ToString("F2"),
+                            systemLoad.Load15.ToString("F2"),
+                            systemLoad.RunningProcesses,
+                            systemLoad.TotalProcesses);
 
-                    // Publicera event med systemlast-informationen
+                        _lastLogTime = now;
+                    }
+
+                    // Publicera event var gång (inte beroende på loggintervallet)
                     SystemLoadUpdated?.Invoke(this, new SystemLoadEventArgs(
                         systemLoad.Load1,
                         systemLoad.Load5,
