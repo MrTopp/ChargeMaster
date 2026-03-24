@@ -129,7 +129,6 @@ public class ChargeWorker(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            logger.LogDebug("ChargeWorker tick at: {time}", DateTimeOffset.Now);
             DateTime dt = DateTime.Now;
             DateTime nu = new DateTime(dt.Year, dt.Month, dt.Day,
                 dt.Hour, dt.Minute, 0);

@@ -65,7 +65,7 @@ public class ElectricityPriceService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Kunde inte hämta eller lagra priser för {Date}.", date);
+            logger.LogError(ex, "Kan inte hämta eller lagra elpriser för {Date}.", date);
             throw; // Omkastning eller hantering? Bakgrundstjänsten bör hantera det.
         }
     }
@@ -82,10 +82,10 @@ public class ElectricityPriceService(
         // Kontrollera antal priser (96 = 24 timmar * 4 kvartar per timme)
         if (prices.Count != 96)
         {
-            logger.LogError("Unexpected number of prices for {Date}: expected 96, got {Count}",
+            logger.LogError("Ogiltigt antal priser för {Date}: förväntat 96, men får {Count}",
                 date.ToString("yyyy-MM-dd"), prices.Count);
             throw new InvalidOperationException(
-                $"Expected 96 prices for {date:yyyy-MM-dd}, but got {prices.Count}");
+                $"Ogiltigt antal priser för {date:yyyy-MM-dd}: förväntat 96, men får {prices.Count}");
         }
 
         // Kontrollera att alla priser är inom den efterfrågade dagen

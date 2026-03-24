@@ -165,7 +165,7 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Fel vid påslaging av värmepump");
+            logger.LogError(ex, "Fel vid start av värmepump");
             return false;
         }
     }
