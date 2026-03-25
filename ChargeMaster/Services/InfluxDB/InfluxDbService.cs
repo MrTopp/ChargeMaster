@@ -38,7 +38,7 @@ public class InfluxDBClientFactory : IInfluxDBClientFactory
     {
         var httpClient = new HttpClient(new SocketsHttpHandler())
         {
-            Timeout = TimeSpan.FromSeconds(10) // Set timeout to 10 seconds for HTTP operations
+            Timeout = TimeSpan.FromSeconds(60) // Set timeout to 60 seconds for HTTP operations
         };
 
         var clientOptions = new InfluxDBClientOptions(options.Url)
