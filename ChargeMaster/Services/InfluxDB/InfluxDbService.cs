@@ -205,6 +205,8 @@ public class InfluxDbService : IAsyncDisposable
 
     private sealed record WallboxWriteOperation(WallboxMeterInfo MeterInfo, ElectricityPriceService PriceService, InfluxDbService Service) : WriteOperation
     {
+        private static List<PointData> _points = new(); 
+
         public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
         {
             var timestamp = DateTime.UtcNow;
@@ -227,19 +229,20 @@ public class InfluxDbService : IAsyncDisposable
                 return; // Ingen förändring
             }
 
-            var points = new List<PointData>
-            {
-                PointData.Measurement("wallbox_meter")
-                    .Field("acc_energy_wh", MeterInfo.AccEnergy)
-                    .Field("phase1_current_energy_w", MeterInfo.Phase1CurrentEnergy)
-                    .Field("phase2_current_energy_w", MeterInfo.Phase2CurrentEnergy)
-                    .Field("phase3_current_energy_w", MeterInfo.Phase3CurrentEnergy)
-                    .Field("current_energy_w", MeterInfo.CurrentEnergy)
-                    .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
-                    .Timestamp(timestamp, WritePrecision.Ns)
-            };
+            var point = PointData.Measurement("wallbox_meter")
+                .Field("acc_energy_wh", MeterInfo.AccEnergy)
+                .Field("phase1_current_energy_w", MeterInfo.Phase1CurrentEnergy)
+                .Field("phase2_current_energy_w", MeterInfo.Phase2CurrentEnergy)
+                .Field("phase3_current_energy_w", MeterInfo.Phase3CurrentEnergy)
+                .Field("current_energy_w", MeterInfo.CurrentEnergy)
+                .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
+                .Timestamp(timestamp, WritePrecision.Ns);
 
-            await client.GetWriteApiAsync().WritePointsAsync(points, options.Bucket, options.Org);
+            //await client.GetWriteApiAsync().WritePointsAsync(points, options.Bucket, options.Org);
+            logger.LogDebug(">> Queuing WallboxMeterInfo for InfluxDB write: {current}W", MeterInfo.CurrentEnergy);
+            _points.Add(point);
+            WritePoints(client, options, logger);
+
             logger.LogDebug(">> Writing WallboxMeterInfo to InfluxDB: {current}", MeterInfo.CurrentEnergy);
 
             Service._lastPhase1Energy = MeterInfo.Phase1CurrentEnergy;
@@ -248,10 +251,26 @@ public class InfluxDbService : IAsyncDisposable
             Service._lastPrice = elpris?.SekPerKwh ?? 0;
             Service._lastQuarter = currentQuarter;
         }
+
+        private void WritePoints(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger, bool forceWrite = false)
+        {
+            if (_points.Count > 10 || forceWrite)
+            {
+                client.GetWriteApiAsync().WritePointsAsync(_points, options.Bucket, options.Org).Wait();
+                logger.LogDebug(">> Successfully wrote {Count} points to InfluxDB for WallboxMeterInfo", _points.Count);
+                _points.Clear();
+            }
+            else
+            {
+                logger.LogDebug(">> Accumulated {Count} points for WallboxMeterInfo, waiting to batch write to InfluxDB", _points.Count);
+            }
+        }
     }
 
     private sealed record TibberWriteOperation(RealTimeMeasurement Measurement, ElectricityPriceService PriceService) : WriteOperation
     {
+        private static List<PointData> _points = new ();
+
         public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
         {
             var timestamp = Measurement.Timestamp.UtcDateTime;
@@ -277,8 +296,25 @@ public class InfluxDbService : IAsyncDisposable
             if (Measurement.VoltagePhase3.HasValue && Measurement.CurrentPhase3.HasValue && Measurement.PowerFactor.HasValue)
                 point = point.Field("power_phase3_w", (double)(Measurement.VoltagePhase3.Value * Measurement.CurrentPhase3.Value * Measurement.PowerFactor.Value));
 
-            await client.GetWriteApiAsync().WritePointAsync(point, options.Bucket, options.Org);
+            logger.LogDebug(">> Queuing Tibber measurement for InfluxDB write: {Power}W", Measurement.Power);
+            //await client.GetWriteApiAsync().WritePointAsync(point, options.Bucket, options.Org);
+            _points.Add(point);
+            WritePoints(client, options, logger);
             logger.LogDebug(">> Writing Tibber measurement to InfluxDB: {Power}W", Measurement.Power);
+        }
+
+        private void WritePoints(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger, bool forceWrite = false)
+        {
+            if (_points.Count > 10 || forceWrite)
+            {
+                client.GetWriteApiAsync().WritePointsAsync(_points, options.Bucket, options.Org).Wait();
+                logger.LogDebug(">> Successfully wrote {Count} points to InfluxDB for Tibber measurement", _points.Count);
+                _points.Clear();
+            }
+            else
+            {
+                logger.LogDebug(">> Accumulated {Count} points for Tibber measurement, waiting to batch write to InfluxDB", _points.Count);
+            }
         }
     }
 
