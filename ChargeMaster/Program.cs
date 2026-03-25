@@ -46,6 +46,8 @@ namespace ChargeMaster
                 .WriteTo.Sink(new ErrorEventSink(errorLogService.OnErrorLogged))
                 .CreateLogger();
 
+            System.Diagnostics.Trace.Listeners.Clear();
+
             try
             {
                 Log.Information("==============================================");
@@ -105,7 +107,7 @@ namespace ChargeMaster
                 builder.Services.AddScoped<IElectricityPriceRepository, ElectricityPriceRepository>();
                 builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>(client =>
                 {
-                    client.Timeout = TimeSpan.FromSeconds(15);
+                    client.Timeout = TimeSpan.FromSeconds(160);
                 });
 
                 var vwServiceBaseAddress = builder.Configuration["Services:VWService"]
@@ -114,25 +116,25 @@ namespace ChargeMaster
                 builder.Services.AddHttpClient<VWService, VWService>(client =>
                 {
                     client.BaseAddress = new Uri(vwServiceBaseAddress);
-                    client.Timeout = TimeSpan.FromSeconds(30);
+                    client.Timeout = TimeSpan.FromSeconds(60);
                 });
 
                 builder.Services.AddHttpClient<WallboxService, WallboxService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.205:8080/");
-                    client.Timeout = TimeSpan.FromSeconds(20);
+                    client.Timeout = TimeSpan.FromSeconds(60);
                 });
 
                 builder.Services.AddHttpClient<DaikinService>(client =>
                 {
                     client.BaseAddress = new Uri("http://192.168.1.156/");
-                    client.Timeout = TimeSpan.FromSeconds(10);
+                    client.Timeout = TimeSpan.FromSeconds(60);
                 });
                 builder.Services.AddSingleton<IDaikinService>(sp => sp.GetRequiredService<DaikinService>());
 
                 builder.Services.AddHttpClient<SmhiWeatherService, SmhiWeatherService>(client =>
                 {
-                    client.Timeout = TimeSpan.FromSeconds(10);
+                    client.Timeout = TimeSpan.FromSeconds(60);
                 });
                 builder.Services.AddScoped<IWeatherForecastRepository, WeatherForecastRepository>();
 
