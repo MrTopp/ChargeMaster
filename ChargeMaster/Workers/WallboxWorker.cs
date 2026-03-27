@@ -154,16 +154,26 @@ public class WallboxWorker(
             await CheckWallboxTimeAsync(wallboxStatus);
 
             // Räkna ut nuvarande effekt
-            MeterInfo = await ReadEnergyAsync(stoppingToken, DateTime.Now);
+            var currentMeterInfo = await ReadEnergyAsync(stoppingToken, DateTime.Now);
+
+            // Sätt förbrukningsvärden innan objektet exponeras för konsumenter
+            if (currentMeterInfo != null)
+            {
+                currentMeterInfo.EffektTimmeNu = FörbrukningDennaTimme;
+                currentMeterInfo.EffektTimmeTotal = FörbrukningTotalDennaTimme;
+            }
+
+            // Exponera fullt initierat objekt via property
+            MeterInfo = currentMeterInfo;
 
             // Uppdatera InfluxDB
-            if (MeterInfo != null)
+            if (currentMeterInfo != null)
             {
-                await influxDbService.WriteWallboxMeterInfoAsync(MeterInfo);
+                await influxDbService.WriteWallboxMeterInfoAsync(currentMeterInfo);
             }
 
             // Posta mätarinfo
-            PostMeterInfo(MeterInfo);
+            PostMeterInfo(currentMeterInfo);
 
             // vänta innan nästa iteration
             await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
@@ -176,14 +186,13 @@ public class WallboxWorker(
     public ChargeSessionData? ChargeSessionData { get; private set; }
 
     /// <summary>
-    /// Posta förbrukning innevarande timme till prenumeranter på MeterInfoCalculated eventet.
+    /// Posta mätarinfo till prenumeranter på MeterInfoCalculated eventet.
+    /// Objektet ska vara fullt initierat (inklusive EffektTimmeNu/EffektTimmeTotal) innan anrop.
     /// </summary>
     private void PostMeterInfo(WallboxMeterInfo? meterInfo)
     {
         if (meterInfo == null)
             return;
-        meterInfo.EffektTimmeNu = FörbrukningDennaTimme;
-        meterInfo.EffektTimmeTotal = FörbrukningTotalDennaTimme;
         MeterInfoCalculated?.Invoke(this, new MeterInfoEventArgs(meterInfo));
     }
 
@@ -570,8 +579,9 @@ public class WallboxWorker(
     /// Beräkna gränsvärde när timförbrukningen är för hög.
     /// </summary>
     /// <param name="nu">Justeringsvärde, används för att beräkna gränsvärdet baserat på aktuell tid.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<long> KalkyleraGrans(DateTime nu)
+    public async Task<long> KalkyleraGrans(DateTime nu, CancellationToken cancellationToken )
     {
         long max;   // Högsta timförbrukningen i Wh
         HourlyEnergyUsage usage;
