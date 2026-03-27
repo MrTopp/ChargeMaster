@@ -17,7 +17,6 @@ using Serilog;
 
 using System.Reflection;
 using ChargeMaster.Services.SMHI;
-using Serilog.Events;
 
 namespace ChargeMaster
 {

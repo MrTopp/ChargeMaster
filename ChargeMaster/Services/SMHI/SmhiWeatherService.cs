@@ -1,8 +1,5 @@
 ﻿namespace ChargeMaster.Services.SMHI;
 
-using ChargeMaster.Data;
-using Microsoft.EntityFrameworkCore;
-
 /// <summary>
 /// Tjänst för att hämta väderprognos från SMHI.
 /// Hämtar temperatur (verklig och upplevd) för närmaste 12 timmarna.

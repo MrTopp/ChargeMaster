@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace ChargeMaster.Services.ElectricityPrice;
+﻿namespace ChargeMaster.Services.ElectricityPrice;
 
 /// <summary>
 /// Tillhandahåller metoder för att hämta, lagra och hantera elprisdata för specifika datum med hjälp av ett externt

@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using MQTTnet;
-using System;
 
 namespace ChargeMaster.UnitTests.Services.Shelly;
 
