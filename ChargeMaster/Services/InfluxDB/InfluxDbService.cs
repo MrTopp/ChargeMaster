@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Tibber.Sdk;
 
 using System.Threading.Channels;
+// ReSharper disable InconsistentNaming
 
 namespace ChargeMaster.Services.InfluxDB;
 
