@@ -61,6 +61,11 @@ public class ElectricityPriceService(
                     prices.Count, date.ToString("yyyy-MM-dd"));
             }
         }
+        catch(HttpRequestException ex)
+        {
+            logger.LogError("Fel vid hämtning av elpriser för {Date}, felkod {StatusCode} försöker senare.", date, ex.StatusCode);
+            throw; 
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Kan inte hämta eller lagra elpriser för {Date}.", date);

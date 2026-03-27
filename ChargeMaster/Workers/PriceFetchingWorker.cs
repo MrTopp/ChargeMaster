@@ -122,7 +122,7 @@ public class PriceFetchingWorker(
     /// </summary>
     /// <param name="date">Datumet för vilket elpriser ska hämtas.</param>
     /// <param name="stoppingToken">En avbytningstoken som kan användas för att avbryta operationen.</param>
-    /// <returns>En uppgift som repräsenterar den asynkrona operationen och returnerar true om den lyckas.</returns>
+    /// <returns>En uppgift som representerar den asynkrona operationen och returnerar true om den lyckas.</returns>
     private async Task<bool> CheckAndFetchAsync(DateOnly date, CancellationToken stoppingToken)
     {
         try
@@ -141,9 +141,8 @@ public class PriceFetchingWorker(
             await priceService.FetchAndStorePricesForDateAsync(date);
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            logger.LogError(ex, "PriceFetchingWorker: kunde inte hämta priser för {Date}", date);
             return false;
         }
     }
