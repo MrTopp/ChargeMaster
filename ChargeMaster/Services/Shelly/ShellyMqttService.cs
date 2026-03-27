@@ -15,10 +15,6 @@ public class ShellyMqttService(
     ILogger<ShellyMqttService> logger,
     IMqttClient? mqttClient = null) : IAsyncDisposable
 {
-    // ----- Captured primary constructor parameters -----
-    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly ILogger<ShellyMqttService> _logger = logger;
-
     /// <summary>
     /// Aktuella uppdaterade temperaturer
     /// </summary>
@@ -114,7 +110,7 @@ public class ShellyMqttService(
     
 
     public ShellyMqttService()
-        : this(null, null)
+        : this(null!, null!)
     {
 
     }
@@ -158,14 +154,8 @@ public class ShellyMqttService(
         {
             // Använd IServiceScopeFactory för att skapa ett scope för databasanrop
             // Detta är nödvändigt eftersom ShellyMqttService är Singleton men DbContext är Scoped
-            using var scope = _serviceScopeFactory?.CreateScope();
-            if (scope?.ServiceProvider == null)
-            {
-                _logger?.LogDebug("ServiceScopeFactory är null, använder standardtemperaturer");
-                return;
-            }
-
-            var dbContext = scope.ServiceProvider.GetRequiredService<ChargeMaster.Data.ApplicationDbContext>();
+            using var scope = serviceScopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<Data.ApplicationDbContext>();
 
             // Hämta senaste temperaturvärde för varje enhet från databasen
             var latestTemperatures = await dbContext.ShellyTemperatures
@@ -179,7 +169,7 @@ public class ShellyMqttService(
                 if (temp != null)
                 {
                     Temperatures[temp.DeviceId] = temp.TemperatureCelsius;
-                    _logger?.LogDebug("Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
+                    logger?.LogDebug("Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
                         temp.DeviceId, temp.TemperatureCelsius);
                 }
             }
@@ -193,7 +183,7 @@ public class ShellyMqttService(
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "Fel vid hämtning av temperaturer från databasen, använder defaultvärden");
+            logger?.LogError(ex, "Fel vid hämtning av temperaturer från databasen, använder defaultvärden");
         }
     }
 
@@ -220,7 +210,7 @@ public class ShellyMqttService(
             .Build();
 
         await _mqttClient.ConnectAsync(options, CancellationToken.None);
-        _logger?.LogInformation("Ansluten till MQTT-server på {Address}:{Port} med klient-ID {ClientId}",
+        logger.LogInformation("Ansluten till MQTT-server på {Address}:{Port} med klient-ID {ClientId}",
             brokerAddress, brokerPort, clientId);
     }
 
@@ -234,7 +224,7 @@ public class ShellyMqttService(
 
         if (_mqttClient.IsConnected)
         {
-            await _mqttClient.DisconnectAsync(MqttClientDisconnectOptionsReason.NormalDisconnection);
+            await _mqttClient.DisconnectAsync();
             logger.LogDebug("Kopplad ifrån MQTT-server");
         }
     }
@@ -248,8 +238,8 @@ public class ShellyMqttService(
         if (_mqttClient is null || !_mqttClient.IsConnected)
             throw new InvalidOperationException("Inte ansluten till MQTT-server");
 
-        await _mqttClient.SubscribeAsync(topic, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
-        _logger?.LogDebug("Prenumererad på MQTT-ämne: {Topic}", topic);
+        await _mqttClient.SubscribeAsync(topic);
+        logger.LogDebug("Prenumererad på MQTT-ämne: {Topic}", topic);
     }
 
     /// <summary>
@@ -269,7 +259,7 @@ public class ShellyMqttService(
         var topic = e.ApplicationMessage.Topic;
         var payload = System.Text.Encoding.UTF8.GetString(e.ApplicationMessage.Payload.ToArray());
 
-        _logger?.LogDebug("MQTT-meddelande mottaget från {Topic}: {Payload}", topic, payload);
+        logger.LogDebug("MQTT-meddelande mottaget från {Topic}: {Payload}", topic, payload);
 
         var mess = ShellyRpcMessageParser.Parse(payload);
         if (mess == null)
@@ -282,13 +272,13 @@ public class ShellyMqttService(
 
     private void HandleMessage(ShellyRpcMessage message)
     {
-        double? temp = message?.@params?.Temperature0?.TemperatureCelsius;
-        string? src = message?.dst?.Split('/')?.FirstOrDefault()?.Replace("shelly-", "");
+        double? temp = message.@params?.Temperature0?.TemperatureCelsius;
+        string? src = message.dst.Split('/').FirstOrDefault()?.Replace("shelly-", "");
         if (temp.HasValue && src != null)
         {
             if (!Temperatures.ContainsKey(src) || Math.Abs(Temperatures[src] - temp.Value) > 0.1)
             {
-                _logger?.LogInformation("Temperatur från {Src}: {Temp} °C", src, temp.Value);
+                logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temp.Value);
                 Temperatures[src] = temp.Value;
                 _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs(src, temp.Value));
             }
@@ -298,7 +288,7 @@ public class ShellyMqttService(
 
     private Task OnConnectedAsync(MqttClientConnectedEventArgs e)
     {
-        _logger?.LogDebug("MQTT-anslutning etablerad");
+        logger.LogDebug("MQTT-anslutning etablerad");
 
         // Trigga ConnectionChanged-eventet
         ConnectionChanged?.Invoke(this, new ShellyConnectionChangedEventArgs(true));
@@ -309,7 +299,7 @@ public class ShellyMqttService(
     private Task OnDisconnectedAsync(MqttClientDisconnectedEventArgs e)
     {
         var reason = e.Reason.ToString();
-        _logger?.LogWarning("MQTT-anslutning förlorad. Anledning: {Reason}", reason);
+        logger.LogWarning("MQTT-anslutning förlorad. Anledning: {Reason}", reason);
 
         // Trigga ConnectionChanged-eventet
         ConnectionChanged?.Invoke(this, new ShellyConnectionChangedEventArgs(false));
@@ -327,7 +317,7 @@ public class ShellyMqttService(
 
             if (_mqttClient.IsConnected)
             {
-                await _mqttClient.DisconnectAsync(MqttClientDisconnectOptionsReason.NormalDisconnection);
+                await _mqttClient.DisconnectAsync();
             }
 
             _mqttClient.Dispose();
