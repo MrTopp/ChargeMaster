@@ -1,6 +1,4 @@
-﻿using ChargeMaster.Services.ElectricityPrice;
-
-namespace ChargeMaster.xUnit.Services.ElectricityPrice;
+﻿namespace ChargeMaster.xUnit.Services.ElectricityPrice;
 
 public class ElectricityPriceTests
 {
