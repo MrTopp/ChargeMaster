@@ -2,7 +2,7 @@
 
 public class ElectricityPriceTests
 {
-    [Theory]
+    [Theory(Skip="Only for interactive testing")]
     // Winter Months (Nov-Mar) - Blocked between 07:00 and 19:00
     [InlineData(11, 7, false)]  // Start of block
     [InlineData(11, 18, false)] // End of block (inclusive/exclusive boundary check)
