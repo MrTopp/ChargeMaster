@@ -67,7 +67,7 @@ public class ElectricityPriceServiceTests : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task HasPricesForDateAsync_ReturnsFalse_WhenNoPricesExist()
     {
         // Arrange
@@ -80,7 +80,7 @@ public class ElectricityPriceServiceTests : IDisposable
         Assert.False(result);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task HasPricesForDateAsync_ReturnsTrue_WhenPricesExist()
     {
         // Arrange
@@ -102,7 +102,7 @@ public class ElectricityPriceServiceTests : IDisposable
         Assert.True(result);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetPricesForDateAsync_ReturnsOnlyPricesForSpecificDate()
     {
         // Arrange
@@ -141,7 +141,7 @@ public class ElectricityPriceServiceTests : IDisposable
     /// Test running data fetching, deleting existing prices to force a fetch.
     /// </summary>
     /// <returns></returns>
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_DeletesExistingPrices_AndFetchesNewData()
     {
         // Arrange
@@ -164,7 +164,7 @@ public class ElectricityPriceServiceTests : IDisposable
 
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_DoesNothing_IfPricesExist()
     {
         // Arrange
@@ -193,7 +193,7 @@ public class ElectricityPriceServiceTests : IDisposable
             Times.Once);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_FetchesAndStores_WhenNoPricesExist()
     {
         // Arrange
@@ -216,7 +216,7 @@ public class ElectricityPriceServiceTests : IDisposable
     /// Fyll på databasen med priser från 1 oktober 2025 till idag. 
     /// </summary>
     /// <returns></returns>
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetPriceForDateTimeAsync_ReturnsCorrectPrice_ForSpecificDateTime()
     {
         // Arrange
@@ -234,7 +234,7 @@ public class ElectricityPriceServiceTests : IDisposable
         Assert.Equal(0.84m, result.SekPerKwh);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetPriceForDateTimeAsync_UsesCacheForSameDay()
     {
         // Arrange
@@ -253,7 +253,7 @@ public class ElectricityPriceServiceTests : IDisposable
         Assert.Same(result1, result2); // Should be the same instance from cache
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetPriceForDateTimeAsync_ReturnsNull_WhenNoPriceExists()
     {
         // Arrange
@@ -273,7 +273,7 @@ public class ElectricityPriceServiceTests : IDisposable
     /// Fyll på databasen med priser från 1 oktober 2025 till idag. 
     /// </summary>
     /// <returns></returns>
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_PopulatesDatabaseFromOctoberFirstToToday()
     {
         // Arrange

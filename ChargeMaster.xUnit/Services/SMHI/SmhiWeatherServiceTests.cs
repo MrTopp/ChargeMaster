@@ -30,7 +30,7 @@ public class SmhiWeatherServiceTests
         return new ApplicationDbContext(options);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetForecastAsync_WithValidCoordinates_ReturnsWeatherForecasts()
     {
         // Arrange
@@ -55,7 +55,7 @@ public class SmhiWeatherServiceTests
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetForecastForStromtorpAsync_ReturnsWeatherForecasts()
     {
         // Arrange

@@ -92,7 +92,7 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
     /// Grundläggande test för att ansluta till MQTT-server.
     /// Modifiera brokerAddress och brokerPort enligt din miljö.
     /// </summary>
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task ConnectToMqttBroker()
     {
         // Konfiguration

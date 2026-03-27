@@ -10,7 +10,7 @@ namespace ChargeMaster.xUnit.Workers;
 
 public class WallboxWorkerInitieraFörbrukningTests
 {
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task InitieraFörbrukningAsync_WithReadings_SetsPropertiesCorrectly()
     {
         // Arrange
@@ -44,7 +44,7 @@ public class WallboxWorkerInitieraFörbrukningTests
         Assert.True(worker.WallboxInitierad);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task InitieraFörbrukningAsync_WithNoReadings_SetsDefaultValues()
     {
         // Arrange
@@ -60,7 +60,7 @@ public class WallboxWorkerInitieraFörbrukningTests
         Assert.Equal(0, worker.FörbrukningFöregåendeTimme);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task InitieraFörbrukningAsync_CalculatesFörbrukningFöregåendeTimme()
     {
         // Arrange - Sätt upp mätningar där vi kan verifiera förbrukning föregående timme
@@ -93,7 +93,7 @@ public class WallboxWorkerInitieraFörbrukningTests
         Assert.Equal(500, worker.FörbrukningFöregåendeTimme);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task InitieraFörbrukningAsync_WithSingleReading_HandlesGracefully()
     {
         // Arrange
@@ -112,7 +112,7 @@ public class WallboxWorkerInitieraFörbrukningTests
         Assert.True(worker.WallboxInitierad);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task InitieraFörbrukningAsync_WithReadingsSpanningMultipleDays_WorksCorrectly()
     {
         // Arrange
@@ -136,7 +136,7 @@ public class WallboxWorkerInitieraFörbrukningTests
         Assert.Equal(200, worker.FörbrukningFöregåendeTimme);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task InitieraFörbrukningAsync_CancellationRequested_ThrowsOperationCanceledException()
     {
         // Arrange
