@@ -143,7 +143,7 @@ public class ChargeWorker(
             }
 
             // ----- Effektvakt värmepump
-            await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningDennaTimme, nu);
+            await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningDennaTimme, nu, stoppingToken);
 
             // ----- Bilen inte ansluten, hoppa över utvärdering av laddning
             if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
@@ -214,7 +214,7 @@ public class ChargeWorker(
             {
                 // TODO: kalkylera gränsen exclusive bilens laddade effekt
                 // kräver att vi räknar ut bilens laddade effekt i realtid.
-                var grans = await wallboxWorker.KalkyleraGrans((DateTime)nu);
+                var grans = await wallboxWorker.KalkyleraGrans((DateTime)nu,stoppingToken);
                 if (nu.Minute < 30) grans = int.MaxValue;
                 if (wallboxWorker.FörbrukningDennaTimme > grans)
                 {
