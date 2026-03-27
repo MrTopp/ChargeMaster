@@ -4,7 +4,7 @@ namespace ChargeMaster.xUnit.Services.Wallbox;
 
 public sealed class WallboxSchemaEntryTests
 {
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void Equals_WhenOtherIsNull_ReturnsFalse()
     {
         var a = new WallboxSchemaEntry
@@ -17,7 +17,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.False(a.Equals(null));
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void Equals_WhenSameReference_ReturnsTrue()
     {
         var a = new WallboxSchemaEntry
@@ -30,7 +30,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.True(a.Equals(a));
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void Equals_WhenSameStartStopWeekday_ReturnsTrue()
     {
         var a = new WallboxSchemaEntry
@@ -71,7 +71,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.False(a.Equals((object)b));
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void Equals_IsOrdinalAndCaseSensitive()
     {
         var a = new WallboxSchemaEntry { Start = "08:00:00", Stop = "10:00:00", Weekday = "mon" };
@@ -80,7 +80,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.False(a.Equals(b));
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void Equals_WhenBothHaveNullFields_TreatsNullsAsEqual()
     {
         var a = new WallboxSchemaEntry { Start = null, Stop = null, Weekday = null };

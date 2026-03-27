@@ -17,7 +17,7 @@ public class ChargeWorkerTests
 {
     private readonly ChargeWorker _worker = SetUpChargeWorker().Result;
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task ChargeLoop_OK()
     {
 
@@ -25,7 +25,7 @@ public class ChargeWorkerTests
         await _worker.ChargeLoop(CancellationToken.None);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task LaddBehov_OK()
     {
         // Act
@@ -35,7 +35,7 @@ public class ChargeWorkerTests
         Assert.Equal(0, result);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void SkapaKvartlista_OK()
     {
         // Act
@@ -43,7 +43,7 @@ public class ChargeWorkerTests
         
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetHourlyEnergyUsage_OK()
     {
         // Arrange

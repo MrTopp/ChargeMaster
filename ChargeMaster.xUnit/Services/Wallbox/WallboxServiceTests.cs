@@ -26,7 +26,7 @@ public class WallboxServiceTests : IDisposable
         _httpClient.Dispose();
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetStatusAsync_OK()
     {
         // Act
@@ -66,7 +66,7 @@ public class WallboxServiceTests : IDisposable
         }));
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetMeterInfoAsync_OK()
     {
         // Act
@@ -77,7 +77,7 @@ public class WallboxServiceTests : IDisposable
         Assert.True(result.AccEnergy > 64067100);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetSchemaAsync_OK()
     {
         // Act
@@ -95,7 +95,7 @@ public class WallboxServiceTests : IDisposable
         });
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetConfigAsync_OK()
     {
         // Act
@@ -107,7 +107,7 @@ public class WallboxServiceTests : IDisposable
         Assert.False(string.IsNullOrWhiteSpace(result.ProgramVersion));
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetSlavesAsync_OK()
     {
         // Act

@@ -32,7 +32,7 @@ public class DaikinFacadeTests : IDisposable
         _httpClient.Dispose();
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task InitializeAsync_LoadsStatusFromDaikin()
     {
         await _facade.InitializeAsync();
@@ -44,7 +44,7 @@ public class DaikinFacadeTests : IDisposable
         Assert.True(Enum.IsDefined(typeof(DaikinMode), _facade.Mode));
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task CurrentTemperatureProperty_ReturnsValidTemperature()
     {
         await _facade.InitializeAsync();
@@ -55,7 +55,7 @@ public class DaikinFacadeTests : IDisposable
         Assert.InRange(currentTemp.Value, -20, 50);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task IsOnProperty_MatchesPowerState()
     {
         await _facade.InitializeAsync();
@@ -65,7 +65,7 @@ public class DaikinFacadeTests : IDisposable
         Assert.IsType<bool>(isOn);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task SetTargetTemperatureAsync_UpdatesLocalCache()
     {
         await _facade.InitializeAsync();
@@ -87,7 +87,7 @@ public class DaikinFacadeTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task TurnOffAsync_SetsPowerToZero()
     {
         await _facade.InitializeAsync();
@@ -109,7 +109,7 @@ public class DaikinFacadeTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task TurnOnAsync_SetsPowerToOne()
     {
         await _facade.InitializeAsync();
@@ -131,7 +131,7 @@ public class DaikinFacadeTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task TurnOffAndOnAsync_RestoresOriginalState()
     {
         await _facade.InitializeAsync();
@@ -163,7 +163,7 @@ public class DaikinFacadeTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task SetModeAsync_ChangesMode()
     {
         await _facade.InitializeAsync();
@@ -185,7 +185,7 @@ public class DaikinFacadeTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task RefreshAsync_UpdatesAllStatus()
     {
         // Första uppdatering
@@ -205,7 +205,7 @@ public class DaikinFacadeTests : IDisposable
         Assert.InRange(refreshedTemp.Value, -20, 50);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task StatusChanged_EventRaisedWhenStatusUpdates()
     {
         await _facade.InitializeAsync();
@@ -222,7 +222,7 @@ public class DaikinFacadeTests : IDisposable
         Assert.True(true);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task StatusChanged_RaisedWhenModeChanges()
     {
         await _facade.InitializeAsync();
@@ -248,7 +248,7 @@ public class DaikinFacadeTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task StatusChanged_RaisedWhenTemperatureChanges()
     {
         await _facade.InitializeAsync();

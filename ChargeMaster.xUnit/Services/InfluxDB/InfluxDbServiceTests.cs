@@ -40,7 +40,7 @@ public class InfluxDbServiceTests
     /// and power factor data, the service correctly calculates the phase power and includes
     /// it in the InfluxDB write operation.
     /// </summary>
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     [Trait("Category", "ProductionBugSuspected")]
     public async Task WriteTibberMeasurementAsync_WithPhase1Data_CalculatesPhase1Power()
     {

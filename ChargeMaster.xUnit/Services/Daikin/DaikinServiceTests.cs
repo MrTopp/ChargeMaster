@@ -121,7 +121,7 @@ public class DaikinServiceTests : IDisposable
 
     // ==================== AIRCON ENDPOINTS ====================
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetControlInfoAsync_ReturnsSettings()
     {
         DaikinControlInfo? result = await _service.GetControlInfoAsync();
@@ -134,7 +134,7 @@ public class DaikinServiceTests : IDisposable
         Assert.False(string.IsNullOrWhiteSpace(result.ModeDescription));
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetSensorInfoAsync_ReturnsTemperatures()
     {
         // Temperatur inne och ute
@@ -187,7 +187,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotEmpty(result.WeeklyData);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetWeekPowerExAsync_ReturnsWeeklyDataExtended()
     {
         DaikinWeekPowerEx? result = await _service.GetWeekPowerExAsync();
@@ -200,7 +200,7 @@ public class DaikinServiceTests : IDisposable
         Assert.Equal(14, result.WeekCool.Length);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetDayPowerExAsync_ReturnsDailyDataExtended()
     {
         DaikinDayPowerEx? result = await _service.GetDayPowerExAsync();
@@ -224,7 +224,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotEmpty(result.PreviousYear);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task GetYearPowerExAsync_ReturnsYearlyDataExtended()
     {
         DaikinYearPowerEx? result = await _service.GetYearPowerExAsync();
@@ -264,7 +264,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotNull(result.Enabled);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task SetControlInfoAsync_RestoresOriginal()
     {
         // Ställer måltemperatur, fungerar!
@@ -307,7 +307,7 @@ public class DaikinServiceTests : IDisposable
 
     // ==================== CONVENIENCE METHODS ====================
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task TurnOffAndOn_RestoresOriginalState()
     {
         DaikinControlInfo? original = await _service.GetControlInfoAsync();
@@ -336,7 +336,7 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task SetTargetTemperatureAsync_RestoresOriginal()
     {
         DaikinControlInfo? original = await _service.GetControlInfoAsync();
@@ -417,7 +417,7 @@ public class DaikinServiceTests : IDisposable
     /// <summary>
     /// Växla mellan kyla och värme och tillbaka
     /// </summary>
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task SetModeAsync_RestoresOriginal()
     {
         DaikinControlInfo? original = await _service.GetControlInfoAsync();

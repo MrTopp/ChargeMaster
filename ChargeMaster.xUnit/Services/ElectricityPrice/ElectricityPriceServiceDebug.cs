@@ -43,7 +43,7 @@ public class ElectricityPriceServiceDebug : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task HasPricesForDateAsync_ReturnsFalse_WhenNoPricesExist()
     {
         // Arrange
@@ -60,7 +60,7 @@ public class ElectricityPriceServiceDebug : IDisposable
     /// Test running data fetching, deleting existing prices to force a fetch.
     /// </summary>
     /// <returns></returns>
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_Rensa_OK()
     {
         // Arrange
@@ -85,7 +85,7 @@ public class ElectricityPriceServiceDebug : IDisposable
     }
     
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_utan_rensning_OK()
     {
         // Arrange

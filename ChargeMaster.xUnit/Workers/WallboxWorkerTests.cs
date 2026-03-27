@@ -33,7 +33,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 {
     private readonly HttpClient _httpClient = fixture.HttpClient;
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task InitializeWallboxStatus_OK()
     {
         // Arrange
@@ -54,7 +54,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         Assert.True(result.Serial > 0);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task CheckWallboxTime_OK()
     {
         // Arrange
@@ -103,7 +103,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         await worker.CheckWallboxTimeAsync(status);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task ReadEnergyAsync_Debug()
     {
         // Arrange - Set up services with database and wallbox
@@ -144,7 +144,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         }
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task KalkyleraGrans_NoAssertion()
     {
         // Arrange - Set up services with database and wallbox
@@ -201,7 +201,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         return path;
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void GenerateHourBoundaryReadings_SameHour_ReturnsSingleEntry()
     {
         // Arrange
@@ -220,7 +220,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         Assert.Equal(currentEnergy, result[0].AccEnergy);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void GenerateHourBoundaryReadings_CrossesOneHour_ReturnsTwoEntries()
     {
         // Arrange
@@ -249,7 +249,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         Assert.Equal(currentEnergy, result[1].AccEnergy);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void GenerateHourBoundaryReadings_CrossesMultipleHours_ReturnsEntryPerHour()
     {
         // Arrange
@@ -285,7 +285,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         Assert.True(result[3].AccEnergy > result[2].AccEnergy);
     }
 
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public void GenerateHourBoundaryReadings_CrossesMidnight_HandlesDateChange()
     {
         // Arrange

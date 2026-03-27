@@ -17,7 +17,7 @@ public class TibberPulseInteractiveTests(ITestOutputHelper output)
     /// Ansluter till Tibber API och skriver ut alla mottagna mätningar i upp till 2 minuter.
     /// Kör testet manuellt via Test Explorer för att se resultat i realtid.
     /// </summary>
-    [Fact]
+    [Fact(Skip="Only for interactive testing")]
     public async Task SubscribeAndPrintMeasurements()
     {
         var config = new ConfigurationBuilder()
