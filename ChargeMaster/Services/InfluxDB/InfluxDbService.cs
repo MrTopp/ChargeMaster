@@ -64,6 +64,7 @@ public class InfluxDbService : IAsyncDisposable
     private readonly ElectricityPriceService _priceService;
     private readonly Channel<WriteOperation> _writeChannel;
     private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly Task _processTask;
 
     private long _lastPhase1Energy = 0;
     private long _lastPhase2Energy = 0;
@@ -100,7 +101,7 @@ public class InfluxDbService : IAsyncDisposable
             new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
 
         // Starta background task som processerar skrivningar
-        _ = ProcessWriteQueueAsync(_cancellationTokenSource.Token);
+        _processTask = ProcessWriteQueueAsync(_cancellationTokenSource.Token);
     }
 
     /// <summary>
@@ -205,7 +206,7 @@ public class InfluxDbService : IAsyncDisposable
 
     private sealed record WallboxWriteOperation(WallboxMeterInfo MeterInfo, ElectricityPriceService PriceService, InfluxDbService Service) : WriteOperation
     {
-        private static List<PointData> _points = new(); 
+        internal static List<PointData> _points = new(); 
 
         public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
         {
@@ -241,7 +242,7 @@ public class InfluxDbService : IAsyncDisposable
             //await client.GetWriteApiAsync().WritePointsAsync(points, options.Bucket, options.Org);
             logger.LogDebug(">> Queuing WallboxMeterInfo for InfluxDB write: {current}W", MeterInfo.CurrentEnergy);
             _points.Add(point);
-            WritePoints(client, options, logger);
+            await WritePointsAsync(client, options, logger);
 
             logger.LogDebug(">> Writing WallboxMeterInfo to InfluxDB: {current}", MeterInfo.CurrentEnergy);
 
@@ -252,11 +253,11 @@ public class InfluxDbService : IAsyncDisposable
             Service._lastQuarter = currentQuarter;
         }
 
-        private void WritePoints(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger, bool forceWrite = false)
+        internal static async Task WritePointsAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger, bool forceWrite = false)
         {
-            if (_points.Count > 10 || forceWrite)
+            if (_points.Count > 10 || (forceWrite && _points.Count > 0))
             {
-                client.GetWriteApiAsync().WritePointsAsync(_points, options.Bucket, options.Org).Wait();
+                await client.GetWriteApiAsync().WritePointsAsync(_points, options.Bucket, options.Org);
                 logger.LogDebug(">> Successfully wrote {Count} points to InfluxDB for WallboxMeterInfo", _points.Count);
                 _points.Clear();
             }
@@ -269,7 +270,7 @@ public class InfluxDbService : IAsyncDisposable
 
     private sealed record TibberWriteOperation(RealTimeMeasurement Measurement, ElectricityPriceService PriceService) : WriteOperation
     {
-        private static List<PointData> _points = new ();
+        internal static List<PointData> _points = new ();
 
         public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
         {
@@ -299,15 +300,15 @@ public class InfluxDbService : IAsyncDisposable
             logger.LogDebug(">> Queuing Tibber measurement for InfluxDB write: {Power}W", Measurement.Power);
             //await client.GetWriteApiAsync().WritePointAsync(point, options.Bucket, options.Org);
             _points.Add(point);
-            WritePoints(client, options, logger);
+            await WritePointsAsync(client, options, logger);
             logger.LogDebug(">> Writing Tibber measurement to InfluxDB: {Power}W", Measurement.Power);
         }
 
-        private void WritePoints(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger, bool forceWrite = false)
+        internal static async Task WritePointsAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger, bool forceWrite = false)
         {
-            if (_points.Count > 10 || forceWrite)
+            if (_points.Count > 10 || (forceWrite && _points.Count > 0))
             {
-                client.GetWriteApiAsync().WritePointsAsync(_points, options.Bucket, options.Org).Wait();
+                await client.GetWriteApiAsync().WritePointsAsync(_points, options.Bucket, options.Org);
                 logger.LogDebug(">> Successfully wrote {Count} points to InfluxDB for Tibber measurement", _points.Count);
                 _points.Clear();
             }
@@ -315,6 +316,16 @@ public class InfluxDbService : IAsyncDisposable
             {
                 logger.LogDebug(">> Accumulated {Count} points for Tibber measurement, waiting to batch write to InfluxDB", _points.Count);
             }
+        }
+    }
+
+    private sealed record FlushWriteOperation : WriteOperation
+    {
+        public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
+        {
+            logger.LogInformation("Flushing remaining buffered points to InfluxDB");
+            await WallboxWriteOperation.WritePointsAsync(client, options, logger, forceWrite: true);
+            await TibberWriteOperation.WritePointsAsync(client, options, logger, forceWrite: true);
         }
     }
 
@@ -339,7 +350,9 @@ public class InfluxDbService : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        await _writeChannel.Writer.WriteAsync(new FlushWriteOperation());
         _writeChannel.Writer.Complete();
+        await _processTask;
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
     }
