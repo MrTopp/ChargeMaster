@@ -29,6 +29,9 @@
 - Use dependency injection through interfaces rather than concrete classes for better testability. When refactoring services for unit testing, create interfaces that abstract the service contract, update the implementing class to implement the interface, update dependency injection registrations to use interfaces, and create test helpers using the interface for mocking.
 - Keep code clean and concise, removing dead code and cleaning up after refactoring to maintain a tidy codebase.
 - Do not create obvious comments. Do comment if the code is not self-explanatory or if it provides important context that is not immediately clear from the code itself.
+- Write comments in Swedish.
+- Comments in code should not describe "what" the code is doing, they should describe "why" it is doing it.
+- Public methods should have XML documentation comments.
 
 ## Configuration
 - Use `appsettings.json` for configuration, with environment-specific overrides (`appsettings.Production.json` and `appsettings.Development.json`).

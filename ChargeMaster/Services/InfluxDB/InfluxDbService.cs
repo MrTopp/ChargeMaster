@@ -1,11 +1,8 @@
 ﻿using ChargeMaster.Services.ElectricityPrice;
-using ChargeMaster.Services.TibberPulse;
-using ChargeMaster.Services.VolksWagen;
 using ChargeMaster.Services.Wallbox;
 
 using InfluxDB.Client;
 using InfluxDB.Client.Api.Domain;
-using InfluxDB.Client.Api.Service;
 using InfluxDB.Client.Writes;
 
 using Microsoft.Extensions.Options;
@@ -38,7 +35,7 @@ public class InfluxDBClientFactory : IInfluxDBClientFactory
     {
         var httpClient = new HttpClient(new SocketsHttpHandler())
         {
-            Timeout = TimeSpan.FromSeconds(60) // Set timeout to 60 seconds for HTTP operations
+            Timeout = TimeSpan.FromSeconds(60)
         };
 
         var clientOptions = new InfluxDBClientOptions(options.Url)
@@ -53,8 +50,8 @@ public class InfluxDBClientFactory : IInfluxDBClientFactory
 }
 
 /// <summary>
-/// Tjänst för att skriva data till InfluxDB.
-/// Serialiserar alla skrivningar via en queue för att undvika concurrency-problem.
+/// Writes measurement data to InfluxDB.
+/// Serializes all writes via a channel to avoid concurrency issues and batches points for efficiency.
 /// </summary>
 public class InfluxDbService : IAsyncDisposable
 {
@@ -62,15 +59,19 @@ public class InfluxDbService : IAsyncDisposable
     private readonly InfluxDBOptions _options;
     private readonly ILogger<InfluxDbService> _logger;
     private readonly ElectricityPriceService _priceService;
-    private readonly Channel<WriteOperation> _writeChannel;
-    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly Channel<WriteItem> _writeChannel;
     private readonly Task _processTask;
 
-    private long _lastPhase1Energy = 0;
-    private long _lastPhase2Energy = 0;
-    private long _lastPhase3Energy = 0;
-    private decimal _lastPrice = 0;
+    private readonly List<PointData> _wallboxPoints = new();
+    private readonly List<PointData> _tibberPoints = new();
+
+    private long _lastPhase1Energy;
+    private long _lastPhase2Energy;
+    private long _lastPhase3Energy;
+    private decimal _lastPrice;
     private int _lastQuarter = -1;
+
+    private const int BatchSize = 10;
 
     public InfluxDbService(IOptions<InfluxDBOptions> options, ElectricityPriceService priceService, ILogger<InfluxDbService> logger)
         : this(options, priceService, logger, new InfluxDBClientFactory())
@@ -82,7 +83,6 @@ public class InfluxDbService : IAsyncDisposable
         _options = options.Value;
         _logger = logger;
         _priceService = priceService;
-        _cancellationTokenSource = new CancellationTokenSource();
 
         try
         {
@@ -96,240 +96,153 @@ public class InfluxDbService : IAsyncDisposable
             throw;
         }
 
-        // Skapa channel för att serialisera skrivningar
-        _writeChannel = Channel.CreateUnbounded<WriteOperation>(
+        _writeChannel = Channel.CreateUnbounded<WriteItem>(
             new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
 
-        // Starta background task som processerar skrivningar
-        _processTask = ProcessWriteQueueAsync(_cancellationTokenSource.Token);
+        _processTask = ProcessWriteQueueAsync();
     }
 
-    /// <summary>
-    /// Background task som processar skrivningar från kanalen en åt gången.
-    /// </summary>
-    private async Task ProcessWriteQueueAsync(CancellationToken cancellationToken)
+    public async Task WriteWallboxMeterInfoAsync(WallboxMeterInfo meterInfo)
     {
-        var operationCount = 0;
-        var errorCount = 0;
+        await _writeChannel.Writer.WriteAsync(new WallboxItem(meterInfo));
+    }
 
+    public async Task WriteTibberMeasurementAsync(RealTimeMeasurement m)
+    {
+        await _writeChannel.Writer.WriteAsync(new TibberItem(m));
+    }
+
+    private async Task ProcessWriteQueueAsync()
+    {
         try
         {
             _logger.LogDebug("InfluxDB write queue processor started");
 
-            await foreach (var operation in _writeChannel.Reader.ReadAllAsync(cancellationToken))
+            await foreach (var item in _writeChannel.Reader.ReadAllAsync())
             {
-                operationCount++;
                 try
                 {
-                    var operationType = operation.GetType().Name;
-                    _logger.LogDebug("Processing InfluxDB write operation #{Count}: {OperationType}", operationCount, operationType);
-
-                    await operation.ExecuteAsync(_client, _options, _logger);
-
-                    _logger.LogDebug("Successfully completed write operation #{Count}: {OperationType}", operationCount, operationType);
+                    switch (item)
+                    {
+                        case WallboxItem(var meterInfo):
+                            await ProcessWallboxAsync(meterInfo);
+                            break;
+                        case TibberItem(var measurement):
+                            await ProcessTibberAsync(measurement);
+                            break;
+                        case FlushItem:
+                            await FlushPointsAsync(_wallboxPoints, "wallbox");
+                            await FlushPointsAsync(_tibberPoints, "tibber");
+                            break;
+                    }
                 }
                 catch (TaskCanceledException ex)
                 {
-                    errorCount++;
-                    _logger.LogWarning(ex, 
-                        "Write operation #{Count} was canceled (timeout). Queue may be slow or InfluxDB unresponsive",
-                        operationCount);
+                    _logger.LogWarning(ex, "Write operation timed out");
                 }
                 catch (HttpRequestException ex)
                 {
-                    errorCount++;
-                    _logger.LogError(ex,
-                        "Write operation #{Count} failed with HTTP error. InfluxDB connection issue? Status: {Status}",
-                        operationCount, ex.StatusCode);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    errorCount++;
-                    _logger.LogError(ex,
-                        "Write operation #{Count} failed with invalid operation. Data validation error?",
-                        operationCount);
+                    _logger.LogError(ex, "Write operation failed with HTTP error. Status: {Status}", ex.StatusCode);
                 }
                 catch (Exception ex)
                 {
-                    errorCount++;
-                    _logger.LogError(ex,
-                        "Write operation #{Count} failed with unexpected error. Type: {ExceptionType}, Message: {Message}",
-                        operationCount, ex.GetType().Name, ex.Message);
+                    _logger.LogError(ex, "Write operation failed: {Type}", ex.GetType().Name);
                 }
             }
 
-            _logger.LogInformation(
-                "InfluxDB write queue processor completed. Total operations: {Total}, Errors: {Errors}, Success rate: {SuccessRate:P}",
-                operationCount, errorCount, (operationCount - errorCount) / (double)Math.Max(operationCount, 1));
+            _logger.LogInformation("InfluxDB write queue processor completed");
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation(
-                "InfluxDB write queue processor canceled. Processed {Count} operations with {Errors} errors before shutdown",
-                operationCount, errorCount);
+            _logger.LogInformation("InfluxDB write queue processor canceled");
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex,
-                "InfluxDB write queue processor crashed unexpectedly. Processed {Count} operations with {Errors} errors",
-                operationCount, errorCount);
+            _logger.LogCritical(ex, "InfluxDB write queue processor crashed unexpectedly");
         }
     }
 
-    /// <summary>
-    /// Skriver innehållet i en WallboxMeterInfo-instans till InfluxDB.
-    /// </summary>
-    /// <param name="meterInfo">Mätdata från Wallbox som ska skrivas</param>
-    /// <returns>Task som representerar den asynkrona operationen</returns>
-    public async Task WriteWallboxMeterInfoAsync(WallboxMeterInfo meterInfo)
+    private async Task ProcessWallboxAsync(WallboxMeterInfo meterInfo)
     {
-        var operation = new WallboxWriteOperation(meterInfo, _priceService, this);
-        await _writeChannel.Writer.WriteAsync(operation);
-    }
+        var timestamp = DateTime.UtcNow;
+        int currentQuarter = timestamp.Minute / 15;
 
-    /// <summary>
-    /// Skriver mätdata från Tibber Pulse till InfluxDB.
-    /// </summary>
-    /// <param name="e">Mätdata från Tibber Pulse</param>
-    public async Task WriteTibberMeasurementAsync(RealTimeMeasurement m)
-    {
-        var operation = new TibberWriteOperation(m, _priceService);
-        await _writeChannel.Writer.WriteAsync(operation);
-    }
-
-    // ==================== WRITE OPERATIONS ====================
-
-    private abstract record WriteOperation
-    {
-        public abstract Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger);
-    }
-
-    private sealed record WallboxWriteOperation(WallboxMeterInfo MeterInfo, ElectricityPriceService PriceService, InfluxDbService Service) : WriteOperation
-    {
-        internal static List<PointData> _points = new(); 
-
-        public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
+        if (currentQuarter != _lastQuarter)
         {
-            var timestamp = DateTime.UtcNow;
-            int currentQuarter = timestamp.Minute / 15;
-
-            if (currentQuarter != Service._lastQuarter)
-            {
-                timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day,
-                    timestamp.Hour, timestamp.Minute, 0, DateTimeKind.Utc);
-            }
-
-            var elpris = await PriceService.GetPriceForDateTimeAsync(DateTime.Now);
-
-            if (currentQuarter == Service._lastQuarter &&
-                MeterInfo.Phase1CurrentEnergy == Service._lastPhase1Energy &&
-                MeterInfo.Phase2CurrentEnergy == Service._lastPhase2Energy &&
-                MeterInfo.Phase3CurrentEnergy == Service._lastPhase3Energy &&
-                elpris?.SekPerKwh == Service._lastPrice)
-            {
-                return; // Ingen förändring
-            }
-
-            var point = PointData.Measurement("wallbox_meter")
-                .Field("acc_energy_wh", MeterInfo.AccEnergy)
-                .Field("phase1_current_energy_w", MeterInfo.Phase1CurrentEnergy)
-                .Field("phase2_current_energy_w", MeterInfo.Phase2CurrentEnergy)
-                .Field("phase3_current_energy_w", MeterInfo.Phase3CurrentEnergy)
-                .Field("current_energy_w", MeterInfo.CurrentEnergy)
-                .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
-                .Timestamp(timestamp, WritePrecision.Ns);
-
-            //await client.GetWriteApiAsync().WritePointsAsync(points, options.Bucket, options.Org);
-            logger.LogDebug(">> Queuing WallboxMeterInfo for InfluxDB write: {current}W", MeterInfo.CurrentEnergy);
-            _points.Add(point);
-            await WritePointsAsync(client, options, logger);
-
-            logger.LogDebug(">> Writing WallboxMeterInfo to InfluxDB: {current}", MeterInfo.CurrentEnergy);
-
-            Service._lastPhase1Energy = MeterInfo.Phase1CurrentEnergy;
-            Service._lastPhase2Energy = MeterInfo.Phase2CurrentEnergy;
-            Service._lastPhase3Energy = MeterInfo.Phase3CurrentEnergy;
-            Service._lastPrice = elpris?.SekPerKwh ?? 0;
-            Service._lastQuarter = currentQuarter;
+            timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day,
+                timestamp.Hour, timestamp.Minute, 0, DateTimeKind.Utc);
         }
 
-        internal static async Task WritePointsAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger, bool forceWrite = false)
+        var elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
+
+        if (currentQuarter == _lastQuarter &&
+            meterInfo.Phase1CurrentEnergy == _lastPhase1Energy &&
+            meterInfo.Phase2CurrentEnergy == _lastPhase2Energy &&
+            meterInfo.Phase3CurrentEnergy == _lastPhase3Energy &&
+            elpris?.SekPerKwh == _lastPrice)
         {
-            if (_points.Count > 10 || (forceWrite && _points.Count > 0))
-            {
-                await client.GetWriteApiAsync().WritePointsAsync(_points, options.Bucket, options.Org);
-                logger.LogDebug(">> Successfully wrote {Count} points to InfluxDB for WallboxMeterInfo", _points.Count);
-                _points.Clear();
-            }
-            else
-            {
-                logger.LogDebug(">> Accumulated {Count} points for WallboxMeterInfo, waiting to batch write to InfluxDB", _points.Count);
-            }
+            return;
         }
+
+        var point = PointData.Measurement("wallbox_meter")
+            .Field("acc_energy_wh", meterInfo.AccEnergy)
+            .Field("phase1_current_energy_w", meterInfo.Phase1CurrentEnergy)
+            .Field("phase2_current_energy_w", meterInfo.Phase2CurrentEnergy)
+            .Field("phase3_current_energy_w", meterInfo.Phase3CurrentEnergy)
+            .Field("current_energy_w", meterInfo.CurrentEnergy)
+            .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
+            .Timestamp(timestamp, WritePrecision.Ns);
+
+        _wallboxPoints.Add(point);
+        if (_wallboxPoints.Count > BatchSize)
+            await FlushPointsAsync(_wallboxPoints, "wallbox");
+
+        _lastPhase1Energy = meterInfo.Phase1CurrentEnergy;
+        _lastPhase2Energy = meterInfo.Phase2CurrentEnergy;
+        _lastPhase3Energy = meterInfo.Phase3CurrentEnergy;
+        _lastPrice = elpris?.SekPerKwh ?? 0;
+        _lastQuarter = currentQuarter;
     }
 
-    private sealed record TibberWriteOperation(RealTimeMeasurement Measurement, ElectricityPriceService PriceService) : WriteOperation
+    private async Task ProcessTibberAsync(RealTimeMeasurement measurement)
     {
-        internal static List<PointData> _points = new ();
+        var timestamp = measurement.Timestamp.UtcDateTime;
+        var elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
 
-        public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
-        {
-            var timestamp = Measurement.Timestamp.UtcDateTime;
-            var elpris = await PriceService.GetPriceForDateTimeAsync(DateTime.Now);
+        var point = PointData.Measurement("tibber_pulse")
+            .Field("power_w", (double)measurement.Power)
+            .Field("accumulated_consumption_last_hour_kwh", (double)measurement.AccumulatedConsumptionLastHour)
+            .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
+            .Timestamp(timestamp, WritePrecision.Ns);
 
-            var point = PointData.Measurement("tibber_pulse")
-                .Field("power_w", (double)Measurement.Power)
-                .Field("accumulated_consumption_last_hour_kwh", (double)Measurement.AccumulatedConsumptionLastHour)
-                .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
-                .Timestamp(timestamp, WritePrecision.Ns);
+        if (measurement.PowerFactor.HasValue)
+            point = point.Field("power_factor", (double)measurement.PowerFactor.Value);
+        if (measurement.AccumulatedCost.HasValue)
+            point = point.Field("accumulated_cost", (double)measurement.AccumulatedCost.Value);
+        if (measurement.SignalStrength.HasValue)
+            point = point.Field("signal_strength_db", measurement.SignalStrength.Value);
 
-            if (Measurement.PowerFactor.HasValue)
-                point = point.Field("power_factor", (double)Measurement.PowerFactor.Value);
-            if (Measurement.AccumulatedCost.HasValue)
-                point = point.Field("accumulated_cost", (double)Measurement.AccumulatedCost.Value);
-            if (Measurement.SignalStrength.HasValue)
-                point = point.Field("signal_strength_db", Measurement.SignalStrength.Value);
+        if (measurement.VoltagePhase1.HasValue && measurement.CurrentPhase1.HasValue && measurement.PowerFactor.HasValue)
+            point = point.Field("power_phase1_w", (double)(measurement.VoltagePhase1.Value * measurement.CurrentPhase1.Value * measurement.PowerFactor.Value));
+        if (measurement.VoltagePhase2.HasValue && measurement.CurrentPhase2.HasValue && measurement.PowerFactor.HasValue)
+            point = point.Field("power_phase2_w", (double)(measurement.VoltagePhase2.Value * measurement.CurrentPhase2.Value * measurement.PowerFactor.Value));
+        if (measurement.VoltagePhase3.HasValue && measurement.CurrentPhase3.HasValue && measurement.PowerFactor.HasValue)
+            point = point.Field("power_phase3_w", (double)(measurement.VoltagePhase3.Value * measurement.CurrentPhase3.Value * measurement.PowerFactor.Value));
 
-            if (Measurement.VoltagePhase1.HasValue && Measurement.CurrentPhase1.HasValue && Measurement.PowerFactor.HasValue)
-                point = point.Field("power_phase1_w", (double)(Measurement.VoltagePhase1.Value * Measurement.CurrentPhase1.Value * Measurement.PowerFactor.Value));
-            if (Measurement.VoltagePhase2.HasValue && Measurement.CurrentPhase2.HasValue && Measurement.PowerFactor.HasValue)
-                point = point.Field("power_phase2_w", (double)(Measurement.VoltagePhase2.Value * Measurement.CurrentPhase2.Value * Measurement.PowerFactor.Value));
-            if (Measurement.VoltagePhase3.HasValue && Measurement.CurrentPhase3.HasValue && Measurement.PowerFactor.HasValue)
-                point = point.Field("power_phase3_w", (double)(Measurement.VoltagePhase3.Value * Measurement.CurrentPhase3.Value * Measurement.PowerFactor.Value));
-
-            logger.LogDebug(">> Queuing Tibber measurement for InfluxDB write: {Power}W", Measurement.Power);
-            //await client.GetWriteApiAsync().WritePointAsync(point, options.Bucket, options.Org);
-            _points.Add(point);
-            await WritePointsAsync(client, options, logger);
-            logger.LogDebug(">> Writing Tibber measurement to InfluxDB: {Power}W", Measurement.Power);
-        }
-
-        internal static async Task WritePointsAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger, bool forceWrite = false)
-        {
-            if (_points.Count > 10 || (forceWrite && _points.Count > 0))
-            {
-                await client.GetWriteApiAsync().WritePointsAsync(_points, options.Bucket, options.Org);
-                logger.LogDebug(">> Successfully wrote {Count} points to InfluxDB for Tibber measurement", _points.Count);
-                _points.Clear();
-            }
-            else
-            {
-                logger.LogDebug(">> Accumulated {Count} points for Tibber measurement, waiting to batch write to InfluxDB", _points.Count);
-            }
-        }
+        _tibberPoints.Add(point);
+        if (_tibberPoints.Count > BatchSize)
+            await FlushPointsAsync(_tibberPoints, "tibber");
     }
 
-    private sealed record FlushWriteOperation : WriteOperation
+    private async Task FlushPointsAsync(List<PointData> points, string source)
     {
-        public override async Task ExecuteAsync(InfluxDBClient client, InfluxDBOptions options, ILogger<InfluxDbService> logger)
-        {
-            logger.LogInformation("Flushing remaining buffered points to InfluxDB");
-            await WallboxWriteOperation.WritePointsAsync(client, options, logger, forceWrite: true);
-            await TibberWriteOperation.WritePointsAsync(client, options, logger, forceWrite: true);
-        }
-    }
+        if (points.Count == 0)
+            return;
 
-    // ==================== HELPER METHODS ====================
+        await _client.GetWriteApiAsync().WritePointsAsync(points, _options.Bucket, _options.Org);
+        _logger.LogDebug("Wrote {Count} {Source} points to InfluxDB", points.Count, source);
+        points.Clear();
+    }
 
     private static void ValidateUrl(string? url)
     {
@@ -350,12 +263,15 @@ public class InfluxDbService : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        await _writeChannel.Writer.WriteAsync(new FlushWriteOperation());
+        await _writeChannel.Writer.WriteAsync(new FlushItem());
         _writeChannel.Writer.Complete();
         await _processTask;
-        _cancellationTokenSource.Cancel();
-        _cancellationTokenSource.Dispose();
     }
+
+    private abstract record WriteItem;
+    private sealed record WallboxItem(WallboxMeterInfo MeterInfo) : WriteItem;
+    private sealed record TibberItem(RealTimeMeasurement Measurement) : WriteItem;
+    private sealed record FlushItem : WriteItem;
 }
 
 /// <summary>

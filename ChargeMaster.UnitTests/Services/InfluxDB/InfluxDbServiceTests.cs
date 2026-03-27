@@ -175,6 +175,8 @@ public class InfluxDbServiceTests
         var meterInfo = InfluxDbServiceTestHelper.CreateMeterInfo();
         // Act & Assert - Should not propagate exception
         await service.WriteWallboxMeterInfoAsync(meterInfo);
+        // Vänta på att bakgrundsprocessorn hanterar meddelandet
+        await service.DisposeAsync();
         // Verify that error was logged
         mockLogger.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.Is<It.IsAnyType>((v, t) => true), It.IsAny<Exception>(), It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)), Times.Once);
     }
@@ -203,7 +205,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object);
 
         // Mock the client factory - we don't need a real InfluxDBClient instance for initialization testing
         // The factory is only used during construction, not during the initialization verification
@@ -230,11 +232,11 @@ public class InfluxDbServiceTests
     }
 
     /// <summary>
-    /// Tests that the constructor throws ArgumentNullException when the logger parameter is null
-    /// and attempts to log initialization success.
+    /// Tests that the constructor throws ArgumentNullException when the logger parameter is null.
+    /// LoggerExtensions.LogError anropar ArgumentNullException.ThrowIfNull för null-logger.
     /// </summary>
     [Fact]
-    public void Constructor_WithNullLogger_ThrowsNullReferenceException()
+    public void Constructor_WithNullLogger_ThrowsArgumentNullException()
     {
         // Arrange
         var options = new InfluxDBOptions
@@ -248,7 +250,7 @@ public class InfluxDbServiceTests
         var mockHttpClient = new Mock<HttpClient>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
-        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, new Mock<IElectricityPriceRepository>().Object, mockPriceLogger.Object);
+        var mockPriceService = new Mock<ElectricityPriceService>(mockHttpClient.Object, mockServiceScopeFactory.Object, mockPriceLogger.Object);
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new InfluxDbService(mockOptions, mockPriceService.Object, null!));
     }
@@ -602,34 +604,24 @@ public class InfluxDbServiceTests
 
         // Act
         await service.WriteTibberMeasurementAsync(measurement);
+        // Batching: en enskild mätning triggar inte flush, DisposeAsync tvingar flush
+        await service.DisposeAsync();
 
         // Assert
-        // Verify that the client factory was called during initialization
         mockClientFactory.Verify(
             x => x.CreateClient(It.IsAny<InfluxDBOptions>()),
             Times.Once,
             "InfluxDBClientFactory should be called during service initialization to create InfluxDB client");
 
-        // Verify that error was logged when InfluxDB write fails (null client from factory)
         mockLogger.Verify(
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to write Tibber measurement")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Write operation failed")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once,
             "Error should be logged when InfluxDB client write operation fails due to null client");
-
-        // Result: Service successfully processed the measurement with PowerFactor value (0.95m):
-        // 1. ✓ Accepted and stored PowerFactor as an optional field
-        // 2. ✓ Used PowerFactor in phase power calculations (P = U × I × PF)
-        // 3. ✓ Queried electricity price service for additional enrichment
-        // 4. ✓ Attempted to write the complete point to InfluxDB
-        // 5. ✓ Logged error gracefully when write failed due to null client from factory mock
-        //
-        // The test verifies the entire data flow from input measurement to error handling,
-        // confirming that PowerFactor values are properly integrated into the write process.
     }
 
     /// <summary>
@@ -663,21 +655,19 @@ public class InfluxDbServiceTests
 
         // Act
         await service.WriteTibberMeasurementAsync(measurement);
+        await service.DisposeAsync();
 
         // Assert
-        // Verify that the client factory was called during initialization
         mockClientFactory.Verify(
             x => x.CreateClient(It.IsAny<InfluxDBOptions>()),
             Times.Once,
             "InfluxDBClientFactory should be called during service initialization");
 
-        // Verify that error was logged when InfluxDB write operation fails
-        // (due to null client from the factory)
         mockLogger.Verify(
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to write Tibber measurement")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Write operation failed")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once,
@@ -927,27 +917,23 @@ public class InfluxDbServiceTests
 
         // Act
         await service.WriteTibberMeasurementAsync(measurement);
+        await service.DisposeAsync();
 
         // Assert
-        // Verify that the client factory was called during initialization
         mockClientFactory.Verify(
             x => x.CreateClient(It.IsAny<InfluxDBOptions>()),
             Times.Once,
             "InfluxDBClientFactory should be called during service initialization");
 
-        // Verify that error was logged when InfluxDB write fails (null client)
         mockLogger.Verify(
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to write Tibber measurement")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Write operation failed")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once,
             "Error should be logged when InfluxDB client is unavailable");
-
-        // Zero power was accepted and processed through the system
-        // (verified by successful method execution and proper error logging)
     }
 
     /// <summary>
