@@ -268,14 +268,14 @@ public class DaikinWorker(
     /// </summary>
     /// <param name="forbrukningDennaTimme">Uppskattad förbrukning för innevarande timme i Wh.</param>
     /// <param name="nu">Datum för beräkning</param>
-    public async Task KontrolleraEffekt(long forbrukningDennaTimme, DateTime nu)
+    public async Task KontrolleraEffekt(long forbrukningDennaTimme, DateTime nu, CancellationToken cancellationToken)
     {
         if (nu.Minute < 20)
         {
             return; // Vänta 20 minuter in i timmen innan vi börjar kolla.
         }
 
-        var grans = await wallboxWorker.KalkyleraGrans(nu);
+        var grans = await wallboxWorker.KalkyleraGrans(nu, cancellationToken);
         if (EmergencyStopped && forbrukningDennaTimme < grans * 0.8)
         {
             logger.LogInformation("Emergency stop restore. Förbrukning: {forbrukning} Wh, Grans: {grans} Wh.", forbrukningDennaTimme, grans);

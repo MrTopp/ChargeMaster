@@ -160,7 +160,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var worker = new WallboxWorker(scopeFactory, wallboxService, influxDbService, logger);
 
         // Act
-        await worker.KalkyleraGrans(DateTime.Now);
+        await worker.KalkyleraGrans(DateTime.Now, CancellationToken.None);
     }
 
     private ServiceCollection CreateServiceCollection()
