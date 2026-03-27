@@ -660,8 +660,8 @@ public class WallboxWorker(
         // Uppdatera cachen
         lock (CacheLocker)
         {
-            LastHourlyEnergyUsageCacheTime = new DateTime(LastHourlyEnergyUsageCacheTime.Year, LastHourlyEnergyUsageCacheTime.Month,
-                LastHourlyEnergyUsageCacheTime.Day, LastHourlyEnergyUsageCacheTime.Hour, 0, 0);
+            DateTime nu = DateTime.Now;
+            LastHourlyEnergyUsageCacheTime = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
             HourlyEnergyUsageCache = result;
         }
 
