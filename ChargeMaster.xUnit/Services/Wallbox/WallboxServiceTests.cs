@@ -37,7 +37,7 @@ public class WallboxServiceTests : IDisposable
         Assert.True(result.Serial > 0);
     }
     
-    [Theory]
+    [Theory(Skip="Only for interactive testing")]
     [InlineData(WallboxMode.Available, "ALWAYS_ON")]
     [InlineData(WallboxMode.NotAvailable, "ALWAYS_OFF")]
     [InlineData(WallboxMode.TimerControlled, "SCHEMA")]
