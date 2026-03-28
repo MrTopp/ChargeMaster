@@ -82,8 +82,9 @@ public class ElectricityPriceService(
     /// <exception cref="InvalidOperationException">Kastas om validering misslyckas</exception>
     private void ValidatePrices(List<Data.ElectricityPrice> prices, DateOnly date)
     {
-        // Kontrollera antal priser (96 = 24 timmar * 4 kvartar per timme)
-        if (prices.Count != 96)
+        // Kontrollera antal priser (96 = 24 timmar * 4 kvartar per timme) eller 92 (för dagar med sommartid)
+        // eller 100 (för dagar med vintertid)
+        if (prices.Count != 96 && prices.Count != 92 && prices.Count != 100)
         {
             logger.LogError("Ogiltigt antal priser för {Date}: förväntat 96, men får {Count}",
                 date.ToString("yyyy-MM-dd"), prices.Count);
