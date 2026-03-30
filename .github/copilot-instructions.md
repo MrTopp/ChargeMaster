@@ -26,7 +26,7 @@
 - Use asynchronous methods (`async Task`) for I/O bound operations.
 - Prefer `var` over explicit types when the type is obvious from the right-hand side. Use explicit types when it enhances readability.
 - Follow standard C# naming conventions (PascalCase for classes/methods, camelCase for local variables).
-- Use dependency injection through interfaces rather than concrete classes for better testability. When refactoring services for unit testing, create interfaces that abstract the service contract, update the implementing class to implement the interface, update dependency injection registrations to use interfaces, and create test helpers using the interface for mocking.
+- Use dependency injection through interfaces rather than concrete classes if it is needed by testing, otherwise inject concrete classes directly.
 - Keep code clean and concise, removing dead code and cleaning up after refactoring to maintain a tidy codebase.
 - Do not create obvious comments. Do comment if the code is not self-explanatory or if it provides important context that is not immediately clear from the code itself.
 - Write comments in Swedish.

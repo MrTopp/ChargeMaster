@@ -31,25 +31,40 @@ public class ShellyMqttService(
     /// </summary>
     public double GetAverage()
     {
-        var temp1 = GetArbetsrumTemperature();
-        var temp3 = GetSovrumTemperature();
-        return (temp1 + temp3) / 2.0;
+        lock (_temperaturesLock)
+        {
+            var temp1 = GetArbetsrumTemperatureUnsafe();
+            var temp3 = GetSovrumTemperatureUnsafe();
+            return (temp1 + temp3) / 2.0;
+        }
     }
 
     public double GetHallTemperature()
     {
-        return Temperatures.TryGetValue("hall", out var temp) ? temp : 21.5;
+        lock (_temperaturesLock)
+            return GetHallTemperatureUnsafe();
     }
 
     public double GetArbetsrumTemperature()
     {
-        return Temperatures.TryGetValue("arbetsrum", out var temp) ? temp : 21.5;
+        lock (_temperaturesLock)
+            return GetArbetsrumTemperatureUnsafe();
     }
 
     public double GetSovrumTemperature()
     {
-        return Temperatures.TryGetValue("sovrum", out var temp) ? temp : 21.5;
+        lock (_temperaturesLock)
+            return GetSovrumTemperatureUnsafe();
     }
+
+    private double GetHallTemperatureUnsafe() =>
+        Temperatures.TryGetValue("hall", out var temp) ? temp : 21.5;
+
+    private double GetArbetsrumTemperatureUnsafe() =>
+        Temperatures.TryGetValue("arbetsrum", out var temp) ? temp : 21.5;
+
+    private double GetSovrumTemperatureUnsafe() =>
+        Temperatures.TryGetValue("sovrum", out var temp) ? temp : 21.5;
 
     /// <summary>
     /// Event som skickas när en temperaturmätning uppdateras från en Shelly-enhet.
@@ -58,27 +73,45 @@ public class ShellyMqttService(
     {
         add
         {
-            var hadSubscribers = _temperatureChangedHandlers != null;
-            _temperatureChangedHandlers += value;
+            bool isFirstSubscriber;
+            double arbetsrum, hall, sovrum;
+
+            lock (_eventLock)
+            {
+                isFirstSubscriber = _temperatureChangedHandlers == null;
+                _temperatureChangedHandlers += value;
+            }
 
             // Trigga SubscriberConnected när första prenumeranten ansluter
-            if (!hadSubscribers && value != null)
+            if (isFirstSubscriber && value != null)
             {
                 SubscriberConnected?.Invoke(this, EventArgs.Empty);
             }
 
-            // Only invoke the newly added subscriber with initial temperature values
-            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("arbetsrum", Temperatures["arbetsrum"]));
-            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("hall", Temperatures["hall"]));
-            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("sovrum", Temperatures["sovrum"]));
+            lock (_temperaturesLock)
+            {
+                arbetsrum = Temperatures.TryGetValue("arbetsrum", out var a) ? a : 21.5;
+                hall = Temperatures.TryGetValue("hall", out var h) ? h : 21.5;
+                sovrum = Temperatures.TryGetValue("sovrum", out var s) ? s : 21.5;
+            }
 
+            // Only invoke the newly added subscriber with initial temperature values
+            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("arbetsrum", arbetsrum));
+            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("hall", hall));
+            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("sovrum", sovrum));
         }
         remove
         {
-            _temperatureChangedHandlers -= value;
+            bool isLastRemoved;
+
+            lock (_eventLock)
+            {
+                _temperatureChangedHandlers -= value;
+                isLastRemoved = _temperatureChangedHandlers == null;
+            }
 
             // Trigga SubscriberDisconnected när sista prenumeranten kopplas från
-            if (_temperatureChangedHandlers == null)
+            if (isLastRemoved)
             {
                 SubscriberDisconnected?.Invoke(this, EventArgs.Empty);
             }
@@ -87,6 +120,8 @@ public class ShellyMqttService(
 
     // ----- private parts -----
 
+    private readonly object _temperaturesLock = new();
+    private readonly object _eventLock = new();
 
     private IMqttClient? _mqttClient;
     private readonly IMqttClient? _injectedMqttClient = mqttClient;
@@ -164,21 +199,24 @@ public class ShellyMqttService(
                 .ToListAsync();
 
             // Lägg till värdena i Temperatures-dictionary
-            foreach (var temp in latestTemperatures)
+            lock (_temperaturesLock)
             {
-                if (temp != null)
+                foreach (var temp in latestTemperatures)
                 {
-                    Temperatures[temp.DeviceId] = temp.TemperatureCelsius;
-                    logger?.LogDebug("Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
-                        temp.DeviceId, temp.TemperatureCelsius);
+                    if (temp != null)
+                    {
+                        Temperatures[temp.DeviceId] = temp.TemperatureCelsius;
+                        logger?.LogDebug("Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
+                            temp.DeviceId, temp.TemperatureCelsius);
+                    }
                 }
-            }
 
-            // Sätt defaultvärden för enheter som inte finns i databasen
-            var enhetIds = new[] { "arbetsrum", "hall", "sovrum" };
-            foreach (var enhetId in enhetIds)
-            {
-                Temperatures.TryAdd(enhetId, 20.0);
+                // Sätt defaultvärden för enheter som inte finns i databasen
+                var enhetIds = new[] { "arbetsrum", "hall", "sovrum" };
+                foreach (var enhetId in enhetIds)
+                {
+                    Temperatures.TryAdd(enhetId, 20.0);
+                }
             }
         }
         catch (Exception ex)
@@ -276,8 +314,15 @@ public class ShellyMqttService(
         string src = message.DeviceId;
 
         logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temperature);
-        Temperatures[src] = temperature;
-        _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs(src, temperature));
+
+        lock (_temperaturesLock)
+            Temperatures[src] = temperature;
+
+        EventHandler<ShellyTemperatureChangedEventArgs>? handler;
+        lock (_eventLock)
+            handler = _temperatureChangedHandlers;
+
+        handler?.Invoke(this, new ShellyTemperatureChangedEventArgs(src, temperature));
     }
 
     private Task OnConnectedAsync(MqttClientConnectedEventArgs e)
