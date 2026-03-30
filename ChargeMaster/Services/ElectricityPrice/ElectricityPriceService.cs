@@ -26,6 +26,10 @@ public class ElectricityPriceService(
     private List<Data.ElectricityPrice>? _cachedPrices;
     private readonly object _cacheLock = new();
 
+    /// <summary>
+    /// Försöker hämta elpriser för det angivna datumet från det externa API:et och lagrar dem i databasen.
+    /// </summary>
+    /// <param name="date">Datum i lokal tid.</param>
     public async Task FetchAndStorePricesForDateAsync(DateOnly date)
     {
         using var scope = serviceScopeFactory.CreateScope();
@@ -109,6 +113,11 @@ public class ElectricityPriceService(
         }
     }
 
+    /// <summary>
+    /// Hämta elpriser från databasen för det angivna datumet. 
+    /// </summary>
+    /// <param name="date">Datum i lokal tid.</param>
+    /// <returns></returns>
     public async Task<List<Data.ElectricityPrice>> GetPricesForDateAsync(DateOnly date)
     {
         using var scope = serviceScopeFactory.CreateScope();
@@ -116,6 +125,11 @@ public class ElectricityPriceService(
         return await repository.GetPricesForDateAsync(date);
     }
 
+    /// <summary>
+    /// Kontrollera om det finns priser i databasen för det angivna datumet. 
+    /// </summary>
+    /// <param name="date">Datum i lokal tid.</param>
+    /// <returns></returns>
     public async Task<bool> HasPricesForDateAsync(DateOnly date)
     {
         using var scope = serviceScopeFactory.CreateScope();
@@ -131,6 +145,11 @@ public class ElectricityPriceService(
         logger.LogInformation("Deleted {Count} prices for {Date}.", count, date.ToString("yyyy-MM-dd"));
     }
 
+    /// <summary>
+    /// Hämta elpris för en specifik tidpunkt. 
+    /// </summary>
+    /// <param name="dateTime">Lokal tid, inte UTC.</param>
+    /// <returns></returns>
     public virtual async Task<Data.ElectricityPrice?> GetPriceForDateTimeAsync(DateTime dateTime)
     {
         var requestedDate = DateOnly.FromDateTime(dateTime);
