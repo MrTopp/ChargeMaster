@@ -65,6 +65,7 @@ public class InfluxDbService : IAsyncDisposable
 
     private readonly List<PointData> _wallboxPoints = new();
     private readonly List<PointData> _tibberPoints = new();
+    private bool _disposed;
 
     private long _lastPhase1Energy;
     private long _lastPhase2Energy;
@@ -195,7 +196,7 @@ public class InfluxDbService : IAsyncDisposable
             .Timestamp(timestamp, WritePrecision.Ns);
 
         _wallboxPoints.Add(point);
-        if (_wallboxPoints.Count > BatchSize)
+        if (_wallboxPoints.Count >= BatchSize)
             await FlushPointsAsync(_wallboxPoints, "wallbox");
 
         _lastPhase1Energy = meterInfo.Phase1CurrentEnergy;
@@ -231,7 +232,7 @@ public class InfluxDbService : IAsyncDisposable
             point = point.Field("power_phase3_w", (double)(measurement.VoltagePhase3.Value * measurement.CurrentPhase3.Value * measurement.PowerFactor.Value));
 
         _tibberPoints.Add(point);
-        if (_tibberPoints.Count > BatchSize)
+        if (_tibberPoints.Count >= BatchSize)
             await FlushPointsAsync(_tibberPoints, "tibber");
     }
 
@@ -264,9 +265,22 @@ public class InfluxDbService : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        await _writeChannel.Writer.WriteAsync(new FlushItem());
-        _writeChannel.Writer.Complete();
-        await _processTask;
+        if (_disposed)
+            return;
+        _disposed = true;
+
+        try
+        {
+            _writeChannel.Writer.TryWrite(new FlushItem());
+            _writeChannel.Writer.TryComplete();
+            await _processTask;
+        }
+        finally
+        {
+            _client?.Dispose();
+        }
+
+        GC.SuppressFinalize(this);
     }
 
     private abstract record WriteItem;
