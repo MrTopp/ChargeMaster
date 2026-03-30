@@ -107,7 +107,7 @@ public class ShellyMqttService(
     /// </summary>
     internal bool IsConnected => _mqttClient?.IsConnected ?? false;
 
-    
+
 
     public ShellyMqttService()
         : this(null!, null!)
@@ -254,37 +254,31 @@ public class ShellyMqttService(
         }
     }
 
-    private Task OnApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs e)
+    internal Task OnApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs e)
     {
         var topic = e.ApplicationMessage.Topic;
         var payload = System.Text.Encoding.UTF8.GetString(e.ApplicationMessage.Payload.ToArray());
 
         logger.LogDebug("MQTT-meddelande mottaget från {Topic}: {Payload}", topic, payload);
 
-        var mess = ShellyRpcMessageParser.Parse(payload);
-        if (mess == null)
-            return Task.CompletedTask;
-
-        HandleMessage(mess);
+        var tempMessage = ShellyTemperatureMessageParser.Parse(topic, payload);
+        if (tempMessage != null)
+        {
+            HandleMessageTempeerature(tempMessage);
+        }
 
         return Task.CompletedTask;
     }
 
-    private void HandleMessage(ShellyRpcMessage message)
+    private void HandleMessageTempeerature(ShellyStatusTemperatureMessage message)
     {
-        double? temp = message.@params?.Temperature0?.TemperatureCelsius;
-        string? src = message.dst.Split('/').FirstOrDefault()?.Replace("shelly-", "");
-        if (temp.HasValue && src != null)
-        {
-            if (!Temperatures.ContainsKey(src) || Math.Abs(Temperatures[src] - temp.Value) > 0.1)
-            {
-                logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temp.Value);
-                Temperatures[src] = temp.Value;
-                _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs(src, temp.Value));
-            }
-        }
-    }
+        double temperature = message.TemperatureCelsius;
+        string src = message.DeviceId;
 
+        logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temperature);
+        Temperatures[src] = temperature;
+        _temperatureChangedHandlers?.Invoke(this, new ShellyTemperatureChangedEventArgs(src, temperature));
+    }
 
     private Task OnConnectedAsync(MqttClientConnectedEventArgs e)
     {

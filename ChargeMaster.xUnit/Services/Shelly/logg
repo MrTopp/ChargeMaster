@@ -1,0 +1,1275 @@
+shelly-arbetsrum/online false
+shelly-sovrum/online false
+shelly-hall/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.3}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262088,"ram_free":160544,"ram_min_free":157292,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.4, "tF":72.4}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774877640.85,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.3},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161744,"ram_min_free":159076,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.4, "tF":72.4},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774877640.85,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774877640.39,"sys":{"last_sync_ts":1774877640}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"15:34","unixtime":1774877640,"last_sync_ts":1774877640,"uptime":1,"ram_size":261924,"ram_free":153148,"ram_min_free":146268,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"15:34","unixtime":1774877640,"last_sync_ts":1774877640,"uptime":1,"ram_size":261908,"ram_free":152344,"ram_min_free":146268,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774877640.39,"sys":{"time":"15:34","unixtime":1774877640}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774877640.50,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774877642.07,"events":[{"component":"sys", "event":"sleep", "ts":1774877642.07}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.0}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"15:37","unixtime":1774877821,"last_sync_ts":1774877820,"uptime":1,"ram_size":262040,"ram_free":155320,"ram_min_free":150304,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774877821.24,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.0},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"15:37","unixtime":1774877821,"last_sync_ts":1774877820,"uptime":1,"ram_size":262112,"ram_free":156560,"ram_min_free":150304,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774877821.24,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774877823.25,"events":[{"component":"sys", "event":"sleep", "ts":1774877823.25}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"15:40","unixtime":1774878001,"last_sync_ts":1774878000,"uptime":1,"ram_size":262044,"ram_free":155140,"ram_min_free":151856,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.4, "tF":72.3}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774878001.11,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"15:40","unixtime":1774878001,"last_sync_ts":1774878000,"uptime":1,"ram_size":262124,"ram_free":159152,"ram_min_free":152664,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.4, "tF":72.3},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774878001.11,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774878003.13,"events":[{"component":"sys", "event":"sleep", "ts":1774878003.13}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.1}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":261964,"ram_free":155108,"ram_min_free":150668,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"15:43","unixtime":1774878180,"last_sync_ts":1774878180,"uptime":1,"ram_size":261888,"ram_free":154300,"ram_min_free":150668,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"15:43","unixtime":1774878180,"last_sync_ts":1774878180,"uptime":1,"ram_size":261872,"ram_free":153472,"ram_min_free":150668,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774878181.03,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.1},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262152,"ram_free":161564,"ram_min_free":157276,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774878181.03,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774878180.43,"sys":{"last_sync_ts":1774878180}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774878180.43,"sys":{"time":"15:43","unixtime":1774878180}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774878180.59,"cloud":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774878182.41,"events":[{"component":"sys", "event":"sleep", "ts":1774878182.41}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"15:46","unixtime":1774878360,"last_sync_ts":1774878360,"uptime":1,"ram_size":262064,"ram_free":158204,"ram_min_free":152656,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.4, "tF":72.4}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774878360.83,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"15:46","unixtime":1774878360,"last_sync_ts":1774878360,"uptime":1,"ram_size":262136,"ram_free":159440,"ram_min_free":152656,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.4, "tF":72.4},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774878360.83,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774878362.85,"events":[{"component":"sys", "event":"sleep", "ts":1774878362.85}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.0}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"15:49","unixtime":1774878541,"last_sync_ts":1774878540,"uptime":1,"ram_size":262048,"ram_free":157732,"ram_min_free":152600,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774878541.08,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.0},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"15:49","unixtime":1774878541,"last_sync_ts":1774878540,"uptime":1,"ram_size":262120,"ram_free":158968,"ram_min_free":152600,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774878541.08,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774878543.09,"events":[{"component":"sys", "event":"sleep", "ts":1774878543.09}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.02, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.3}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262096,"ram_free":160864,"ram_min_free":157592,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.4, "tF":72.4}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774878721.66,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.02, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.3},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262168,"ram_free":162060,"ram_min_free":157656,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.4, "tF":72.4},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774878721.66,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774878721.15,"sys":{"last_sync_ts":1774878721}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"15:52","unixtime":1774878721,"last_sync_ts":1774878721,"uptime":1,"ram_size":261948,"ram_free":154956,"ram_min_free":146528,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"15:52","unixtime":1774878721,"last_sync_ts":1774878721,"uptime":1,"ram_size":261932,"ram_free":154132,"ram_min_free":146528,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774878721.15,"sys":{"time":"15:52","unixtime":1774878721}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774878721.29,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774878722.79,"events":[{"component":"sys", "event":"sleep", "ts":1774878722.79}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.1}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"15:55","unixtime":1774878900,"last_sync_ts":1774878900,"uptime":1,"ram_size":262064,"ram_free":158120,"ram_min_free":152560,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774878900.80,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.1},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"15:55","unixtime":1774878900,"last_sync_ts":1774878900,"uptime":1,"ram_size":262136,"ram_free":159344,"ram_min_free":152560,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774878900.80,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774878902.82,"events":[{"component":"sys", "event":"sleep", "ts":1774878902.82}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"15:58","unixtime":1774879081,"last_sync_ts":1774879081,"uptime":1,"ram_size":262064,"ram_free":158176,"ram_min_free":152628,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.4, "tF":72.3}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774879081.72,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"15:58","unixtime":1774879081,"last_sync_ts":1774879081,"uptime":1,"ram_size":262136,"ram_free":159412,"ram_min_free":152628,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.4, "tF":72.3},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774879081.72,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774879083.74,"events":[{"component":"sys", "event":"sleep", "ts":1774879083.74}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.1}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:01","unixtime":1774879261,"last_sync_ts":1774879261,"uptime":1,"ram_size":262064,"ram_free":158156,"ram_min_free":152608,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774879261.55,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.1},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"16:01","unixtime":1774879261,"last_sync_ts":1774879261,"uptime":1,"ram_size":262136,"ram_free":159404,"ram_min_free":152608,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774879261.54,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774879263.56,"events":[{"component":"sys", "event":"sleep", "ts":1774879263.56}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.3}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:04","unixtime":1774879441,"last_sync_ts":1774879441,"uptime":1,"ram_size":262064,"ram_free":158216,"ram_min_free":152668,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.4, "tF":72.3}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774879441.55,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.3},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"16:04","unixtime":1774879441,"last_sync_ts":1774879441,"uptime":1,"ram_size":262136,"ram_free":159468,"ram_min_free":152668,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.4, "tF":72.3},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774879441.55,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774879443.56,"events":[{"component":"sys", "event":"sleep", "ts":1774879443.56}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.1}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:07","unixtime":1774879621,"last_sync_ts":1774879620,"uptime":1,"ram_size":262064,"ram_free":158076,"ram_min_free":151668,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.8, "tF":71.2}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774879621.31,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.1},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"16:07","unixtime":1774879621,"last_sync_ts":1774879620,"uptime":1,"ram_size":262136,"ram_free":159312,"ram_min_free":151668,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.8, "tF":71.2},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774879621.31,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774879623.33,"events":[{"component":"sys", "event":"sleep", "ts":1774879623.33}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.3}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262088,"ram_free":160536,"ram_min_free":156980,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.3, "tF":72.2}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774879801.32,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.3},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262156,"ram_free":161388,"ram_min_free":156980,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.3, "tF":72.2},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774879801.32,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774879802.30,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774879801.89,"sys":{"last_sync_ts":1774879801}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:10","unixtime":1774879801,"last_sync_ts":1774879801,"uptime":2,"ram_size":262096,"ram_free":159028,"ram_min_free":146736,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:10","unixtime":1774879801,"last_sync_ts":1774879801,"uptime":2,"ram_size":262068,"ram_free":158000,"ram_min_free":146736,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774879801.89,"sys":{"time":"16:10","unixtime":1774879801}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774879802.61,"events":[{"component":"sys", "event":"sleep", "ts":1774879802.61}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.1}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262012,"ram_free":157604,"ram_min_free":152548,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.8, "tF":71.2}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774879981.44,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.1},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262084,"ram_free":158812,"ram_min_free":152548,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.8, "tF":71.2},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774879981.44,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774879982.03,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774879983.46,"events":[{"component":"sys", "event":"sleep", "ts":1774879983.46}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.3}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:16","unixtime":1774880161,"last_sync_ts":1774880161,"uptime":1,"ram_size":262052,"ram_free":156636,"ram_min_free":152636,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.3, "tF":72.1}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774880161.57,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.3},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"16:16","unixtime":1774880161,"last_sync_ts":1774880161,"uptime":1,"ram_size":262124,"ram_free":157872,"ram_min_free":152636,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.3, "tF":72.1},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774880161.57,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774880163.59,"events":[{"component":"sys", "event":"sleep", "ts":1774880163.59}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.2}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:19","unixtime":1774880340,"last_sync_ts":1774880339,"uptime":1,"ram_size":262064,"ram_free":158116,"ram_min_free":152540,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.1}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774880340.46,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.2},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"16:19","unixtime":1774880340,"last_sync_ts":1774880339,"uptime":1,"ram_size":262136,"ram_free":159344,"ram_min_free":152540,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.1},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774880340.46,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774880342.47,"events":[{"component":"sys", "event":"sleep", "ts":1774880342.47}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.3}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:22","unixtime":1774880521,"last_sync_ts":1774880520,"uptime":1,"ram_size":262064,"ram_free":158196,"ram_min_free":151052,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.2, "tF":72.0}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774880521.43,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.3},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"16:22","unixtime":1774880521,"last_sync_ts":1774880520,"uptime":1,"ram_size":262136,"ram_free":159424,"ram_min_free":151052,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.2, "tF":72.0},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774880521.43,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774880523.45,"events":[{"component":"sys", "event":"sleep", "ts":1774880523.45}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.3}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262084,"ram_free":160112,"ram_min_free":156848,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.6, "tF":71.0}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-71,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774880701.21,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.3},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161864,"ram_min_free":158920,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.6, "tF":71.0},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-71,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774880701.21,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774880702.43,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774880701.70,"sys":{"last_sync_ts":1774880701}}}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:25","unixtime":1774880701,"last_sync_ts":1774880701,"uptime":2,"ram_size":261944,"ram_free":151732,"ram_min_free":146564,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:25","unixtime":1774880701,"last_sync_ts":1774880701,"uptime":2,"ram_size":261916,"ram_free":150704,"ram_min_free":146564,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774880701.70,"sys":{"time":"16:25","unixtime":1774880701}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774880702.39,"events":[{"component":"sys", "event":"sleep", "ts":1774880702.39}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:28","unixtime":1774880881,"last_sync_ts":1774880880,"uptime":1,"ram_size":262064,"ram_free":158228,"ram_min_free":152660,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.2, "tF":71.9}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774880881.38,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"16:28","unixtime":1774880881,"last_sync_ts":1774880880,"uptime":1,"ram_size":262136,"ram_free":159452,"ram_min_free":152660,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.2, "tF":71.9},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774880881.38,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774880883.39,"events":[{"component":"sys", "event":"sleep", "ts":1774880883.39}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:31","unixtime":1774881061,"last_sync_ts":1774881060,"uptime":1,"ram_size":262052,"ram_free":156596,"ram_min_free":152520,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.6, "tF":70.9}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-71,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774881061.19,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"16:31","unixtime":1774881061,"last_sync_ts":1774881060,"uptime":1,"ram_size":262124,"ram_free":157820,"ram_min_free":152520,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.6, "tF":70.9},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-71,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774881061.19,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774881063.20,"events":[{"component":"sys", "event":"sleep", "ts":1774881063.20}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.3}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:34","unixtime":1774881241,"last_sync_ts":1774881240,"uptime":1,"ram_size":262064,"ram_free":158216,"ram_min_free":152620,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.1, "tF":71.9}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774881241.36,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.3},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"16:34","unixtime":1774881241,"last_sync_ts":1774881240,"uptime":1,"ram_size":262136,"ram_free":159432,"ram_min_free":152620,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.1, "tF":71.9},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774881241.36,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774881243.37,"events":[{"component":"sys", "event":"sleep", "ts":1774881243.37}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:37","unixtime":1774881420,"last_sync_ts":1774881420,"uptime":1,"ram_size":262064,"ram_free":158092,"ram_min_free":152556,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.6, "tF":70.8}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774881420.85,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"16:37","unixtime":1774881420,"last_sync_ts":1774881420,"uptime":1,"ram_size":262136,"ram_free":159324,"ram_min_free":152556,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.6, "tF":70.8},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774881420.85,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774881422.87,"events":[{"component":"sys", "event":"sleep", "ts":1774881422.87}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:40","unixtime":1774881601,"last_sync_ts":1774881600,"uptime":1,"ram_size":262060,"ram_free":158196,"ram_min_free":152668,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.1, "tF":71.8}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774881601.12,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"16:40","unixtime":1774881601,"last_sync_ts":1774881600,"uptime":1,"ram_size":262132,"ram_free":159424,"ram_min_free":152668,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.1, "tF":71.8},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774881601.12,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774881603.14,"events":[{"component":"sys", "event":"sleep", "ts":1774881603.14}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262096,"ram_free":160788,"ram_min_free":157264,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.5, "tF":70.7}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-71,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774881781.64,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161696,"ram_min_free":159032,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.5, "tF":70.7},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-71,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774881781.63,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774881782.46,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774881782.09,"sys":{"last_sync_ts":1774881782}}}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:43","unixtime":1774881782,"last_sync_ts":1774881782,"uptime":2,"ram_size":262096,"ram_free":159012,"ram_min_free":151972,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:43","unixtime":1774881782,"last_sync_ts":1774881782,"uptime":2,"ram_size":262068,"ram_free":157964,"ram_min_free":151972,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774881782.09,"sys":{"time":"16:43","unixtime":1774881782}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774881782.82,"events":[{"component":"sys", "event":"sleep", "ts":1774881782.82}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262008,"ram_free":157400,"ram_min_free":152412,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.1, "tF":71.7}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774881961.24,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262036,"ram_free":156088,"ram_min_free":152412,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.1, "tF":71.7},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774881961.24,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774881960.56,"sys":{"last_sync_ts":1774881960}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:46","unixtime":1774881960,"last_sync_ts":1774881960,"uptime":1,"ram_size":261888,"ram_free":152844,"ram_min_free":149520,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:46","unixtime":1774881960,"last_sync_ts":1774881960,"uptime":1,"ram_size":261872,"ram_free":152020,"ram_min_free":149520,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774881960.56,"sys":{"time":"16:46","unixtime":1774881960}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774881961.31,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774881962.53,"events":[{"component":"sys", "event":"sleep", "ts":1774881962.53}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262096,"ram_free":160740,"ram_min_free":157488,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.5, "tF":70.7}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774882141.66,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262168,"ram_free":161960,"ram_min_free":159012,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.5, "tF":70.7},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882141.66,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882141.20,"sys":{"last_sync_ts":1774882141}}}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:49","unixtime":1774882141,"last_sync_ts":1774882141,"uptime":1,"ram_size":261968,"ram_free":154924,"ram_min_free":147028,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:49","unixtime":1774882141,"last_sync_ts":1774882141,"uptime":1,"ram_size":261952,"ram_free":154092,"ram_min_free":147028,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882141.20,"sys":{"time":"16:49","unixtime":1774882141}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882141.30,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774882142.87,"events":[{"component":"sys", "event":"sleep", "ts":1774882142.87}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:52","unixtime":1774882321,"last_sync_ts":1774882321,"uptime":1,"ram_size":262064,"ram_free":158180,"ram_min_free":152624,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.1, "tF":71.7}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774882321.56,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"16:52","unixtime":1774882321,"last_sync_ts":1774882321,"uptime":1,"ram_size":262136,"ram_free":159424,"ram_min_free":152624,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.1, "tF":71.7},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774882321.55,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774882323.57,"events":[{"component":"sys", "event":"sleep", "ts":1774882323.57}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"16:55","unixtime":1774882501,"last_sync_ts":1774882501,"uptime":1,"ram_size":262064,"ram_free":158092,"ram_min_free":152568,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.5, "tF":70.6}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774882501.64,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"16:55","unixtime":1774882501,"last_sync_ts":1774882501,"uptime":1,"ram_size":262136,"ram_free":159308,"ram_min_free":152568,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.5, "tF":70.6},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882501.63,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774882503.65,"events":[{"component":"sys", "event":"sleep", "ts":1774882503.65}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.4}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"16:58","unixtime":1774882681,"last_sync_ts":1774882681,"uptime":1,"ram_size":262064,"ram_free":158224,"ram_min_free":152648,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.0, "tF":71.6}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774882681.55,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.4},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"16:58","unixtime":1774882681,"last_sync_ts":1774882681,"uptime":1,"ram_size":262136,"ram_free":159472,"ram_min_free":152648,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.0, "tF":71.6},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774882681.55,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774882683.57,"events":[{"component":"sys", "event":"sleep", "ts":1774882683.57}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262096,"ram_free":160760,"ram_min_free":157508,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.4, "tF":70.6}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774882861.45,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161688,"ram_min_free":158904,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.4, "tF":70.6},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882861.45,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882862.42,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882861.88,"sys":{"last_sync_ts":1774882861}}}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:01","unixtime":1774882861,"last_sync_ts":1774882861,"uptime":2,"ram_size":262096,"ram_free":159004,"ram_min_free":147264,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:01","unixtime":1774882861,"last_sync_ts":1774882861,"uptime":2,"ram_size":262068,"ram_free":157968,"ram_min_free":147264,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774882861.88,"sys":{"time":"17:01","unixtime":1774882861}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774882862.63,"events":[{"component":"sys", "event":"sleep", "ts":1774882862.63}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262004,"ram_free":157368,"ram_min_free":151080,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.0, "tF":71.5}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774883041.70,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262084,"ram_free":158812,"ram_min_free":151080,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.0, "tF":71.5},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774883041.70,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774883040.95,"sys":{"last_sync_ts":1774883040}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:04","unixtime":1774883040,"last_sync_ts":1774883040,"uptime":1,"ram_size":261888,"ram_free":152936,"ram_min_free":150580,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:04","unixtime":1774883040,"last_sync_ts":1774883040,"uptime":1,"ram_size":261872,"ram_free":152124,"ram_min_free":149944,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774883040.95,"sys":{"time":"17:04","unixtime":1774883040}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774883041.57,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774883042.94,"events":[{"component":"sys", "event":"sleep", "ts":1774883042.94}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262104,"ram_free":160796,"ram_min_free":157536,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.4, "tF":70.6}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774883221.54,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262176,"ram_free":162008,"ram_min_free":157592,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.4, "tF":70.6},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774883221.54,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774883222.81,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774883223.56,"events":[{"component":"sys", "event":"sleep", "ts":1774883223.56}]}}
+shelly-sovrum/online false
+shelly-arbetsrum/online true
+shelly-arbetsrum/status/ble {}
+shelly-arbetsrum/status/cloud {"connected":false}
+shelly-arbetsrum/status/devicepower:0 {"id": 0,"battery":{"V":5.92, "percent":95},"external":{"present":false}}
+shelly-arbetsrum/status/ht_ui {}
+shelly-arbetsrum/status/humidity:0 {"id": 0,"rh":37.2}
+shelly-arbetsrum/status/mqtt {"connected":true}
+shelly-arbetsrum/status/sys {"mac":"D885AC155640","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262060,"ram_free":160140,"ram_min_free":156904,"fs_size":1048576,"fs_free":712704,"cfg_rev":20,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"periodic"},"wakeup_period":7200,"reset_reason":8,"utc_offset":7200}
+shelly-arbetsrum/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.0}
+shelly-arbetsrum/status/wifi {"sta_ip":"192.168.1.245","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-73,"sta_ip6":null}
+shelly-arbetsrum/status/ws {"connected":false}
+shelly-arbetsrum/status/mqtt {"connected":true}
+shelly-arbetsrum/events/rpc {"src":"shellyhtg3-d885ac155640","dst":"shelly-arbetsrum/events","method":"NotifyFullStatus","params":{"ts":1774883401.38,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":5.92, "percent":95},"external":{"present":false}},"ht_ui":{},"humidity:0":{"id": 0,"rh":37.2},"mqtt":{"connected":true},"sys":{"mac":"D885AC155640","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262128,"ram_free":161012,"ram_min_free":158320,"fs_size":1048576,"fs_free":712704,"cfg_rev":20,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"periodic"},"wakeup_period":7200,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.0},"wifi":{"sta_ip":"192.168.1.245","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-73,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-arbetsrum/events/rpc {"src":"shellyhtg3-d885ac155640","dst":"shelly-arbetsrum/events","method":"NotifyStatus","params":{"ts":1774883401.38,"mqtt":{"connected":true}}}
+shelly-arbetsrum/events/rpc {"src":"shellyhtg3-d885ac155640","dst":"shelly-arbetsrum/events","method":"NotifyStatus","params":{"ts":1774883402.31,"cloud":{"connected":true}}}
+shelly-arbetsrum/status/cloud {"connected":true}
+shelly-arbetsrum/events/rpc {"src":"shellyhtg3-d885ac155640","dst":"shelly-arbetsrum/events","method":"NotifyStatus","params":{"ts":1774883377.67,"sys":{"last_sync_ts":1774883377}}}
+shelly-arbetsrum/status/sys {"mac":"D885AC155640","restart_required":false,"time":"17:09","unixtime":1774883377,"last_sync_ts":1774883377,"uptime":2,"ram_size":262068,"ram_free":158668,"ram_min_free":144652,"fs_size":1048576,"fs_free":712704,"cfg_rev":20,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"periodic"},"wakeup_period":7200,"reset_reason":8,"utc_offset":7200}
+shelly-arbetsrum/status/sys {"mac":"D885AC155640","restart_required":false,"time":"17:09","unixtime":1774883377,"last_sync_ts":1774883377,"uptime":2,"ram_size":262040,"ram_free":157624,"ram_min_free":144652,"fs_size":1048576,"fs_free":712704,"cfg_rev":20,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"periodic"},"wakeup_period":7200,"reset_reason":8,"utc_offset":7200}
+shelly-arbetsrum/events/rpc {"src":"shellyhtg3-d885ac155640","dst":"shelly-arbetsrum/events","method":"NotifyStatus","params":{"ts":1774883377.67,"sys":{"time":"17:09","unixtime":1774883377}}}
+shelly-arbetsrum/events/rpc {"src":"shellyhtg3-d885ac155640","dst":"shelly-arbetsrum/events","method":"NotifyEvent","params":{"ts":1774883378.45,"events":[{"component":"sys", "event":"sleep", "ts":1774883378.45}]}}
+shelly-arbetsrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:10","unixtime":1774883401,"last_sync_ts":1774883401,"uptime":1,"ram_size":262028,"ram_free":159384,"ram_min_free":152460,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":22.0, "tF":71.5}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774883401.30,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"17:10","unixtime":1774883401,"last_sync_ts":1774883401,"uptime":1,"ram_size":262080,"ram_free":158876,"ram_min_free":152460,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":22.0, "tF":71.5},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774883401.30,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774883401.38,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774883403.31,"events":[{"component":"sys", "event":"sleep", "ts":1774883403.31}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262096,"ram_free":160752,"ram_min_free":157492,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.4, "tF":70.5}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774883581.48,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262168,"ram_free":161972,"ram_min_free":157544,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.4, "tF":70.5},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774883581.48,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774883579.84,"sys":{"last_sync_ts":1774883579}}}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:12","unixtime":1774883579,"last_sync_ts":1774883579,"uptime":0,"ram_size":261996,"ram_free":156100,"ram_min_free":152748,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:12","unixtime":1774883579,"last_sync_ts":1774883579,"uptime":0,"ram_size":261980,"ram_free":155268,"ram_min_free":152748,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774883579.84,"sys":{"time":"17:12","unixtime":1774883579}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774883580.87,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774883581.81,"events":[{"component":"sys", "event":"sleep", "ts":1774883581.81}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:16","unixtime":1774883761,"last_sync_ts":1774883760,"uptime":1,"ram_size":262060,"ram_free":158120,"ram_min_free":152664,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774883761.05,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"17:16","unixtime":1774883761,"last_sync_ts":1774883760,"uptime":1,"ram_size":262132,"ram_free":159356,"ram_min_free":152664,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774883761.05,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774883763.06,"events":[{"component":"sys", "event":"sleep", "ts":1774883763.06}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:19","unixtime":1774883941,"last_sync_ts":1774883941,"uptime":1,"ram_size":262072,"ram_free":158488,"ram_min_free":152596,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.4, "tF":70.5}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774883941.72,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"17:19","unixtime":1774883941,"last_sync_ts":1774883941,"uptime":1,"ram_size":262144,"ram_free":159696,"ram_min_free":152596,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.4, "tF":70.5},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774883941.72,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774883941.81,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774883943.74,"events":[{"component":"sys", "event":"sleep", "ts":1774883943.74}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:22","unixtime":1774884120,"last_sync_ts":1774884120,"uptime":1,"ram_size":262048,"ram_free":157856,"ram_min_free":150836,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774884120.83,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"17:22","unixtime":1774884120,"last_sync_ts":1774884120,"uptime":1,"ram_size":262120,"ram_free":159072,"ram_min_free":150836,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774884120.83,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774884122.85,"events":[{"component":"sys", "event":"sleep", "ts":1774884122.85}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262000,"ram_free":156692,"ram_min_free":152332,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.4, "tF":70.5}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774884301.88,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262052,"ram_free":156476,"ram_min_free":152332,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.4, "tF":70.5},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774884301.88,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774884302.06,"cloud":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774884303.90,"events":[{"component":"sys", "event":"sleep", "ts":1774884303.90}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262104,"ram_free":160880,"ram_min_free":157632,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774884481.80,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262176,"ram_free":162104,"ram_min_free":159084,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774884481.80,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774884481.20,"sys":{"last_sync_ts":1774884481}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:28","unixtime":1774884481,"last_sync_ts":1774884481,"uptime":1,"ram_size":261996,"ram_free":156188,"ram_min_free":152548,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:28","unixtime":1774884481,"last_sync_ts":1774884481,"uptime":1,"ram_size":261980,"ram_free":155380,"ram_min_free":152548,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774884481.20,"sys":{"time":"17:28","unixtime":1774884481}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774884481.91,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774884483.14,"events":[{"component":"sys", "event":"sleep", "ts":1774884483.14}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:31","unixtime":1774884660,"last_sync_ts":1774884660,"uptime":1,"ram_size":262012,"ram_free":157668,"ram_min_free":152580,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.3, "tF":70.4}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774884660.41,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"17:31","unixtime":1774884660,"last_sync_ts":1774884660,"uptime":1,"ram_size":262084,"ram_free":158880,"ram_min_free":152580,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.3, "tF":70.4},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774884660.41,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774884660.61,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774884662.44,"events":[{"component":"sys", "event":"sleep", "ts":1774884662.44}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:34","unixtime":1774884841,"last_sync_ts":1774884840,"uptime":1,"ram_size":262064,"ram_free":158196,"ram_min_free":152648,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.4}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774884841.14,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"17:34","unixtime":1774884841,"last_sync_ts":1774884840,"uptime":1,"ram_size":262136,"ram_free":159416,"ram_min_free":152648,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.4},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774884841.14,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774884843.16,"events":[{"component":"sys", "event":"sleep", "ts":1774884843.16}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262104,"ram_free":160856,"ram_min_free":157604,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.3, "tF":70.4}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774885021.34,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262176,"ram_free":162080,"ram_min_free":159068,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.3, "tF":70.4},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774885021.34,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774885022.21,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774885023.65,"events":[{"component":"sys", "event":"sleep", "ts":1774885023.65}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:40","unixtime":1774885200,"last_sync_ts":1774885200,"uptime":1,"ram_size":262064,"ram_free":158168,"ram_min_free":152656,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.8, "tF":71.3}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774885200.90,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"17:40","unixtime":1774885200,"last_sync_ts":1774885200,"uptime":1,"ram_size":262136,"ram_free":159424,"ram_min_free":152656,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.8, "tF":71.3},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774885200.90,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774885202.92,"events":[{"component":"sys", "event":"sleep", "ts":1774885202.92}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:43","unixtime":1774885380,"last_sync_ts":1774885380,"uptime":1,"ram_size":262064,"ram_free":158092,"ram_min_free":152552,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.3, "tF":70.3}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774885380.66,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"17:43","unixtime":1774885380,"last_sync_ts":1774885380,"uptime":1,"ram_size":262136,"ram_free":159332,"ram_min_free":152552,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.3, "tF":70.3},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774885380.66,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774885382.67,"events":[{"component":"sys", "event":"sleep", "ts":1774885382.67}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:46","unixtime":1774885561,"last_sync_ts":1774885561,"uptime":1,"ram_size":262076,"ram_free":158564,"ram_min_free":152540,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.9, "tF":71.3}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-65,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774885561.70,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"17:46","unixtime":1774885561,"last_sync_ts":1774885561,"uptime":1,"ram_size":262148,"ram_free":159784,"ram_min_free":152540,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.9, "tF":71.3},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-65,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774885561.70,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774885561.76,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774885563.72,"events":[{"component":"sys", "event":"sleep", "ts":1774885563.72}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262096,"ram_free":160760,"ram_min_free":157504,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.3, "tF":70.3}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774885741.45,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161692,"ram_min_free":158912,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.3, "tF":70.3},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774885741.45,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774885742.21,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774885741.93,"sys":{"last_sync_ts":1774885741}}}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:49","unixtime":1774885741,"last_sync_ts":1774885741,"uptime":2,"ram_size":262096,"ram_free":158988,"ram_min_free":146864,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:49","unixtime":1774885741,"last_sync_ts":1774885741,"uptime":2,"ram_size":262068,"ram_free":157956,"ram_min_free":146864,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774885741.93,"sys":{"time":"17:49","unixtime":1774885741}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774885742.65,"events":[{"component":"sys", "event":"sleep", "ts":1774885742.65}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.5}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262088,"ram_free":160564,"ram_min_free":157304,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.8, "tF":71.3}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774885921.50,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.5},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161772,"ram_min_free":157372,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.8, "tF":71.3},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774885921.50,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774885922.59,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774885921.93,"sys":{"last_sync_ts":1774885921}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:52","unixtime":1774885921,"last_sync_ts":1774885921,"uptime":2,"ram_size":262080,"ram_free":157216,"ram_min_free":151096,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:52","unixtime":1774885921,"last_sync_ts":1774885921,"uptime":2,"ram_size":262052,"ram_free":156200,"ram_min_free":151096,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774885921.93,"sys":{"time":"17:52","unixtime":1774885921}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774885922.67,"events":[{"component":"sys", "event":"sleep", "ts":1774885922.67}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"17:55","unixtime":1774886101,"last_sync_ts":1774886100,"uptime":1,"ram_size":262036,"ram_free":154720,"ram_min_free":150240,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.3, "tF":70.3}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774886101.37,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"17:55","unixtime":1774886101,"last_sync_ts":1774886100,"uptime":1,"ram_size":262104,"ram_free":156424,"ram_min_free":150240,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.3, "tF":70.3},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774886101.37,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774886103.39,"events":[{"component":"sys", "event":"sleep", "ts":1774886103.39}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"17:58","unixtime":1774886281,"last_sync_ts":1774886280,"uptime":1,"ram_size":262036,"ram_free":154928,"ram_min_free":150352,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.8, "tF":71.2}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774886281.36,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"17:58","unixtime":1774886281,"last_sync_ts":1774886280,"uptime":1,"ram_size":262112,"ram_free":156608,"ram_min_free":150352,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.8, "tF":71.2},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774886281.35,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774886283.38,"events":[{"component":"sys", "event":"sleep", "ts":1774886283.38}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262096,"ram_free":160764,"ram_min_free":157508,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.2, "tF":70.2}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774886461.23,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262168,"ram_free":161984,"ram_min_free":158992,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.2, "tF":70.2},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774886461.23,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774886462.17,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774886463.25,"events":[{"component":"sys", "event":"sleep", "ts":1774886463.25}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262088,"ram_free":160588,"ram_min_free":157308,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.8, "tF":71.3}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774886641.17,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161780,"ram_min_free":157376,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.8, "tF":71.3},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774886641.17,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774886642.44,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774886641.72,"sys":{"last_sync_ts":1774886641}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:04","unixtime":1774886641,"last_sync_ts":1774886641,"uptime":2,"ram_size":262028,"ram_free":154108,"ram_min_free":146420,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:04","unixtime":1774886641,"last_sync_ts":1774886641,"uptime":2,"ram_size":262000,"ram_free":153048,"ram_min_free":146420,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774886641.72,"sys":{"time":"18:04","unixtime":1774886641}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774886642.43,"events":[{"component":"sys", "event":"sleep", "ts":1774886642.43}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:07","unixtime":1774886820,"last_sync_ts":1774886819,"uptime":1,"ram_size":262044,"ram_free":155020,"ram_min_free":151020,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.2, "tF":70.2}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774886820.28,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"18:07","unixtime":1774886820,"last_sync_ts":1774886819,"uptime":1,"ram_size":262116,"ram_free":157468,"ram_min_free":151020,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.2, "tF":70.2},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774886820.28,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774886822.30,"events":[{"component":"sys", "event":"sleep", "ts":1774886822.30}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262012,"ram_free":157656,"ram_min_free":152436,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.8, "tF":71.2}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774887001.54,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262044,"ram_free":156780,"ram_min_free":152436,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.8, "tF":71.2},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774887001.54,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774887000.80,"sys":{"last_sync_ts":1774887000}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:10","unixtime":1774887000,"last_sync_ts":1774887000,"uptime":1,"ram_size":261888,"ram_free":152964,"ram_min_free":149916,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:10","unixtime":1774887000,"last_sync_ts":1774887000,"uptime":1,"ram_size":261872,"ram_free":152124,"ram_min_free":149916,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774887000.80,"sys":{"time":"18:10","unixtime":1774887000}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774887001.39,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774887002.78,"events":[{"component":"sys", "event":"sleep", "ts":1774887002.78}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.8}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262088,"ram_free":160428,"ram_min_free":157180,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.2, "tF":70.1}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-68,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774887181.08,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.8},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161652,"ram_min_free":158640,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.2, "tF":70.1},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-68,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774887181.08,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774887180.39,"sys":{"last_sync_ts":1774887180}}}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:13","unixtime":1774887180,"last_sync_ts":1774887180,"uptime":0,"ram_size":262148,"ram_free":161748,"ram_min_free":153448,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:13","unixtime":1774887180,"last_sync_ts":1774887180,"uptime":0,"ram_size":262132,"ram_free":160928,"ram_min_free":153448,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774887180.39,"sys":{"time":"18:13","unixtime":1774887180}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774887180.96,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774887182.20,"events":[{"component":"sys", "event":"sleep", "ts":1774887182.20}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262004,"ram_free":157264,"ram_min_free":152064,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.8, "tF":71.2}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774887361.89,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262036,"ram_free":156064,"ram_min_free":152424,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.8, "tF":71.2},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774887361.89,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774887362.08,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774887363.92,"events":[{"component":"sys", "event":"sleep", "ts":1774887363.92}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.8}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:19","unixtime":1774887540,"last_sync_ts":1774887540,"uptime":1,"ram_size":262064,"ram_free":158120,"ram_min_free":151076,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.2, "tF":70.1}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774887540.98,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.8},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"18:19","unixtime":1774887540,"last_sync_ts":1774887540,"uptime":1,"ram_size":262136,"ram_free":159348,"ram_min_free":151076,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.2, "tF":70.1},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774887540.98,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774887542.99,"events":[{"component":"sys", "event":"sleep", "ts":1774887542.99}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:22","unixtime":1774887720,"last_sync_ts":1774887720,"uptime":1,"ram_size":262064,"ram_free":158220,"ram_min_free":152648,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.1}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774887720.89,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"18:22","unixtime":1774887720,"last_sync_ts":1774887720,"uptime":1,"ram_size":262136,"ram_free":159444,"ram_min_free":152648,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.1},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-63,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774887720.89,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774887722.90,"events":[{"component":"sys", "event":"sleep", "ts":1774887722.90}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.8}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:25","unixtime":1774887901,"last_sync_ts":1774887901,"uptime":1,"ram_size":262064,"ram_free":158132,"ram_min_free":152412,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.2, "tF":70.1}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774887901.64,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.8},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"18:25","unixtime":1774887901,"last_sync_ts":1774887901,"uptime":1,"ram_size":262136,"ram_free":159372,"ram_min_free":152412,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.2, "tF":70.1},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774887901.64,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774887903.66,"events":[{"component":"sys", "event":"sleep", "ts":1774887903.66}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.02, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:28","unixtime":1774888081,"last_sync_ts":1774888081,"uptime":1,"ram_size":262076,"ram_free":158588,"ram_min_free":151124,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.1}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774888081.66,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.02, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"18:28","unixtime":1774888081,"last_sync_ts":1774888081,"uptime":1,"ram_size":262148,"ram_free":159772,"ram_min_free":151124,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.1},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774888081.66,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774888081.72,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774888083.68,"events":[{"component":"sys", "event":"sleep", "ts":1774888083.68}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:31","unixtime":1774888261,"last_sync_ts":1774888260,"uptime":1,"ram_size":262048,"ram_free":156216,"ram_min_free":152552,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.1, "tF":70.0}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774888261.35,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"18:31","unixtime":1774888261,"last_sync_ts":1774888260,"uptime":1,"ram_size":262120,"ram_free":157444,"ram_min_free":152552,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.1, "tF":70.0},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774888261.35,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774888263.37,"events":[{"component":"sys", "event":"sleep", "ts":1774888263.37}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262004,"ram_free":157512,"ram_min_free":152620,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.1}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-65,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:34","unixtime":1774888441,"last_sync_ts":1774888441,"uptime":1,"ram_size":261880,"ram_free":154228,"ram_min_free":151076,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:34","unixtime":1774888441,"last_sync_ts":1774888441,"uptime":1,"ram_size":261864,"ram_free":153416,"ram_min_free":151076,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774888441.79,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262084,"ram_free":158880,"ram_min_free":152620,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.1},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-65,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774888441.79,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774888441.08,"sys":{"last_sync_ts":1774888441}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774888441.08,"sys":{"time":"18:34","unixtime":1774888441}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774888441.64,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774888443.08,"events":[{"component":"sys", "event":"sleep", "ts":1774888443.08}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.8}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262096,"ram_free":160780,"ram_min_free":157528,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.1, "tF":70.0}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774888621.19,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.8},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262168,"ram_free":162000,"ram_min_free":159040,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.1, "tF":70.0},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774888621.19,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774888621.62,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774888623.21,"events":[{"component":"sys", "event":"sleep", "ts":1774888623.21}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:40","unixtime":1774888800,"last_sync_ts":1774888800,"uptime":1,"ram_size":262052,"ram_free":157868,"ram_min_free":149180,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.1}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-65,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774888800.80,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"18:40","unixtime":1774888800,"last_sync_ts":1774888800,"uptime":1,"ram_size":262124,"ram_free":159116,"ram_min_free":149180,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.1},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-65,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774888800.80,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774888802.82,"events":[{"component":"sys", "event":"sleep", "ts":1774888802.82}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.8}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262044,"ram_free":155864,"ram_min_free":151008,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.1, "tF":69.9}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774888981.30,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.8},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":1,"ram_size":262084,"ram_free":158808,"ram_min_free":151008,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.1, "tF":69.9},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774888981.30,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774888981.38,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774888983.33,"events":[{"component":"sys", "event":"sleep", "ts":1774888983.33}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":false}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262080,"ram_free":160448,"ram_min_free":157284,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.1}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774889161.61,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161756,"ram_min_free":158888,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.1},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774889161.61,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774889162.52,"cloud":{"connected":true}}}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774889161.98,"sys":{"last_sync_ts":1774889161}}}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:46","unixtime":1774889161,"last_sync_ts":1774889161,"uptime":2,"ram_size":262096,"ram_free":159052,"ram_min_free":146672,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:46","unixtime":1774889161,"last_sync_ts":1774889161,"uptime":2,"ram_size":262068,"ram_free":158032,"ram_min_free":146672,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774889161.98,"sys":{"time":"18:46","unixtime":1774889161}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774889162.73,"events":[{"component":"sys", "event":"sleep", "ts":1774889162.73}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.8}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:48","unixtime":1774889339,"last_sync_ts":1774889338,"uptime":1,"ram_size":262064,"ram_free":158132,"ram_min_free":150932,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.1, "tF":69.9}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774889339.34,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.8},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":"18:48","unixtime":1774889339,"last_sync_ts":1774889338,"uptime":1,"ram_size":262136,"ram_free":159352,"ram_min_free":150932,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.1, "tF":69.9},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-70,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774889339.34,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774889341.35,"events":[{"component":"sys", "event":"sleep", "ts":1774889341.35}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:52","unixtime":1774889521,"last_sync_ts":1774889521,"uptime":1,"ram_size":262064,"ram_free":158180,"ram_min_free":150632,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.0}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774889521.62,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"18:52","unixtime":1774889521,"last_sync_ts":1774889521,"uptime":1,"ram_size":262136,"ram_free":159412,"ram_min_free":150632,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.0},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774889521.62,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774889523.64,"events":[{"component":"sys", "event":"sleep", "ts":1774889523.64}]}}
+shelly-hall/online false
+shelly-sovrum/online true
+shelly-sovrum/status/ble {}
+shelly-sovrum/status/cloud {"connected":false}
+shelly-sovrum/status/devicepower:0 {"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}}
+shelly-sovrum/status/ht_ui {}
+shelly-sovrum/status/humidity:0 {"id": 0,"rh":35.7}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262088,"ram_free":160672,"ram_min_free":157412,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/temperature:0 {"id": 0,"tC":21.1, "tF":69.9}
+shelly-sovrum/status/wifi {"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null}
+shelly-sovrum/status/ws {"connected":false}
+shelly-sovrum/status/mqtt {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyFullStatus","params":{"ts":1774889701.09,"ble":{},"cloud":{"connected":false},"devicepower:0":{"id": 0,"battery":{"V":0.00, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.7},"mqtt":{"connected":true},"sys":{"mac":"D885AC14D3EC","restart_required":false,"time":null,"unixtime":null,"last_sync_ts":null,"uptime":0,"ram_size":262160,"ram_free":161884,"ram_min_free":159052,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.1, "tF":69.9},"wifi":{"sta_ip":"192.168.1.128","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-69,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774889701.09,"mqtt":{"connected":true}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774889700.53,"sys":{"last_sync_ts":1774889700}}}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:55","unixtime":1774889700,"last_sync_ts":1774889700,"uptime":1,"ram_size":261956,"ram_free":154916,"ram_min_free":145572,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/status/sys {"mac":"D885AC14D3EC","restart_required":false,"time":"18:55","unixtime":1774889700,"last_sync_ts":1774889700,"uptime":1,"ram_size":261940,"ram_free":154100,"ram_min_free":145572,"fs_size":1048576,"fs_free":712704,"cfg_rev":18,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774889700.53,"sys":{"time":"18:55","unixtime":1774889700}}}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyStatus","params":{"ts":1774889700.71,"cloud":{"connected":true}}}
+shelly-sovrum/status/cloud {"connected":true}
+shelly-sovrum/events/rpc {"src":"shellyhtg3-d885ac14d3ec","dst":"shelly-sovrum/events","method":"NotifyEvent","params":{"ts":1774889702.17,"events":[{"component":"sys", "event":"sleep", "ts":1774889702.17}]}}
+shelly-sovrum/online false
+shelly-hall/online true
+shelly-hall/status/ble {}
+shelly-hall/status/cloud {"connected":true}
+shelly-hall/status/devicepower:0 {"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}}
+shelly-hall/status/ht_ui {}
+shelly-hall/status/humidity:0 {"id": 0,"rh":35.6}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/status/sys {"mac":"D885AC1555EC","restart_required":false,"time":"18:58","unixtime":1774889881,"last_sync_ts":1774889881,"uptime":1,"ram_size":262064,"ram_free":158216,"ram_min_free":152648,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200}
+shelly-hall/status/temperature:0 {"id": 0,"tC":21.7, "tF":71.0}
+shelly-hall/status/wifi {"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null}
+shelly-hall/status/ws {"connected":false}
+shelly-hall/status/mqtt {"connected":true}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyFullStatus","params":{"ts":1774889881.52,"ble":{},"cloud":{"connected":true},"devicepower:0":{"id": 0,"battery":{"V":0.01, "percent":0},"external":{"present":true}},"ht_ui":{},"humidity:0":{"id": 0,"rh":35.6},"mqtt":{"connected":true},"sys":{"mac":"D885AC1555EC","restart_required":false,"time":"18:58","unixtime":1774889881,"last_sync_ts":1774889881,"uptime":1,"ram_size":262136,"ram_free":159460,"ram_min_free":152648,"fs_size":1048576,"fs_free":712704,"cfg_rev":16,"kvs_rev":0,"webhook_rev":0,"available_updates":{},"wakeup_reason":{"boot":"deepsleep_wake","cause":"status_update"},"wakeup_period":600,"reset_reason":8,"utc_offset":7200},"temperature:0":{"id": 0,"tC":21.7, "tF":71.0},"wifi":{"sta_ip":"192.168.1.223","status":"got ip","ssid":"Cartoon","bssid":"d8:50:e6:44:ca:00","rssi":-64,"sta_ip6":null},"ws":{"connected":false}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyStatus","params":{"ts":1774889881.52,"mqtt":{"connected":true}}}
+shelly-hall/events/rpc {"src":"shellyhtg3-d885ac1555ec","dst":"shelly-hall/events","method":"NotifyEvent","params":{"ts":1774889883.53,"events":[{"component":"sys", "event":"sleep", "ts":1774889883.53}]}}
+shelly-hall/online false
