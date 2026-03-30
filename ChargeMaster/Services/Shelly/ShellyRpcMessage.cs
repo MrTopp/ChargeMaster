@@ -6,9 +6,9 @@ namespace ChargeMaster.Services.Shelly;
 /// This is the root structure for NotifyFullStatus and other RPC methods.
 /// </summary>
 public record ShellyRpcMessage(
-    string src,
-    string dst,
-    string method,
+    string? src,
+    string? dst,
+    string? method,
     ShellyRpcParams? @params
 );
 
