@@ -4,6 +4,11 @@ using Tibber.Sdk;
 
 namespace ChargeMaster.Workers;
 
+/// <summary>
+/// Bakgrundstjänst som prenumererar på realtidsmätdata från Tibber Pulse
+/// och skriver mätdata till InfluxDB. Hanterar automatisk återanslutning
+/// med exponentiell backoff vid anslutningsfel.
+/// </summary>
 public class TibberWorker(
     TibberPulseService tibberPulseService,
     InfluxDbService influxDbService,
@@ -27,7 +32,6 @@ public class TibberWorker(
 
                 // Framgång - återställ backoff
                 delaySeconds = InitialDelaySeconds;
-                reconnectCount = 0;
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -60,15 +64,20 @@ public class TibberWorker(
         logger.LogInformation("TibberWorker: Totalt {Reconnects} återanslutningsförsök", reconnectCount);
     }
 
-    private void OnMeasurementReceived(object? sender, TibberMeasurementEventArgs e)
+    private async void OnMeasurementReceived(object? sender, TibberMeasurementEventArgs e)
     {
-        logger.LogDebug("Mottog Tibber-mätning: {Measurement}", FormatMeasurement(e.Measurement));
-        RealTimeMeasurement m = e.Measurement;
-        _ = influxDbService.WriteTibberMeasurementAsync(m);
-    }
+        try
+        {
+            var m = e.Measurement;
+            logger.LogDebug(
+                "Mottog Tibber-mätning: {Power} W, {AccumulatedConsumption} kWh, {AccumulatedCost} {Currency}",
+                m.Power, m.AccumulatedConsumption, m.AccumulatedCost, m.Currency);
 
-    private string FormatMeasurement(RealTimeMeasurement m)
-    {
-        return $"Power: {m.Power} W, AccumulatedConsumption: {m.AccumulatedConsumption} kWh, AccumulatedCost: {m.AccumulatedCost} {m.Currency}";
+            await influxDbService.WriteTibberMeasurementAsync(m);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Fel vid hantering av Tibber-mätning");
+        }
     }
 }
