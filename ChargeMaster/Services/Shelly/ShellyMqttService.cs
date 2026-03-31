@@ -39,18 +39,27 @@ public class ShellyMqttService(
         }
     }
 
+    /// <summary>
+    /// Returnerar aktuell temperatur i hallen.
+    /// </summary>
     public double GetHallTemperature()
     {
         lock (_temperaturesLock)
             return GetHallTemperatureUnsafe();
     }
 
+    /// <summary>
+    /// Returnerar aktuell temperatur i arbetsrummet.
+    /// </summary>
     public double GetArbetsrumTemperature()
     {
         lock (_temperaturesLock)
             return GetArbetsrumTemperatureUnsafe();
     }
 
+    /// <summary>
+    /// Returnerar aktuell temperatur i sovrummet.
+    /// </summary>
     public double GetSovrumTemperature()
     {
         lock (_temperaturesLock)
@@ -172,6 +181,9 @@ public class ShellyMqttService(
     /// </summary>
     public event EventHandler<ShellyConnectionChangedEventArgs>? ConnectionChanged;
 
+    /// <summary>
+    /// Initierar tjänsten genom att hämta temperaturer från databasen, ansluta till MQTT-brokern och prenumerera på Shelly-ämnen.
+    /// </summary>
     public async Task SetupAsync()
     {
         await InitiateTemperatures();
@@ -254,7 +266,7 @@ public class ShellyMqttService(
             .WithCleanSession(false)
             .Build();
 
-        await _mqttClient.ConnectAsync(_mqttOptions, CancellationToken.None);
+        await _mqttClient.ConnectAsync(_mqttOptions, _disposeCts?.Token ?? CancellationToken.None);
         logger.LogInformation("Ansluten till MQTT-server på {Address}:{Port} med klient-ID {ClientId}",
             brokerAddress, brokerPort, clientId);
     }
@@ -311,13 +323,13 @@ public class ShellyMqttService(
         var tempMessage = ShellyTemperatureMessageParser.Parse(topic, payload);
         if (tempMessage != null)
         {
-            HandleMessageTempeerature(tempMessage);
+            HandleMessageTemperature(tempMessage);
         }
 
         return Task.CompletedTask;
     }
 
-    private void HandleMessageTempeerature(ShellyStatusTemperatureMessage message)
+    private void HandleMessageTemperature(ShellyStatusTemperatureMessage message)
     {
         double temperature = message.TemperatureCelsius;
         string src = message.DeviceId;
@@ -407,6 +419,9 @@ public class ShellyMqttService(
         }
     }
 
+    /// <summary>
+    /// Avbryter pågående återanslutning, kopplar ifrån MQTT och frigör resurser.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         _isIntentionalDisconnect = true;
