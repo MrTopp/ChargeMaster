@@ -2,15 +2,16 @@
 
 namespace ChargeMaster.Services.Wallbox;
 
-    /// <summary>
-    /// Åtkomst till Garo wallbox via HTTP-gränssnitt
-    /// </summary>
-    /// <param name="httpClient"></param>
-    public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logger)
+/// <summary>
+/// Åtkomst till Garo wallbox via HTTP-gränssnitt
+/// </summary>
+/// <param name="httpClient">HTTP-klient konfigurerad med wallbox-basadress.</param>
+/// <param name="logger">Logger för diagnostisk information.</param>
+public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logger)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public long AccessCounter
+    private long AccessCounter
     {
         get => ++field;
         set => field = value;
@@ -120,6 +121,11 @@ namespace ChargeMaster.Services.Wallbox;
             var json = await httpClient.GetStringAsync(url);
             return JsonSerializer.Deserialize<List<WallboxSchemaEntry>>(json, JsonOptions);
         }
+        catch (TaskCanceledException)
+        {
+            logger.LogError("Timeout vid hämtning av wallbox-schema");
+            return null;
+        }
         catch (HttpRequestException ex)
         {
             logger.LogError(ex, "Fel vid hämtning av wallbox-schema");
@@ -135,6 +141,11 @@ namespace ChargeMaster.Services.Wallbox;
             var json = await httpClient.GetStringAsync(url);
             return JsonSerializer.Deserialize<WallboxConfig>(json, JsonOptions);
         }
+        catch (TaskCanceledException)
+        {
+            logger.LogError("Timeout vid hämtning av wallbox-konfiguration");
+            return null;
+        }
         catch (HttpRequestException ex)
         {
             logger.LogError(ex, "Fel vid hämtning av wallbox-konfiguration");
@@ -149,6 +160,11 @@ namespace ChargeMaster.Services.Wallbox;
             var url = $"servlet/rest/chargebox/slaves/false?_={AccessCounter}";
             var json = await httpClient.GetStringAsync(url);
             return JsonSerializer.Deserialize<List<WallboxSlaveConfig>>(json, JsonOptions);
+        }
+        catch (TaskCanceledException)
+        {
+            logger.LogError("Timeout vid hämtning av wallbox-slavar");
+            return null;
         }
         catch (HttpRequestException ex)
         {
