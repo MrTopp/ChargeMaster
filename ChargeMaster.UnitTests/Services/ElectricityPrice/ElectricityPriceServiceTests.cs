@@ -434,7 +434,7 @@ public partial class ElectricityPriceServiceTests
             l => l.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Deleted 0 prices")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Raderade 0 priser")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -468,7 +468,7 @@ public partial class ElectricityPriceServiceTests
             l => l.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Deleted 1 prices")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Raderade 1 priser")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -505,7 +505,7 @@ public partial class ElectricityPriceServiceTests
             l => l.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Deleted {count} prices")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Raderade {count} priser")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -539,7 +539,7 @@ public partial class ElectricityPriceServiceTests
             l => l.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Deleted 5 prices")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Raderade 5 priser")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -573,7 +573,7 @@ public partial class ElectricityPriceServiceTests
             l => l.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Deleted 3 prices")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Raderade 3 priser")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
