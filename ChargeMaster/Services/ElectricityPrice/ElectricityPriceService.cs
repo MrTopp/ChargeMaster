@@ -1,4 +1,4 @@
-namespace ChargeMaster.Services.ElectricityPrice;
+﻿namespace ChargeMaster.Services.ElectricityPrice;
 
 /// <summary>
 /// Tillhandahåller metoder för att hämta, lagra och hantera elprisdata för specifika datum med hjälp av ett externt
@@ -67,13 +67,14 @@ public class ElectricityPriceService(
         }
         catch(HttpRequestException ex)
         {
+            // Logga error men inte stack-trace, eftersom det kan vara en tillfällig nätverksfel eller problem med API:et.
             logger.LogError("Fel vid hämtning av elpriser för {Date}, felkod {StatusCode} försöker senare.", date.ToString("yyyy-MM-dd"), ex.StatusCode);
             throw; 
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Kan inte hämta eller lagra elpriser för {Date}.", date.ToString("yyyy-MM-dd"));
-            throw; // Omkastning eller hantering? Bakgrundstjänsten bör hantera det.
+            throw; 
         }
     }
 
@@ -137,11 +138,25 @@ public class ElectricityPriceService(
         return await repository.HasPricesForDateAsync(date);
     }
 
+    /// <summary>
+    /// Tar bort alla elpriser för det angivna datumet från databasen och invaliderar cachen om det berörda datumet är cachat.
+    /// </summary>
+    /// <param name="date">Datum i lokal tid.</param>
     public async Task DeletePricesForDateAsync(DateOnly date)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IElectricityPriceRepository>();
         var count = await repository.DeletePricesForDateAsync(date);
+
+        lock (_cacheLock)
+        {
+            if (_cachedDate == date)
+            {
+                _cachedDate = null;
+                _cachedPrices = null;
+            }
+        }
+
         logger.LogInformation("Raderade {Count} priser för {Date}.", count, date.ToString("yyyy-MM-dd"));
     }
 
