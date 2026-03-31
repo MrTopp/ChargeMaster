@@ -1,7 +1,5 @@
 ﻿using ChargeMaster.Services.ElectricityPrice;
 
-// ReSharper disable UnusedParameter.Local
-
 namespace ChargeMaster.Workers;
 
 /// <summary>
@@ -11,10 +9,10 @@ namespace ChargeMaster.Workers;
 /// en återkommande hämtning kl. 13:10 varje dag, vanligtvis för följande dags priser. Tjänsten är utformad för att
 /// köras kontinuerligt tills programmet stoppas. Loggning tillhandahålls för både lyckade operationer och feltillstånd.
 /// </remarks>
-/// <param name="serviceProvider">Tjänsteleverantören som används för att lösa programtjänster som krävs för prishämtningsoperationer.</param>
+/// <param name="electricityPriceService">Tjänsten som används för att hämta och lagra elprisdata.</param>
 /// <param name="logger">Loggern som används för att registrera informations- och felmeddelanden relaterade till arbetarens körning.</param>
 public class PriceFetchingWorker(
-    IServiceScopeFactory serviceScopeFactory,
+    ElectricityPriceService electricityPriceService,
     ILogger<PriceFetchingWorker> logger) : BackgroundService
 {
     /// <summary>
@@ -23,16 +21,12 @@ public class PriceFetchingWorker(
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Hämta historiska priser från 1 oktober för att initiera databasen.
-        // await FetchPricesFromOctoberAsync(stoppingToken);
-
-        bool success = await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now), stoppingToken);
+        bool success = await CheckAndFetchAsync(DateOnly.FromDateTime(DateTime.Now));
 
         var now = DateTime.Now;
         if (now.Hour >= 13)
         {
-            success = await CheckAndFetchAsync(DateOnly.FromDateTime(now.AddDays(1)),
-                stoppingToken);
+            success = await CheckAndFetchAsync(DateOnly.FromDateTime(now.AddDays(1)));
         }
 
         while (!stoppingToken.IsCancellationRequested)
@@ -45,7 +39,7 @@ public class PriceFetchingWorker(
 
                 await Task.Delay(delay, stoppingToken);
                 var tomorrow = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
-                success = await CheckAndFetchAsync(tomorrow, stoppingToken);
+                success = await CheckAndFetchAsync(tomorrow);
             }
             catch (OperationCanceledException)
             {
@@ -57,8 +51,6 @@ public class PriceFetchingWorker(
             }
         }
     }
-
-
 
     /// <summary>
     /// Beräknar nästa gång för att köra prishämtningen baserat på aktuell tid och framgång för den senaste hämtningen.
@@ -84,46 +76,11 @@ public class PriceFetchingWorker(
     }
 
     /// <summary>
-    /// Hämtar alla elpriser från 1 oktober framåt till idag genom att anropa CheckAndFetchAsync för varje datum.
-    /// </summary>
-    /// <param name="stoppingToken">En avbytningstoken som kan användas för att avbryta operationen.</param>
-    private async Task FetchPricesFromOctoberAsync(CancellationToken stoppingToken)
-    {
-        var startDate = new DateOnly(2025, 10, 1);
-        var endDate = DateOnly.FromDateTime(DateTime.Now);
-        var currentDate = startDate;
-
-        logger.LogInformation("Börjar hämta historiska priser från {StartDate} till {EndDate}", startDate, endDate);
-
-        while (currentDate <= endDate)
-        {
-            try
-            {
-                if (stoppingToken.IsCancellationRequested)
-                {
-                    break;
-                }
-
-                await CheckAndFetchAsync(currentDate, stoppingToken);
-                currentDate = currentDate.AddDays(1);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "PriceFetchingWorker: kunde inte hämta priser för {Date}", currentDate);
-                currentDate = currentDate.AddDays(1);
-            }
-        }
-
-        logger.LogInformation("Slutförde hämtning av historiska priser från 1 oktober");
-    }
-
-    /// <summary>
     /// Kontrollerar elpriser för det angivna datumet och initierar en asynkron hämtnings- och lagringsoperation.
     /// </summary>
     /// <param name="date">Datumet för vilket elpriser ska hämtas.</param>
-    /// <param name="stoppingToken">En avbytningstoken som kan användas för att avbryta operationen.</param>
     /// <returns>En uppgift som representerar den asynkrona operationen och returnerar true om den lyckas.</returns>
-    private async Task<bool> CheckAndFetchAsync(DateOnly date, CancellationToken stoppingToken)
+    private async Task<bool> CheckAndFetchAsync(DateOnly date)
     {
         try
         {
@@ -134,15 +91,12 @@ public class PriceFetchingWorker(
                 return true;
             }
 
-            using var scope = serviceScopeFactory.CreateScope();
-            ElectricityPriceService priceService
-                = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
-
-            await priceService.FetchAndStorePricesForDateAsync(date);
+            await electricityPriceService.FetchAndStorePricesForDateAsync(date);
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logger.LogError(ex, "Kunde inte hämta priser för {Date}", date);
             return false;
         }
     }
