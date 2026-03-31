@@ -1930,7 +1930,7 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid påslaging av värmepump")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid start av värmepump")),
                 It.Is<Exception>(ex => ex == exception),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -1962,7 +1962,7 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid påslaging av värmepump")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid start av värmepump")),
                 It.Is<Exception>(ex => ex == exception),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -1994,7 +1994,7 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid påslaging av värmepump")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid start av värmepump")),
                 It.Is<Exception>(ex => ex == exception),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -2026,7 +2026,7 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid påslaging av värmepump")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid start av värmepump")),
                 It.Is<Exception>(ex => ex == exception),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -2058,7 +2058,7 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid påslaging av värmepump")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid start av värmepump")),
                 It.Is<Exception>(ex => ex == exception),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -2090,7 +2090,7 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid påslaging av värmepump")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid start av värmepump")),
                 It.Is<Exception>(ex => ex == exception),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
