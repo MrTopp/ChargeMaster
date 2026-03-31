@@ -703,10 +703,21 @@ public class InfluxDbServiceTests
             AccumulatedConsumptionLastHour = 0.75m
         };
 
-        // Act - method should not throw due to try-catch block
+        // Act
         await service.WriteTibberMeasurementAsync(measurement);
+        // Tvinga flush så att InfluxDB-skrivning försöks
+        await service.DisposeAsync();
 
-        // Assert - verify that error was logged when write fails
+        // Assert - varning för prisfel + error vid skrivfel
+        mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once,
+            "Expected warning to be logged when price service fails");
         mockLogger.Verify(
             x => x.Log(
                 LogLevel.Error,
@@ -834,19 +845,20 @@ public class InfluxDbServiceTests
             AccumulatedConsumptionLastHour = 0.5m
         };
 
-        // Act - method should not throw due to try-catch block
+        // Act
         await service.WriteTibberMeasurementAsync(measurement);
+        await service.DisposeAsync();
 
-        // Assert - verify that error was logged (write will fail but exception is caught)
+        // Assert - varning loggas när prisservice inte kan nås
         mockLogger.Verify(
             x => x.Log(
-                LogLevel.Error,
+                LogLevel.Warning,
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once,
-            "Expected error to be logged when write fails");
+            "Expected warning to be logged when price service fails");
     }
 
     /// <summary>
@@ -878,19 +890,20 @@ public class InfluxDbServiceTests
             AccumulatedConsumptionLastHour = 0.5m
         };
 
-        // Act - method should not throw due to try-catch block
+        // Act
         await service.WriteTibberMeasurementAsync(measurement);
+        await service.DisposeAsync();
 
-        // Assert - verify that error was logged (write will fail but exception is caught)
+        // Assert - varning loggas när prisservice inte kan nås
         mockLogger.Verify(
             x => x.Log(
-                LogLevel.Error,
+                LogLevel.Warning,
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once,
-            "Expected error to be logged when write fails");
+            "Expected warning to be logged when price service fails");
     }
 
     /// <summary>
@@ -966,19 +979,20 @@ public class InfluxDbServiceTests
             AccumulatedConsumptionLastHour = 0.75m
         };
 
-        // Act - method should not throw due to try-catch block
+        // Act
         await service.WriteTibberMeasurementAsync(measurement);
+        await service.DisposeAsync();
 
-        // Assert - verify that error was logged (write will fail but exception is caught)
+        // Assert - varning loggas när prisservice inte kan nås
         mockLogger.Verify(
             x => x.Log(
-                LogLevel.Error,
+                LogLevel.Warning,
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once,
-            "Expected error to be logged when write fails");
+            "Expected warning to be logged when price service fails");
     }
 
     /// <summary>
@@ -1010,18 +1024,19 @@ public class InfluxDbServiceTests
             AccumulatedConsumptionLastHour = decimal.MaxValue
         };
 
-        // Act - method should not throw due to try-catch block
+        // Act
         await service.WriteTibberMeasurementAsync(measurement);
+        await service.DisposeAsync();
 
-        // Assert - verify that error was logged (write will fail but exception is caught)
+        // Assert - varning loggas när prisservice inte kan nås
         mockLogger.Verify(
             x => x.Log(
-                LogLevel.Error,
+                LogLevel.Warning,
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once,
-            "Expected error to be logged when write fails");
+            "Expected warning to be logged when price service fails");
     }
 }

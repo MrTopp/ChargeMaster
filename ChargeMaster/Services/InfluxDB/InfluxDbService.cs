@@ -104,11 +104,17 @@ public class InfluxDbService : IAsyncDisposable
         _processTask = ProcessWriteQueueAsync();
     }
 
+    /// <summary>
+    /// Skriver wallbox-mätdata till InfluxDB via den interna skrivkön.
+    /// </summary>
     public async Task WriteWallboxMeterInfoAsync(WallboxMeterInfo meterInfo)
     {
         await _writeChannel.Writer.WriteAsync(new WallboxItem(meterInfo));
     }
 
+    /// <summary>
+    /// Skriver Tibber Pulse-mätdata till InfluxDB via den interna skrivkön.
+    /// </summary>
     public async Task WriteTibberMeasurementAsync(RealTimeMeasurement m)
     {
         await _writeChannel.Writer.WriteAsync(new TibberItem(m));
@@ -167,7 +173,7 @@ public class InfluxDbService : IAsyncDisposable
     private async Task ProcessWallboxAsync(WallboxMeterInfo meterInfo)
     {
         var timestamp = DateTime.UtcNow;
-        int currentQuarter = timestamp.Minute / 15;
+        int currentQuarter = timestamp.Hour * 4 + timestamp.Minute / 15;
 
         if (currentQuarter != _lastQuarter)
         {
@@ -175,7 +181,15 @@ public class InfluxDbService : IAsyncDisposable
                 timestamp.Hour, timestamp.Minute, 0, DateTimeKind.Utc);
         }
 
-        var elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
+        Data.ElectricityPrice? elpris = null;
+        try
+        {
+            elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Kunde inte hämta elpris för wallbox-mätning");
+        }
 
         if (currentQuarter == _lastQuarter &&
             meterInfo.Phase1CurrentEnergy == _lastPhase1Energy &&
@@ -209,7 +223,16 @@ public class InfluxDbService : IAsyncDisposable
     private async Task ProcessTibberAsync(RealTimeMeasurement measurement)
     {
         var timestamp = measurement.Timestamp.UtcDateTime;
-        var elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
+
+        Data.ElectricityPrice? elpris = null;
+        try
+        {
+            elpris = await _priceService.GetPriceForDateTimeAsync(DateTime.Now);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Kunde inte hämta elpris för Tibber-mätning");
+        }
 
         var point = PointData.Measurement("tibber_pulse")
             .Field("power_w", (double)measurement.Power)
@@ -263,6 +286,9 @@ public class InfluxDbService : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Tömmer kvarvarande mätpunkter och frigör InfluxDB-klienten.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (_disposed)
