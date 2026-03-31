@@ -26,10 +26,10 @@ public class ChargeWorkerTests
     }
 
     [Fact(Skip="Only for interactive testing")]
-    public async Task LaddBehov_OK()
+    public async Task LaddBehovAsync_OK()
     {
         // Act
-        var result = await _worker.LaddBehov();
+        var result = await _worker.LaddBehovAsync();
 
         // Assert
         Assert.Equal(0, result);

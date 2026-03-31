@@ -116,14 +116,14 @@ public class ChargeWorker(
     {
         DateTime previous = DateTime.Now;
         Timladdning = true;
-        BilenLaddar = await LaddStatus();
+        BilenLaddar = await LaddStatusAsync();
         var currentConnectorStatus = await GetConnectorStatusAsync();
         if (currentConnectorStatus == ConnectionEnum.Disabled)
         {
             logger.LogInformation("Wallbox is disabled.");
             WallboxStopped = true;
         }
-        LaddBehovProcent = await LaddBehov();
+        LaddBehovProcent = await LaddBehovAsync();
         while(!wallboxWorker.WallboxInitierad)
             await Task.Delay(100, stoppingToken);
 
@@ -181,7 +181,8 @@ public class ChargeWorker(
             if (currentConnectorStatus != ConnectorStatus)
             {
                 logger.LogInformation(
-                    $"Charge transition {ConnectorStatus}->{currentConnectorStatus}");
+                    "Charge transition {OldStatus}->{NewStatus}",
+                    ConnectorStatus, currentConnectorStatus);
 
                 // ----- Bilen börjar ladda.
                 if (currentConnectorStatus == ConnectionEnum.Charging)
@@ -230,7 +231,7 @@ public class ChargeWorker(
             // ***** Varje kvart
             if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
             {
-                LaddBehovProcent = await LaddBehov();
+                LaddBehovProcent = await LaddBehovAsync();
                 // Starta/stoppa laddning beroende på om det är tillåtet eller inte
                 if (wallboxWorker.FörbrukningDennaTimme > 0)
                     logger.LogInformation("-- Quarter, consumption: {consumption} Wh --",
@@ -330,7 +331,7 @@ public class ChargeWorker(
         }
     }
 
-    internal async Task<bool> LaddStatus()
+    internal async Task<bool> LaddStatusAsync()
     {
         try
         {
@@ -421,7 +422,7 @@ public class ChargeWorker(
     /// Räknar ut behov av laddning i procent
     /// </summary>
     /// <returns>laddbehov i procent</returns>
-    internal async Task<double> LaddBehov()
+    internal async Task<double> LaddBehovAsync()
     {
         // Beräkna laddbehov
         VWStatus? status;
@@ -431,7 +432,7 @@ public class ChargeWorker(
         }
         catch (CarConnectionException ex)
         {
-            logger.LogError( "Error fetching VW status: {message}", ex.Message);
+            logger.LogError(ex, "Error fetching VW status: {message}", ex.Message);
             await StopWallbox();
             return 0;
         }
@@ -451,7 +452,7 @@ public class ChargeWorker(
     /// </summary>
     private List<ElectricityPrice>? _kvartlista;
 
-    private object _kvartlistaLock = new object();
+    private readonly object _kvartlistaLock = new();
 
     /// <summary>
     /// Skapa lista med kvartar där laddning skall vara aktiv
