@@ -7,15 +7,15 @@ namespace ChargeMaster.Services.VolksWagen;
 /// statusuppdateringar i realtid. Minskar mängden känslig information
 /// som UI har tillgång till och även storleken på skickad information.
 /// </summary>
-public class VWStatusLimitet
+public class VWStatusLimited
 {
     public double? ChargingSettingsTargetLevel { get; set; }
     public double? BatteryLevel { get; set; }
 
-    public VWStatusLimitet(VWStatus status)
+    public VWStatusLimited(VWStatus status)
     {
         ChargingSettingsTargetLevel = status.ChargingSettingsTargetLevel;
-        BatteryLevel = status.BatteryLevel; 
+        BatteryLevel = status.BatteryLevel;
     }
 }
 
@@ -24,7 +24,7 @@ public class VWStatusEventArgs : EventArgs
     /// <summary>
     /// Gets the vehicle status data.
     /// </summary>
-    public VWStatusLimitet? VWStatusLimitet { get; }
+    public VWStatusLimited? VWStatusLimited { get; }
 
     public DateTime Timestamp { get; } = DateTime.Now;
 
@@ -34,7 +34,7 @@ public class VWStatusEventArgs : EventArgs
     /// <param name="status">The vehicle status data.</param>
     public VWStatusEventArgs(VWStatus status)
     {
-        VWStatusLimitet = new VWStatusLimitet(status);
+        VWStatusLimited = new VWStatusLimited(status);
     }
 }
 
@@ -58,13 +58,17 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public async Task<VWStatus?> GetStatus()
+    /// <summary>
+    /// Hämtar aktuell status för fordonet från Volkswagen-tjänsten.
+    /// </summary>
+    /// <returns>Fordonets status, eller null om svaret saknar statusdata.</returns>
+    /// <exception cref="CarConnectionException">Kastas om kommunikation med tjänsten misslyckas.</exception>
+    public async Task<VWStatus?> GetStatusAsync()
     {
         try
         {
             var json = await httpClient.GetStringAsync("/status");
-            VWStatusResponse? response
-                = JsonSerializer.Deserialize<VWStatusResponse>(json, JsonOptions);
+            var response = JsonSerializer.Deserialize<VWStatusResponse>(json, JsonOptions);
             if (response?.Status != null)
             {
                 VWStatusRetrieved?.Invoke(this, new VWStatusEventArgs(response.Status));
@@ -74,13 +78,14 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (TaskCanceledException ex)
         {
-            logger.LogInformation("GetStatus: Förfrågan avbröts {message}", ex.Message);
+            logger.LogInformation("GetStatusAsync: Förfrågan avbröts {message}", ex.Message);
+            throw new CarConnectionException("GetStatusAsync: Kunde inte hämta VW-status", ex);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "GetStatus: Fel vid hämtning av VW-status");
+            logger.LogError(ex, "GetStatusAsync: Fel vid hämtning av VW-status");
+            throw new CarConnectionException("GetStatusAsync: Kunde inte hämta VW-status", ex);
         }
-        throw new CarConnectionException("GetStatus: Kunde inte hämta VW-status");
     }
 
     public async Task<VWVehiclesResponse?> GetVehiclesAsync()
@@ -93,7 +98,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         catch (Exception ex)
         {
             logger.LogError(ex, "GetVehiclesAsync: Fel vid hämtning av VW-fordon");
-            throw new CarConnectionException("GetVehiclesAsync: Kunde inte hämta VW-fordon");
+            throw new CarConnectionException("GetVehiclesAsync: Kunde inte hämta VW-fordon", ex);
         }
     }
 
@@ -116,7 +121,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         catch (Exception ex)
         {
             logger.LogError(ex, "PostAsync: Fel vid skickning av VW-kommando till {url}", relativeUrl);
-            throw new CarConnectionException($"PostAsync: Kunde inte skicka kommando till {relativeUrl}");
+            throw new CarConnectionException($"PostAsync: Kunde inte skicka kommando till {relativeUrl}", ex);
         }
     }
 }
