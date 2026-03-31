@@ -179,7 +179,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
     {
         try
         {
-            if (environment.EnvironmentName == Environments.Development)
+            if (environment.IsDevelopment())
             {
                 logger.LogInformation("🔒 [DEV MODE] Would set holiday mode to {Enabled}", enabled);
                 return true;
@@ -204,7 +204,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
     {
         try
         {
-            if (environment.EnvironmentName == Environments.Development)
+            if (environment.IsDevelopment())
             {
                 logger.LogInformation("🔒 [DEV MODE] Would set region code to {Region}", region);
                 return true;
@@ -559,7 +559,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
     {
         try
         {
-            if (environment.EnvironmentName == Environments.Development)
+            if (environment.IsDevelopment())
             {
                 logger.LogInformation("🔒 [DEV MODE] Would set control info - Power: {Power}, Mode: {Mode}, Temp: {Temp}°C, FanRate: {FanRate}, FanDir: {FanDir}",
                     controlInfo.Power, controlInfo.Mode, controlInfo.TargetTemperature, controlInfo.FanRate ?? "A", controlInfo.FanDirection);
@@ -604,7 +604,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
     {
         try
         {
-            if (environment.EnvironmentName == Environments.Development)
+            if (environment.IsDevelopment())
             {
                 logger.LogInformation("🔒 [DEV MODE] Would set target to {Target}", target);
                 return true;
@@ -657,7 +657,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
         if (controlInfo is null) return false;
 
         controlInfo.TargetTemperature = temperature;
-        controlInfo.Mode = heat ? 4 : 3;
+        controlInfo.Mode = (int)(heat ? DaikinMode.Heat : DaikinMode.Cool);
         return await SetControlInfoAsync(controlInfo);
     }
 
@@ -765,7 +765,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        if (DateTime.TryParseExact(value, "yyyy/M/d H:m:ss",
+        if (DateTime.TryParseExact(value, "yyyy/M/d H:m:s",
             System.Globalization.CultureInfo.InvariantCulture,
             System.Globalization.DateTimeStyles.None, out var result))
         {
