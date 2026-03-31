@@ -29,7 +29,7 @@ public class SmhiWeatherServiceTests
         return mockScopeFactory.Object;
     }
 
-    [Fact]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetForecastAsync_WithValidCoordinates_ReturnsWeatherForecasts()
     {
         // Arrange
@@ -54,21 +54,6 @@ public class SmhiWeatherServiceTests
         }
     }
 
-    [Fact(Skip="Only for interactive testing")]
-    public async Task GetForecastForStromtorpAsync_ReturnsWeatherForecasts()
-    {
-        // Arrange
-        var httpClient = new HttpClient();
-        var logger = new NullLogger<SmhiWeatherService>();
-        var scopeFactory = CreateMockedScopeFactory();
-        var service = new SmhiWeatherService(httpClient, logger, scopeFactory);
-
-        // Act
-        var forecasts = await service.GetForecastAsync();
-
-        // Assert
-        Assert.NotNull(forecasts);
-    }
 }
 
 /// <summary>
