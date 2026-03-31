@@ -54,7 +54,7 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
     {
         try
         {
-            await UpdateStatusAsync();
+            await UpdateStatusAsync(forceEvent);
             logger.LogInformation(
                 "Daikin-status: Inne: {Current}°C, Ute: {Outdoor}°C, Måltemperatur: {Target}°C, Läge: {Mode}, Status: {Status}, Kompressor: {Compressor}",
                 _currentTemperature, _outdoorTemperature, _targetTemperature, _mode, IsOn ? "PÅ" : "AV", _compressorFrequency);
@@ -84,13 +84,13 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
                 changes.CurrentTemperatureChanged = true;
             }
 
-            if (sensorInfo.OutdoorTemperature !=null && Math.Abs( (_outdoorTemperature ?? Int32.MinValue) - (sensorInfo.OutdoorTemperature ?? Int32.MaxValue)) > 0.015)
+            if (sensorInfo.OutdoorTemperature != null && Math.Abs( (_outdoorTemperature ?? Int32.MinValue) - (sensorInfo.OutdoorTemperature ?? Int32.MaxValue)) > 0.015)
             {
                 _outdoorTemperature = sensorInfo.OutdoorTemperature;
                 changes.OutdoorTemperatureChanged = true;
             }
 
-            if (sensorInfo.CompressorFrequency != null & _compressorFrequency != sensorInfo.CompressorFrequency)
+            if (sensorInfo.CompressorFrequency != null && _compressorFrequency != sensorInfo.CompressorFrequency)
             {
                 _compressorFrequency = sensorInfo.CompressorFrequency;
                 changes.CompressorFrequencyChanged = true;
@@ -99,7 +99,7 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
 
         if (controlInfo != null)
         {
-            if (controlInfo.TargetTemperature != null &&Math.Abs( (_targetTemperature ?? Int32.MinValue) - (controlInfo.TargetTemperature ?? Int32.MaxValue)) > 0.015)
+            if (controlInfo.TargetTemperature != null && Math.Abs( (_targetTemperature ?? Int32.MinValue) - (controlInfo.TargetTemperature ?? Int32.MaxValue)) > 0.015)
             {
                 _targetTemperature = controlInfo.TargetTemperature;
                 changes.TargetTemperatureChanged = true;
