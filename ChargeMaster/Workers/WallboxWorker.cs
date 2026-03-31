@@ -344,8 +344,8 @@ public class WallboxWorker(
         try
         {
             WallboxMeterInfo? info = await wallboxService.GetMeterInfoAsync();
-            if (info == null || FöregåendeMeterInfo?.AccEnergy == null ||
-                FöregåendeMeterInfo!.AccEnergy == info.AccEnergy)
+            if (info == null || FöregåendeMeterInfo == null ||
+                FöregåendeMeterInfo.AccEnergy == info.AccEnergy)
             {
                 return info;
             }
@@ -366,15 +366,7 @@ public class WallboxWorker(
 
             // ----- Spara i databasen -----
             using var scope = serviceScopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
-
-            // Skip database operations if db context is not available
-            if (db is null)
-            {
-                logger.LogCritical(
-                    "Database context is not available. Meter info will not be persisted.");
-                return NuvarandeMeterInfo;
-            }
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Generera poster för varje timgräns
             var entries = GenerateHourBoundaryReadings(
@@ -510,13 +502,7 @@ public class WallboxWorker(
         try
         {
             using var scope = serviceScopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
-
-            if (db is null)
-            {
-                logger.LogCritical("Database context is not available. Cannot calculate monthly energy usage.");
-                return 0;
-            }
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Bestäm start- och slutdatum för månaden
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
@@ -587,7 +573,7 @@ public class WallboxWorker(
         HourlyEnergyUsage usage;
         if (IsHighEffect(nu))
         {
-            usage = await GetHighestHourlyEnergyUsageDaytimeAsync(nu);
+            usage = await GetHighestHourlyEnergyUsageDaytimeAsync(nu, cancellationToken);
             max = usage.EnergyUsageWh;
             if (max < 1500)
             {
@@ -596,7 +582,7 @@ public class WallboxWorker(
         }
         else
         {
-            usage = await GetHighestHourlyEnergyUsageAsync(nu);
+            usage = await GetHighestHourlyEnergyUsageAsync(nu, cancellationToken);
             max = usage.EnergyUsageWh;
             if (max < 3000)
             {
@@ -653,12 +639,10 @@ public class WallboxWorker(
         lock (CacheLocker)
         {
             var now = DateTime.Now;
-            var cacheHour = new DateTime(dateInMonth.Year, dateInMonth.Month, now.Day, now.Hour, 0, 0);
-            var lastCacheHour = new DateTime(LastHourlyEnergyUsageCacheTime.Year, LastHourlyEnergyUsageCacheTime.Month,
-                LastHourlyEnergyUsageCacheTime.Day, LastHourlyEnergyUsageCacheTime.Hour, 0, 0);
+            var currentHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
 
             // Om cachen är från samma timme, returnera cachad data
-            if (cacheHour == lastCacheHour && HourlyEnergyUsageCache.Count > 0)
+            if (currentHour == LastHourlyEnergyUsageCacheTime && HourlyEnergyUsageCache.Count > 0)
             {
                 return HourlyEnergyUsageCache;
             }
@@ -686,13 +670,7 @@ public class WallboxWorker(
         try
         {
             using var scope = serviceScopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
-
-            if (db is null)
-            {
-                logger.LogCritical("Database context is not available. Cannot calculate hourly energy usage.");
-                return new List<HourlyEnergyUsage>();
-            }
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Bestäm start- och slutdatum för månaden
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
