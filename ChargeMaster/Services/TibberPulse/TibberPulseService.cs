@@ -33,12 +33,12 @@ public class TibberPulseService(
 
         if (!Guid.TryParse(opts.HomeId, out var homeId))
             throw new InvalidOperationException(
-                $"HomeId '{opts.HomeId}' är inte ett giltigt GUID. Kontrollera appsettings.Developer.json.");
+                $"HomeId '{opts.HomeId}' är inte ett giltigt GUID. Kontrollera appsettings.Development.json.");
 
         // Initiera session-state för denna anslutning
         var sessionState = new SessionState();
 
-        var client = new TibberApiClient(opts.ApiToken, UserAgent);
+        using var client = new TibberApiClient(opts.ApiToken, UserAgent);
 
         logger.LogInformation("Startar Tibber Pulse-lyssnare för HomeId: {HomeId}", homeId);
         IObservable<RealTimeMeasurement>? listener;
@@ -72,13 +72,13 @@ public class TibberPulseService(
             if (completedTask == monitorTask)
             {
                 logger.LogWarning("Tibber stream-monitor kastade exception, försöker reconnecta");
-                await monitorTask; // Hämta actual exception
+                await monitorTask; // Kastar det faktiska undantaget
             }
 
             // Kasta vidare strömfel så att TibberWorker kan återansluta
             if (completedTask == streamErrorTcs.Task && !cancellationToken.IsCancellationRequested)
             {
-                await streamErrorTcs.Task; // Hämta actual exception
+                await streamErrorTcs.Task; // Kastar det faktiska undantaget
             }
         }
         finally
@@ -135,7 +135,7 @@ public class TibberPulseService(
         }
         catch (OperationCanceledException)
         {
-            // Expected when subscription ends
+            // Förväntat när prenumerationen avslutas
         }
     }
 
@@ -169,7 +169,7 @@ public class TibberPulseService(
     private class SessionState
     {
         public DateTime LastMeasurementTime { get; set; } = DateTime.UtcNow;
-        public int MeasurementCount { get; set; } = 0;
+        public int MeasurementCount { get; set; }
     }
 
     private sealed class TibberObserver(
