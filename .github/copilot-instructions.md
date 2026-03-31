@@ -38,6 +38,10 @@
 - In production environment, secret parts of the configuration are provided by the environment and override the values in `appsettings.Production.json`. 
 - In development environment, secrets are stored in `appsettings.Development.json` which is not committed to version control.
 
+## DateTime Handling
+- Use local format for DateTime in the application. 
+- Use UTC format only for external communication, such as storage in InfluxDB.
+
 ## Blazor Specifics
 - Use `@inject` for dependency injection in Razor components.
 - Ensure `InteractiveServer` render mode is considered where appropriate.
