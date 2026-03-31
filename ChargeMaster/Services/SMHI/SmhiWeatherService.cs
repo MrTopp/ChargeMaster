@@ -1,4 +1,7 @@
-﻿namespace ChargeMaster.Services.SMHI;
+﻿using System.Globalization;
+using System.Text.Json;
+
+namespace ChargeMaster.Services.SMHI;
 
 /// <summary>
 /// Tjänst för att hämta väderprognos från SMHI.
@@ -11,6 +14,11 @@ public class SmhiWeatherService(
 {
     private const string SmhiBaseUrl = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point";
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     /// <summary>
     /// Hämta väderprognos för en specifik plats.
     /// </summary>
@@ -22,7 +30,7 @@ public class SmhiWeatherService(
         try
         {
             var url = $"{SmhiBaseUrl}/lon/{longitude.ToString("F4", 
-                System.Globalization.CultureInfo.InvariantCulture)}/lat/{latitude.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}/data.json";
+                CultureInfo.InvariantCulture)}/lat/{latitude.ToString("F4", CultureInfo.InvariantCulture)}/data.json";
             
             logger.LogInformation("Fetching weather forecast from SMHI for coordinates: {Lat},{Lon}", 
                 latitude, longitude);
@@ -31,11 +39,7 @@ public class SmhiWeatherService(
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var options = new System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
-            };
-            var data = System.Text.Json.JsonSerializer.Deserialize<SmhiWeatherResponse>(content, options);
+            var data = JsonSerializer.Deserialize<SmhiWeatherResponse>(content, JsonOptions);
 
             if (data?.TimeSeries == null || data.TimeSeries.Count == 0)
             {
@@ -50,8 +54,8 @@ public class SmhiWeatherService(
                 {
                     Time = ts.Time,
                     Temperature = GetParameterValue(ts.Parameters, "t") ?? 0,
-                    CloudCoverage = GetParameterValue(ts.Parameters, "tcc_mean") != null 
-                        ? (GetParameterValue(ts.Parameters, "tcc_mean") / 8.0 * 100) 
+                    CloudCoverage = GetParameterValue(ts.Parameters, "tcc_mean") is double tcc
+                        ? tcc / 8.0 * 100
                         : null,
                     Precipitation = GetParameterValue(ts.Parameters, "pmin"),
                     MaxPrecipitation = GetParameterValue(ts.Parameters, "pmax"),
@@ -86,7 +90,7 @@ public class SmhiWeatherService(
             logger.LogError(ex, "Failed to fetch weather forecast from SMHI");
             return [];
         }
-        catch (System.Text.Json.JsonException ex)
+        catch (JsonException ex)
         {
             logger.LogError(ex, "Failed to parse SMHI weather response");
             return [];
@@ -99,10 +103,10 @@ public class SmhiWeatherService(
     }
 
     /// <summary>
-    /// Hämta väderprognos för strömtorp
+    /// Hämta väderprognos för strömtorp.
     /// </summary>
     /// <returns>Lista med väderdata</returns>
-    public async Task<List<WeatherForecast>> GetForecast()
+    public async Task<List<WeatherForecast>> GetForecastAsync()
     {
         // Koordinater för strömtorp
         return await GetForecastAsync(longitude: 14.4308, latitude: 59.2301);

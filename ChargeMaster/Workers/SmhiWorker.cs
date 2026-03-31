@@ -77,7 +77,7 @@ public class SmhiWorker(
     {
         try
         {
-            var forecast = await smhiWeatherService.GetForecast();
+            var forecast = await smhiWeatherService.GetForecastAsync();
 
             if (forecast.Count > 0)
             {

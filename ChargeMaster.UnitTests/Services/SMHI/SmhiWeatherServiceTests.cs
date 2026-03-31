@@ -16,7 +16,7 @@ public class SmhiWeatherServiceTests
     /// result in an actual HTTP call or connection failure.
     /// </summary>
     [Fact]
-    public async Task GetForecast_CallsGetForecastAsyncWithStromtorpCoordinates_ReturnsResult()
+    public async Task GetForecastAsync_CallsGetForecastAsyncWithStromtorpCoordinates_ReturnsResult()
     {
         // Arrange
         var mockLogger = new Mock<ILogger<SmhiWeatherService>>();
@@ -24,7 +24,7 @@ public class SmhiWeatherServiceTests
         var httpClient = new HttpClient();
         var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
-        var result = await service.GetForecast();
+        var result = await service.GetForecastAsync();
         // Assert
         Assert.NotNull(result);
         Assert.IsType<List<WeatherForecast>>(result);
@@ -35,7 +35,7 @@ public class SmhiWeatherServiceTests
     /// GetForecastAsync encounters an error (such as network failure).
     /// </summary>
     [Fact]
-    public async Task GetForecast_WhenGetForecastAsyncFails_ReturnsEmptyList()
+    public async Task GetForecastAsync_WhenGetForecastAsyncFails_ReturnsEmptyList()
     {
         // Arrange
         var mockLogger = new Mock<ILogger<SmhiWeatherService>>();
@@ -47,7 +47,7 @@ public class SmhiWeatherServiceTests
         };
         var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
-        var result = await service.GetForecast();
+        var result = await service.GetForecastAsync();
         // Assert
         Assert.NotNull(result);
         Assert.Empty(result);
@@ -58,7 +58,7 @@ public class SmhiWeatherServiceTests
     /// Verifies that the method properly awaits the GetForecastAsync call.
     /// </summary>
     [Fact]
-    public async Task GetForecast_ExecutesAsynchronously_CompletesSuccessfully()
+    public async Task GetForecastAsync_ExecutesAsynchronously_CompletesSuccessfully()
     {
         // Arrange
         var mockLogger = new Mock<ILogger<SmhiWeatherService>>();
@@ -69,7 +69,7 @@ public class SmhiWeatherServiceTests
         };
         var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
-        var task = service.GetForecast();
+        var task = service.GetForecastAsync();
         var result = await task;
         // Assert
         Assert.True(task.IsCompleted);
