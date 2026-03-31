@@ -157,34 +157,32 @@ public class DaikinWorker(
         return (temp, heat);
     }
 
-    private (DateOnly, List<ElectricityPrice>)? _cachedPrices;
+    private (DateOnly Date, List<ElectricityPrice> ExpensiveHours)? _cachedPrices;
 
     /// <summary>
-    /// Justera temperaturen om elpriset är extremt
+    /// Justera temperaturen om elpriset är extremt.
     /// </summary>
-    /// <param name="nu"></param>
-    /// <param name="temp"></param>
-    /// <returns></returns>
+    /// <param name="nu">Referenstid för prisjämförelse.</param>
+    /// <param name="temp">Nuvarande beräknad måltemperatur.</param>
+    /// <returns>Justerad måltemperatur.</returns>
     private async Task<double> JusteraMotPris(DateTime nu, double temp)
     {
         // Om priset är riktigt lågt, kosta på lite extra värme
-         var currentPrice = await GetCurrentPrice(nu);
-         if (currentPrice != null && currentPrice < 0.1m)
-         {
-             return temp + 2;
-        }
-        if (_cachedPrices == null || _cachedPrices.Value.Item1 != DateOnly.FromDateTime(nu))
+        var currentPrice = await GetCurrentPrice(nu);
+        if (currentPrice != null && currentPrice < 0.1m)
         {
-            // Hämta upp dagens elpris 
-            var l
-                = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
-            // Lista 10 kvartar där priset är över 3 kr/kWh
-            var l2 = l.OrderByDescending(p => p.SekPerKwh)
-                .Where(p => p.SekPerKwh >= (decimal)3.0)
-                .Take(10).ToList();
-            _cachedPrices = (DateOnly.FromDateTime(nu), l2);
+            return temp + 2;
         }
-        var priceList = _cachedPrices.Value.Item2;
+        if (_cachedPrices == null || _cachedPrices.Value.Date != DateOnly.FromDateTime(nu))
+        {
+            var todaysPrices
+                = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
+            var expensiveHours = todaysPrices.OrderByDescending(p => p.SekPerKwh)
+                .Where(p => p.SekPerKwh >= 3.0m)
+                .Take(10).ToList();
+            _cachedPrices = (DateOnly.FromDateTime(nu), expensiveHours);
+        }
+        var priceList = _cachedPrices.Value.ExpensiveHours;
         if (priceList.Count == 0)
         {
             return temp;
@@ -212,14 +210,13 @@ public class DaikinWorker(
     }
 
     /// <summary>
-    /// Hämta aktuell elpris för given tid.
+    /// Hämta aktuellt elpris för given tid.
     /// </summary>
+    /// <param name="nu">Tidpunkt att hämta pris för.</param>
     private async Task<decimal?> GetCurrentPrice(DateTime nu)
     {
         try
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            var electricityPriceService = scope.ServiceProvider.GetRequiredService<ElectricityPriceService>();
             var prices = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
             var currentPriceData = prices.FirstOrDefault(p => p.TimeStart <= nu && p.TimeEnd > nu);
             return currentPriceData?.SekPerKwh;
@@ -267,7 +264,8 @@ public class DaikinWorker(
     /// Kontrollera om timmens förbrukning överstiger gränsvärdet.
     /// </summary>
     /// <param name="forbrukningDennaTimme">Uppskattad förbrukning för innevarande timme i Wh.</param>
-    /// <param name="nu">Datum för beräkning</param>
+    /// <param name="nu">Datum för beräkning.</param>
+    /// <param name="cancellationToken">Token för att avbryta operationen.</param>
     public async Task KontrolleraEffekt(long forbrukningDennaTimme, DateTime nu, CancellationToken cancellationToken)
     {
         if (nu.Minute < 20)
