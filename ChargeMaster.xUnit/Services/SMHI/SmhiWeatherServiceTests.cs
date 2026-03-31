@@ -65,7 +65,7 @@ public class SmhiWeatherServiceTests
         var service = new SmhiWeatherService(httpClient, logger, new Mock<IServiceScopeFactory>().Object);
 
         // Act
-        var forecasts = await service.GetForecast();
+        var forecasts = await service.GetForecastAsync();
 
         // Assert
         Assert.NotNull(forecasts);
