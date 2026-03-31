@@ -12,8 +12,6 @@ public class SmhiWeatherService(
     ILogger<SmhiWeatherService> logger,
     IServiceScopeFactory serviceScopeFactory)
 {
-    private const string SmhiBaseUrl = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point";
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -29,8 +27,8 @@ public class SmhiWeatherService(
     {
         try
         {
-            var url = $"{SmhiBaseUrl}/lon/{longitude.ToString("F4", 
-                CultureInfo.InvariantCulture)}/lat/{latitude.ToString("F4", CultureInfo.InvariantCulture)}/data.json";
+            var url = $"https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/geotype/point/lon/{longitude.ToString("F3",
+                    CultureInfo.InvariantCulture)}/lat/{latitude.ToString("F4", CultureInfo.InvariantCulture)}/data.json";
             
             logger.LogInformation("Fetching weather forecast from SMHI for coordinates: {Lat},{Lon}", 
                 latitude, longitude);
@@ -49,29 +47,29 @@ public class SmhiWeatherService(
 
             var now = DateTime.UtcNow;
             var forecasts = data.TimeSeries
-                .Where(ts => ts.Time >= now)
+                .Where(ts => ts.Time >= now && ts.Data != null)
                 .Select(ts => new WeatherForecast
                 {
                     Time = ts.Time,
-                    Temperature = GetParameterValue(ts.Parameters, "t") ?? 0,
-                    CloudCoverage = GetParameterValue(ts.Parameters, "tcc_mean") is double tcc
+                    Temperature = ts.Data!.AirTemperature ?? 0,
+                    CloudCoverage = ts.Data.CloudAreaFraction is double tcc
                         ? tcc / 8.0 * 100
                         : null,
-                    Precipitation = GetParameterValue(ts.Parameters, "pmin"),
-                    MaxPrecipitation = GetParameterValue(ts.Parameters, "pmax"),
-                    MeanPrecipitation = GetParameterValue(ts.Parameters, "pmean"),
-                    WindSpeed = GetParameterValue(ts.Parameters, "ws"),
-                    WindGust = GetParameterValue(ts.Parameters, "gust"),
-                    WindDirection = (int?)GetParameterValue(ts.Parameters, "wd"),
-                    Luftfuktighet = (int?)GetParameterValue(ts.Parameters, "r"),
-                    Lufttryck = GetParameterValue(ts.Parameters, "msl"),
-                    Sikt = GetParameterValue(ts.Parameters, "vis"),
-                    ThunderstormProbability = (int?)GetParameterValue(ts.Parameters, "tstm"),
-                    PrecipitationMedian = GetParameterValue(ts.Parameters, "pmedian"),
-                    PrecipitationProbability = (int?)GetParameterValue(ts.Parameters, "spp"),
-                    PrecipitationCategory = (int?)GetParameterValue(ts.Parameters, "pcat"),
-                    WeatherSymbol = (int?)GetParameterValue(ts.Parameters, "Wsymb2"),
-                    TotalPrecipitation = GetParameterValue(ts.Parameters, "tp")
+                    Precipitation = ts.Data.PrecipitationAmountMin,
+                    MaxPrecipitation = ts.Data.PrecipitationAmountMax,
+                    MeanPrecipitation = ts.Data.PrecipitationAmountMean,
+                    WindSpeed = ts.Data.WindSpeed,
+                    WindGust = ts.Data.WindSpeedOfGust,
+                    WindDirection = (int?)ts.Data.WindFromDirection,
+                    Luftfuktighet = (int?)ts.Data.RelativeHumidity,
+                    Lufttryck = ts.Data.AirPressureAtMeanSeaLevel,
+                    Sikt = ts.Data.VisibilityInAir,
+                    ThunderstormProbability = (int?)ts.Data.ThunderstormProbability,
+                    PrecipitationMedian = ts.Data.PrecipitationAmountMedian,
+                    PrecipitationProbability = (int?)ts.Data.ProbabilityOfPrecipitation,
+                    PrecipitationCategory = (int?)ts.Data.PredominantPrecipitationTypeAtSurface,
+                    WeatherSymbol = (int?)ts.Data.SymbolCode,
+                    TotalPrecipitation = ts.Data.PrecipitationAmountMeanDeterministic
                 })
                 .OrderBy(f => f.Time)
                 .ToList();
@@ -112,14 +110,4 @@ public class SmhiWeatherService(
         return await GetForecastAsync(longitude: 14.4308, latitude: 59.2301);
     }
 
-    /// <summary>
-    /// Extrahera värde från parameters-array baserat på parameternamn.
-    /// </summary>
-    /// <param name="parameters">SMHI parameters array</param>
-    /// <param name="name">Parameternamn (t.ex. "t", "vis", "ws")</param>
-    /// <returns>Första värdet från parametern, eller null om den inte finns</returns>
-    private static double? GetParameterValue(List<SmhiParameter>? parameters, string name)
-    {
-        return parameters?.FirstOrDefault(p => p.Name == name)?.Values?.FirstOrDefault();
     }
-}

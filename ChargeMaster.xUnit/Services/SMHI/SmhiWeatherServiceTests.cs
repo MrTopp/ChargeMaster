@@ -1,8 +1,6 @@
 ﻿using ChargeMaster.Services.SMHI;
-using ChargeMaster.Data;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
@@ -10,34 +8,35 @@ namespace ChargeMaster.xUnit.Services.SMHI;
 
 public class SmhiWeatherServiceTests
 {
-    private static IWeatherForecastRepository CreateWeatherForecastRepository()
+    private static IServiceScopeFactory CreateMockedScopeFactory()
     {
-        var services = new ServiceCollection();
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql("Host=localhost;Database=chargemaster_test;Username=postgres;Password=postgres"));
-        services.AddLogging();
-        services.AddScoped<IWeatherForecastRepository, WeatherForecastRepository>();
+        var mockRepository = new Mock<IWeatherForecastRepository>();
+        mockRepository
+            .Setup(r => r.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>()))
+            .Returns(Task.CompletedTask);
 
-        var serviceProvider = services.BuildServiceProvider();
-        return serviceProvider.GetRequiredService<IWeatherForecastRepository>();
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        mockServiceProvider
+            .Setup(sp => sp.GetService(typeof(IWeatherForecastRepository)))
+            .Returns(mockRepository.Object);
+
+        var mockScope = new Mock<IServiceScope>();
+        mockScope.Setup(s => s.ServiceProvider).Returns(mockServiceProvider.Object);
+
+        var mockScopeFactory = new Mock<IServiceScopeFactory>();
+        mockScopeFactory.Setup(f => f.CreateScope()).Returns(mockScope.Object);
+
+        return mockScopeFactory.Object;
     }
 
-    private static ApplicationDbContext CreateTestDbContext()
-    {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql("Host=localhost;Database=chargemaster_test;Username=postgres;Password=postgres")
-            .Options;
-        return new ApplicationDbContext(options);
-    }
-
-    [Fact(Skip="Only for interactive testing")]
+    [Fact]
     public async Task GetForecastAsync_WithValidCoordinates_ReturnsWeatherForecasts()
     {
         // Arrange
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
-        var repository = CreateWeatherForecastRepository();
-        var service = new SmhiWeatherService(httpClient, logger, new Mock<IServiceScopeFactory>().Object);
+        var scopeFactory = CreateMockedScopeFactory();
+        var service = new SmhiWeatherService(httpClient, logger, scopeFactory);
 
         // Act
         var forecasts = await service.GetForecastAsync(longitude: 14.416639, latitude: 59.250709);
@@ -61,8 +60,8 @@ public class SmhiWeatherServiceTests
         // Arrange
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
-        var repository = CreateWeatherForecastRepository();
-        var service = new SmhiWeatherService(httpClient, logger, new Mock<IServiceScopeFactory>().Object);
+        var scopeFactory = CreateMockedScopeFactory();
+        var service = new SmhiWeatherService(httpClient, logger, scopeFactory);
 
         // Act
         var forecasts = await service.GetForecastAsync();
