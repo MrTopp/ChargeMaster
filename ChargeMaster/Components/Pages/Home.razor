@@ -242,7 +242,7 @@
     private CancellationTokenSource? _cts;
     private WallboxMeterInfo? CurrentMeterInfo { get; set; }
     private List<ElectricityPrice>? CurrentKvartlista { get; set; }
-    private VWStatusLimitet? CurrentVWStatus { get; set; }
+    private VWStatusLimited? CurrentVWStatus { get; set; }
     private SystemLoadEventArgs? SystemLoad { get; set; }
     private List<ErrorLogEventArgs> RecentErrors { get; set; } = [];
     private HashSet<string> HighlightedProperties { get; set; } = [];
@@ -283,7 +283,7 @@
         // Trigga uppdatering av kvartlista
         CurrentKvartlista = ChargeWorker.GetKvartlista();
 
-        _ = VWService.GetStatus();
+        _ = VWService.GetStatusAsync();
 
         // Initialisera Daikin-facade
         // await DaikinFacade.InitializeAsync();
@@ -303,7 +303,7 @@
 
     private void OnVWStatusRetrieved(object? sender, VWStatusEventArgs e)
     {
-        CurrentVWStatus = e.VWStatusLimitet;
+        CurrentVWStatus = e.VWStatusLimited;
         InvokeAsync(StateHasChanged);
     }
 

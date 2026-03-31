@@ -27,7 +27,7 @@ public class VWServiceTests : IDisposable
     [Fact(Skip="Only for interactive testing")]
     public async Task GetStatus_OK()
     {
-        var result = await _service.GetStatus();
+        var result = await _service.GetStatusAsync();
         Assert.NotNull(result);
         Assert.False(string.IsNullOrWhiteSpace(result.Vin));
         Assert.NotEqual(VWVehicleState.Unknown, result.VehicleState);

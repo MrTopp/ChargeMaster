@@ -334,7 +334,7 @@ public class ChargeWorker(
     {
         try
         {
-            VWStatus? response = await vwService.GetStatus();
+            VWStatus? response = await vwService.GetStatusAsync();
             _chargeLevelCurrent = response?.BatteryLevel ?? 0;
             _chargeLevelTarget = response?.ChargingSettingsTargetLevel ?? 0;
             return (response?.ChargingPower ?? 0) > 0;
@@ -427,7 +427,7 @@ public class ChargeWorker(
         VWStatus? status;
         try
         {
-            status = await vwService.GetStatus();
+            status = await vwService.GetStatusAsync();
         }
         catch (CarConnectionException ex)
         {
