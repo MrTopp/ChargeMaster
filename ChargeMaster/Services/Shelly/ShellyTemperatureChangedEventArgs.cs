@@ -18,5 +18,5 @@ public class ShellyTemperatureChangedEventArgs(string deviceId, double temperatu
     /// <summary>
     /// Tidpunkten då temperaturen uppdaterades.
     /// </summary>
-    public DateTime Timestamp { get; } = DateTime.UtcNow;
+    public DateTime Timestamp { get; } = DateTime.Now;
 }
