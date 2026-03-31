@@ -125,10 +125,15 @@ public class ShellyMqttService(
 
     private IMqttClient? _mqttClient;
     private readonly IMqttClient? _injectedMqttClient = mqttClient;
+    private MqttClientOptions? _mqttOptions;
+    private volatile bool _isIntentionalDisconnect;
+    private CancellationTokenSource? _disposeCts = new();
 
     const string BrokerAddress = "192.168.1.10";
     const int BrokerPort = 1883;
     const string ClientId = "chargemaster-shelly-mqtt";
+    const int InitialReconnectDelaySeconds = 5;
+    const int MaxReconnectDelaySeconds = 300;
 
     private readonly string[] _shellysTopics =
     [
@@ -174,9 +179,6 @@ public class ShellyMqttService(
         await ConnectAsync(BrokerAddress, BrokerPort, ClientId);
 
         await SubscribeAsync(_shellysTopics);
-
-        // Här kan du lägga till eventuell setup-logik om det behövs
-        await Task.CompletedTask;
     }
 
     /// <summary>
@@ -235,19 +237,24 @@ public class ShellyMqttService(
     {
         clientId ??= $"chargemaster-{Guid.NewGuid().ToString("N")[..8]}";
 
-        _mqttClient = _injectedMqttClient ?? new MqttClientFactory().CreateMqttClient();
+        _isIntentionalDisconnect = false;
 
-        _mqttClient.ApplicationMessageReceivedAsync += OnApplicationMessageReceivedAsync;
-        _mqttClient.ConnectedAsync += OnConnectedAsync;
-        _mqttClient.DisconnectedAsync += OnDisconnectedAsync;
+        // Skapa bara en ny klient om det inte redan finns en (undvik dubblerade eventhanterare)
+        if (_mqttClient is null)
+        {
+            _mqttClient = _injectedMqttClient ?? new MqttClientFactory().CreateMqttClient();
+            _mqttClient.ApplicationMessageReceivedAsync += OnApplicationMessageReceivedAsync;
+            _mqttClient.ConnectedAsync += OnConnectedAsync;
+            _mqttClient.DisconnectedAsync += OnDisconnectedAsync;
+        }
 
-        var options = new MqttClientOptionsBuilder()
+        _mqttOptions = new MqttClientOptionsBuilder()
             .WithTcpServer(brokerAddress, brokerPort)
             .WithClientId(clientId)
             .WithCleanSession(false)
             .Build();
 
-        await _mqttClient.ConnectAsync(options, CancellationToken.None);
+        await _mqttClient.ConnectAsync(_mqttOptions, CancellationToken.None);
         logger.LogInformation("Ansluten till MQTT-server på {Address}:{Port} med klient-ID {ClientId}",
             brokerAddress, brokerPort, clientId);
     }
@@ -259,6 +266,8 @@ public class ShellyMqttService(
     {
         if (_mqttClient is null)
             return;
+
+        _isIntentionalDisconnect = true;
 
         if (_mqttClient.IsConnected)
         {
@@ -340,14 +349,75 @@ public class ShellyMqttService(
         var reason = e.Reason.ToString();
         logger.LogWarning("MQTT-anslutning förlorad. Anledning: {Reason}", reason);
 
-        // Trigga ConnectionChanged-eventet
         ConnectionChanged?.Invoke(this, new ShellyConnectionChangedEventArgs(false));
+
+        if (!_isIntentionalDisconnect)
+        {
+            _ = ReconnectAsync();
+        }
 
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Försöker återansluta till MQTT-servern med exponentiell backoff.
+    /// </summary>
+    private async Task ReconnectAsync()
+    {
+        var delaySeconds = InitialReconnectDelaySeconds;
+        var attempt = 0;
+
+        while (_disposeCts is { IsCancellationRequested: false })
+        {
+            attempt++;
+            logger.LogInformation("Försöker återansluta till MQTT (försök #{Attempt}) om {Delay}s...",
+                attempt, delaySeconds);
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds), _disposeCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.LogDebug("Återanslutning avbruten");
+                return;
+            }
+
+            try
+            {
+                if (_mqttClient is null || _mqttOptions is null || _disposeCts is null)
+                    return;
+
+                await _mqttClient.ConnectAsync(_mqttOptions, _disposeCts.Token);
+                logger.LogInformation("Återansluten till MQTT efter {Attempt} försök", attempt);
+
+                await SubscribeAsync(_shellysTopics);
+                return;
+            }
+            catch (OperationCanceledException)
+            {
+                logger.LogDebug("Återanslutning avbruten");
+                return;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Återanslutningsförsök #{Attempt} misslyckades", attempt);
+                delaySeconds = Math.Min(delaySeconds * 2, MaxReconnectDelaySeconds);
+            }
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
+        _isIntentionalDisconnect = true;
+
+        if (_disposeCts is not null)
+        {
+            await _disposeCts.CancelAsync();
+            _disposeCts.Dispose();
+            _disposeCts = null;
+        }
+
         if (_mqttClient is not null)
         {
             _mqttClient.ApplicationMessageReceivedAsync -= OnApplicationMessageReceivedAsync;
