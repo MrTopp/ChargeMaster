@@ -239,7 +239,6 @@
 </div>
 
 @code {
-    private CancellationTokenSource? _cts;
     private WallboxMeterInfo? CurrentMeterInfo { get; set; }
     private List<ElectricityPrice>? CurrentKvartlista { get; set; }
     private VWStatusLimited? CurrentVWStatus { get; set; }
@@ -259,8 +258,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _cts = new CancellationTokenSource();
-
         // Hämta senaste meter-information direkt från WallboxWorker
         if (WallboxWorker.MeterInfo is not null)
         {
@@ -283,10 +280,7 @@
         // Trigga uppdatering av kvartlista
         CurrentKvartlista = ChargeWorker.GetKvartlista();
 
-        _ = VWService.GetStatusAsync();
-
-        // Initialisera Daikin-facade
-        // await DaikinFacade.InitializeAsync();
+        await VWService.GetStatusAsync();
     }
 
     private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
@@ -311,6 +305,7 @@
     {
         // Avbryt tidigare highlight-timer
         _highlightCts?.Cancel();
+        _highlightCts?.Dispose();
         _highlightCts = new CancellationTokenSource();
 
         // Lägg till ändringar till highlighted set
@@ -327,24 +322,14 @@
 
         InvokeAsync(StateHasChanged);
 
-        // Ta bort highlight efter 55 sekunder
-        _ = Task.Delay(55000, _highlightCts.Token).ContinueWith(async _ =>
-        {
-            if (!_highlightCts.Token.IsCancellationRequested)
-            {
-                HighlightedProperties.Clear();
-                await InvokeAsync(StateHasChanged);
-            }
-        });
+        _ = ClearHighlightAfterDelayAsync(HighlightedProperties, _highlightCts.Token);
     }
 
     private void OnShellyTemperatureChanged(object? sender, ShellyTemperatureChangedEventArgs e)
     {
         // Avbryt tidigare highlight-timer
-        if (_highlightShellyCts is { IsCancellationRequested: false })
-        {
-            _highlightShellyCts.Cancel();
-        }
+        _highlightShellyCts?.Cancel();
+        _highlightShellyCts?.Dispose();
         _highlightShellyCts = new CancellationTokenSource();
 
         // Uppdatera temperatur för motsvarande enhet
@@ -356,15 +341,7 @@
 
         InvokeAsync(StateHasChanged);
 
-        // Ta bort highlight efter 55 sekunder
-        _ = Task.Delay(55000, _highlightShellyCts.Token).ContinueWith(async _ =>
-        {
-            if (!_highlightShellyCts.Token.IsCancellationRequested)
-            {
-                HighlightedShellyProperties.Clear();
-                await InvokeAsync(StateHasChanged);
-            }
-        });
+        _ = ClearHighlightAfterDelayAsync(HighlightedShellyProperties, _highlightShellyCts.Token);
     }
 
     private void OnWeatherForecastUpdated(object? sender, WeatherForecastUpdatedEventArgs e)
@@ -381,18 +358,38 @@
 
     private void OnErrorLogged(object? sender, ErrorLogEventArgs e)
     {
-        RecentErrors.Add(e);
-
-        // Behålla bara senaste 50 fel
-        if (RecentErrors.Count > 50)
+        InvokeAsync(() =>
         {
-            RecentErrors.RemoveAt(0);
-        }
+            RecentErrors.Add(e);
 
-        InvokeAsync(StateHasChanged);
+            // Behålla bara senaste 50 fel
+            if (RecentErrors.Count > 50)
+            {
+                RecentErrors.RemoveAt(0);
+            }
+
+            StateHasChanged();
+        });
     }
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
+    /// <summary>
+    /// Rensar highlight-markeringar efter en fördröjning, om inte token avbryts av en nyare uppdatering.
+    /// </summary>
+    private async Task ClearHighlightAfterDelayAsync(HashSet<string> properties, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(55000, token);
+            properties.Clear();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (TaskCanceledException)
+        {
+            // Ny uppdatering inkom innan timeout — ignorera
+        }
+    }
+
+    ValueTask IAsyncDisposable.DisposeAsync()
     {
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
@@ -408,12 +405,7 @@
         _highlightShellyCts?.Cancel();
         _highlightShellyCts?.Dispose();
 
-        if (_cts != null)
-        {
-            await _cts.CancelAsync();
-        }
-
-        _cts?.Dispose();
+        return ValueTask.CompletedTask;
     }
 }
 
