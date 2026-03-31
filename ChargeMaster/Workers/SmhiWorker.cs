@@ -47,7 +47,7 @@ public class SmhiWorker(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Hämta väderdata vid start
-        await FetchWeatherAsync(stoppingToken);
+        await FetchWeatherAsync();
 
         // Schemalägga timliga hämtningar
         while (!stoppingToken.IsCancellationRequested)
@@ -56,8 +56,8 @@ public class SmhiWorker(
             {
                 // Vänta en timme
                 await Task.Delay(TimeSpan.FromMinutes(HourlyIntervalMinutes), stoppingToken);
-                
-                await FetchWeatherAsync(stoppingToken);
+
+                await FetchWeatherAsync();
             }
             catch (OperationCanceledException)
             {
@@ -73,7 +73,7 @@ public class SmhiWorker(
     /// <summary>
     /// Hämtar väderprognos från SMHI för Strömtorp.
     /// </summary>
-    private async Task FetchWeatherAsync(CancellationToken stoppingToken)
+    private async Task FetchWeatherAsync()
     {
         try
         {
@@ -82,18 +82,17 @@ public class SmhiWorker(
             if (forecast.Count > 0)
             {
                 CurrentForecast = forecast;
-                LastUpdate = DateTime.UtcNow;
+                LastUpdate = DateTime.Now;
 
                 var firstTemp = forecast.FirstOrDefault()?.Temperature ?? 0;
                 logger.LogInformation(
                     "SMHI väderdata uppdaterad: {Count} prognoser, nu {Temperature}°C",
                     forecast.Count, firstTemp);
 
-                // Publicera event när väderdata uppdateras
                 OnWeatherForecastUpdated(new WeatherForecastUpdatedEventArgs
                 {
                     Forecast = forecast,
-                    UpdateTime = DateTime.UtcNow
+                    UpdateTime = DateTime.Now
                 });
             }
             else
@@ -126,7 +125,7 @@ public class SmhiWorker(
         // Publicera omedelbar nuvarande data till ny prenumerant
         if (CurrentForecast.Count > 0)
         {
-            OnWeatherForecastUpdated(new WeatherForecastUpdatedEventArgs
+            handler.Invoke(this, new WeatherForecastUpdatedEventArgs
             {
                 Forecast = CurrentForecast,
                 UpdateTime = LastUpdate
@@ -166,7 +165,6 @@ public class SmhiWorker(
         var temperatures = CurrentForecast
             .Where(f => f.Time >= now && f.Time <= now.AddHours(hours))
             .Select(f => f.Temperature)
-            .Where(t => t > 0)
             .ToList();
 
         return temperatures.Count > 0 ? temperatures.Average() : null;
