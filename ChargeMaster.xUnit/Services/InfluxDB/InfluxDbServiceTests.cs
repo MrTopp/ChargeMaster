@@ -1,12 +1,13 @@
 ﻿using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
+using ChargeMaster.Services.InfluxDB;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Tibber.Sdk;
 
-namespace ChargeMaster.Services.InfluxDB.xUnit;
+namespace ChargeMaster.xUnit.Services.InfluxDB;
 
 /// <summary>
 /// Integration tests for the InfluxDbService class.
