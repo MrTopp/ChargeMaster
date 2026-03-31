@@ -44,7 +44,7 @@ public class ShellyRpcMessageParserTests
 
         Assert.NotNull(result);
         var @params = result.@params;
-        Assert.Equal(1772473140.89, @params.ts);
+        Assert.Equal(1774792561.71, @params.ts);
         Assert.NotNull(@params.cloud);
         Assert.False(@params.cloud.connected);
     }

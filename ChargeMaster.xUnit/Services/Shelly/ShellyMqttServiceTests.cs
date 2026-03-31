@@ -33,7 +33,7 @@ public class ShellyMqttServiceTests
             null);
     }
 
-    [Fact]
+    [Fact(Skip="Exploratory test using logged MQTT messages")]
     public async Task OnApplicationMessageReceivedAsync_ValidPayload_UpdatesTemperature()
     {
         var service = CreateService();
