@@ -3,6 +3,7 @@ using ChargeMaster.Services.Wallbox;
 
 using InfluxDB.Client;
 using InfluxDB.Client.Api.Domain;
+using InfluxDB.Client.Core.Exceptions;
 using InfluxDB.Client.Writes;
 
 using Microsoft.Extensions.Options;
@@ -147,6 +148,15 @@ public class InfluxDbService : IAsyncDisposable
                 catch (TaskCanceledException ex)
                 {
                     _logger.LogWarning(ex, "Write operation timed out");
+                }
+                catch (HttpException ex) when (ex.InnerException is TaskCanceledException or OperationCanceledException)
+                {
+                    // Transiellt nätverksavbrott (t.ex. InfluxDB omstartat eller anslutning bruten)
+                    _logger.LogWarning("Transient network error when writing to InfluxDB, buffered data will be retried: {Message}", ex.Message);
+                }
+                catch (HttpException ex)
+                {
+                    _logger.LogError(ex, "Write operation failed with InfluxDB HTTP error {Status}", ex.Status);
                 }
                 catch (HttpRequestException ex)
                 {
