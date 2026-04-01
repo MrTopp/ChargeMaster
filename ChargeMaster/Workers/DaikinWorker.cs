@@ -57,12 +57,13 @@ public class DaikinWorker(
             }
 
             // Uppdatera börvärde mot schema och maxpris
-            var (temp, heat) = await KalkyleraTemperatur(nu);
+            var (temp, heat, log) = await KalkyleraTemperatur(nu);
 
             // Uppdatera Daikin endast om börvärde är ändrad
             if (Math.Abs(temp - previousTemp) > 0.2)
             {
                 logger.LogDebug("Uppdaterar Daikin måltemperatur: {Temp}°C", temp);
+                logger.LogInformation(log);
                 await daikinFacade.SetTargetTemperatureAsync(temp, heat);
                 await SaveDaikinSession(nu, temp, heat);
                 previousTemp = temp;
@@ -88,37 +89,22 @@ public class DaikinWorker(
     /// </summary>
     /// <param name="nu">Referenstid, normalt DateTime.Now</param>
     /// <returns>Börvärde temperatur och true/false för heat/cool</returns>
-    private async Task<(double, bool)> KalkyleraTemperatur(DateTime nu)
+    private async Task<(double, bool, string)> KalkyleraTemperatur(DateTime nu)
     {
         // ----- Nödstopp draget -----
-        if (EmergencyStopped)
-        {
-            return (16, true);
-        }
-        // ----- Schema -----
+        //if (EmergencyStopped)
+        //{
+        //    return (16, true);
+        //}
+
         bool heat = true;
-        double temp = nu.Hour switch
-        {
-            < 4 => 22,
-            < 7 => 24,
-            < 11 => 20,
-            < 14 => 24,
-            < 16 => 22,
-            < 19 => 20,
-            < 22 => 24,
-            _ => 22
-        };
-        // ----- Helg -----
-        if (nu.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
-        {
-            temp = 23;
-        }
+        double temp = 24;
 
         // ----- Justera mot temperatur inne -----
         var inneTemp = shellyMqttService.GetAverage();
         temp = inneTemp switch
         {
-            < 18 => 26,
+            < 18 => 28,
             < 20 => temp + 4,
             < 20.5 => temp + 3,
             < 21 => temp + 2,
@@ -144,6 +130,20 @@ public class DaikinWorker(
             };
         }
 
+        // ----- Justera mot temperatur ute enligt Daikin -----
+        double daikinUteTemp = daikinFacade.OutdoorTemperature ?? 0;
+        if (daikinUteTemp > temperature + 5)
+        {
+            temp = daikinUteTemp switch
+            {
+                > 25 => 16,
+                > 20 => 20,
+                > 15 => temp - 2,
+                > 10 => temp - 1,
+                _ => temp
+            };
+        }
+
         // ----- Justera mot elpris -----
         temp = await JusteraMotPris(nu, temp);
 
@@ -154,8 +154,13 @@ public class DaikinWorker(
             heat = false;
         }
 
-        return (temp, heat);
+        string log
+            = $"Calculated target temperature: target {temp:F1}°C inne {inneTemp:F1} daikin {daikinUteTemp:F1} smhi {temperature:F1} (Heat: {heat})";
+       
+
+        return (temp, heat, log);
     }
+
 
     private (DateOnly Date, List<ElectricityPrice> ExpensiveHours)? _cachedPrices;
 
