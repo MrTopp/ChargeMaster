@@ -333,11 +333,21 @@ public class ShellyMqttService(
     {
         double temperature = message.TemperatureCelsius;
         string src = message.DeviceId;
-
-        logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temperature);
-
+        
+        bool changed = false;
         lock (_temperaturesLock)
-            Temperatures[src] = temperature;
+        {
+            if (Math.Abs(Temperatures[src] - temperature) > 0.05)
+            {
+                Temperatures[src] = temperature;
+                changed = true; 
+            }
+        }
+
+        if (changed)
+        {
+            logger.LogInformation("Temperatur från {Src}: {Temp} °C", src, temperature);
+        }
 
         EventHandler<ShellyTemperatureChangedEventArgs>? handler;
         lock (_eventLock)
