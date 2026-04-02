@@ -400,7 +400,10 @@ public class ShellyMqttService(
                 if (_mqttClient is null || _mqttOptions is null || _disposeCts is null)
                     return;
 
-                await _mqttClient.ConnectAsync(_mqttOptions, _disposeCts.Token);
+                // Klienten kan redan vara ansluten om MQTTnet återanslöt internt under väntetiden
+                if (!_mqttClient.IsConnected)
+                    await _mqttClient.ConnectAsync(_mqttOptions, _disposeCts.Token);
+
                 logger.LogInformation("Återansluten till MQTT efter {Attempt} försök", attempt);
 
                 await SubscribeAsync(_shellysTopics);
