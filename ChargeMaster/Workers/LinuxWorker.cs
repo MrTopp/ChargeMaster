@@ -71,11 +71,10 @@ public class LinuxWorker(ILogger<LinuxWorker> logger) : BackgroundService
                 var systemLoad = await ReadSystemLoadAsync();
                 if (systemLoad != null)
                 {
-                    // Logga endast vid uppstart eller om LogIntervalSeconds har passerat
                     var now = DateTime.Now;
-                    if (_lastLogTime == DateTime.MinValue || (now - _lastLogTime).TotalSeconds >= LogIntervalSeconds)
+                    if (systemLoad.Load1 > 1.0 && (_lastLogTime == DateTime.MinValue || (now - _lastLogTime).TotalSeconds >= LogIntervalSeconds))
                     {
-                        logger.LogInformation(
+                        logger.LogWarning(
                             "Systemlast - 1min: {Load1:F2}, 5min: {Load5:F2}, 15min: {Load15:F2} | Processer: {Running}/{Total}",
                             systemLoad.Load1,
                             systemLoad.Load5,
