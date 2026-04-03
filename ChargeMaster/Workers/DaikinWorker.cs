@@ -84,6 +84,9 @@ public class DaikinWorker(
         }
     }
 
+    private double? _prevInneTemp;
+    private double? _prevSmhiTemp;
+
     /// <summary>
     /// Beräkna börvärde för temperatur
     /// </summary>
@@ -99,40 +102,51 @@ public class DaikinWorker(
 
         bool heat = true;
         double temp = 24;
+        bool setTemp = true;
 
         // ----- Justera mot temperatur inne -----
-        var inneTemp = shellyMqttService.GetAverage();
-        temp = inneTemp switch
+        double inneTemp = shellyMqttService.GetAverage();
+        setTemp = _prevInneTemp != null && Math.Abs((double)(_prevInneTemp - inneTemp)) > 0.1;
+        if (setTemp)
         {
-            < 18 => 28,
-            < 20 => temp + 4,
-            < 20.5 => temp + 3,
-            < 21 => temp + 2,
-            < 21.5 => temp + 1,
-            > 24 => 16,
-            > 23 => 20,
-            > 22.5 => temp - 2,
-            > 22.2 => temp - 1,
-            _ => temp
-        };
-
-        // ----- Justera mot temperatur ute -----
-        var temperature = smhiWorker.GetCurrentTemperature(2);
-        if (temperature != null)
-        {
-            temp = temperature switch
+            temp = inneTemp switch
             {
-                < -15 => temp + 6,
-                < -10 => temp + 4,
-                < -5 => temp + 2,
-                < 0 => temp + 1,
+                < 18 => 28,
+                < 20 => temp + 4,
+                < 20.5 => temp + 3,
+                < 21 => temp + 2,
+                < 21.5 => temp + 1,
+                > 24 => 16,
+                > 23 => 20,
+                > 22.5 => temp - 2,
+                > 22.2 => temp - 1,
                 _ => temp
             };
+            _prevInneTemp = inneTemp;
+        }
+
+        // ----- Justera mot temperatur ute -----
+        double? smhiTemp = smhiWorker.GetCurrentTemperature(2);
+        if (smhiTemp != null)
+        {
+            setTemp = _prevSmhiTemp != null && Math.Abs((double)(_prevSmhiTemp - smhiTemp)) > 0.1;
+            if (setTemp)
+            {
+                temp = smhiTemp switch
+                {
+                    < -15 => temp + 6,
+                    < -10 => temp + 4,
+                    < -5 => temp + 2,
+                    < 0 => temp + 1,
+                    _ => temp
+                };
+                _prevSmhiTemp = smhiTemp;
+            }
         }
 
         // ----- Justera mot temperatur ute enligt Daikin -----
         double daikinUteTemp = daikinFacade.OutdoorTemperature ?? 0;
-        if (daikinUteTemp > temperature + 5)
+        if (daikinUteTemp > smhiTemp + 5)
         {
             temp = daikinUteTemp switch
             {
@@ -155,8 +169,8 @@ public class DaikinWorker(
         }
 
         string log
-            = $"Calculated target temperature: target {temp:F1}°C inne {inneTemp:F1} daikin {daikinUteTemp:F1} smhi {temperature:F1} (Heat: {heat})";
-       
+            = $"Calculated target temperature: target {temp:F1}°C inne {inneTemp:F2} daikin {daikinUteTemp:F1} smhi {smhiTemp:F1} (Heat: {heat})";
+
 
         return (temp, heat, log);
     }
