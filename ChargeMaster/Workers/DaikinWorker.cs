@@ -84,9 +84,6 @@ public class DaikinWorker(
         }
     }
 
-    private double? _prevInneTemp;
-    private double? _prevSmhiTemp;
-
     /// <summary>
     /// Beräkna börvärde för temperatur
     /// </summary>
@@ -105,42 +102,32 @@ public class DaikinWorker(
 
         // ----- Justera mot temperatur inne -----
         double inneTemp = shellyMqttService.GetAverage();
-        bool setTemp = _prevInneTemp != null && Math.Abs((double)(_prevInneTemp - inneTemp)) > 0.1;
-        if (setTemp || _prevInneTemp == null)
+        temp = inneTemp switch
         {
-            temp = inneTemp switch
-            {
-                < 18 => 28,
-                < 20 => temp + 4,
-                < 20.5 => temp + 3,
-                < 21 => temp + 2,
-                < 21.5 => temp + 1,
-                > 24 => 16,
-                > 23 => 20,
-                > 22.5 => temp - 2,
-                > 22.2 => temp - 1,
-                _ => temp
-            };
-            _prevInneTemp = inneTemp;
-        }
+            < 18 => 28,
+            < 20 => temp + 4,
+            < 20.5 => temp + 3,
+            < 21 => temp + 2,
+            < 21.5 => temp + 1,
+            > 24 => 16,
+            > 23 => 20,
+            > 22.5 => temp - 2,
+            > 22.2 => temp - 1,
+            _ => temp
+        };
 
         // ----- Justera mot temperatur ute -----
         double? smhiTemp = smhiWorker.GetCurrentTemperature(2);
         if (smhiTemp != null)
         {
-            setTemp = _prevSmhiTemp != null && Math.Abs((double)(_prevSmhiTemp - smhiTemp)) > 0.1;
-            if (setTemp || _prevSmhiTemp == null)
+            temp = smhiTemp switch
             {
-                temp = smhiTemp switch
-                {
-                    < -15 => temp + 6,
-                    < -10 => temp + 4,
-                    < -5 => temp + 2,
-                    < 0 => temp + 1,
-                    _ => temp
-                };
-                _prevSmhiTemp = smhiTemp;
-            }
+                < -15 => temp + 6,
+                < -10 => temp + 4,
+                < -5 => temp + 2,
+                < 0 => temp + 1,
+                _ => temp
+            };
         }
 
         // ----- Justera mot temperatur ute enligt Daikin -----
