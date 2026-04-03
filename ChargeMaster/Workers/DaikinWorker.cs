@@ -102,12 +102,11 @@ public class DaikinWorker(
 
         bool heat = true;
         double temp = 24;
-        bool setTemp = true;
 
         // ----- Justera mot temperatur inne -----
         double inneTemp = shellyMqttService.GetAverage();
-        setTemp = _prevInneTemp != null && Math.Abs((double)(_prevInneTemp - inneTemp)) > 0.1;
-        if (setTemp)
+        bool setTemp = _prevInneTemp != null && Math.Abs((double)(_prevInneTemp - inneTemp)) > 0.1;
+        if (setTemp || _prevInneTemp == null)
         {
             temp = inneTemp switch
             {
@@ -130,7 +129,7 @@ public class DaikinWorker(
         if (smhiTemp != null)
         {
             setTemp = _prevSmhiTemp != null && Math.Abs((double)(_prevSmhiTemp - smhiTemp)) > 0.1;
-            if (setTemp)
+            if (setTemp || _prevSmhiTemp == null)
             {
                 temp = smhiTemp switch
                 {
