@@ -111,6 +111,7 @@ public class DaikinWorker(
             < 21.5 => temp + 1,
             > 24 => 16,
             > 23 => 20,
+            > 22.7 => temp - 3,
             > 22.5 => temp - 2,
             > 22.2 => temp - 1,
             _ => temp
@@ -173,11 +174,11 @@ public class DaikinWorker(
     private async Task<double> JusteraMotPris(DateTime nu, double temp)
     {
         // Om priset är riktigt lågt, kosta på lite extra värme
-        var currentPrice = await GetCurrentPrice(nu);
-        if (currentPrice != null && currentPrice < 0.1m)
-        {
-            return temp + 2;
-        }
+        //var currentPrice = await GetCurrentPrice(nu);
+        //if (currentPrice != null && currentPrice < 0.1m)
+        //{
+        //    return temp + 2;
+        //}
         if (_cachedPrices == null || _cachedPrices.Value.Date != DateOnly.FromDateTime(nu))
         {
             var todaysPrices
