@@ -132,52 +132,51 @@
     </section>
 
     <section class="mb-3">
-        <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
-            <h4 class="mb-2">Bilens laddstatus</h4>
+        <div class="row g-3" style="max-width: 720px; margin-left: auto; margin-right: auto;">
+            <div class="col-md-5">
+                <h4 class="mb-2">Bilens laddstatus</h4>
 
-            @if (CurrentVWStatus is not null)
-            {
-                <div class="row g-2">
-                    <div class="col-auto">
-                        <small class="text-muted">Batterinivå:</small><br>
-                        <strong>@((CurrentVWStatus.BatteryLevel ?? 0.0).ToString("F0")) %</strong>
+                @if (CurrentVWStatus is not null)
+                {
+                    <div class="row g-2">
+                        <div class="col-auto">
+                            <small class="text-muted">Batterinivå:</small><br>
+                            <strong>@((CurrentVWStatus.BatteryLevel ?? 0.0).ToString("F0")) %</strong>
+                        </div>
+                        <div class="col-auto">
+                            <small class="text-muted">Målnivå:</small><br>
+                            <strong>@((CurrentVWStatus.ChargingSettingsTargetLevel ?? 0.0).ToString("F0")) %</strong>
+                        </div>
                     </div>
-                    <div class="col-auto">
-                        <small class="text-muted">Målnivå:</small><br>
-                        <strong>@((CurrentVWStatus.ChargingSettingsTargetLevel ?? 0.0).ToString("F0")) %</strong>
+                }
+            </div>
+            @if (SystemLoad is not null)
+            {
+                <div class="col-md-7">
+                    <h4 class="mb-2">Systemlast (Linux)</h4>
+
+                    <div class="row g-2">
+                        <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                            <small class="text-muted">1 minut:</small><br>
+                            <strong>@SystemLoad.Load1.ToString("F2")</strong>
+                        </div>
+                        <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                            <small class="text-muted">5 minuter:</small><br>
+                            <strong>@SystemLoad.Load5.ToString("F2")</strong>
+                        </div>
+                        <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                            <small class="text-muted">15 minuter:</small><br>
+                            <strong>@SystemLoad.Load15.ToString("F2")</strong>
+                        </div>
+                        <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
+                            <small class="text-muted">Processer:</small><br>
+                            <strong>@SystemLoad.RunningProcesses/@SystemLoad.TotalProcesses</strong>
+                        </div>
                     </div>
                 </div>
             }
         </div>
     </section>
-
-@if (SystemLoad is not null)
-    {
-        <section class="mb-3">
-            <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
-                <h4 class="mb-2">Systemlast (Linux)</h4>
-
-                <div class="row g-2">
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
-                        <small class="text-muted">1 minut:</small><br>
-                        <strong>@SystemLoad.Load1.ToString("F2")</strong>
-                    </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
-                        <small class="text-muted">5 minuter:</small><br>
-                        <strong>@SystemLoad.Load5.ToString("F2")</strong>
-                    </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
-                        <small class="text-muted">15 minuter:</small><br>
-                        <strong>@SystemLoad.Load15.ToString("F2")</strong>
-                    </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem;">
-                        <small class="text-muted">Processer:</small><br>
-                        <strong>@SystemLoad.RunningProcesses/@SystemLoad.TotalProcesses</strong>
-                    </div>
-                </div>
-            </div>
-        </section>
-    }
 
     <section class="mb-3">
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
