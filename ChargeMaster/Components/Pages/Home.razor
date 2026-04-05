@@ -113,13 +113,20 @@
 
             @if (CurrentWeatherForecast.Count > 0)
             {
-                <div class="row g-2 mb-3">
-                    @foreach (var forecast in CurrentWeatherForecast.Take(14))
+                var forecasts = CurrentWeatherForecast.Take(14).ToList();
+                <div class="row g-2 mb-3 flex-nowrap">
+                    @for (var i = 0; i < forecasts.Count; i++)
                     {
-                        <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; text-align: center;">
-                            <small class="text-muted">@forecast.Time.ToString("H:mm")</small><br>
-                            <strong>@forecast.Temperature.ToString("F1")°</strong><br>
-                            <span style="font-size: 1.5rem; line-height: 1; display: block; margin-top: 0.25rem;">@forecast.WeatherEmoji</span>
+                        var responsiveClass = i switch
+                        {
+                            < 10 => "",
+                            < 11 => "d-none d-sm-block",
+                            _ => "d-none d-md-block"
+                        };
+                        <div class="col-auto @responsiveClass" style="padding: 0.5rem; border-radius: 0.25rem; text-align: center;">
+                            <small class="text-muted">@forecasts[i].Time.ToString("H:mm")</small><br>
+                            <strong>@forecasts[i].Temperature.ToString("F1")°</strong><br>
+                            <span style="font-size: 1.5rem; line-height: 1; display: block; margin-top: 0.25rem;">@forecasts[i].WeatherEmoji</span>
                         </div>
                     }
                 </div>
