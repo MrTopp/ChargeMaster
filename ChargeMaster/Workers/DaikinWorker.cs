@@ -98,7 +98,7 @@ public class DaikinWorker(
         //}
 
         bool heat = true;
-        double temp = 24;
+        double temp = 23;
 
         // ----- Justera mot temperatur inne -----
         double inneTemp = shellyMqttService.GetAverage();
