@@ -213,13 +213,11 @@ public class ChargeWorker(
             // ----- Kontrollera förväntad timförbrukning
             if (Timladdning)
             {
-                // TODO: kalkylera gränsen exclusive bilens laddade effekt
-                // kräver att vi räknar ut bilens laddade effekt i realtid.
-                var grans = await wallboxWorker.KalkyleraGrans((DateTime)nu,stoppingToken);
-                if (nu.Minute < 30) grans = int.MaxValue;
+                // laddningen görs alltid på slutet av timmen så om vi passerar 
+                // gränsen är det stopp direkt.
+                var grans = await wallboxWorker.KalkyleraGrans(nu, stoppingToken);
                 if (wallboxWorker.FörbrukningDennaTimme > grans)
                 {
-                    //  För hög förbrukning -> stoppa laddning
                     logger.LogInformation(
                         "! Charging disabled due to high consumption: {consumption} Wh.",
                         wallboxWorker.FörbrukningDennaTimme);
@@ -490,15 +488,23 @@ public class ChargeWorker(
                 .ToList();
 
             // Sätt ChargingAllowed = false på de två dyraste kvartarna varje timme
-            var dyrasteKvartPerTimme =
-                priser.GroupBy(x => new
-                { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
-            foreach (var grupp in dyrasteKvartPerTimme)
+            //var dyrasteKvartPerTimme =
+            //    priser.GroupBy(x => new
+            //    { x.TimeStart.Year, x.TimeStart.Month, x.TimeStart.Day, x.TimeStart.Hour });
+            //foreach (var grupp in dyrasteKvartPerTimme)
+            //{
+            //    var dyrasteKvartar = grupp.OrderByDescending(x => x.SekPerKwh).Take(2);
+            //    foreach (var dyrasteKvart in dyrasteKvartar)
+            //    {
+            //        dyrasteKvart.ChargingAllowed = false;
+            //    }
+            //}
+            // Sätt ChargingAllowed = false på de två första kvartarna varje timme
+            foreach (var kvart in priser)
             {
-                var dyrasteKvartar = grupp.OrderByDescending(x => x.SekPerKwh).Take(2);
-                foreach (var dyrasteKvart in dyrasteKvartar)
+                if (kvart.TimeStart.Minute < 29)
                 {
-                    dyrasteKvart.ChargingAllowed = false;
+                    kvart.ChargingAllowed = false;
                 }
             }
 

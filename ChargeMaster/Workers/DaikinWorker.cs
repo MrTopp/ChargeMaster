@@ -289,7 +289,9 @@ public class DaikinWorker(
 
         if (EmergencyStopped) return;
 
-        if (forbrukningDennaTimme > grans)
+        // bilens laddning stoppas om förbrikningen är större än gränsvärdet. 
+        // värmepumpen stoppas lite senare för att undvika ryckig drift.
+        if (forbrukningDennaTimme > grans * 1.05)
         {
             //  För hög förbrukning -> stoppa värmepumpen
             logger.LogInformation(
