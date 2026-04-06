@@ -65,6 +65,12 @@ public sealed class WallboxWeekdayJsonConverter : JsonConverter<string?>
         };
     }
 
+    /// <summary>
+    /// Serialiserar ett strängvärde till JSON, eller skriver null om värdet saknas.
+    /// </summary>
+    /// <param name="writer">JSON-skrivaren.</param>
+    /// <param name="value">Värdet som ska serialiseras.</param>
+    /// <param name="options">Serialiseringsalternativ.</param>
     public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
     {
         if (value is null)
