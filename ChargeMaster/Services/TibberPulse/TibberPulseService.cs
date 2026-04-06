@@ -178,6 +178,10 @@ public class TibberPulseService(
         TaskCompletionSource<bool> errorTcs,
         ILogger<TibberPulseService> logger) : IObserver<RealTimeMeasurement>
     {
+        /// <summary>
+        /// Anropas när en ny realtidsmätning tas emot från Tibber-strömmen.
+        /// </summary>
+        /// <param name="value">Den inkommande mätningen.</param>
         public void OnNext(RealTimeMeasurement value)
         {
             try
@@ -190,12 +194,19 @@ public class TibberPulseService(
             }
         }
 
+        /// <summary>
+        /// Anropas när ett fel uppstår i Tibber-strömmen. Propagerar felet till den väntande uppgiften.
+        /// </summary>
+        /// <param name="error">Undantaget som orsakade felet.</param>
         public void OnError(Exception error)
         {
             service.HandleStreamError(error);
             errorTcs.TrySetException(error);
         }
 
+        /// <summary>
+        /// Anropas när servern stänger Tibber-strömmen. Behandlas som ett fel eftersom strömmen förväntas vara kontinuerlig.
+        /// </summary>
         public void OnCompleted()
         {
             service.HandleStreamCompleted();

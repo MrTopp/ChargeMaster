@@ -8,6 +8,10 @@ namespace ChargeMaster.Services.ErrorLog;
 /// </summary>
 public class ErrorEventSink(Action<ErrorLogEventArgs> errorHandler) : ILogEventSink
 {
+    /// <summary>
+    /// Tar emot ett logg-event och publicerar det vidare om nivån är Error eller Fatal.
+    /// </summary>
+    /// <param name="logEvent">Logg-eventet från Serilog.</param>
     public void Emit(LogEvent logEvent)
     {
         // Fånga endast Error och Fatal

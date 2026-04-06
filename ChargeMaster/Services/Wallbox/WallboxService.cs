@@ -17,6 +17,10 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         set => field = value;
     } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
+    /// <summary>
+    /// Hämtar aktuell status från wallboxen.
+    /// </summary>
+    /// <returns>Wallbox-status, eller <c>null</c> vid kommunikationsfel.</returns>
     public async Task<WallboxStatus?> GetStatusAsync()
     {
         try
@@ -68,6 +72,11 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
     }
 
+    /// <summary>
+    /// Ställer in driftläge på wallboxen.
+    /// </summary>
+    /// <param name="mode">Önskat driftläge.</param>
+    /// <returns><c>true</c> om anropet lyckades, annars <c>false</c>.</returns>
     public async Task<bool> SetModeAsync(WallboxMode mode)
     {
         try
@@ -92,6 +101,10 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
     }
 
+    /// <summary>
+    /// Hämtar mätarinformation från wallboxens externa mätare.
+    /// </summary>
+    /// <returns>Mätarinformation, eller <c>null</c> vid kommunikationsfel.</returns>
     public virtual async Task<WallboxMeterInfo?> GetMeterInfoAsync()
     {
         try
@@ -113,6 +126,10 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
     }
 
+    /// <summary>
+    /// Hämtar laddscheman konfigurerade i wallboxen.
+    /// </summary>
+    /// <returns>Lista med schemaposter, eller <c>null</c> vid kommunikationsfel.</returns>
     public async Task<IReadOnlyList<WallboxSchemaEntry>?> GetSchemaAsync()
     {
         try
@@ -133,6 +150,10 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
     }
 
+    /// <summary>
+    /// Hämtar konfigurationen från wallboxen.
+    /// </summary>
+    /// <returns>Wallbox-konfiguration, eller <c>null</c> vid kommunikationsfel.</returns>
     public async Task<WallboxConfig?> GetConfigAsync()
     {
         try
@@ -153,6 +174,10 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
     }
 
+    /// <summary>
+    /// Hämtar konfiguration för anslutna slave-enheter till wallboxen.
+    /// </summary>
+    /// <returns>Lista med slave-konfigurationer, eller <c>null</c> vid kommunikationsfel.</returns>
     public async Task<IReadOnlyList<WallboxSlaveConfig>?> GetSlavesAsync()
     {
         try
@@ -173,6 +198,11 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
     }
 
+    /// <summary>
+    /// Sparar eller uppdaterar ett laddschema i wallboxen.
+    /// </summary>
+    /// <param name="schemaEntry">Schemaposten som ska sparas.</param>
+    /// <returns><c>true</c> om anropet lyckades, annars <c>false</c>.</returns>
     public async Task<bool> SetSchemaAsync(WallboxSchemaEntry schemaEntry)
     {
         try
@@ -188,6 +218,11 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
     }
 
+    /// <summary>
+    /// Tar bort ett laddschema från wallboxen.
+    /// </summary>
+    /// <param name="schemaId">Id för schemat som ska tas bort.</param>
+    /// <returns><c>true</c> om anropet lyckades, annars <c>false</c>.</returns>
     public async Task<bool> DeleteSchemaAsync(int schemaId)
     {
         try

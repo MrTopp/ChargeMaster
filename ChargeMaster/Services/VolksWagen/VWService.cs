@@ -88,6 +88,10 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
     }
 
+    /// <summary>
+    /// Hämtar en lista över registrerade fordon från den lokala VW-tjänsten.
+    /// </summary>
+    /// <returns>Svar med fordonsdata, eller <c>null</c> vid kommunikationsfel.</returns>
     public async Task<VWVehiclesResponse?> GetVehiclesAsync()
     {
         try
