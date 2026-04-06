@@ -78,7 +78,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (TaskCanceledException ex)
         {
-            logger.LogInformation("GetStatusAsync: Förfrågan avbröts {message}", ex.Message);
+            logger.LogInformation("GetStatusAsync: Förfrågan avbröts {Message}", ex.Message);
             throw new CarConnectionException("GetStatusAsync: Kunde inte hämta VW-status", ex);
         }
         catch (Exception ex)
@@ -120,7 +120,7 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "PostAsync: Fel vid skickning av VW-kommando till {url}", relativeUrl);
+            logger.LogError(ex, "PostAsync: Fel vid skickning av VW-kommando till {Url}", relativeUrl);
             throw new CarConnectionException($"PostAsync: Kunde inte skicka kommando till {relativeUrl}", ex);
         }
     }

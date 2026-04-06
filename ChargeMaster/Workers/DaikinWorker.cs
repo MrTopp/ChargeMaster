@@ -282,7 +282,7 @@ public class DaikinWorker(
         var grans = await wallboxWorker.KalkyleraGrans(nu, cancellationToken);
         if (EmergencyStopped && forbrukningDennaTimme < grans * 0.8)
         {
-            logger.LogInformation("Emergency stop restore. Förbrukning: {forbrukning} Wh, Grans: {grans} Wh.", forbrukningDennaTimme, grans);
+            logger.LogInformation("Emergency stop restore. Förbrukning: {Forbrukning} Wh, Grans: {Grans} Wh.", forbrukningDennaTimme, grans);
             EmergencyStopped = false;
             return;
         }
