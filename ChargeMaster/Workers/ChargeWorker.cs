@@ -54,7 +54,7 @@ public class ChargeWorker(
             if (value != field)
             {
                 field = value;
-                logger.LogInformation("WallboxStopped.set: WallboxStopped set to {value}", value);
+                logger.LogInformation("WallboxStopped.set: WallboxStopped set to {Value}", value);
             }
         }
     } = false;
@@ -137,7 +137,7 @@ public class ChargeWorker(
             // ----- Varje timme
             if (nu.Hour != previous.Hour)
             {
-                logger.LogInformation("** Hourly consumption: {consumption} Wh **",
+                logger.LogInformation("** Hourly consumption: {Consumption} Wh **",
                     wallboxWorker.FörbrukningFöregåendeTimme);
                 Timladdning = true;
             }
@@ -232,7 +232,7 @@ public class ChargeWorker(
                 LaddBehovProcent = await LaddBehovAsync();
                 // Starta/stoppa laddning beroende på om det är tillåtet eller inte
                 if (wallboxWorker.FörbrukningDennaTimme > 0)
-                    logger.LogInformation("-- Quarter, consumption: {consumption} Wh --",
+                    logger.LogInformation("-- Quarter, consumption: {Consumption} Wh --",
                         wallboxWorker.FörbrukningDennaTimme);
                 if (Timladdning)
                 {
@@ -252,7 +252,7 @@ public class ChargeWorker(
                     else
                     {
                         var next = kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
-                        logger.LogInformation("Quarter, not starting, next {time}",
+                        logger.LogInformation("Quarter, not starting, next {Time}",
                             next?.TimeStart.ToShortTimeString() ?? "---");
                         await StoppaLaddningAsync();
                     }
@@ -409,7 +409,7 @@ public class ChargeWorker(
                 return ConnectionEnum.SearchingForCommunication;
 
             default:
-                logger.LogError("Unknown value för WallboxStatus.Connector: {value}",
+                logger.LogError("Unknown value för WallboxStatus.Connector: {Value}",
                     response.Connector);
                 return ConnectionEnum.Unknown;
         }
@@ -430,7 +430,7 @@ public class ChargeWorker(
         }
         catch (CarConnectionException ex)
         {
-            logger.LogError(ex, "Error fetching VW status: {message}", ex.Message);
+            logger.LogError(ex, "Error fetching VW status: {Message}", ex.Message);
             await StopWallbox();
             return 0;
         }
