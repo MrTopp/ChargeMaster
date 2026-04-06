@@ -593,6 +593,12 @@ public class WallboxWorker(
     }
 
 
+    /// <summary>
+    /// Hämtar den timme under angiven månad med högst energiförbrukning.
+    /// </summary>
+    /// <param name="dateInMonth">Ett datum inom den månad som ska analyseras.</param>
+    /// <param name="cancellationToken">Token för att avbryta operationen.</param>
+    /// <returns>Timmen med högst förbrukning, eller en tom post om ingen data finns.</returns>
     public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);

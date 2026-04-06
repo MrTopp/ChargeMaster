@@ -74,6 +74,12 @@ public sealed class VWVehicleStateJsonConverter : JsonConverter<VWVehicleState>
         };
     }
 
+    /// <summary>
+    /// Serialiserar ett <see cref="VWVehicleState"/>-värde till dess JSON-strängrepresentation.
+    /// </summary>
+    /// <param name="writer">JSON-skrivaren.</param>
+    /// <param name="value">Värdet som ska serialiseras.</param>
+    /// <param name="options">Serialiseringsalternativ.</param>
     public override void Write(Utf8JsonWriter writer, VWVehicleState value, JsonSerializerOptions options)
     {
         var s = value switch
