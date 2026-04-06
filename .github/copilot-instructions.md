@@ -26,12 +26,16 @@
 - Use asynchronous methods (`async Task`) for I/O bound operations.
 - Prefer `var` over explicit types when the type is obvious from the right-hand side. Use explicit types when it enhances readability.
 - Follow standard C# naming conventions (PascalCase for classes/methods, camelCase for local variables).
-- Use dependency injection through interfaces rather than concrete classes if it is needed by testing, otherwise inject concrete classes directly.
+- Inject concrete classes by default. Only introduce an interface when a unit test requires mocking the dependency.
 - Keep code clean and concise, removing dead code and cleaning up after refactoring to maintain a tidy codebase.
 - Do not create obvious comments. Do comment if the code is not self-explanatory or if it provides important context that is not immediately clear from the code itself.
 - Write comments in Swedish.
 - Comments in code should not describe "what" the code is doing, they should describe "why" it is doing it.
 - Public methods should have XML documentation comments.
+- Use structured logging with named PascalCase placeholders: `logger.LogInformation("Key {Key}", value)`.
+- Implement `IAsyncDisposable` on services that hold active connections (e.g. MQTT, event subscriptions) and on Blazor components that subscribe to events.
+- Use the C# 13 `field` keyword in property setters to track state mutations and trigger side effects (e.g. logging) without a separate backing field.
+- Use `System.Threading.Channels.Channel<T>` for producer/consumer scenarios that require serialized or queued processing (e.g. InfluxDB writes).
 
 ## Configuration
 - Use `appsettings.json` for configuration, with environment-specific overrides (`appsettings.Production.json` and `appsettings.Development.json`).
@@ -39,12 +43,24 @@
 - In development environment, secrets are stored in `appsettings.Development.json` which is not committed to version control.
 
 ## DateTime Handling
-- Use local format for DateTime in the application. 
-- Use UTC format only for external communication, such as storage in InfluxDB.
+- Use local time (`DateTime.Now`) throughout the application.
+- Use UTC only for external communication such as InfluxDB writes.
+- When storing `DateTime` in PostgreSQL, values use `DateTimeKind.Unspecified` via a custom EF Core value converter — do not assign `DateTimeKind.Utc` to values destined for the database.
 
 ## Blazor Specifics
 - Use `@inject` for dependency injection in Razor components.
 - Ensure `InteractiveServer` render mode is considered where appropriate.
+- Subscribe to service events in `OnInitializedAsync` and unsubscribe in `DisposeAsync`.
+- Always call `InvokeAsync(StateHasChanged)` from event handlers triggered outside the render thread.
+
+## Workers
+- Workers extend `BackgroundService` and implement their main logic in `ExecuteAsync(CancellationToken)`.
+- Use a `while (!stoppingToken.IsCancellationRequested)` loop with a try/catch that breaks on `OperationCanceledException` and logs-then-retries-after-delay on all other exceptions.
+- Workers are registered as singletons. They cannot directly inject `DbContext` (which is scoped). Use `IServiceScopeFactory` to create a scope when database access is needed:
+  ```csharp
+  await using var scope = serviceScopeFactory.CreateAsyncScope();
+  var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+  ```
 
 ## Testing
 - Use xUnit test framework.
@@ -64,6 +80,16 @@ The main purpose is to optimize the usage of electricity by activating the heatp
 It also limits the total usage of electricity for each hour. There is a cost for the maximum usage of electricity for the hour in the month where the usage is the highest. The application monitors the usage and stops the heatpump and electric vehicle charging if the usage is close to the maximum for the month.
 
 # Project Structure
+
+## Solutions and Projects
+The solution contains the following projects:
+- **ChargeMaster** — main ASP.NET Core web application (workers, Blazor UI, EF Core data layer).
+- **ChargeMaster.Services** — shared services library consumed by the main project.
+- **ChargeMaster.UnitTests** — xUnit unit tests (run automatically).
+- **ChargeMaster.xUnit** — exploratory/integration tests (never run automatically).
+
+## Database Schema
+Schema changes are made by adding a new SQL script to `Data/Scripts/`. Do not use EF Core migrations (`Add-Migration`). The scripts are applied manually to the database.
 
 ## Workers
 Workers are background services that run continuously to perform tasks such as monitoring electricity prices, 
