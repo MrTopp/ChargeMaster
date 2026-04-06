@@ -45,7 +45,7 @@ public class SmhiWeatherService(
                 return [];
             }
 
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var forecasts = data.TimeSeries
                 .Where(ts => ts.Time >= now && ts.Data != null)
                 .Select(ts => new WeatherForecast

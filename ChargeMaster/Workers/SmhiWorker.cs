@@ -161,7 +161,7 @@ public class SmhiWorker(
         if (CurrentForecast.Count == 0)
             return null;
 
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         var temperatures = CurrentForecast
             .Where(f => f.Time >= now && f.Time <= now.AddHours(hours))
             .Select(f => f.Temperature)

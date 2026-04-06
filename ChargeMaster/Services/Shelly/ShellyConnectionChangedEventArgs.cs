@@ -13,5 +13,5 @@ public class ShellyConnectionChangedEventArgs(bool isConnected) : EventArgs
     /// <summary>
     /// Tidpunkten då anslutningen förändrades.
     /// </summary>
-    public DateTime Timestamp { get; } = DateTime.UtcNow;
+    public DateTime Timestamp { get; } = DateTime.Now;
 }

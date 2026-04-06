@@ -113,7 +113,7 @@ public class TibberPulseService(
             {
                 await Task.Delay(TimeSpan.FromSeconds(healthCheckIntervalSeconds), cancellationToken);
 
-                var now = DateTime.UtcNow;
+                var now = DateTime.Now;
                 var timeSinceLastMeasurement = now - sessionState.LastMeasurementTime;
 
                 // Logga debug-info
@@ -142,7 +142,7 @@ public class TibberPulseService(
     private void HandleMeasurement(RealTimeMeasurement measurement, SessionState sessionState)
     {
         LastMeasurement = measurement;
-        sessionState.LastMeasurementTime = DateTime.UtcNow;
+        sessionState.LastMeasurementTime = DateTime.Now;
         sessionState.MeasurementCount++;
 
         // Logg bara var 100:e mätning för debug
@@ -168,7 +168,7 @@ public class TibberPulseService(
     /// </summary>
     private class SessionState
     {
-        public DateTime LastMeasurementTime { get; set; } = DateTime.UtcNow;
+        public DateTime LastMeasurementTime { get; set; } = DateTime.Now;
         public int MeasurementCount { get; set; }
     }
 

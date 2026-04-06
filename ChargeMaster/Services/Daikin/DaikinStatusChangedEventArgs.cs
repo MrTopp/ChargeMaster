@@ -38,7 +38,7 @@ public class DaikinStatusChangedEventArgs : EventArgs
     /// <summary>
     /// Tid när statusändringen registrerades.
     /// </summary>
-    public DateTime ChangedAt { get; } = DateTime.UtcNow;
+    public DateTime ChangedAt { get; } = DateTime.Now;
 
     /// <summary>
     /// Returnerar true om någon status ändrades.
