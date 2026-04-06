@@ -41,6 +41,11 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
             logger.LogError(ex, "Fel vid hämtning av wallbox-status");
             return null;
         }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Ogiltigt JSON-svar vid hämtning av wallbox-status");
+            return null;
+        }
     }
     
     /// <summary>
@@ -124,6 +129,11 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
             logger.LogError(ex, "Fel vid hämtning av wallbox-mäterinformation");
             return null;
         }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Ogiltigt JSON-svar vid hämtning av wallbox-mäterinformation");
+            return null;
+        }
     }
 
     /// <summary>
@@ -146,6 +156,11 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         catch (HttpRequestException ex)
         {
             logger.LogError(ex, "Fel vid hämtning av wallbox-schema");
+            return null;
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Ogiltigt JSON-svar vid hämtning av wallbox-schema");
             return null;
         }
     }
@@ -172,6 +187,11 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
             logger.LogError(ex, "Fel vid hämtning av wallbox-konfiguration");
             return null;
         }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Ogiltigt JSON-svar vid hämtning av wallbox-konfiguration");
+            return null;
+        }
     }
 
     /// <summary>
@@ -194,6 +214,11 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         catch (HttpRequestException ex)
         {
             logger.LogError(ex, "Fel vid hämtning av wallbox-slavar");
+            return null;
+        }
+        catch (JsonException ex)
+        {
+            logger.LogError(ex, "Ogiltigt JSON-svar vid hämtning av wallbox-slavar");
             return null;
         }
     }
