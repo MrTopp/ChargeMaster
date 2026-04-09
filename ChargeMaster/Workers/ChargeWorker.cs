@@ -211,7 +211,7 @@ public class ChargeWorker(
             }
 
             // ----- Kontrollera förväntad timförbrukning
-            if (Timladdning)
+            if (Timladdning && nu.Minute > 10)
             {
                 // laddningen görs alltid på slutet av timmen så om vi passerar 
                 // gränsen är det stopp direkt.
