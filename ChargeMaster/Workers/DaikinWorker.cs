@@ -108,7 +108,7 @@ public class DaikinWorker(
             < 20 => temp + 4,
             < 20.5 => temp + 3,
             < 21 => temp + 2,
-            < 21.5 => temp + 1,
+            < 21.6 => temp + 1,
             > 24 => 16,
             > 23 => 20,
             > 22.7 => temp - 3,
@@ -179,12 +179,14 @@ public class DaikinWorker(
         //{
         //    return temp + 2;
         //}
+
+        // sänk temperaturen kraftigt under de dyraste timmarna på dagen
         if (_cachedPrices == null || _cachedPrices.Value.Date != DateOnly.FromDateTime(nu))
         {
             var todaysPrices
                 = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
             var expensiveHours = todaysPrices.OrderByDescending(p => p.SekPerKwh)
-                .Where(p => p.SekPerKwh >= 3.0m)
+                .Where(p => p.SekPerKwh >= 1.0m)
                 .Take(10).ToList();
             _cachedPrices = (DateOnly.FromDateTime(nu), expensiveHours);
         }
@@ -198,8 +200,8 @@ public class DaikinWorker(
             .FirstOrDefault(p => p.TimeStart <= nu && p.TimeEnd > nu);
         if (pris != null)
         {
-            logger.LogInformation("High price period detected. Setting target temperature to 16°C.");
-            return 16;
+            logger.LogInformation("High price period detected. Setting target temperature to 20°C.");
+            return 20;
         }
         return temp;
     }
