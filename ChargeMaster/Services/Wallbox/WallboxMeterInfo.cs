@@ -104,5 +104,5 @@ public class WallboxMeterInfo
     public string EffektTimmeTotalFormatted =>
         EffektTimmeTotal > 0 ? EffektTimmeTotal.ToString("F0") : "-";
 
-    public DateTime ReadDateTime { get; init; } = DateTime.Now;
+    public DateTime ReadDateTime { get; set; } = DateTime.Now;
 }

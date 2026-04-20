@@ -124,11 +124,11 @@ public class WallboxWorker(
             catch (TaskCanceledException)
             {
                 // Förväntat när tjänsten stoppas, ingen åtgärd krävs.
-                logger.LogInformation("WallboxWorker is stopping due to cancellation request.");
+                logger.LogInformation("WallboxWorker stoppas på grund av avbrottsbegäran.");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in WallboxMeterWorker loop");
+                logger.LogError(ex, "Fel i WallboxWorker-slinga");
                 await Task.Delay(TimeSpan.FromSeconds(60 * 10), stoppingToken);
             }
         }
@@ -299,7 +299,7 @@ public class WallboxWorker(
         WallboxStatus? wallboxStatus = await wallboxService.GetStatusAsync();
         while (wallboxStatus is null)
         {
-            logger.LogWarning("Wallbox status is null, retrying in 1 minute");
+            logger.LogWarning("Wallbox-status är null, försöker igen om 1 minut");
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             wallboxStatus = await wallboxService.GetStatusAsync();
         }
@@ -326,7 +326,7 @@ public class WallboxWorker(
             TimeSpan timeDifference = now - correctWallboxTime;
             if (timeDifference.Duration() > TimeSpan.FromMinutes(5))
             {
-                logger.LogInformation("Wallbox time is incorrect by {Difference}. Updating time.",
+                logger.LogInformation("Wallbox-klockan avviker {Difference} från systemtiden. Uppdaterar tid.",
                     timeDifference);
                 await wallboxService.SetTimeAsync(now);
             }
@@ -352,6 +352,16 @@ public class WallboxWorker(
 
             // OK - nytt värde på ackumulerad effekt från wallbox
             NuvarandeMeterInfo = info;
+
+            // Kontrollera om returnerad info har en tid som skiljer mot systemtiden mer än 5 minuter, i så fall använd systemtiden
+            if ((nu - NuvarandeMeterInfo.ReadDateTime).Duration() > TimeSpan.FromMinutes(5))
+            {
+                logger.LogError("Mäterinformation läsades vid {ReadTime} men systemtiden är {SystemTime}, vilket skiljer mer än 5 minuter. Använder systemtid för beräkningar.",
+                    NuvarandeMeterInfo.ReadDateTime, nu);
+                NuvarandeMeterInfo.ReadDateTime = nu;
+                // Klockan går fel, rätta den
+                await wallboxService.SetTimeAsync(nu);
+            }
 
             // Ny timme, uppdatera föregående mätarställningar
             if (FöregåendeMeterInfo != null && nu.Hour != FöregåendeMeterInfo.ReadDateTime.Hour)
@@ -382,7 +392,7 @@ public class WallboxWorker(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to read or store meter info");
+            logger.LogError(ex, "Kunde inte läsa eller lagra mäterinformation");
             return null;
         }
     }
@@ -413,7 +423,7 @@ public class WallboxWorker(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "KalkyleraFörbrukningInnevarandeTimme: oväntad exeption!");
+            logger.LogError(ex, "KalkyleraFörbrukningInnevarandeTimme: oväntad exception!");
         }
     }
 
@@ -508,7 +518,7 @@ public class WallboxWorker(
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
             var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
 
-            logger.LogDebug("Calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
+            logger.LogDebug("Beräknar månadsförbrukning för {Month:yyyy-MM}", dateInMonth);
 
             // Hämta sista läsningen i föregående månad
             var firstReading = await db.WallboxMeterReadings
@@ -519,7 +529,7 @@ public class WallboxWorker(
 
             if (firstReading is null)
             {
-                logger.LogWarning("No meter readings found for {Month:yyyy-MM}", dateInMonth);
+                logger.LogWarning("Inga mätarläsningar hittades för {Month:yyyy-MM}", dateInMonth);
                 return 0;
             }
 
@@ -542,21 +552,21 @@ public class WallboxWorker(
 
             if (lastReading is null)
             {
-                logger.LogInformation("Could not find last reading for {Month:yyyy-MM}", dateInMonth);
+                logger.LogInformation("Kunde inte hitta sista läsningen för {Month:yyyy-MM}", dateInMonth);
                 return 0;
             }
 
             // Beräkna skillnaden mellan första och sista läsningen
             var monthlyUsageWh = lastReading.AccEnergy - firstReading.AccEnergy;
 
-            logger.LogDebug("Monthly energy usage for {Month:yyyy-MM}: {Usage} Wh ({UsageKwh:F2} kWh)",
+            logger.LogDebug("Månadsförbrukning för {Month:yyyy-MM}: {Usage} Wh ({UsageKwh:F2} kWh)",
                 dateInMonth, monthlyUsageWh, monthlyUsageWh / 1000.0);
 
             return monthlyUsageWh;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error calculating monthly energy usage for {Month:yyyy-MM}", dateInMonth);
+            logger.LogError(ex, "Fel vid beräkning av månadsförbrukning för {Month:yyyy-MM}", dateInMonth);
             return 0;
         }
     }
@@ -682,7 +692,7 @@ public class WallboxWorker(
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
             var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
 
-            logger.LogDebug("Calculating hourly energy usage for {Month:yyyy-MM} (from {Start:yyyy-MM-dd} to {End:yyyy-MM-dd})",
+            logger.LogDebug("Beräknar timförbrukning för {Month:yyyy-MM} (från {Start:yyyy-MM-dd} till {End:yyyy-MM-dd})",
                 dateInMonth, startOfMonth, endOfMonth);
 
             var hourlyUsage = new List<HourlyEnergyUsage>();
@@ -721,14 +731,14 @@ public class WallboxWorker(
                 }
             }
 
-            logger.LogDebug("Processed {TotalReadings} readings and calculated {HourlyCount} hourly usages for {Month:yyyy-MM}.",
+            logger.LogDebug("Bearbetade {TotalReadings} läsningar och beräknade {HourlyCount} timförbrukningar för {Month:yyyy-MM}.",
                 totalReadings, hourlyUsage.Count, dateInMonth);
 
             return hourlyUsage;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error calculating hourly energy usage");
+            logger.LogError(ex, "Fel vid beräkning av timförbrukning");
             return new List<HourlyEnergyUsage>();
         }
     }
