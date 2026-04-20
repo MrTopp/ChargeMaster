@@ -362,8 +362,6 @@ public class WallboxWorker(
 
             KalkyleraFörbrukningInnevarandeTimme(nu);
 
-            FöregåendeMeterInfo = NuvarandeMeterInfo;
-
             // ----- Spara i databasen -----
             using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -377,6 +375,8 @@ public class WallboxWorker(
 
             db.WallboxMeterReadings.AddRange(entries);
             await db.SaveChangesAsync(stoppingToken);
+
+            FöregåendeMeterInfo = NuvarandeMeterInfo;
 
             return NuvarandeMeterInfo;
         }
@@ -427,7 +427,7 @@ public class WallboxWorker(
     /// <param name="currentTime">Tidpunkt för aktuell mätning.</param>
     /// <param name="currentEnergy">Ackumulerad energi vid aktuell mätning.</param>
     /// <returns>Lista med mätarposter, en för varje timgräns plus slutmätningen.</returns>
-    internal List<WallboxMeterReading> GenerateHourBoundaryReadings(
+    internal static List<WallboxMeterReading> GenerateHourBoundaryReadings(
         DateTime previousTime,
         long previousEnergy,
         DateTime currentTime,
