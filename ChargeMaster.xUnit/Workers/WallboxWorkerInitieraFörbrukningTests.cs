@@ -185,7 +185,7 @@ public class WallboxWorkerInitieraFörbrukningTests
                 Org = "test",
                 Bucket = "test"
             }),
-            null,
+            null!,
             influxLogger);
 
         return new WallboxWorker(scopeFactory, null!, influxDbService, logger);

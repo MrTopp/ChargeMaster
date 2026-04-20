@@ -98,7 +98,7 @@ public class ChargeWorkerTests
         //}
         var mockLogger = new Mock<ILogger<ChargeWorker>>();
 
-        var worker = new ChargeWorker(null, null,null,null,null, mockLogger.Object);
+        var worker = new ChargeWorker(null!, null!,null!,null!,null!, mockLogger.Object);
         return Task.FromResult(worker);
     }
 
@@ -128,9 +128,9 @@ public class ChargeWorkerTests
 
         var mockLogger = new Mock<ILogger<WallboxWorker>>();
         var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = new InfluxDbService(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), null,
+        var influxDbService = new InfluxDbService(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), null!,
             influxLogger);
-        var worker = new WallboxWorker(null, null, influxDbService, mockLogger.Object);
+        var worker = new WallboxWorker(null!, null!, influxDbService, mockLogger.Object);
 
         return Task.FromResult(worker);
     }

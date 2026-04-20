@@ -193,7 +193,7 @@ public class DaikinFacadeTests : IDisposable
         var initialTemp = _facade.CurrentTemperature;
 
         // Vänta lite
-        await Task.Delay(500);
+        await Task.Delay(500, TestContext.Current.CancellationToken);
 
         // Uppdatera status
         await _facade.InitializeAsync();

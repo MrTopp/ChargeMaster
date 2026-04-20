@@ -96,14 +96,12 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
     public async Task ConnectToMqttBroker()
     {
         // Konfiguration
-        const string brokerAddress = "192.168.1.10";
-        const int brokerPort = 1883;
 
         // Prenumerera på events
         await _shellyService.SetupAsync();
 
         // Vänta en stund för att ta emot meddelanden
-        await Task.Delay(TimeSpan.FromSeconds(30));
+        await Task.Delay(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
 
         // Koppla ifrån
         await _shellyService.DisconnectAsync();
