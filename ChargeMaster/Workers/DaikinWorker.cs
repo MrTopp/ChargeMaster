@@ -146,7 +146,10 @@ public class DaikinWorker(
         }
 
         // ----- Justera mot elpris -----
-        temp = await JusteraMotPris(nu, temp);
+        if (inneTemp > 20.5)
+        {
+            temp = await JusteraMotPris(nu, temp);
+        }
 
         // ----- Aktivera cool mode under varma sommardagar -----
         if (inneTemp > 25)
