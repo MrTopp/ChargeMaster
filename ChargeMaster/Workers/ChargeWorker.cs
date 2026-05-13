@@ -508,8 +508,8 @@ public class ChargeWorker(
                 }
             }
 
-            // Antar att det behövs 2.4 kvartar per procent laddbehov.
-            var antalKvartar = (int)(LaddBehovProcent * 2.1);
+            // Antar att det behövs 1.9 kvartar per procent laddbehov.
+            var antalKvartar = (int)(LaddBehovProcent * 1.9);
 
             kvartlista = priser.Where(x => x.ChargingAllowed
                                            && x.TimeEnd > DateTime.Now)
