@@ -107,8 +107,8 @@ public class DaikinWorker(
             < 18 => 28,
             < 20 => temp + 4,
             < 20.5 => temp + 3,
-            < 21 => temp + 2,
-            < 21.6 => temp + 1,
+            < 21.5 => temp + 2,
+            < 21.9 => temp + 1,
             > 24 => 16,
             > 23 => 20,
             > 22.7 => temp - 3,
@@ -126,7 +126,7 @@ public class DaikinWorker(
                 < -15 => temp + 6,
                 < -10 => temp + 4,
                 < -5 => temp + 2,
-                < 0 => temp + 1,
+                < 2 => temp + 1,
                 _ => temp
             };
         }
