@@ -8,11 +8,11 @@ namespace ChargeMaster.xUnit.Services.SMHI;
 
 public class SmhiWeatherServiceTests
 {
-    private static IServiceScopeFactory CreateMockedScopeFactory()
+    private static IServiceScopeFactory CreateMockedScopeFactory(CancellationToken cancellationToken)
     {
         var mockRepository = new Mock<IWeatherForecastRepository>();
         mockRepository
-            .Setup(r => r.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>()))
+            .Setup(r => r.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>(), cancellationToken))
             .Returns(Task.CompletedTask);
 
         var mockServiceProvider = new Mock<IServiceProvider>();
@@ -35,12 +35,11 @@ public class SmhiWeatherServiceTests
         // Arrange
         var httpClient = new HttpClient();
         var logger = new NullLogger<SmhiWeatherService>();
-        var scopeFactory = CreateMockedScopeFactory();
+        var scopeFactory = CreateMockedScopeFactory(CancellationToken.None);
         var service = new SmhiWeatherService(httpClient, logger, scopeFactory);
 
         // Act
-        var forecasts = await service.GetForecastAsync(longitude: 14.416639, latitude: 59.250709);
-
+        var forecasts = await service.GetForecastAsync(longitude: 14.416639, latitude: 59.250709, CancellationToken.None);
         // Assert
         Assert.NotNull(forecasts);
         Assert.NotEmpty(forecasts);

@@ -23,7 +23,7 @@ public class SmhiWeatherService(
     /// <param name="longitude">Longitud (t.ex. 18.0686 för Stockholm)</param>
     /// <param name="latitude">Latitud (t.ex. 59.3293 för Stockholm)</param>
     /// <returns>Lista med väderdata, för närvarande 3 dygn framåt</returns>
-    public async Task<List<WeatherForecast>> GetForecastAsync(double longitude, double latitude)
+    public async Task<List<WeatherForecast>> GetForecastAsync(double longitude, double latitude, CancellationToken cancellationToken)
     {
         try
         {
@@ -33,10 +33,10 @@ public class SmhiWeatherService(
             logger.LogInformation("Fetching weather forecast from SMHI for coordinates: {Lat},{Lon}", 
                 latitude, longitude);
 
-            var response = await httpClient.GetAsync(url);
+            var response = await httpClient.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
             var data = JsonSerializer.Deserialize<SmhiWeatherResponse>(content, JsonOptions);
 
             if (data?.TimeSeries == null || data.TimeSeries.Count == 0)
@@ -79,7 +79,7 @@ public class SmhiWeatherService(
             // Spara väderdata i databasen via repository
             using var scope = serviceScopeFactory.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IWeatherForecastRepository>();
-            await repository.SaveForecastsAsync(forecasts);
+            await repository.SaveForecastsAsync(forecasts, cancellationToken);
 
             return forecasts;
         }
@@ -104,10 +104,10 @@ public class SmhiWeatherService(
     /// Hämta väderprognos för strömtorp.
     /// </summary>
     /// <returns>Lista med väderdata</returns>
-    public async Task<List<WeatherForecast>> GetForecastAsync()
+    public async Task<List<WeatherForecast>> GetForecastAsync(CancellationToken cancellationToken)
     {
         // Koordinater för strömtorp
-        return await GetForecastAsync(longitude: 14.4308, latitude: 59.2301);
+        return await GetForecastAsync(longitude: 14.4308, latitude: 59.2301, cancellationToken: cancellationToken);
     }
 
     }

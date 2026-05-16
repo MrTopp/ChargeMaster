@@ -26,7 +26,7 @@ public class SmhiWorker(
     SmhiWeatherService smhiWeatherService,
     ILogger<SmhiWorker> logger) : BackgroundService
 {
-    private const int HourlyIntervalMinutes = 60;
+    private const int IntervalMinutes = 60 * 5;
 
     /// <summary>
     /// Aktuell väderprognos för Strömtorp (lagras efter senaste hämtningen).
@@ -44,20 +44,18 @@ public class SmhiWorker(
     public event EventHandler<WeatherForecastUpdatedEventArgs>? WeatherForecastUpdated;
 
     /// <inheritdoc/>
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         // Hämta väderdata vid start
-        await FetchWeatherAsync();
+        await FetchWeatherAsync(cancellationToken);
 
         // Schemalägga timliga hämtningar
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                // Vänta en timme
-                await Task.Delay(TimeSpan.FromMinutes(HourlyIntervalMinutes), stoppingToken);
-
-                await FetchWeatherAsync();
+                await Task.Delay(TimeSpan.FromMinutes(IntervalMinutes), cancellationToken);
+                await FetchWeatherAsync(cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -73,12 +71,11 @@ public class SmhiWorker(
     /// <summary>
     /// Hämtar väderprognos från SMHI för Strömtorp.
     /// </summary>
-    private async Task FetchWeatherAsync()
+    private async Task FetchWeatherAsync(CancellationToken cancellationToken)
     {
         try
         {
-            var forecast = await smhiWeatherService.GetForecastAsync();
-
+            var forecast = await smhiWeatherService.GetForecastAsync(cancellationToken);
             if (forecast.Count > 0)
             {
                 CurrentForecast = forecast;
@@ -146,27 +143,10 @@ public class SmhiWorker(
     /// Hämtar den aktuella temperaturen från den senaste prognosen.
     /// Returnerar null om ingen prognos är tillgänglig.
     /// </summary>
-    public double? GetCurrentTemperature(int hours = 0)
+    public double? GetForecastTemperature(int hours = 0)
     {
         var forecast = CurrentForecast.Skip(hours).FirstOrDefault();
         return forecast?.Temperature;
     }
 
-    /// <summary>
-    /// Hämtar den genomsnittliga temperaturen för de närmaste timmarna.
-    /// </summary>
-    /// <param name="hours">Antal timmar att beräkna medel för (standard: 3)</param>
-    public double? GetAverageTemperature(int hours = 3)
-    {
-        if (CurrentForecast.Count == 0)
-            return null;
-
-        var now = DateTime.Now;
-        var temperatures = CurrentForecast
-            .Where(f => f.Time >= now && f.Time <= now.AddHours(hours))
-            .Select(f => f.Temperature)
-            .ToList();
-
-        return temperatures.Count > 0 ? temperatures.Average() : null;
-    }
 }

@@ -17,15 +17,15 @@
             <h4 class="mb-3">Elpriser</h4>
             
             <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
-                <button class="btn btn-secondary btn-sm" 
-                        @onclick="PreviousDayAsync" 
+                <button class="btn btn-secondary btn-sm"
+                        @onclick="PreviousDayAsync"
                         disabled="@(_isCheckingPrevious || !_hasPreviousDayPrices)">
                     ← Föregående dag
                 </button>
                 <label for="price-date" class="form-label mb-0">Välj datum:</label>
                 <InputDate id="price-date" @bind-Value="_selectedDate" @bind-Value:after="LoadPricesAsync" class="form-control w-auto" min="2025-10-01" max="@_maxSelectableDate.ToString("yyyy-MM-dd")" />
-                <button class="btn btn-secondary btn-sm" 
-                        @onclick="NextDayAsync" 
+                <button class="btn btn-secondary btn-sm"
+                        @onclick="NextDayAsync"
                         disabled="@(_isCheckingNext || !_hasNextDayPrices)">
                     Nästa dag →
                 </button>
@@ -106,7 +106,6 @@
                 <a href="energy-usage" class="btn btn-secondary btn-sm">Timförbrukning</a>
                 <a href="monthly-costs" class="btn btn-secondary btn-sm">Nätavgifter</a>
             </p>
-            <p/>
             <p>
                 <a href="https://www.elprisetjustnu.se">
                     <img src="https://i.bnfcl.io/hva-koster-strommen/elpriser-tillhandahalls-av-elprisetjustnu_ttNExOIU_.png" alt="Elpriser tillhandahålls av Elpriset just nu.se" width="200" height="45">
@@ -226,7 +225,7 @@
 
     private async Task RenderChartAsync()
     {
-        if (_isDisposed || _module == null || _prices?.Count == 0)
+        if (_isDisposed || _module == null || _prices == null || _prices.Count == 0)
             return;
 
         var labels = _prices.Select(p => p.TimeStart.ToString("HH:mm")).ToList();

@@ -15,7 +15,9 @@ public class WeatherForecastRepository(
     /// Sparar eller uppdaterar väderprognos i databasen.
     /// </summary>
     /// <param name="forecasts">Lista med väderprognos-data att spara</param>
-    public async Task SaveForecastsAsync(List<WeatherForecast> forecasts)
+    /// <param name="cancellationToken"></param>
+    public async Task SaveForecastsAsync(
+        List<WeatherForecast> forecasts, CancellationToken cancellationToken)
     {
         try
         {
@@ -59,7 +61,7 @@ public class WeatherForecastRepository(
                 }
             }
 
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(cancellationToken);
             logger.LogInformation("Saved {Count} weather forecasts to database", forecasts.Count);
         }
         catch (Exception ex)

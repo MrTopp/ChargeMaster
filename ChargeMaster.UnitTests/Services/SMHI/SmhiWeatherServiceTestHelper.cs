@@ -162,10 +162,10 @@ public static class SmhiWeatherServiceTestHelper
     /// <param name="exception">The exception to throw</param>
     public static void ConfigureRepositoryToThrow(
         Mock<IWeatherForecastRepository> mockRepository,
-        Exception exception)
+        Exception exception, CancellationToken cancellationToken)
     {
         mockRepository
-            .Setup(x => x.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>()))
+            .Setup(x => x.SaveForecastsAsync(It.IsAny<List<WeatherForecast>>(), cancellationToken))
             .ThrowsAsync(exception);
     }
 

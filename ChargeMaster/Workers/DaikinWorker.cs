@@ -117,8 +117,8 @@ public class DaikinWorker(
             _ => temp
         };
 
-        // ----- Justera mot temperatur ute -----
-        double? smhiTemp = smhiWorker.GetCurrentTemperature(2);
+        // ----- Justera mot temperatur ute om 5 timmar -----
+        double? smhiTemp = smhiWorker.GetForecastTemperature(5);
         if (smhiTemp != null)
         {
             temp = smhiTemp switch

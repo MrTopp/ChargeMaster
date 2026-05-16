@@ -24,7 +24,7 @@ public class SmhiWeatherServiceTests
         var httpClient = new HttpClient();
         var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
-        var result = await service.GetForecastAsync();
+        var result = await service.GetForecastAsync(CancellationToken.None);
         // Assert
         Assert.NotNull(result);
         Assert.IsType<List<WeatherForecast>>(result);
@@ -47,7 +47,7 @@ public class SmhiWeatherServiceTests
         };
         var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
-        var result = await service.GetForecastAsync();
+        var result = await service.GetForecastAsync(CancellationToken.None);
         // Assert
         Assert.NotNull(result);
         Assert.Empty(result);
@@ -69,7 +69,7 @@ public class SmhiWeatherServiceTests
         };
         var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
         // Act
-        var task = service.GetForecastAsync();
+        var task = service.GetForecastAsync(CancellationToken.None);
         var result = await task;
         // Assert
         Assert.True(task.IsCompleted);
