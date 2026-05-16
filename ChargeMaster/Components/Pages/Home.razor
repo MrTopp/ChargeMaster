@@ -10,6 +10,8 @@
 @inject SmhiWorker SmhiWorker
 @inject LinuxWorker LinuxWorker
 @inject ErrorLogService ErrorLogService
+@inject ElectricityPriceService ElectricityPriceService
+@inject IJSRuntime Js
 @using ChargeMaster.Data
 @using ChargeMaster.Services.Wallbox
 @using ChargeMaster.Services.VolksWagen
@@ -17,6 +19,7 @@
 @using ChargeMaster.Services.Shelly
 @using ChargeMaster.Services.SMHI
 @using ChargeMaster.Services.ErrorLog
+@using ChargeMaster.Services.ElectricityPrice
 @using ChargeMaster.Workers
 
 <PageTitle>Charge Master</PageTitle>
@@ -104,6 +107,23 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <section class="mb-3">
+        <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
+            <h4 class="mb-2">Elpriser</h4>
+
+            @if (CurrentElectricityPrices is { Count: > 0 })
+            {
+                <div style="max-height: 300px; margin-bottom: 2rem;">
+                    <canvas id="priceChartHome"></canvas>
+                </div>
+            }
+            else if (CurrentElectricityPrices != null && CurrentElectricityPrices.Count == 0)
+            {
+                <p class="text-muted mb-0"><em>Ingen prisdata tillgänglig för närvarande</em></p>
+            }
         </div>
     </section>
 
@@ -261,6 +281,10 @@
     private HashSet<string> HighlightedShellyProperties { get; set; } = [];
     private CancellationTokenSource? _highlightShellyCts;
     private List<WeatherForecast> CurrentWeatherForecast { get; set; } = [];
+    private List<ElectricityPrice>? CurrentElectricityPrices { get; set; }
+    private IJSObjectReference? _module;
+    private bool _isDisposed;
+    private CancellationTokenSource? _priceUpdateCts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -286,7 +310,119 @@
         // Trigga uppdatering av kvartlista
         CurrentKvartlista = ChargeWorker.GetKvartlista();
 
+        // Ladda elpriser från dagens datum från aktuell tid
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        CurrentElectricityPrices = await ElectricityPriceService.GetPricesForDateAsync(today);
+
+        // Starta timuppdatering av elpriser
+        _priceUpdateCts = new CancellationTokenSource();
+        _ = UpdatePricesHourlyAsync(_priceUpdateCts.Token);
+
         await VWService.GetStatusAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_isDisposed)
+            return;
+
+        if (!firstRender)
+            return;
+
+        try
+        {
+            try
+            {
+                _module = await Js.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Home.razor.js");
+            }
+            catch (JSDisconnectedException)
+            {
+                return;
+            }
+
+            // Rendera graf om priserna redan är laddade
+            if (CurrentElectricityPrices?.Count > 0)
+            {
+                await RenderPriceChartAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit disconnected, ignorera
+        }
+    }
+
+    private async Task UpdatePricesHourlyAsync(CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                // Vänta i 5 minuter innan nästa uppdatering
+                await Task.Delay(TimeSpan.FromMinutes(5), token);
+
+                if (token.IsCancellationRequested)
+                    break;
+
+                // Uppdatera priserna
+                var today = DateOnly.FromDateTime(DateTime.Now);
+                var updatedPrices = await ElectricityPriceService.GetPricesForDateAsync(today);
+
+                if (updatedPrices?.Count > 0)
+                {
+                    CurrentElectricityPrices = updatedPrices;
+                    await InvokeAsync(StateHasChanged);
+
+                    // Rendera grafen igen med uppdaterade priser
+                    if (_module != null)
+                    {
+                        await RenderPriceChartAsync();
+                    }
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Uppdatering avbruten
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fel vid uppdatering av elpriser: {ex.Message}");
+        }
+    }
+
+    private async Task RenderPriceChartAsync()
+    {
+        if (_isDisposed || _module == null || CurrentElectricityPrices == null || CurrentElectricityPrices.Count == 0)
+            return;
+
+        var now = DateTime.Now;
+        // Avrunda nedåt till början av den aktuella timmen
+        var roundedTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+
+        // Filtrera priser från aktuell timme och framåt
+        var pricesFromNow = CurrentElectricityPrices
+            .Where(p => p.TimeStart >= roundedTime)
+            .OrderBy(p => p.TimeStart)
+            .ToList();
+
+        if (pricesFromNow.Count == 0)
+            return;
+
+        var labels = pricesFromNow.Select(p => p.TimeStart.ToString("HH:mm")).ToList();
+        var data = pricesFromNow.Select(p => p.SekPerKwh).ToList();
+
+        // Visa aktuell tid med minuter för den lodräta linjen
+        var currentTimeForIndicator = now.ToString("HH:mm");
+
+        try
+        {
+            await _module.InvokeVoidAsync("initializeChart", labels, data, currentTimeForIndicator);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit disconnected, ignorera
+        }
     }
 
     private void OnMeterInfoCalculated(object? sender, MeterInfoEventArgs e)
@@ -395,8 +531,9 @@
         }
     }
 
-    ValueTask IAsyncDisposable.DisposeAsync()
+    async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        _isDisposed = true;
         WallboxWorker.MeterInfoCalculated -= OnMeterInfoCalculated;
         ChargeWorker.KvartlistaUpdated -= OnKvartlistaUpdated;
         VWService.VWStatusRetrieved -= OnVWStatusRetrieved;
@@ -410,8 +547,20 @@
         _highlightCts?.Dispose();
         _highlightShellyCts?.Cancel();
         _highlightShellyCts?.Dispose();
+        _priceUpdateCts?.Cancel();
+        _priceUpdateCts?.Dispose();
 
-        return ValueTask.CompletedTask;
+        if (_module is not null)
+        {
+            try
+            {
+                await _module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit redan disconnected, resurser rensas av webbläsaren
+            }
+        }
     }
 }
 
