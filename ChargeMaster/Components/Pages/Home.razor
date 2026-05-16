@@ -12,6 +12,7 @@
 @inject ErrorLogService ErrorLogService
 @inject ElectricityPriceService ElectricityPriceService
 @inject IJSRuntime Js
+@inject ILogger<Home> Logger
 @using ChargeMaster.Data
 @using ChargeMaster.Services.Wallbox
 @using ChargeMaster.Services.VolksWagen
@@ -314,11 +315,20 @@
         var today = DateOnly.FromDateTime(DateTime.Now);
         CurrentElectricityPrices = await ElectricityPriceService.GetPricesForDateAsync(today);
 
-        // Starta timuppdatering av elpriser
+        // Starta uppdatering av elpriser var 5:e minut
         _priceUpdateCts = new CancellationTokenSource();
         _ = UpdatePricesHourlyAsync(_priceUpdateCts.Token);
 
-        await VWService.GetStatusAsync();
+        // Hämta VW-status med felhantering
+        try
+        {
+            await VWService.GetStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            // Logga felet så det syns i fellistan, men låt sidan laddas normalt
+            Logger.LogError(ex, "Kan inte hämta VW-status");
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
