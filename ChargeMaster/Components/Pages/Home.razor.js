@@ -117,15 +117,25 @@ function createChart(labels, data, currentTime) {
                 const xScale = chart.scales.x;
                 const yScale = chart.scales.y;
 
-                // Konvertera aktuell tid till minuter från midnatt
-                const [hours, minutes] = currentTime.split(':').map(Number);
-                const currentTimeMinutes = hours * 60 + minutes;
+                // Konvertera alla etiketter till ackumulerade minuter (hanterar midnattsskifte)
+                const labelMinutes = [];
+                let dayOffset = 0;
+                for (let i = 0; i < labels.length; i++) {
+                    const [h, m] = labels[i].split(':').map(Number);
+                    const mins = h * 60 + m;
+                    if (i > 0 && mins < labelMinutes[i - 1] - dayOffset) {
+                        dayOffset += 24 * 60;
+                    }
+                    labelMinutes.push(dayOffset + mins);
+                }
 
-                // Konvertera alla etiketter till minuter från midnatt
-                const labelMinutes = labels.map(label => {
-                    const [h, m] = label.split(':').map(Number);
-                    return h * 60 + m;
-                });
+                // Konvertera aktuell tid till minuter, med hänsyn till om tidsserien spänner över midnatt
+                const [hours, minutes] = currentTime.split(':').map(Number);
+                let currentTimeMinutes = hours * 60 + minutes;
+                // Om tidsserien sträcker sig in på nästa dag och aktuell tid är på den dagen
+                if (labelMinutes[labelMinutes.length - 1] >= 24 * 60 && currentTimeMinutes < labelMinutes[0]) {
+                    currentTimeMinutes += 24 * 60;
+                }
 
                 // Hitta positionen för aktuell tid inom X-axelns skala
                 const firstTimeMinutes = labelMinutes[0];
