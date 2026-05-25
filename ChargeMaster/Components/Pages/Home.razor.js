@@ -36,6 +36,13 @@ function createChart(labels, data, currentTime) {
         window.priceChartHomeInstance.destroy();
     }
 
+    // Sätt canvas-höjden till containerens höjd
+    const container = ctx.parentElement;
+    const containerHeight = container.offsetHeight || 600;
+    ctx.height = containerHeight;
+
+    console.log('Canvas height set to:', containerHeight);
+
     // Beräkna min och max för Y-axel
     const min = Math.min(...data);
     const max = Math.max(...data);
@@ -64,7 +71,7 @@ function createChart(labels, data, currentTime) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: true,
