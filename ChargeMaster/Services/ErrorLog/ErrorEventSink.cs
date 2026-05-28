@@ -25,7 +25,7 @@ public class ErrorEventSink(Action<ErrorLogEventArgs> errorHandler) : ILogEventS
 
         var errorArgs = new ErrorLogEventArgs
         {
-            Timestamp = logEvent.Timestamp.UtcDateTime,
+            Timestamp = logEvent.Timestamp.LocalDateTime,
             Message = message,
             Exception = logEvent.Exception,
             Source = source
