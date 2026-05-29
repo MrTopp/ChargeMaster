@@ -510,11 +510,15 @@ public class ChargeWorker(
 
             // Antar att det behövs 1.9 kvartar per procent laddbehov.
             var antalKvartar = (int)(LaddBehovProcent * 1.9);
+            var prisTak = new decimal(0.5); // 50 öre
 
             kvartlista = priser.Where(x => x.ChargingAllowed
                                            && x.TimeEnd > DateTime.Now)
                 .OrderBy(x => x.SekPerKwh)
-                .Take(antalKvartar)
+                //.Take(antalKvartar)
+                // tillfälligt, eftersom vw inte berättar laddstatus får 
+                // vi helt enkelt ladda om priset är under 50 öre.
+                .Where(x => x.SekPerKwh < prisTak )
                 .ToList();
 
             var nextKvart = kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();

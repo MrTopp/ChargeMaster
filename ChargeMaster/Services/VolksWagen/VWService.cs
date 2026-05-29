@@ -65,6 +65,12 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
     /// <exception cref="CarConnectionException">Kastas om kommunikation med tjänsten misslyckas.</exception>
     public async Task<VWStatus?> GetStatusAsync()
     {
+        // Kortslut eftersom vw inte längre vill berätta hur bilen mår.
+        var status = GetFejkStatus();
+        VWStatusRetrieved?.Invoke(this, new VWStatusEventArgs(status));
+        return status;
+
+        // orginalkod som funkade en gång i tiden :(
         try
         {
             var json = await httpClient.GetStringAsync("/status");
@@ -86,6 +92,18 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
             logger.LogError(ex, "GetStatusAsync: Fel vid hämtning av VW-status");
             throw new CarConnectionException("GetStatusAsync: Kunde inte hämta VW-status", ex);
         }
+    }
+
+    private VWStatus GetFejkStatus()
+    {
+        // skapa en fejkstatus med 60% batterinivå och 80% laddningsinställning
+        return new VWStatus
+        {
+            BatteryLevel = 60,
+            ChargingSettingsTargetLevel = 80,
+            ChargingPower = 0.0,
+
+        };
     }
 
     /// <summary>
@@ -116,6 +134,8 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
 
     private async Task<bool> PostAsync(string relativeUrl)
     {
+        // Kortslut eftersom vw inte längre vill ta emot kommandon.
+        return true;
         try
         {
             using var content = new StringContent(string.Empty);
