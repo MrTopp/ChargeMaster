@@ -151,11 +151,22 @@ public class DaikinWorker(
             temp = await JusteraMotPris(nu, temp);
         }
 
-        // ----- Aktivera cool mode under varma sommardagar -----
-        if (inneTemp > 25)
+        // ----- Aktivera cool mode om det är varmt i sovrummet på kvällen -----
+        if (DateTime.Now.Hour >= 20 || DateTime.Now.Hour <= 3)
         {
-            temp = 20;
-            heat = false;
+            var sovtemp = shellyMqttService.GetSovrumTemperature();
+            if (sovtemp > 24)
+            {
+                temp = sovtemp switch
+                {
+                    > 26 => 16,
+                    > 25.5 => 18,
+                    > 25 => 20,
+                    > 24.5 => 22,
+                    _ => 23
+                };
+                heat = false;
+            }
         }
 
         string log
