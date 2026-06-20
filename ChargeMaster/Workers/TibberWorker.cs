@@ -14,8 +14,8 @@ public class TibberWorker(
     InfluxDbService influxDbService,
     ILogger<TibberWorker> logger) : BackgroundService
 {
-    private const int InitialDelaySeconds = 5;
-    private const int MaxDelaySeconds = 300;
+    private const int InitialDelaySeconds = 60;
+    private const int MaxDelaySeconds = 7200;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

@@ -164,8 +164,7 @@ public class DaikinWorker(
                     > 26 => 16,
                     > 25.5 => 18,
                     > 25 => 20,
-                    > 24.5 => 22,
-                    _ => 23
+                    _ => 21
                 };
                 heat = false;
             }
