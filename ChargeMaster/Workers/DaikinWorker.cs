@@ -42,6 +42,7 @@ public class DaikinWorker(
     {
         await daikinFacade.InitializeAsync(forceEvent: true);
         double previousTemp = daikinFacade.TargetTemperature ?? 22L;
+        bool previousHeat = true;
         DateTime previous = DateTime.Now;
 
         while (!stoppingToken.IsCancellationRequested)
@@ -59,14 +60,15 @@ public class DaikinWorker(
             // Uppdatera börvärde mot schema och maxpris
             var (temp, heat, log) = await KalkyleraTemperatur(nu);
 
-            // Uppdatera Daikin endast om börvärde är ändrad
-            if (Math.Abs(temp - previousTemp) > 0.2)
+            // Uppdatera Daikin endast om börvärde är ändrad eller läge är ändrat
+            if (Math.Abs(temp - previousTemp) > 0.2 || heat != previousHeat)
             {
-                logger.LogDebug("Uppdaterar Daikin måltemperatur: {Temp}°C", temp);
+                logger.LogDebug("Uppdaterar Daikin måltemperatur: {Temp}°C (Värme: {Heat})", temp, heat);
                 logger.LogInformation(log);
                 await daikinFacade.SetTargetTemperatureAsync(temp, heat);
                 await SaveDaikinSession(nu, temp, heat);
                 previousTemp = temp;
+                previousHeat = heat;
             }
             else
             {
@@ -152,7 +154,7 @@ public class DaikinWorker(
         }
 
         // ----- Aktivera cool mode om det är varmt i sovrummet på kvällen -----
-        if (DateTime.Now.Hour >= 20 || DateTime.Now.Hour <= 3)
+        if (DateTime.Now.Hour >= 20 || DateTime.Now.Hour <= 4)
         {
             var sovtemp = shellyMqttService.GetSovrumTemperature();
             if (sovtemp > 24)
