@@ -150,7 +150,11 @@ public class DaikinWorker(
         // ----- Justera mot elpris -----
         if (inneTemp > 20.5)
         {
-            temp = await JusteraMotPris(nu, temp);
+            if (await JusteraMotPris(nu))
+            {
+                // sätt måltemp till 20 under högprisperioder 
+                return (20, true, "High price period detected. Setting target temperature to 20°C.");
+            }
         }
 
         // ----- Aktivera cool mode om det är varmt i sovrummet på kvällen -----
@@ -181,12 +185,12 @@ public class DaikinWorker(
     private (DateOnly Date, List<ElectricityPrice> ExpensiveHours)? _cachedPrices;
 
     /// <summary>
-    /// Justera temperaturen om elpriset är extremt.
+    /// Kontrollera om det är hög elprisperiod.
     /// </summary>
     /// <param name="nu">Referenstid för prisjämförelse.</param>
     /// <param name="temp">Nuvarande beräknad måltemperatur.</param>
-    /// <returns>Justerad måltemperatur.</returns>
-    private async Task<double> JusteraMotPris(DateTime nu, double temp)
+    /// <returns>true om high price.</returns>
+    private async Task<bool> JusteraMotPris(DateTime nu)
     {
         // Om priset är riktigt lågt, kosta på lite extra värme
         //var currentPrice = await GetCurrentPrice(nu);
@@ -208,7 +212,7 @@ public class DaikinWorker(
         var priceList = _cachedPrices.Value.ExpensiveHours;
         if (priceList.Count == 0)
         {
-            return temp;
+            return false;
         }
         // Finns 'nu' i listan?
         var pris = priceList
@@ -216,9 +220,9 @@ public class DaikinWorker(
         if (pris != null)
         {
             logger.LogInformation("High price period detected. Setting target temperature to 20°C.");
-            return 20;
+            return true;
         }
-        return temp;
+        return false;
     }
 
     /// <summary>
