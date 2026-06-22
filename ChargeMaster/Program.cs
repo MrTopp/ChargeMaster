@@ -172,8 +172,8 @@ namespace ChargeMaster
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<DaikinWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ShellyWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<SmhiWorker>());
-                builder.Services.AddHostedService(sp => sp.GetRequiredService<TibberWorker>());
-                builder.Services.AddHostedService(sp => sp.GetRequiredService<LinuxWorker>());
+                //builder.Services.AddHostedService(sp => sp.GetRequiredService<TibberWorker>());
+                //builder.Services.AddHostedService(sp => sp.GetRequiredService<LinuxWorker>());
 
                 var app = builder.Build();
 
