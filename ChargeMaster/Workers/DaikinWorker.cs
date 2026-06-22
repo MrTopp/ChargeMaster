@@ -219,7 +219,6 @@ public class DaikinWorker(
             .FirstOrDefault(p => p.TimeStart <= nu && p.TimeEnd > nu);
         if (pris != null)
         {
-            logger.LogInformation("High price period detected. Setting target temperature to 20°C.");
             return true;
         }
         return false;
