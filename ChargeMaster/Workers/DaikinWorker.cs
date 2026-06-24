@@ -79,9 +79,10 @@ public class DaikinWorker(
 
             // Vänta tills nästa hela minut
             var targetNextMinute = nu.AddMinutes(1);
-            while (DateTime.Now < targetNextMinute && !stoppingToken.IsCancellationRequested)
+            var delayTimeMs = (targetNextMinute - DateTime.Now).TotalMilliseconds;
+            if (delayTimeMs > 0)
             {
-                await Task.Delay(100, stoppingToken);
+                await Task.Delay((int)delayTimeMs, stoppingToken);
             }
         }
     }
