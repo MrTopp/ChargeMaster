@@ -503,7 +503,8 @@ public class ChargeWorker(
             // Ta bort kvart(ar) i början av varje timme.
             foreach (var kvart in priser)
             {
-                if (kvart.TimeStart.Minute < 14)
+                // två kvartar klipps bort i början av varje timme
+                if (kvart.TimeStart.Minute < 20)
                 {
                     kvart.ChargingAllowed = false;
                 }
@@ -511,8 +512,9 @@ public class ChargeWorker(
 
             // Antar att det behövs 1.9 kvartar per procent laddbehov.
             var antalKvartar = (int)(LaddBehovProcent * 1.9);
-            var prisTak = new decimal(0.7); // SEK
+            var prisTak = new decimal(0.5); // SEK
 
+            // Skapa lista med kvartar där laddning är tillåten och priset är under prisTak
             kvartlista = priser.Where(x => x.ChargingAllowed
                                            && x.TimeEnd > DateTime.Now)
                 .OrderBy(x => x.SekPerKwh)
