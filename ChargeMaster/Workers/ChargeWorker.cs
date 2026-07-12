@@ -38,6 +38,7 @@ public class ChargeWorker(
     /// Nuvarande laddnivå i bilen, i procent. 
     /// </summary>
     private double _chargeLevelCurrent;
+
     /// <summary>
     /// Målvärde för laddningen i procent
     /// </summary>
@@ -123,8 +124,9 @@ public class ChargeWorker(
             logger.LogInformation("Wallbox is disabled.");
             WallboxStopped = true;
         }
+
         LaddBehovProcent = await LaddBehovAsync();
-        while(!wallboxWorker.WallboxInitierad)
+        while (!wallboxWorker.WallboxInitierad)
             await Task.Delay(100, stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
@@ -143,7 +145,8 @@ public class ChargeWorker(
             }
 
             // ----- Effektvakt värmepump
-            await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningDennaTimme, nu, stoppingToken);
+            await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningDennaTimme, nu,
+                stoppingToken);
 
             // ----- Bilen inte ansluten, hoppa över utvärdering av laddning
             if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
@@ -207,22 +210,40 @@ public class ChargeWorker(
                         await StoppaLaddningAsync(force: true);
                     }
                 }
+
                 ConnectorStatus = currentConnectorStatus;
             }
 
             // ----- Kontrollera förväntad timförbrukning
             if (Timladdning && nu.Minute > 10)
             {
-                // laddningen görs alltid på slutet av timmen så om vi passerar 
-                // gränsen är det stopp direkt.
-                var grans = await wallboxWorker.KalkyleraGrans(nu, stoppingToken);
-                if (wallboxWorker.FörbrukningDennaTimme > grans)
+                var isKvartar = _kvartlista?.Any(x =>
+                    x.TimeStart.Hour == nu.Hour && x.TimeStart.Day == nu.Day) ?? false;
+                if (isKvartar)
                 {
-                    logger.LogInformation(
-                        "! Charging disabled due to high consumption: {consumption} Wh.",
-                        wallboxWorker.FörbrukningDennaTimme);
-                    Timladdning = false;
-                    await StoppaLaddningAsync();
+                    // Det finns planerad laddning för innevarande timme, räkna ut gräns.
+                    var minuterKvar = 60 - nu.Minute;
+                    
+                    var förbrukningKvar = minuterKvar * 8000 / 60;
+                    var totalförbrukningTimme
+                        = wallboxWorker.FörbrukningDennaTimme + förbrukningKvar;
+
+                    HourlyEnergyUsage maxFörbrukning
+                        = await wallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(nu,
+                            stoppingToken);
+                    var förbrukningGräns = (long)(maxFörbrukning.EnergyUsageWh * 0.9);
+                    if (förbrukningGräns < 4000)
+                    {
+                        förbrukningGräns = 4000;
+                    }
+                    if (totalförbrukningTimme > förbrukningGräns)
+                    {
+                        logger.LogInformation(
+                            "! Charging disabled due to high consumption: {consumption} Wh.",
+                            wallboxWorker.FörbrukningDennaTimme);
+                        Timladdning = false;
+                        await StoppaLaddningAsync();
+                    }
                 }
             }
 
@@ -259,20 +280,19 @@ public class ChargeWorker(
                 }
             }
 
-        NextIteration:
+            NextIteration:
             // Vänta tills nästa hela minut
             var targetNextMinute = nu.AddMinutes(1);
             while (DateTime.Now < targetNextMinute && !stoppingToken.IsCancellationRequested)
             {
                 await Task.Delay(100, stoppingToken);
             }
+
             previous = nu;
             // Tvinga uppdatering av kvartlista varje varv
             _kvartlista = null;
         }
     }
-
-
 
 
     private bool BilenLaddar { get; set; }
@@ -512,7 +532,7 @@ public class ChargeWorker(
 
             // Antar att det behövs 1.9 kvartar per procent laddbehov.
             var antalKvartar = (int)(LaddBehovProcent * 1.9);
-            var prisTak = new decimal(0.5); // SEK
+            var prisTak = new decimal(1.5); // SEK
 
             // Skapa lista med kvartar där laddning är tillåten och priset är under prisTak
             kvartlista = priser.Where(x => x.ChargingAllowed
@@ -520,8 +540,8 @@ public class ChargeWorker(
                 .OrderBy(x => x.SekPerKwh)
                 //.Take(antalKvartar)
                 // tillfälligt, eftersom vw inte berättar laddstatus får 
-                // vi helt enkelt ladda om priset är under 50 öre.
-                .Where(x => x.SekPerKwh < prisTak )
+                // vi helt enkelt ladda om priset är under 1 SEK.
+                .Where(x => x.SekPerKwh < prisTak)
                 .ToList();
 
             var nextKvart = kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
@@ -575,15 +595,18 @@ public class ChargeWorker(
                 try
                 {
                     using var initScope = serviceScopeFactory.CreateScope();
-                    var initContext = initScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    var initContext = initScope.ServiceProvider
+                        .GetRequiredService<ApplicationDbContext>();
                     _lastSavedChargeSession = await initContext.ChargeSessions
                         .OrderByDescending(x => x.Timestamp)
                         .FirstOrDefaultAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "SaveChargeSessionAsync: Error initializing _lastSavedChargeSession from database");
+                    logger.LogError(ex,
+                        "SaveChargeSessionAsync: Error initializing _lastSavedChargeSession from database");
                 }
+
                 // fallback om databasen är tom eller det blev något fel vid inläsning
                 _lastSavedChargeSession ??= new ChargeSession();
             }
