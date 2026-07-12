@@ -66,13 +66,14 @@
 - Use xUnit test framework.
 - Two test projects are used:
   - **ChargeMaster.UnitTests**: Contains unit tests with mocked external dependencies. Use `Moq` for mocking services, repositories, and other external dependencies. These tests verify isolated business logic and behavior of individual components without hitting real external services.
-  - **ChargeMaster.xUnit**: Contains exploratory tests used to understand and validate behavior of external dependencies. These tests may use real services or integration with external systems. **Never run tests in ChargeMaster.xUnit project automatically. Only run tests in this project when the user explicitly requests it with specific instructions.**
+  - **ChargeMaster.xUnit**: Contains exploratory tests used to understand and validate the behavior of external dependencies. These tests may use real services or integration with external systems. **Never run tests in ChargeMaster.xUnit project automatically. Only run tests in this project when the user explicitly requests it with specific instructions.**
 - Do not mock external dependencies in unit tests unless explicitly required for isolation.
 - Use a local PostgreSQL instance for testing Entity Framework Core operations (primarily in exploratory tests).
 - If a private method needs to be tested, change its access modifier to `internal` instead of using reflection. Avoid reflection in tests.
 
-## Commit Messages
+## Version Control
 - Format commit messages as a bullet list where each item starts with `-`. Example: `- Action 1\n- Action 2\n- Action 3`
+- Do not commit changes to git. The user commits all changes manually after testing and verification. 
 
 # Functionality
 The application, named "ChargeMaster", handles charging of the electric vehicle and manages the heatpump.
@@ -84,7 +85,6 @@ It also limits the total usage of electricity for each hour. There is a cost for
 ## Solutions and Projects
 The solution contains the following projects:
 - **ChargeMaster** — main ASP.NET Core web application (workers, Blazor UI, EF Core data layer).
-- **ChargeMaster.Services** — shared services library consumed by the main project.
 - **ChargeMaster.UnitTests** — xUnit unit tests (run automatically).
 - **ChargeMaster.xUnit** — exploratory/integration tests (never run automatically).
 
@@ -155,6 +155,8 @@ Subscribes to real-time energy measurements from the Tibber Pulse unit using the
 ### VWService
 Retrieves Volkswagen vehicle status (battery level, charging state, etc.) via a companion HTTP service.
 Raises events when new status data is available.
+The VWService is currently not working. The called service is closed by Volkswagen and the API is no longer available. 
+The service is kept in the codebase for future reference.
 
 ### WallboxService
 Communicates with the Garo wallbox charger via its HTTP interface. Provides methods to read charger status
