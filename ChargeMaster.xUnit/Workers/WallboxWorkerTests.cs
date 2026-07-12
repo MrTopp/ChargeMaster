@@ -200,4 +200,44 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 
         return path;
     }
+    
+    
+    [Fact]
+    public async Task CalculateHourlyEnergyUsageAsync_Debug()
+    {
+        // Arrange - Setup DI with real database
+        var services = new ServiceCollection();
+        var config = new ConfigurationBuilder()
+            .AddJsonFile(FindAppSettings(), optional: false)
+            .Build();
+
+        var connectionString = config.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+        services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddLogging(builder => builder.AddConsole());
+        services.AddHttpClient();
+        services.Configure<InfluxDBOptions>(config.GetSection("InfluxDB"));
+        
+        var httpClient = new HttpClient { BaseAddress = new Uri("http://192.168.1.205:8080/") };
+        services.AddSingleton(new WallboxService(httpClient, new Logger<WallboxService>(new LoggerFactory())));
+        services.AddSingleton<ElectricityPriceService>();
+        services.AddSingleton<InfluxDbService>();
+
+        using var provider = services.BuildServiceProvider();
+        var wallboxService = provider.GetRequiredService<WallboxService>();
+        var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
+        var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
+        var influxDbService = provider.GetRequiredService<InfluxDbService>();
+
+        var worker = new WallboxWorker(scopeFactory, wallboxService, influxDbService, logger);
+
+        var dateInMonth = new DateTime(2026, 5, 1); // Target month
+
+        // Act
+        var result = await worker.CalculateHourlyEnergyUsageAsync(dateInMonth, CancellationToken.None);
+
+        // Log result for debugging
+        logger.LogInformation("CalculateHourlyEnergyUsageAsync returned {Count} entries for {Date}", result.Count, dateInMonth);
+    }
 }

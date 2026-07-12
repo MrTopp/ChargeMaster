@@ -1,7 +1,6 @@
 ﻿using ChargeMaster.Data;
 using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.Wallbox;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Workers;
@@ -81,6 +80,7 @@ public class WallboxWorker(
                 return SistaMeterInfoFöregåendeTimme.AccEnergy -
                        NästSistaMeterInfoFöregåendeTimme.AccEnergy;
             }
+
             return 0;
         }
     }
@@ -106,10 +106,20 @@ public class WallboxWorker(
     internal WallboxMeterInfo? NästSistaMeterInfoFöregåendeTimme { get; set; }
 
     /// <summary>
-    /// Cache for hourly energy usage calculations. Stores data and timestamp of last calculation.
+    /// Månaden som cache är beräknad för.
     /// </summary>
     private DateTime LastHourlyEnergyUsageCacheTime { get; set; } = DateTime.MinValue;
+
+    /// <summary>
+    /// Tidpunkten för beräkning av cache. Cache endast giltig under samma timme som beräkningen gjordes.
+    /// </summary>
+    private DateTime LastHourlyEnergyUsageCalculationTime { get; set; } = DateTime.MinValue;
+
+    /// <summary>
+    /// Cache för timvis energianvändning. Innehåller data och tidpunkt för senaste beräkning.
+    /// </summary>
     private List<HourlyEnergyUsage> HourlyEnergyUsageCache { get; set; } = [];
+
     private object CacheLocker { get; } = new();
 
     /// <inheritdoc/>
@@ -199,7 +209,8 @@ public class WallboxWorker(
     /// <summary>
     /// Hämta upp den senaste mätarställningen före innevarande timme
     /// </summary>
-    internal async Task InitieraFörbrukningAsync(CancellationToken cancellationToken, DateTime? testNu = null)
+    internal async Task InitieraFörbrukningAsync(
+        CancellationToken cancellationToken, DateTime? testNu = null)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -326,7 +337,8 @@ public class WallboxWorker(
             TimeSpan timeDifference = now - correctWallboxTime;
             if (timeDifference.Duration() > TimeSpan.FromMinutes(5))
             {
-                logger.LogInformation("Wallbox-klockan avviker {Difference} från systemtiden. Uppdaterar tid.",
+                logger.LogInformation(
+                    "Wallbox-klockan avviker {Difference} från systemtiden. Uppdaterar tid.",
                     timeDifference);
                 await wallboxService.SetTimeAsync(now);
             }
@@ -339,7 +351,8 @@ public class WallboxWorker(
     /// <param name="stoppingToken">Token to monitor for cancellation requests.</param>
     /// <param name="nu">Datum för beräkning, normalt DateTime.Now</param>
     /// <returns>The meter information that was read, or null if no information was available.</returns>
-    internal async Task<WallboxMeterInfo?> ReadEnergyAsync(CancellationToken stoppingToken, DateTime nu)
+    internal async Task<WallboxMeterInfo?> ReadEnergyAsync(
+        CancellationToken stoppingToken, DateTime nu)
     {
         try
         {
@@ -356,7 +369,8 @@ public class WallboxWorker(
             // Kontrollera om returnerad info har en tid som skiljer mot systemtiden mer än 5 minuter, i så fall använd systemtiden
             if ((nu - NuvarandeMeterInfo.ReadDateTime).Duration() > TimeSpan.FromMinutes(5))
             {
-                logger.LogError("Mäterinformation läsades vid {ReadTime} men systemtiden är {SystemTime}, vilket skiljer mer än 5 minuter. Använder systemtid för beräkningar.",
+                logger.LogError(
+                    "Mäterinformation läsades vid {ReadTime} men systemtiden är {SystemTime}, vilket skiljer mer än 5 minuter. Använder systemtid för beräkningar.",
                     NuvarandeMeterInfo.ReadDateTime, nu);
                 NuvarandeMeterInfo.ReadDateTime = nu;
                 // Klockan går fel, rätta den
@@ -445,8 +459,10 @@ public class WallboxWorker(
     {
         var entries = new List<WallboxMeterReading>();
 
-        var previousHour = new DateTime(previousTime.Year, previousTime.Month, previousTime.Day, previousTime.Hour, 0, 0);
-        var currentHour = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day, currentTime.Hour, 0, 0);
+        var previousHour = new DateTime(previousTime.Year, previousTime.Month, previousTime.Day,
+            previousTime.Hour, 0, 0);
+        var currentHour = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day,
+            currentTime.Hour, 0, 0);
 
         // Om samma timme, skapa bara en post med slutvärdet
         if (previousHour == currentHour)
@@ -507,7 +523,8 @@ public class WallboxWorker(
     /// <param name="dateInMonth">A date that determines which month to calculate for.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>Total energy consumption in Wh for the specified month, or 0 if insufficient data.</returns>
-    public async Task<long> GetMonthlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    public async Task<long> GetMonthlyEnergyUsageAsync(
+        DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -552,7 +569,8 @@ public class WallboxWorker(
 
             if (lastReading is null)
             {
-                logger.LogInformation("Kunde inte hitta sista läsningen för {Month:yyyy-MM}", dateInMonth);
+                logger.LogInformation("Kunde inte hitta sista läsningen för {Month:yyyy-MM}",
+                    dateInMonth);
                 return 0;
             }
 
@@ -566,7 +584,8 @@ public class WallboxWorker(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Fel vid beräkning av månadsförbrukning för {Month:yyyy-MM}", dateInMonth);
+            logger.LogError(ex, "Fel vid beräkning av månadsförbrukning för {Month:yyyy-MM}",
+                dateInMonth);
             return 0;
         }
     }
@@ -577,9 +596,9 @@ public class WallboxWorker(
     /// <param name="nu">Justeringsvärde, används för att beräkna gränsvärdet baserat på aktuell tid.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<long> KalkyleraGrans(DateTime nu, CancellationToken cancellationToken )
+    public async Task<long> KalkyleraGrans(DateTime nu, CancellationToken cancellationToken)
     {
-        long max;   // Högsta timförbrukningen i Wh
+        long max; // Högsta timförbrukningen i Wh
         HourlyEnergyUsage usage;
         if (IsHighEffect(nu))
         {
@@ -599,6 +618,7 @@ public class WallboxWorker(
                 max = 3000;
             }
         }
+
         return max * nu.Minute / 60;
     }
 
@@ -609,7 +629,8 @@ public class WallboxWorker(
     /// <param name="dateInMonth">Ett datum inom den månad som ska analyseras.</param>
     /// <param name="cancellationToken">Token för att avbryta operationen.</param>
     /// <returns>Timmen med högst förbrukning, eller en tom post om ingen data finns.</returns>
-    public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageAsync(
+        DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
         lock (CacheLocker)
@@ -625,7 +646,8 @@ public class WallboxWorker(
     /// </summary>
     /// <param name="dateInMonth">Datum i efterfrågad månad</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageDaytimeAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    public async Task<HourlyEnergyUsage> GetHighestHourlyEnergyUsageDaytimeAsync(
+        DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
 
@@ -633,32 +655,38 @@ public class WallboxWorker(
         lock (CacheLocker)
         {
             return hourlyUsage
-            .Where(x => x.Hour.Hour >= 7 && x.Hour.Hour < 19) // Hours between 7-19
-            .Where(x => x.Hour.DayOfWeek >= DayOfWeek.Monday && x.Hour.DayOfWeek <= DayOfWeek.Friday) // Weekdays only
-            .Where(x => x.Hour.Month >= 10 || x.Hour.Month <= 3) // October to March
-            .OrderByDescending(x => x.EnergyUsageWh)
-            .FirstOrDefault(new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
+                .Where(x => x.Hour.Hour >= 7 && x.Hour.Hour < 19) // Hours between 7-19
+                .Where(x =>
+                    x.Hour.DayOfWeek >= DayOfWeek.Monday &&
+                    x.Hour.DayOfWeek <= DayOfWeek.Friday) // Weekdays only
+                .Where(x => x.Hour.Month >= 10 || x.Hour.Month <= 3) // October to March
+                .OrderByDescending(x => x.EnergyUsageWh)
+                .FirstOrDefault(
+                    new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
         }
     }
 
     /// <summary>
-    /// Calculates hourly energy consumption for a specific month by comparing the last meter reading of each hour
-    /// with the last meter reading from the previous hour. Uses streaming for efficient memory usage.
-    /// Results are cached for one hour to avoid unnecessary recalculation.
+    /// Calculates largest hourly energy consumption for a specific month.
     /// </summary>
     /// <param name="dateInMonth">A date that determines which month to calculate for. Only readings from this month will be included.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A list of hourly energy usage data sorted by hour for the specified month.</returns>
-    internal async Task<List<HourlyEnergyUsage>> GetHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken = default)
+    internal async Task<List<HourlyEnergyUsage>> GetHourlyEnergyUsageAsync(
+        DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
-        // Kontrollera om cachen är giltig (samma timme som nu)
         lock (CacheLocker)
         {
+            // Cache är giltig om den är beräknad under samma timme som nuvarande tid och för samma månad
             var now = DateTime.Now;
             var currentHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+            var dt = dateInMonth;
+            var requestedMonth = new DateTime(dt.Year, dt.Month, 1, 0, 0, 0);
 
-            // Om cachen är från samma timme, returnera cachad data
-            if (currentHour == LastHourlyEnergyUsageCacheTime && HourlyEnergyUsageCache.Count > 0)
+            // Om cachen är från samma timme och gäller samma månad, returnera den
+            if (currentHour == LastHourlyEnergyUsageCalculationTime
+                && requestedMonth == LastHourlyEnergyUsageCacheTime
+                && HourlyEnergyUsageCache.Count > 0)
             {
                 return HourlyEnergyUsageCache;
             }
@@ -670,7 +698,10 @@ public class WallboxWorker(
         // Uppdatera cachen
         lock (CacheLocker)
         {
-            DateTime nu = DateTime.Now;
+            var dt = dateInMonth;
+            LastHourlyEnergyUsageCalculationTime
+                = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
+            var nu = DateTime.Now;
             LastHourlyEnergyUsageCacheTime = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
             HourlyEnergyUsageCache = result;
         }
@@ -681,7 +712,8 @@ public class WallboxWorker(
     /// <summary>
     /// Performs the actual hourly energy consumption calculation using streaming for efficient memory usage.
     /// </summary>
-    private async Task<List<HourlyEnergyUsage>> CalculateHourlyEnergyUsageAsync(DateTime dateInMonth, CancellationToken cancellationToken)
+    internal async Task<List<HourlyEnergyUsage>> CalculateHourlyEnergyUsageAsync(
+        DateTime dateInMonth, CancellationToken cancellationToken)
     {
         try
         {
@@ -690,9 +722,10 @@ public class WallboxWorker(
 
             // Bestäm start- och slutdatum för månaden
             var startOfMonth = new DateTime(dateInMonth.Year, dateInMonth.Month, 1);
-            var endOfMonth = startOfMonth.AddMonths(1).AddTicks(-1);
+            var endOfMonth = startOfMonth.AddMonths(1);
 
-            logger.LogDebug("Beräknar timförbrukning för {Month:yyyy-MM} (från {Start:yyyy-MM-dd} till {End:yyyy-MM-dd})",
+            logger.LogDebug(
+                "Beräknar timförbrukning för {Month:yyyy-MM} (från {Start:yyyy-MM-dd} till {End:yyyy-MM-dd})",
                 dateInMonth, startOfMonth, endOfMonth);
 
             var hourlyUsage = new List<HourlyEnergyUsage>();
@@ -701,11 +734,12 @@ public class WallboxWorker(
 
             // Använd streaming för att undvika att ladda allt i minnet på en gång
             await foreach (var reading in db.WallboxMeterReadings
-                .Where(x => x.ReadAt >= startOfMonth && x.ReadAt <= endOfMonth)
-                .OrderBy(x => x.ReadAt)
-                .AsNoTracking()
-                .AsAsyncEnumerable()
-                .WithCancellation(cancellationToken))
+                               .Where(x => x.ReadAt >= startOfMonth && x.ReadAt < endOfMonth)
+                               .OrderBy(x => x.ReadAt)
+                               .ThenBy(x => x.Id)
+                               .AsNoTracking()
+                               .AsAsyncEnumerable()
+                               .WithCancellation(cancellationToken))
             {
                 totalReadings++;
 
@@ -716,22 +750,32 @@ public class WallboxWorker(
                 }
 
                 // Om vi skiftat timme eller dag, beräkna förbrukningen
-                if (reading.ReadAt.Hour != lastReading.ReadAt.Hour || reading.ReadAt.Date != lastReading.ReadAt.Date)
+                if (reading.ReadAt.Hour != lastReading.ReadAt.Hour ||
+                    reading.ReadAt.Date != lastReading.ReadAt.Date)
                 {
                     var tidsdiff = reading.ReadAt - lastReading.ReadAt;
+                    if (tidsdiff.TotalSeconds == 0)
+                    {
+                        continue;
+                    }
+
                     var energyUsageWh = reading.AccEnergy - lastReading.AccEnergy;
                     // Fördela förbrukningen jämnt över timmarna
-                    energyUsageWh = (long)(energyUsageWh * (3600.0 / tidsdiff.TotalSeconds));
+                    energyUsageWh = tidsdiff.TotalSeconds > 0
+                        ? (long)(energyUsageWh * (3600.0 / tidsdiff.TotalSeconds))
+                        : 0;
 
                     hourlyUsage.Add(new HourlyEnergyUsage(
-                        new DateTime(lastReading.ReadAt.Year, lastReading.ReadAt.Month, lastReading.ReadAt.Day, lastReading.ReadAt.Hour, 0, 0),
+                        new DateTime(lastReading.ReadAt.Year, lastReading.ReadAt.Month,
+                            lastReading.ReadAt.Day, lastReading.ReadAt.Hour, 0, 0),
                         energyUsageWh
                     ));
                     lastReading = reading;
                 }
             }
 
-            logger.LogDebug("Bearbetade {TotalReadings} läsningar och beräknade {HourlyCount} timförbrukningar för {Month:yyyy-MM}.",
+            logger.LogDebug(
+                "Bearbetade {TotalReadings} läsningar och beräknade {HourlyCount} timförbrukningar för {Month:yyyy-MM}.",
                 totalReadings, hourlyUsage.Count, dateInMonth);
 
             return hourlyUsage;
