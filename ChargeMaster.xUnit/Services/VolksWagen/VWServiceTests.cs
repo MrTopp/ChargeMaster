@@ -1,5 +1,4 @@
 ﻿using ChargeMaster.Services.VolksWagen;
-
 using Microsoft.Extensions.Logging;
 
 namespace ChargeMaster.xUnit.Services.VolksWagen;
@@ -24,7 +23,7 @@ public class VWServiceTests : IDisposable
         _httpClient.Dispose();
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetStatus_OK()
     {
         var result = await _service.GetStatusAsync();
@@ -33,7 +32,7 @@ public class VWServiceTests : IDisposable
         Assert.NotEqual(VWVehicleState.Unknown, result.VehicleState);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetVehicles_OK()
     {
         var result = await _service.GetVehiclesAsync();
@@ -43,28 +42,28 @@ public class VWServiceTests : IDisposable
         Assert.All(result.Vehicles, v => Assert.False(string.IsNullOrWhiteSpace(v.Vin)));
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task StartCharging_OK()
     {
         var result = await _service.StartChargingAsync();
         Assert.True(result);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task StopCharging_OK()
     {
         var result = await _service.StopChargingAsync();
         Assert.True(result);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task StartClimatization_OK()
     {
         var result = await _service.StartClimatizationAsync();
         Assert.True(result);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task StopClimatization_OK()
     {
         var result = await _service.StopClimatizationAsync();

@@ -63,7 +63,8 @@ public class DaikinWorker(
             // Uppdatera Daikin endast om börvärde är ändrad eller läge är ändrat
             if (Math.Abs(temp - previousTemp) > 0.2 || heat != previousHeat)
             {
-                logger.LogDebug("Uppdaterar Daikin måltemperatur: {Temp}°C (Värme: {Heat})", temp, heat);
+                logger.LogDebug("Uppdaterar Daikin måltemperatur: {Temp}°C (Värme: {Heat})", temp,
+                    heat);
                 logger.LogInformation(log);
                 await daikinFacade.SetTargetTemperatureAsync(temp, heat);
                 await SaveDaikinSession(nu, temp, heat);
@@ -154,7 +155,8 @@ public class DaikinWorker(
             if (await JusteraMotPris(nu))
             {
                 // sätt måltemp till 20 under högprisperioder 
-                return (20, true, "High price period detected. Setting target temperature to 20°C.");
+                return (20, true,
+                    "High price period detected. Setting target temperature to 20°C.");
             }
         }
 
@@ -210,11 +212,13 @@ public class DaikinWorker(
                 .Take(10).ToList();
             _cachedPrices = (DateOnly.FromDateTime(nu), expensiveHours);
         }
+
         var priceList = _cachedPrices.Value.ExpensiveHours;
         if (priceList.Count == 0)
         {
             return false;
         }
+
         // Finns 'nu' i listan?
         var pris = priceList
             .FirstOrDefault(p => p.TimeStart <= nu && p.TimeEnd > nu);
@@ -222,6 +226,7 @@ public class DaikinWorker(
         {
             return true;
         }
+
         return false;
     }
 
@@ -244,7 +249,8 @@ public class DaikinWorker(
     {
         try
         {
-            var prices = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
+            var prices
+                = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
             var currentPriceData = prices.FirstOrDefault(p => p.TimeStart <= nu && p.TimeEnd > nu);
             return currentPriceData?.SekPerKwh;
         }
@@ -258,7 +264,8 @@ public class DaikinWorker(
     /// <summary>
     /// Spara Daikin sessiondata till databasen.
     /// </summary>
-    private async Task SaveDaikinSession(DateTime timestamp, double targetTemperature, bool isHeating)
+    private async Task SaveDaikinSession(
+        DateTime timestamp, double targetTemperature, bool isHeating)
     {
         try
         {
@@ -293,7 +300,8 @@ public class DaikinWorker(
     /// <param name="forbrukningDennaTimme">Uppskattad förbrukning för innevarande timme i Wh.</param>
     /// <param name="nu">Datum för beräkning.</param>
     /// <param name="cancellationToken">Token för att avbryta operationen.</param>
-    public async Task KontrolleraEffekt(long forbrukningDennaTimme, DateTime nu, CancellationToken cancellationToken)
+    public async Task KontrolleraEffekt(
+        long forbrukningDennaTimme, DateTime nu, CancellationToken cancellationToken)
     {
         if (nu.Minute < 20)
         {
@@ -303,7 +311,9 @@ public class DaikinWorker(
         var grans = await wallboxWorker.KalkyleraGrans(nu, cancellationToken);
         if (EmergencyStopped && forbrukningDennaTimme < grans * 0.8)
         {
-            logger.LogInformation("Emergency stop restore. Förbrukning: {Forbrukning} Wh, Grans: {Grans} Wh.", forbrukningDennaTimme, grans);
+            logger.LogInformation(
+                "Emergency stop restore. Förbrukning: {Forbrukning} Wh, Grans: {Grans} Wh.",
+                forbrukningDennaTimme, grans);
             EmergencyStopped = false;
             return;
         }

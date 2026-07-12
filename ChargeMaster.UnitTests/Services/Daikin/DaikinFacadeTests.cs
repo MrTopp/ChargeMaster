@@ -4,7 +4,6 @@ using Moq;
 
 namespace ChargeMaster.UnitTests.Services.Daikin;
 
-
 /// <summary>
 /// Unit tests for <see cref="DaikinFacade"/> class.
 /// </summary>
@@ -122,19 +121,22 @@ public class DaikinFacadeTests
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
 
         // Act & Assert - First update to Heat
-        var controlInfo1 = new DaikinControlInfo { Mode = (int)DaikinMode.Heat, Power = 1, TargetTemperature = 22.0 };
+        var controlInfo1 = new DaikinControlInfo
+            { Mode = (int)DaikinMode.Heat, Power = 1, TargetTemperature = 22.0 };
         mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(controlInfo1);
         await facade.UpdateStatusAsync(false);
         Assert.Equal(DaikinMode.Heat, facade.Mode);
 
         // Act & Assert - Second update to Cool
-        var controlInfo2 = new DaikinControlInfo { Mode = (int)DaikinMode.Cool, Power = 1, TargetTemperature = 22.0 };
+        var controlInfo2 = new DaikinControlInfo
+            { Mode = (int)DaikinMode.Cool, Power = 1, TargetTemperature = 22.0 };
         mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(controlInfo2);
         await facade.UpdateStatusAsync(false);
         Assert.Equal(DaikinMode.Cool, facade.Mode);
 
         // Act & Assert - Third update to Fan
-        var controlInfo3 = new DaikinControlInfo { Mode = (int)DaikinMode.Fan, Power = 1, TargetTemperature = 22.0 };
+        var controlInfo3 = new DaikinControlInfo
+            { Mode = (int)DaikinMode.Fan, Power = 1, TargetTemperature = 22.0 };
         mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(controlInfo3);
         await facade.UpdateStatusAsync(false);
         Assert.Equal(DaikinMode.Fan, facade.Mode);
@@ -185,7 +187,8 @@ public class DaikinFacadeTests
     [InlineData(-1000000.0, false)]
     [InlineData(double.MinValue, true)]
     [InlineData(double.MaxValue, false)]
-    public async Task SetTargetTemperatureAsync_WhenServiceReturnsTrue_ReturnsTrueAndUpdatesStatus(double temperature, bool heat)
+    public async Task SetTargetTemperatureAsync_WhenServiceReturnsTrue_ReturnsTrueAndUpdatesStatus(
+        double temperature, bool heat)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -218,7 +221,8 @@ public class DaikinFacadeTests
             l => l.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Måltemperatur inställd till")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Måltemperatur inställd till")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -232,7 +236,9 @@ public class DaikinFacadeTests
     [Theory]
     [InlineData(double.PositiveInfinity, true)]
     [InlineData(double.NegativeInfinity, false)]
-    public async Task SetTargetTemperatureAsync_WhenServiceReturnsTrueWithInfinity_ReturnsTrueAndUpdatesStatus(double temperature, bool heat)
+    public async Task
+        SetTargetTemperatureAsync_WhenServiceReturnsTrueWithInfinity_ReturnsTrueAndUpdatesStatus(
+            double temperature, bool heat)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -265,7 +271,8 @@ public class DaikinFacadeTests
     /// when the service call succeeds.
     /// </summary>
     [Fact]
-    public async Task SetTargetTemperatureAsync_WhenServiceReturnsTrueWithNaN_ReturnsTrueAndUpdatesStatus()
+    public async Task
+        SetTargetTemperatureAsync_WhenServiceReturnsTrueWithNaN_ReturnsTrueAndUpdatesStatus()
     {
         // Arrange
         var temperature = double.NaN;
@@ -306,7 +313,9 @@ public class DaikinFacadeTests
     [InlineData(0.0, false)]
     [InlineData(-10.0, true)]
     [InlineData(double.MaxValue, false)]
-    public async Task SetTargetTemperatureAsync_WhenServiceReturnsFalse_ReturnsFalseWithoutUpdatingStatus(double temperature, bool heat)
+    public async Task
+        SetTargetTemperatureAsync_WhenServiceReturnsFalse_ReturnsFalseWithoutUpdatingStatus(
+            double temperature, bool heat)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -346,7 +355,8 @@ public class DaikinFacadeTests
     [InlineData(20.0, true)]
     [InlineData(-10.0, false)]
     [InlineData(0.0, true)]
-    public async Task SetTargetTemperatureAsync_WhenServiceThrowsException_LogsErrorAndReturnsFalse(double temperature, bool heat)
+    public async Task SetTargetTemperatureAsync_WhenServiceThrowsException_LogsErrorAndReturnsFalse(
+        double temperature, bool heat)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -371,7 +381,8 @@ public class DaikinFacadeTests
             l => l.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid inställning av måltemperatur")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid inställning av måltemperatur")),
                 expectedException,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -385,7 +396,9 @@ public class DaikinFacadeTests
     [Theory]
     [InlineData(25.0)]
     [InlineData(0.0)]
-    public async Task SetTargetTemperatureAsync_WhenServiceThrowsVariousExceptionTypes_LogsErrorAndReturnsFalse(double temperature)
+    public async Task
+        SetTargetTemperatureAsync_WhenServiceThrowsVariousExceptionTypes_LogsErrorAndReturnsFalse(
+            double temperature)
     {
         // Arrange - ArgumentException
         var mockDaikinService = new Mock<IDaikinService>();
@@ -407,7 +420,8 @@ public class DaikinFacadeTests
             l => l.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid inställning av måltemperatur")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid inställning av måltemperatur")),
                 argumentException,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -417,7 +431,8 @@ public class DaikinFacadeTests
     /// Tests that SetTargetTemperatureAsync handles HttpRequestException correctly.
     /// </summary>
     [Fact]
-    public async Task SetTargetTemperatureAsync_WhenServiceThrowsHttpRequestException_LogsErrorAndReturnsFalse()
+    public async Task
+        SetTargetTemperatureAsync_WhenServiceThrowsHttpRequestException_LogsErrorAndReturnsFalse()
     {
         // Arrange
         var temperature = 22.5;
@@ -441,7 +456,8 @@ public class DaikinFacadeTests
             l => l.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid inställning av måltemperatur")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid inställning av måltemperatur")),
                 httpException,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -451,7 +467,8 @@ public class DaikinFacadeTests
     /// Tests that SetTargetTemperatureAsync handles TaskCanceledException correctly.
     /// </summary>
     [Fact]
-    public async Task SetTargetTemperatureAsync_WhenServiceThrowsTaskCanceledException_LogsErrorAndReturnsFalse()
+    public async Task
+        SetTargetTemperatureAsync_WhenServiceThrowsTaskCanceledException_LogsErrorAndReturnsFalse()
     {
         // Arrange
         var temperature = 18.0;
@@ -475,7 +492,8 @@ public class DaikinFacadeTests
             l => l.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid inställning av måltemperatur")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid inställning av måltemperatur")),
                 canceledException,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -491,7 +509,8 @@ public class DaikinFacadeTests
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync((DaikinSensorInfo?)null);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         var eventRaised = false;
@@ -514,7 +533,8 @@ public class DaikinFacadeTests
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync((DaikinSensorInfo?)null);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         var eventRaised = false;
@@ -542,18 +562,23 @@ public class DaikinFacadeTests
     [InlineData(21.5, 21.52)]
     [InlineData(-10.0, -10.02)]
     [InlineData(100.0, 100.1)]
-    public async Task UpdateStatusAsync_WhenIndoorTemperatureChangesAboveThreshold_UpdatesCurrentTemperature(double initial, double newValue)
+    public async Task
+        UpdateStatusAsync_WhenIndoorTemperatureChangesAboveThreshold_UpdatesCurrentTemperature(
+            double initial, double newValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo { IndoorTemperature = initial });
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
+            { IndoorTemperature = initial });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
 
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo { IndoorTemperature = newValue });
+        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
+            { IndoorTemperature = newValue });
         var eventRaised = false;
         DaikinStatusChangedEventArgs? capturedArgs = null;
         facade.StatusChanged += (sender, args) =>
@@ -579,18 +604,23 @@ public class DaikinFacadeTests
     [InlineData(21.5, 21.51)]
     [InlineData(0.0, 0.01)]
     [InlineData(-10.0, -10.01)]
-    public async Task UpdateStatusAsync_WhenIndoorTemperatureChangeIsAtThreshold_DoesNotUpdateCurrentTemperature(double initial, double newValue)
+    public async Task
+        UpdateStatusAsync_WhenIndoorTemperatureChangeIsAtThreshold_DoesNotUpdateCurrentTemperature(
+            double initial, double newValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo { IndoorTemperature = initial });
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
+            { IndoorTemperature = initial });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
 
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo { IndoorTemperature = newValue });
+        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
+            { IndoorTemperature = newValue });
         var eventRaised = false;
         facade.StatusChanged += (sender, args) => eventRaised = true;
 
@@ -609,18 +639,23 @@ public class DaikinFacadeTests
     [InlineData(5.0, 5.02)]
     [InlineData(-20.0, -20.05)]
     [InlineData(30.0, 30.1)]
-    public async Task UpdateStatusAsync_WhenOutdoorTemperatureChangesAboveThreshold_UpdatesOutdoorTemperature(double initial, double newValue)
+    public async Task
+        UpdateStatusAsync_WhenOutdoorTemperatureChangesAboveThreshold_UpdatesOutdoorTemperature(
+            double initial, double newValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo { OutdoorTemperature = initial });
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
+            { OutdoorTemperature = initial });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
 
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo { OutdoorTemperature = newValue });
+        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
+            { OutdoorTemperature = newValue });
         var eventRaised = false;
         DaikinStatusChangedEventArgs? capturedArgs = null;
         facade.StatusChanged += (sender, args) =>
@@ -646,18 +681,22 @@ public class DaikinFacadeTests
     [InlineData(22.0, 22.02)]
     [InlineData(18.0, 18.1)]
     [InlineData(25.0, 25.5)]
-    public async Task UpdateStatusAsync_WhenTargetTemperatureChangesAboveThreshold_UpdatesTargetTemperature(double initial, double newValue)
+    public async Task
+        UpdateStatusAsync_WhenTargetTemperatureChangesAboveThreshold_UpdatesTargetTemperature(
+            double initial, double newValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync((DaikinSensorInfo?)null);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo { TargetTemperature = initial, Power = 0, Mode = 0 });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo
+            { TargetTemperature = initial, Power = 0, Mode = 0 });
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
 
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo { TargetTemperature = newValue, Power = 0, Mode = 0 });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo
+            { TargetTemperature = newValue, Power = 0, Mode = 0 });
         var eventRaised = false;
         DaikinStatusChangedEventArgs? capturedArgs = null;
         facade.StatusChanged += (sender, args) =>
@@ -684,18 +723,22 @@ public class DaikinFacadeTests
     [InlineData(100, 999)]
     [InlineData(999, 0)]
     [InlineData(50, 100)]
-    public async Task UpdateStatusAsync_WhenCompressorFrequencyChanges_UpdatesCompressorFrequency(int initial, int newValue)
+    public async Task UpdateStatusAsync_WhenCompressorFrequencyChanges_UpdatesCompressorFrequency(
+        int initial, int newValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo { CompressorFrequency = initial });
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
+            { CompressorFrequency = initial });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
 
-        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo { CompressorFrequency = newValue });
+        mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(new DaikinSensorInfo
+            { CompressorFrequency = newValue });
         var eventRaised = false;
         DaikinStatusChangedEventArgs? capturedArgs = null;
         facade.StatusChanged += (sender, args) =>
@@ -720,18 +763,21 @@ public class DaikinFacadeTests
     [Theory]
     [InlineData(0, 1)]
     [InlineData(1, 0)]
-    public async Task UpdateStatusAsync_WhenPowerChanges_UpdatesPowerStatus(int initial, int newValue)
+    public async Task UpdateStatusAsync_WhenPowerChanges_UpdatesPowerStatus(
+        int initial, int newValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync((DaikinSensorInfo?)null);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo { Power = initial, Mode = 0 });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo
+            { Power = initial, Mode = 0 });
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
 
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo { Power = newValue, Mode = 0 });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo
+            { Power = newValue, Mode = 0 });
         var eventRaised = false;
         DaikinStatusChangedEventArgs? capturedArgs = null;
         facade.StatusChanged += (sender, args) =>
@@ -765,12 +811,14 @@ public class DaikinFacadeTests
         var mockDaikinService = new Mock<IDaikinService>();
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync((DaikinSensorInfo?)null);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo { Mode = initial, Power = 0 });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo
+            { Mode = initial, Power = 0 });
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
 
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo { Mode = newValue, Power = 0 });
+        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync(new DaikinControlInfo
+            { Mode = newValue, Power = 0 });
         var eventRaised = false;
         DaikinStatusChangedEventArgs? capturedArgs = null;
         facade.StatusChanged += (sender, args) =>
@@ -963,7 +1011,8 @@ public class DaikinFacadeTests
     [InlineData(double.MaxValue)]
     [InlineData(double.PositiveInfinity)]
     [InlineData(double.NegativeInfinity)]
-    public async Task UpdateStatusAsync_WithExtremeTemperatureValues_HandlesCorrectly(double extremeValue)
+    public async Task UpdateStatusAsync_WithExtremeTemperatureValues_HandlesCorrectly(
+        double extremeValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -999,7 +1048,7 @@ public class DaikinFacadeTests
         Assert.Equal(extremeValue, facade.OutdoorTemperature);
         Assert.Equal(extremeValue, facade.TargetTemperature);
     }
-    
+
     /// <summary>
     /// Tests that UpdateStatusAsync only updates sensor-related properties when only sensorInfo is not null.
     /// </summary>
@@ -1015,7 +1064,8 @@ public class DaikinFacadeTests
             OutdoorTemperature = 5.0,
             CompressorFrequency = 50
         });
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         var eventRaised = false;
@@ -1137,7 +1187,7 @@ public class DaikinFacadeTests
         Assert.Equal(5.0, facade.OutdoorTemperature);
         Assert.Equal(22.0, facade.TargetTemperature);
     }
-    
+
     /// <summary>
     /// Tests that UpdateStatusAsync handles boundary value for compressor frequency (999 = idle/off).
     /// </summary>
@@ -1151,7 +1201,8 @@ public class DaikinFacadeTests
         {
             CompressorFrequency = 50
         });
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
@@ -1187,7 +1238,8 @@ public class DaikinFacadeTests
     [InlineData(21.5, 21.505)]
     [InlineData(0.0, 0.001)]
     [InlineData(-10.0, -10.005)]
-    public async Task UpdateStatusAsync_WhenTemperatureChangeIsBelowThreshold_DoesNotUpdate(double initial, double newValue)
+    public async Task UpdateStatusAsync_WhenTemperatureChangeIsBelowThreshold_DoesNotUpdate(
+        double initial, double newValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -1196,7 +1248,8 @@ public class DaikinFacadeTests
         {
             IndoorTemperature = initial
         });
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
         await facade.UpdateStatusAsync(forceEvent: false);
@@ -1332,7 +1385,8 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid initialisering av Daikin-status")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid initialisering av Daikin-status")),
                 It.Is<Exception>(ex => ex == expectedException),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -1370,7 +1424,8 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid initialisering av Daikin-status")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid initialisering av Daikin-status")),
                 It.Is<Exception>(ex => ex == expectedException),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -1430,7 +1485,8 @@ public class DaikinFacadeTests
         };
 
         mockDaikinService.Setup(x => x.GetSensorInfoAsync()).ReturnsAsync(sensorInfo);
-        mockDaikinService.Setup(x => x.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(x => x.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
 
@@ -1460,7 +1516,8 @@ public class DaikinFacadeTests
     [InlineData(-273.15, 1000.0)]
     [InlineData(100.0, -100.0)]
     [InlineData(double.PositiveInfinity, double.NegativeInfinity)]
-    public async Task InitializeAsync_WithExtremeTemperatures_LogsSuccessfully(double indoorTemp, double outdoorTemp)
+    public async Task InitializeAsync_WithExtremeTemperatures_LogsSuccessfully(
+        double indoorTemp, double outdoorTemp)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -1781,7 +1838,8 @@ public class DaikinFacadeTests
     [InlineData(typeof(ArgumentException))]
     [InlineData(typeof(NullReferenceException))]
     [InlineData(typeof(TimeoutException))]
-    public async Task InitializeAsync_WithDifferentExceptionTypes_CatchesAndLogsError(Type exceptionType)
+    public async Task InitializeAsync_WithDifferentExceptionTypes_CatchesAndLogsError(
+        Type exceptionType)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -1800,7 +1858,8 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid initialisering av Daikin-status")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid initialisering av Daikin-status")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -1839,7 +1898,8 @@ public class DaikinFacadeTests
 
         mockDaikinService.Setup(s => s.TurnOnAsync()).ReturnsAsync(true);
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync((DaikinSensorInfo?)null);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
 
@@ -1907,7 +1967,9 @@ public class DaikinFacadeTests
     [InlineData("Generic error")]
     [InlineData("")]
     [InlineData(null)]
-    public async Task TurnOnAsync_WhenServiceThrowsInvalidOperationException_CatchesAndLogsErrorAndReturnsFalse(string? exceptionMessage)
+    public async Task
+        TurnOnAsync_WhenServiceThrowsInvalidOperationException_CatchesAndLogsErrorAndReturnsFalse(
+            string? exceptionMessage)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -1941,7 +2003,8 @@ public class DaikinFacadeTests
     /// logs the error, and returns false.
     /// </summary>
     [Fact]
-    public async Task TurnOnAsync_WhenServiceThrowsHttpRequestException_CatchesAndLogsErrorAndReturnsFalse()
+    public async Task
+        TurnOnAsync_WhenServiceThrowsHttpRequestException_CatchesAndLogsErrorAndReturnsFalse()
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -1973,7 +2036,8 @@ public class DaikinFacadeTests
     /// logs the error, and returns false.
     /// </summary>
     [Fact]
-    public async Task TurnOnAsync_WhenServiceThrowsTimeoutException_CatchesAndLogsErrorAndReturnsFalse()
+    public async Task
+        TurnOnAsync_WhenServiceThrowsTimeoutException_CatchesAndLogsErrorAndReturnsFalse()
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2005,7 +2069,8 @@ public class DaikinFacadeTests
     /// logs the error, and returns false.
     /// </summary>
     [Fact]
-    public async Task TurnOnAsync_WhenServiceThrowsGenericException_CatchesAndLogsErrorAndReturnsFalse()
+    public async Task
+        TurnOnAsync_WhenServiceThrowsGenericException_CatchesAndLogsErrorAndReturnsFalse()
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2037,7 +2102,8 @@ public class DaikinFacadeTests
     /// logs the error, and returns false.
     /// </summary>
     [Fact]
-    public async Task TurnOnAsync_WhenServiceThrowsArgumentNullException_CatchesAndLogsErrorAndReturnsFalse()
+    public async Task
+        TurnOnAsync_WhenServiceThrowsArgumentNullException_CatchesAndLogsErrorAndReturnsFalse()
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2069,7 +2135,8 @@ public class DaikinFacadeTests
     /// logs the error, and returns false.
     /// </summary>
     [Fact]
-    public async Task TurnOnAsync_WhenServiceThrowsOperationCanceledException_CatchesAndLogsErrorAndReturnsFalse()
+    public async Task
+        TurnOnAsync_WhenServiceThrowsOperationCanceledException_CatchesAndLogsErrorAndReturnsFalse()
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2179,7 +2246,8 @@ public class DaikinFacadeTests
     [InlineData(typeof(InvalidOperationException))]
     [InlineData(typeof(TimeoutException))]
     [InlineData(typeof(Exception))]
-    public async Task TurnOffAsync_WhenServiceThrowsException_LogsErrorAndReturnsFalse(Type exceptionType)
+    public async Task TurnOffAsync_WhenServiceThrowsException_LogsErrorAndReturnsFalse(
+        Type exceptionType)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2202,7 +2270,8 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid avstängning av värmepump")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid avstängning av värmepump")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -2213,7 +2282,8 @@ public class DaikinFacadeTests
     /// This tests the edge case where the exception itself might be null or have null properties.
     /// </summary>
     [Fact]
-    public async Task TurnOffAsync_WhenServiceThrowsExceptionWithNullMessage_LogsErrorAndReturnsFalse()
+    public async Task
+        TurnOffAsync_WhenServiceThrowsExceptionWithNullMessage_LogsErrorAndReturnsFalse()
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2236,7 +2306,8 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid avstängning av värmepump")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid avstängning av värmepump")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -2272,7 +2343,8 @@ public class DaikinFacadeTests
     [InlineData(DaikinMode.Heat)]
     [InlineData(DaikinMode.Fan)]
     [InlineData(DaikinMode.AutoSwing)]
-    public async Task SetModeAsync_WhenServiceReturnsTrue_ReturnsTrueAndUpdatesStatus(DaikinMode mode)
+    public async Task SetModeAsync_WhenServiceReturnsTrue_ReturnsTrueAndUpdatesStatus(
+        DaikinMode mode)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2304,7 +2376,8 @@ public class DaikinFacadeTests
     [InlineData(DaikinMode.Auto)]
     [InlineData(DaikinMode.Cool)]
     [InlineData(DaikinMode.Heat)]
-    public async Task SetModeAsync_WhenServiceReturnsFalse_ReturnsFalseWithoutUpdatingStatus(DaikinMode mode)
+    public async Task SetModeAsync_WhenServiceReturnsFalse_ReturnsFalseWithoutUpdatingStatus(
+        DaikinMode mode)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2394,7 +2467,8 @@ public class DaikinFacadeTests
     [InlineData(DaikinMode.Auto)]
     [InlineData(DaikinMode.Heat)]
     [InlineData(DaikinMode.Cool)]
-    public async Task SetModeAsync_WhenServiceThrowsException_ReturnsFalseAndLogsError(DaikinMode mode)
+    public async Task SetModeAsync_WhenServiceThrowsException_ReturnsFalseAndLogsError(
+        DaikinMode mode)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2414,7 +2488,8 @@ public class DaikinFacadeTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid byte av värmepumpläge till")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid byte av värmepumpläge till")),
                 expectedException,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
@@ -2429,7 +2504,8 @@ public class DaikinFacadeTests
     [InlineData(typeof(TimeoutException))]
     [InlineData(typeof(ArgumentException))]
     [InlineData(typeof(NullReferenceException))]
-    public async Task SetModeAsync_WhenServiceThrowsVariousExceptions_ReturnsFalseAndLogsError(Type exceptionType)
+    public async Task SetModeAsync_WhenServiceThrowsVariousExceptions_ReturnsFalseAndLogsError(
+        Type exceptionType)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2467,7 +2543,8 @@ public class DaikinFacadeTests
     [InlineData(-1)]
     [InlineData(int.MinValue)]
     [InlineData(int.MaxValue)]
-    public async Task SetModeAsync_WithOutOfRangeEnumValues_PassesValueToService(int invalidModeValue)
+    public async Task SetModeAsync_WithOutOfRangeEnumValues_PassesValueToService(
+        int invalidModeValue)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2555,15 +2632,16 @@ public class DaikinFacadeTests
     /// </summary>
     /// <param name="expectedFrequency">The compressor frequency value to test.</param>
     [Theory]
-    [InlineData(0)]              // Off state
-    [InlineData(999)]            // Idle/off state
-    [InlineData(50)]             // Normal operating frequency
-    [InlineData(100)]            // Another normal frequency
-    [InlineData(1)]              // Minimum active frequency
-    [InlineData(-1)]             // Invalid negative value
-    [InlineData(int.MaxValue)]   // Maximum integer boundary
-    [InlineData(int.MinValue)]   // Minimum integer boundary
-    public async Task CompressorFrequency_AfterUpdateStatusAsync_ReturnsExpectedValue(int? expectedFrequency)
+    [InlineData(0)] // Off state
+    [InlineData(999)] // Idle/off state
+    [InlineData(50)] // Normal operating frequency
+    [InlineData(100)] // Another normal frequency
+    [InlineData(1)] // Minimum active frequency
+    [InlineData(-1)] // Invalid negative value
+    [InlineData(int.MaxValue)] // Maximum integer boundary
+    [InlineData(int.MinValue)] // Minimum integer boundary
+    public async Task CompressorFrequency_AfterUpdateStatusAsync_ReturnsExpectedValue(
+        int? expectedFrequency)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();
@@ -2571,7 +2649,8 @@ public class DaikinFacadeTests
 
         var sensorInfo = new DaikinSensorInfo { CompressorFrequency = expectedFrequency };
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(sensorInfo);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
 
@@ -2594,7 +2673,8 @@ public class DaikinFacadeTests
         var mockLogger = new Mock<ILogger<DaikinFacade>>();
 
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync((DaikinSensorInfo?)null);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         var facade = new DaikinFacade(mockDaikinService.Object, mockLogger.Object);
 
@@ -2620,7 +2700,8 @@ public class DaikinFacadeTests
         // First update
         var sensorInfo1 = new DaikinSensorInfo { CompressorFrequency = 50 };
         mockDaikinService.Setup(s => s.GetSensorInfoAsync()).ReturnsAsync(sensorInfo1);
-        mockDaikinService.Setup(s => s.GetControlInfoAsync()).ReturnsAsync((DaikinControlInfo?)null);
+        mockDaikinService.Setup(s => s.GetControlInfoAsync())
+            .ReturnsAsync((DaikinControlInfo?)null);
 
         // Act - First update
         await facade.UpdateStatusAsync();
@@ -2681,7 +2762,8 @@ public class DaikinFacadeTests
     [InlineData(18.5)]
     [InlineData(-30.0)]
     [InlineData(50.0)]
-    public async Task TargetTemperature_AfterUpdateWithValue_ReturnsUpdatedValue(double targetTemperature)
+    public async Task TargetTemperature_AfterUpdateWithValue_ReturnsUpdatedValue(
+        double targetTemperature)
     {
         // Arrange
         var mockDaikinService = new Mock<IDaikinService>();

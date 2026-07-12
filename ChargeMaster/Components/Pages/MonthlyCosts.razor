@@ -13,9 +13,14 @@
     <section class="mb-3">
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <button class="btn btn-outline-secondary btn-sm" @onclick="PreviousMonthAsync" disabled="@(SelectedMonth.AddMonths(-1) < new DateTime(2026, 2, 1))">← Föregående månad</button>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="PreviousMonthAsync"
+                        disabled="@(SelectedMonth.AddMonths(-1) < new DateTime(2026, 2, 1))">← Föregående månad
+                </button>
                 <h4 class="mb-0">@SelectedMonth.ToString("MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("sv-SE"))</h4>
-                <button class="btn btn-outline-secondary btn-sm" @onclick="NextMonthAsync" disabled="@(SelectedMonth.AddMonths(1) > new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1))">Nästa månad →</button>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="NextMonthAsync"
+                        disabled="@(SelectedMonth.AddMonths(1) > new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1))">
+                    Nästa månad →
+                </button>
             </div>
             <h4 class="mb-2">Nätavgifter</h4>
             @if (HighestHourlyUsage is not null)
@@ -23,62 +28,62 @@
                 <div class="table-responsive">
                     <table class="table table-striped table-sm">
                         <thead>
-                            <tr>
-                                <th>Avgiftstyp</th>
-                                <th class="text-end">Energi (kWh)</th>
-                                <th>Timme</th>
-                                <th class="text-end">Pris (SEK)</th>
-                            </tr>
+                        <tr>
+                            <th>Avgiftstyp</th>
+                            <th class="text-end">Energi (kWh)</th>
+                            <th>Timme</th>
+                            <th class="text-end">Pris (SEK)</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><strong>Effektavgift</strong></td>
-                                <td class="text-end">@((HighestHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
-                                <td>@(HighestHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
-                                <td class="text-end">@((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000).ToString("F2"))</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Högbelastningsavgift</strong></td>
-                                <td class="text-end">@(((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) / 1000.0).ToString("F2"))</td>
-                                <td>@((HighestDailyHourlyUsage?.Hour)?.ToString("yyyy-MM-dd HH:00") ?? "")</td>
-                                <td class="text-end">@(((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) * 50 / 1000.0).ToString("F2"))</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Nätavgift</strong></td>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
-                                <td class="text-end">
-                                    @(Nätavgift(SelectedMonth).ToString("F2"))
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Överföring hittills</strong></td>
-                                <td class="text-end">@((MonthlyUsage / 1000.0).ToString("F2"))</td>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Överföring månad uppskattad</strong></td>
-                                <td class="text-end">@((ForbrukningManadTotalt / 1000.0).ToString("F3"))</td>
-                                <td>&nbsp;</td>
-                                <td class="text-end">@((ForbrukningManadTotalt * 0.175 / 1000).ToString("F2"))</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Energiskatt</strong></td>
-                                <td class="text-end">@((ForbrukningManadTotalt / 1000.0).ToString("F3"))</td>
-                                <td>&nbsp;</td>
-                                <td class="text-end">@((ForbrukningManadTotalt * 0.45 / 1000).ToString("F2"))</td>
-                            </tr>
-                            <tr class="table-active">
-                                <td><strong>Summa</strong></td>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
-                                <td class="text-end">
-                                    <strong>
-                                        @(SummeradKostnadManad.ToString("F2"))
-                                    </strong>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td><strong>Effektavgift</strong></td>
+                            <td class="text-end">@((HighestHourlyUsage.EnergyUsageWh / 1000.0).ToString("F2"))</td>
+                            <td>@(HighestHourlyUsage.Hour.ToString("yyyy-MM-dd HH:00"))</td>
+                            <td class="text-end">@((HighestHourlyUsage.EnergyUsageWh * 62.5 / 1000).ToString("F2"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Högbelastningsavgift</strong></td>
+                            <td class="text-end">@(((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) / 1000.0).ToString("F2"))</td>
+                            <td>@((HighestDailyHourlyUsage?.Hour)?.ToString("yyyy-MM-dd HH:00") ?? "")</td>
+                            <td class="text-end">@(((HighestDailyHourlyUsage?.EnergyUsageWh ?? 0L) * 50 / 1000.0).ToString("F2"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nätavgift</strong></td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td class="text-end">
+                                @(Nätavgift(SelectedMonth).ToString("F2"))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Överföring hittills</strong></td>
+                            <td class="text-end">@((MonthlyUsage / 1000.0).ToString("F2"))</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Överföring månad uppskattad</strong></td>
+                            <td class="text-end">@((ForbrukningManadTotalt / 1000.0).ToString("F3"))</td>
+                            <td>&nbsp;</td>
+                            <td class="text-end">@((ForbrukningManadTotalt * 0.175 / 1000).ToString("F2"))</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Energiskatt</strong></td>
+                            <td class="text-end">@((ForbrukningManadTotalt / 1000.0).ToString("F3"))</td>
+                            <td>&nbsp;</td>
+                            <td class="text-end">@((ForbrukningManadTotalt * 0.45 / 1000).ToString("F2"))</td>
+                        </tr>
+                        <tr class="table-active">
+                            <td><strong>Summa</strong></td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td class="text-end">
+                                <strong>
+                                    @(SummeradKostnadManad.ToString("F2"))
+                                </strong>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -126,7 +131,7 @@
         }
     }
 
-    private double Nätavgift(DateTime selectedMonth) 
+    private double Nätavgift(DateTime selectedMonth)
     {
         double dagspris = 3000.0 / (DateTime.IsLeapYear(selectedMonth.Year) ? 366 : 365);
         double avgift = Math.Floor(DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month) * dagspris * 100) / 100.0;
@@ -226,4 +231,5 @@
 
         _cts?.Dispose();
     }
+
 }

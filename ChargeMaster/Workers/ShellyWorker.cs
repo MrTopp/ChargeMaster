@@ -1,5 +1,4 @@
 ﻿using ChargeMaster.Services.Shelly;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace ChargeMaster.Workers;
@@ -61,7 +60,8 @@ public class ShellyWorker(
                 .OrderByDescending(t => t.Timestamp)
                 .FirstOrDefaultAsync();
 
-            if (lastTemperature == null || Math.Abs(lastTemperature.TemperatureCelsius - e.TemperatureCelsius) > 0.01)
+            if (lastTemperature == null ||
+                Math.Abs(lastTemperature.TemperatureCelsius - e.TemperatureCelsius) > 0.01)
             {
                 var shellyTemp = new Data.ShellyTemperature
                 {
@@ -78,7 +78,8 @@ public class ShellyWorker(
             }
             else
             {
-                logger.LogDebug("Temperatur för {DeviceId} oförändrad ({Temperature} °C), sparas inte",
+                logger.LogDebug(
+                    "Temperatur för {DeviceId} oförändrad ({Temperature} °C), sparas inte",
                     e.DeviceId, e.TemperatureCelsius);
             }
         }

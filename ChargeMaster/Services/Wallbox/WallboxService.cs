@@ -47,7 +47,7 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
             return null;
         }
     }
-    
+
     /// <summary>
     /// Ställ in wallbox-tid
     /// </summary>

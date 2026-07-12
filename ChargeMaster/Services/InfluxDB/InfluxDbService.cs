@@ -1,15 +1,13 @@
 ﻿using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.Wallbox;
-
 using InfluxDB.Client;
 using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Core.Exceptions;
 using InfluxDB.Client.Writes;
-
 using Microsoft.Extensions.Options;
 using Tibber.Sdk;
-
 using System.Threading.Channels;
+
 // ReSharper disable InconsistentNaming
 
 namespace ChargeMaster.Services.InfluxDB;
@@ -76,12 +74,16 @@ public class InfluxDbService : IAsyncDisposable
 
     private const int BatchSize = 10;
 
-    public InfluxDbService(IOptions<InfluxDBOptions> options, ElectricityPriceService priceService, ILogger<InfluxDbService> logger)
+    public InfluxDbService(
+        IOptions<InfluxDBOptions> options, ElectricityPriceService priceService,
+        ILogger<InfluxDbService> logger)
         : this(options, priceService, logger, new InfluxDBClientFactory())
     {
     }
 
-    public InfluxDbService(IOptions<InfluxDBOptions> options, ElectricityPriceService priceService, ILogger<InfluxDbService> logger, IInfluxDBClientFactory clientFactory)
+    public InfluxDbService(
+        IOptions<InfluxDBOptions> options, ElectricityPriceService priceService,
+        ILogger<InfluxDbService> logger, IInfluxDBClientFactory clientFactory)
     {
         _options = options.Value;
         _logger = logger;
@@ -149,18 +151,23 @@ public class InfluxDbService : IAsyncDisposable
                 {
                     _logger.LogWarning(ex, "Write operation timed out");
                 }
-                catch (HttpException ex) when (ex.InnerException is TaskCanceledException or OperationCanceledException)
+                catch (HttpException ex) when (ex.InnerException is TaskCanceledException
+                                                   or OperationCanceledException)
                 {
                     // Transiellt nätverksavbrott (t.ex. InfluxDB omstartat eller anslutning bruten)
-                    _logger.LogWarning("Transient network error when writing to InfluxDB, buffered data will be retried: {Message}", ex.Message);
+                    _logger.LogWarning(
+                        "Transient network error when writing to InfluxDB, buffered data will be retried: {Message}",
+                        ex.Message);
                 }
                 catch (HttpException ex)
                 {
-                    _logger.LogError(ex, "Write operation failed with InfluxDB HTTP error {Status}", ex.Status);
+                    _logger.LogError(ex, "Write operation failed with InfluxDB HTTP error {Status}",
+                        ex.Status);
                 }
                 catch (HttpRequestException ex)
                 {
-                    _logger.LogError(ex, "Write operation failed with HTTP error. Status: {Status}", ex.StatusCode);
+                    _logger.LogError(ex, "Write operation failed with HTTP error. Status: {Status}",
+                        ex.StatusCode);
                 }
                 catch (Exception ex)
                 {
@@ -246,7 +253,8 @@ public class InfluxDbService : IAsyncDisposable
 
         var point = PointData.Measurement("tibber_pulse")
             .Field("power_w", (double)measurement.Power)
-            .Field("accumulated_consumption_last_hour_kwh", (double)measurement.AccumulatedConsumptionLastHour)
+            .Field("accumulated_consumption_last_hour_kwh",
+                (double)measurement.AccumulatedConsumptionLastHour)
             .Field("sek_per_kwh", elpris?.SekPerKwh ?? 0)
             .Timestamp(timestamp, WritePrecision.Ns);
 
@@ -257,12 +265,21 @@ public class InfluxDbService : IAsyncDisposable
         if (measurement.SignalStrength.HasValue)
             point = point.Field("signal_strength_db", measurement.SignalStrength.Value);
 
-        if (measurement.VoltagePhase1.HasValue && measurement.CurrentPhase1.HasValue && measurement.PowerFactor.HasValue)
-            point = point.Field("power_phase1_w", (double)(measurement.VoltagePhase1.Value * measurement.CurrentPhase1.Value * measurement.PowerFactor.Value));
-        if (measurement.VoltagePhase2.HasValue && measurement.CurrentPhase2.HasValue && measurement.PowerFactor.HasValue)
-            point = point.Field("power_phase2_w", (double)(measurement.VoltagePhase2.Value * measurement.CurrentPhase2.Value * measurement.PowerFactor.Value));
-        if (measurement.VoltagePhase3.HasValue && measurement.CurrentPhase3.HasValue && measurement.PowerFactor.HasValue)
-            point = point.Field("power_phase3_w", (double)(measurement.VoltagePhase3.Value * measurement.CurrentPhase3.Value * measurement.PowerFactor.Value));
+        if (measurement.VoltagePhase1.HasValue && measurement.CurrentPhase1.HasValue &&
+            measurement.PowerFactor.HasValue)
+            point = point.Field("power_phase1_w",
+                (double)(measurement.VoltagePhase1.Value * measurement.CurrentPhase1.Value *
+                         measurement.PowerFactor.Value));
+        if (measurement.VoltagePhase2.HasValue && measurement.CurrentPhase2.HasValue &&
+            measurement.PowerFactor.HasValue)
+            point = point.Field("power_phase2_w",
+                (double)(measurement.VoltagePhase2.Value * measurement.CurrentPhase2.Value *
+                         measurement.PowerFactor.Value));
+        if (measurement.VoltagePhase3.HasValue && measurement.CurrentPhase3.HasValue &&
+            measurement.PowerFactor.HasValue)
+            point = point.Field("power_phase3_w",
+                (double)(measurement.VoltagePhase3.Value * measurement.CurrentPhase3.Value *
+                         measurement.PowerFactor.Value));
 
         _tibberPoints.Add(point);
         if (_tibberPoints.Count >= BatchSize)
@@ -288,7 +305,8 @@ public class InfluxDbService : IAsyncDisposable
         {
             var uri = new Uri(url, UriKind.Absolute);
             if (uri.Scheme != "http" && uri.Scheme != "https")
-                throw new ArgumentException($"URL scheme must be http or https, but got: {uri.Scheme}", nameof(url));
+                throw new ArgumentException(
+                    $"URL scheme must be http or https, but got: {uri.Scheme}", nameof(url));
         }
         catch (UriFormatException ex)
         {
@@ -320,8 +338,11 @@ public class InfluxDbService : IAsyncDisposable
     }
 
     private abstract record WriteItem;
+
     private sealed record WallboxItem(WallboxMeterInfo MeterInfo) : WriteItem;
+
     private sealed record TibberItem(RealTimeMeasurement Measurement) : WriteItem;
+
     private sealed record FlushItem : WriteItem;
 }
 

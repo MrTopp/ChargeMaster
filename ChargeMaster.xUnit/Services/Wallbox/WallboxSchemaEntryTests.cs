@@ -4,7 +4,7 @@ namespace ChargeMaster.xUnit.Services.Wallbox;
 
 public sealed class WallboxSchemaEntryTests
 {
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public void Equals_WhenOtherIsNull_ReturnsFalse()
     {
         var a = new WallboxSchemaEntry
@@ -17,7 +17,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.False(a.Equals(null));
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public void Equals_WhenSameReference_ReturnsTrue()
     {
         var a = new WallboxSchemaEntry
@@ -30,7 +30,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.True(a.Equals(a));
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public void Equals_WhenSameStartStopWeekday_ReturnsTrue()
     {
         var a = new WallboxSchemaEntry
@@ -44,11 +44,11 @@ public sealed class WallboxSchemaEntryTests
 
         var b = new WallboxSchemaEntry
         {
-            SchemaId = 999,          // should not matter for Equals
+            SchemaId = 999, // should not matter for Equals
             Start = "19:00:00",
             Stop = "00:00:00",
             Weekday = "1",
-            ChargeLimit = 16         // should not matter for Equals
+            ChargeLimit = 16 // should not matter for Equals
         };
 
         Assert.True(a.Equals(b));
@@ -56,7 +56,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.Equal(a.GetHashCode(), b.GetHashCode());
     }
 
-    [Theory(Skip="Only for interactive testing")]
+    [Theory(Skip = "Only for interactive testing")]
     [InlineData("07:00:00", "10:00:00", "1", "08:00:00", "10:00:00", "1")] // Start differs
     [InlineData("08:00:00", "09:00:00", "1", "08:00:00", "10:00:00", "1")] // Stop differs
     [InlineData("08:00:00", "10:00:00", "2", "08:00:00", "10:00:00", "1")] // Weekday differs
@@ -71,7 +71,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.False(a.Equals((object)b));
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public void Equals_IsOrdinalAndCaseSensitive()
     {
         var a = new WallboxSchemaEntry { Start = "08:00:00", Stop = "10:00:00", Weekday = "mon" };
@@ -80,7 +80,7 @@ public sealed class WallboxSchemaEntryTests
         Assert.False(a.Equals(b));
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public void Equals_WhenBothHaveNullFields_TreatsNullsAsEqual()
     {
         var a = new WallboxSchemaEntry { Start = null, Stop = null, Weekday = null };

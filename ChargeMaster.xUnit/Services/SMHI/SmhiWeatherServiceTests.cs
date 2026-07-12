@@ -1,5 +1,4 @@
 ﻿using ChargeMaster.Services.SMHI;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -8,7 +7,8 @@ namespace ChargeMaster.xUnit.Services.SMHI;
 
 public class SmhiWeatherServiceTests
 {
-    private static IServiceScopeFactory CreateMockedScopeFactory(CancellationToken cancellationToken)
+    private static IServiceScopeFactory CreateMockedScopeFactory(
+        CancellationToken cancellationToken)
     {
         var mockRepository = new Mock<IWeatherForecastRepository>();
         mockRepository
@@ -39,7 +39,8 @@ public class SmhiWeatherServiceTests
         var service = new SmhiWeatherService(httpClient, logger, scopeFactory);
 
         // Act
-        var forecasts = await service.GetForecastAsync(longitude: 14.416639, latitude: 59.250709, CancellationToken.None);
+        var forecasts = await service.GetForecastAsync(longitude: 14.416639, latitude: 59.250709,
+            CancellationToken.None);
         // Assert
         Assert.NotNull(forecasts);
         Assert.NotEmpty(forecasts);
@@ -48,11 +49,10 @@ public class SmhiWeatherServiceTests
         // Verify that each forecast has reasonable temperature values
         foreach (var forecast in forecasts)
         {
-            Assert.True(forecast.Temperature >= -50 && forecast.Temperature <= 60, 
+            Assert.True(forecast.Temperature >= -50 && forecast.Temperature <= 60,
                 "Temperature should be within reasonable range");
         }
     }
-
 }
 
 /// <summary>
@@ -62,5 +62,10 @@ internal class NullLogger<T> : ILogger<T>
 {
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
     public bool IsEnabled(LogLevel logLevel) => false;
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) { }
+
+    public void Log<TState>(
+        LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+        Func<TState, Exception?, string> formatter)
+    {
+    }
 }

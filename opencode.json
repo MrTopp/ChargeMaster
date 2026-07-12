@@ -1,6 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [".github/copilot-instructions.md"],
+  "instructions": [
+    ".github/copilot-instructions.md"
+  ],
   "permission": {
     "edit": "allow",
     "read": {
@@ -31,5 +33,4 @@
       }
     }
   }
-
 }

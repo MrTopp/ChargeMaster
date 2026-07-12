@@ -56,7 +56,8 @@ public static class ShellyTemperatureMessageParser
     /// <param name="payload">JSON-payload.</param>
     /// <param name="message">Det parsade meddelandet, eller null om parsningen misslyckas.</param>
     /// <returns>True om parsningen lyckades, annars false.</returns>
-    public static bool TryParse(string topic, string payload, out ShellyStatusTemperatureMessage? message)
+    public static bool TryParse(
+        string topic, string payload, out ShellyStatusTemperatureMessage? message)
     {
         message = Parse(topic, payload);
         return message is not null;

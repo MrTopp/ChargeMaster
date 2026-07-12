@@ -1,10 +1,8 @@
 ﻿using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
 using Moq;
 
 namespace ChargeMaster.xUnit.Services.ElectricityPrice;
@@ -22,7 +20,8 @@ public class ElectricityPriceServiceTests : IDisposable
         // Use real HttpClient
         _httpClient = new HttpClient();
 
-        var connectionString = "Host=127.0.0.1;Port=5432;Database=chargemaster_db;Username=postgres;Password=bulle";
+        var connectionString
+            = "Host=127.0.0.1;Port=5432;Database=chargemaster_db;Username=postgres;Password=bulle";
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseNpgsql(connectionString)
             .Options;
@@ -49,7 +48,8 @@ public class ElectricityPriceServiceTests : IDisposable
             });
 
         var repositoryMock = new Mock<IElectricityPriceRepository>();
-        _service = new ElectricityPriceService(_httpClient, scopeFactoryMock.Object, _loggerMock.Object);
+        _service = new ElectricityPriceService(_httpClient, scopeFactoryMock.Object,
+            _loggerMock.Object);
     }
 
     public void Dispose()
@@ -61,13 +61,14 @@ public class ElectricityPriceServiceTests : IDisposable
         {
             _context.Database.RollbackTransaction();
         }
+
         _context.Dispose();
         //_serviceProvider?.Dispose();
         _httpClient.Dispose();
         GC.SuppressFinalize(this);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task HasPricesForDateAsync_ReturnsFalse_WhenNoPricesExist()
     {
         // Arrange
@@ -80,7 +81,7 @@ public class ElectricityPriceServiceTests : IDisposable
         Assert.False(result);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task HasPricesForDateAsync_ReturnsTrue_WhenPricesExist()
     {
         // Arrange
@@ -102,7 +103,7 @@ public class ElectricityPriceServiceTests : IDisposable
         Assert.True(result);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetPricesForDateAsync_ReturnsOnlyPricesForSpecificDate()
     {
         // Arrange
@@ -141,7 +142,7 @@ public class ElectricityPriceServiceTests : IDisposable
     /// Test running data fetching, deleting existing prices to force a fetch.
     /// </summary>
     /// <returns></returns>
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_DeletesExistingPrices_AndFetchesNewData()
     {
         // Arrange
@@ -161,10 +162,9 @@ public class ElectricityPriceServiceTests : IDisposable
             .Where(p => p.TimeStart >= date && p.TimeStart < date.AddDays(1))
             .ToListAsync(TestContext.Current.CancellationToken);
         Assert.InRange(prices.Count, 96, 96); // Expecting around 96 entries
-
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_DoesNothing_IfPricesExist()
     {
         // Arrange
@@ -193,7 +193,7 @@ public class ElectricityPriceServiceTests : IDisposable
             Times.Once);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_FetchesAndStores_WhenNoPricesExist()
     {
         // Arrange
@@ -207,16 +207,16 @@ public class ElectricityPriceServiceTests : IDisposable
         // Verify database content, prices from day 'date' should be 24*4 = 96 entries
         var prices = await _context.ElectricityPrices
             .Where(x => x.TimeStart >= date
-                        && x.TimeStart < date.AddDays(1)).ToListAsync(TestContext.Current.CancellationToken);
+                        && x.TimeStart < date.AddDays(1))
+            .ToListAsync(TestContext.Current.CancellationToken);
         Assert.InRange(prices.Count, 96, 96);
-
     }
 
     /// <summary>
     /// Fyll på databasen med priser från 1 oktober 2025 till idag. 
     /// </summary>
     /// <returns></returns>
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetPriceForDateTimeAsync_ReturnsCorrectPrice_ForSpecificDateTime()
     {
         // Arrange
@@ -234,7 +234,7 @@ public class ElectricityPriceServiceTests : IDisposable
         Assert.Equal(0.84m, result.SekPerKwh);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetPriceForDateTimeAsync_UsesCacheForSameDay()
     {
         // Arrange
@@ -253,7 +253,7 @@ public class ElectricityPriceServiceTests : IDisposable
         Assert.Same(result1, result2); // Should be the same instance from cache
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetPriceForDateTimeAsync_ReturnsNull_WhenNoPriceExists()
     {
         // Arrange
@@ -273,7 +273,7 @@ public class ElectricityPriceServiceTests : IDisposable
     /// Fyll på databasen med priser från 1 oktober 2025 till idag. 
     /// </summary>
     /// <returns></returns>
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_PopulatesDatabaseFromOctoberFirstToToday()
     {
         // Arrange

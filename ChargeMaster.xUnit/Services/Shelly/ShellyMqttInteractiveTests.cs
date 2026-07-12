@@ -59,13 +59,16 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
     {
         private readonly IEnumerator<Data.ShellyTemperature> _enumerator;
 
-        public AsyncEnumerator(IEnumerator<Data.ShellyTemperature> enumerator) => _enumerator = enumerator;
+        public AsyncEnumerator(IEnumerator<Data.ShellyTemperature> enumerator) =>
+            _enumerator = enumerator;
 
         public Data.ShellyTemperature Current => _enumerator.Current;
 
         public async ValueTask<bool> MoveNextAsync() => _enumerator.MoveNext();
 
-        public async ValueTask DisposeAsync() { }
+        public async ValueTask DisposeAsync()
+        {
+        }
     }
 
     /// <summary>
@@ -92,7 +95,7 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
     /// Grundläggande test för att ansluta till MQTT-server.
     /// Modifiera brokerAddress och brokerPort enligt din miljö.
     /// </summary>
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task ConnectToMqttBroker()
     {
         // Konfiguration
@@ -106,7 +109,7 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
         // Koppla ifrån
         await _shellyService.DisconnectAsync();
     }
-    
+
 
     // ===== EVENT HANDLERS =====
 
@@ -118,7 +121,8 @@ public class ShellyMqttInteractiveTests : IAsyncLifetime
         _output.WriteLine("---");
     }
 
-    private void OnConnectionStateChanged(object? sender, ShellyMqttConnectionStateChangedEventArgs e)
+    private void OnConnectionStateChanged(
+        object? sender, ShellyMqttConnectionStateChangedEventArgs e)
     {
         if (e.IsConnected)
         {

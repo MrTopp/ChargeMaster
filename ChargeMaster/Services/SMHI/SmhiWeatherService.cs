@@ -23,14 +23,17 @@ public class SmhiWeatherService(
     /// <param name="longitude">Longitud (t.ex. 18.0686 för Stockholm)</param>
     /// <param name="latitude">Latitud (t.ex. 59.3293 för Stockholm)</param>
     /// <returns>Lista med väderdata, för närvarande 3 dygn framåt</returns>
-    public async Task<List<WeatherForecast>> GetForecastAsync(double longitude, double latitude, CancellationToken cancellationToken)
+    public async Task<List<WeatherForecast>> GetForecastAsync(
+        double longitude, double latitude, CancellationToken cancellationToken)
     {
         try
         {
-            var url = $"https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/geotype/point/lon/{longitude.ToString("F3",
+            var url
+                = $"https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/geotype/point/lon/{longitude.ToString("F3",
                     CultureInfo.InvariantCulture)}/lat/{latitude.ToString("F4", CultureInfo.InvariantCulture)}/data.json";
-            
-            logger.LogInformation("Fetching weather forecast from SMHI for coordinates: {Lat},{Lon}", 
+
+            logger.LogInformation(
+                "Fetching weather forecast from SMHI for coordinates: {Lat},{Lon}",
                 latitude, longitude);
 
             var response = await httpClient.GetAsync(url, cancellationToken);
@@ -74,7 +77,8 @@ public class SmhiWeatherService(
                 .OrderBy(f => f.Time)
                 .ToList();
 
-            logger.LogDebug("Retrieved {Count} weather forecast entries from SMHI", forecasts.Count);
+            logger.LogDebug("Retrieved {Count} weather forecast entries from SMHI",
+                forecasts.Count);
 
             // Spara väderdata i databasen via repository
             using var scope = serviceScopeFactory.CreateScope();
@@ -107,7 +111,7 @@ public class SmhiWeatherService(
     public async Task<List<WeatherForecast>> GetForecastAsync(CancellationToken cancellationToken)
     {
         // Koordinater för strömtorp
-        return await GetForecastAsync(longitude: 14.4308, latitude: 59.2301, cancellationToken: cancellationToken);
+        return await GetForecastAsync(longitude: 14.4308, latitude: 59.2301,
+            cancellationToken: cancellationToken);
     }
-
-    }
+}

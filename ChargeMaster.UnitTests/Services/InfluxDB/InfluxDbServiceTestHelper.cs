@@ -38,7 +38,8 @@ public static class InfluxDbServiceTestHelper
         // Verification: Ensure the mock was created successfully
         if (mockPriceService == null)
         {
-            throw new InvalidOperationException("Failed to create mock ElectricityPriceService instance");
+            throw new InvalidOperationException(
+                "Failed to create mock ElectricityPriceService instance");
         }
 
         return mockPriceService;
@@ -56,7 +57,8 @@ public static class InfluxDbServiceTestHelper
         // Verification: Ensure the mock was created successfully
         if (mockLogger == null)
         {
-            throw new InvalidOperationException("Failed to create mock ILogger<InfluxDbService> instance");
+            throw new InvalidOperationException(
+                "Failed to create mock ILogger<InfluxDbService> instance");
         }
 
         return mockLogger;
@@ -76,7 +78,8 @@ public static class InfluxDbServiceTestHelper
         // Verification: Ensure the mock was created successfully
         if (mockClientFactory == null)
         {
-            throw new InvalidOperationException("Failed to create mock IInfluxDBClientFactory instance");
+            throw new InvalidOperationException(
+                "Failed to create mock IInfluxDBClientFactory instance");
         }
 
         return mockClientFactory;
@@ -107,7 +110,8 @@ public static class InfluxDbServiceTestHelper
 
         if (result.Value == null)
         {
-            throw new InvalidOperationException("Options.Value is null; IOptions<InfluxDBOptions> creation failed");
+            throw new InvalidOperationException(
+                "Options.Value is null; IOptions<InfluxDBOptions> creation failed");
         }
 
         return result;
@@ -161,18 +165,21 @@ public static class InfluxDbServiceTestHelper
         // Verification: Ensure options were created successfully
         if (result == null)
         {
-            throw new InvalidOperationException("Failed to create IOptions<InfluxDBOptions> with provided values");
+            throw new InvalidOperationException(
+                "Failed to create IOptions<InfluxDBOptions> with provided values");
         }
 
         if (result.Value == null)
         {
-            throw new InvalidOperationException("Options.Value is null; creation with custom values failed");
+            throw new InvalidOperationException(
+                "Options.Value is null; creation with custom values failed");
         }
 
         // Verification: Ensure values were set correctly
         if (!result.Value.Url.Equals(url, StringComparison.Ordinal))
         {
-            throw new InvalidOperationException($"URL mismatch: expected '{url}' but got '{result.Value.Url}'");
+            throw new InvalidOperationException(
+                $"URL mismatch: expected '{url}' but got '{result.Value.Url}'");
         }
 
         return result;
@@ -237,7 +244,8 @@ public static class InfluxDbServiceTestHelper
         // Verification: Ensure service was created successfully
         if (service == null)
         {
-            throw new InvalidOperationException("InfluxDbService instance creation resulted in null");
+            throw new InvalidOperationException(
+                "InfluxDbService instance creation resulted in null");
         }
 
         return service;
@@ -310,7 +318,8 @@ public static class InfluxDbServiceTestHelper
             // Verification: Ensure measurement was created with expected values
             if (measurement == null)
             {
-                throw new InvalidOperationException("RealTimeMeasurement instance creation resulted in null");
+                throw new InvalidOperationException(
+                    "RealTimeMeasurement instance creation resulted in null");
             }
 
             if (measurement.Power != power)
@@ -327,7 +336,8 @@ public static class InfluxDbServiceTestHelper
 
             return measurement;
         }
-        catch (Exception ex) when (!(ex is ArgumentOutOfRangeException) && !(ex is InvalidOperationException))
+        catch (Exception ex) when (!(ex is ArgumentOutOfRangeException) &&
+                                   !(ex is InvalidOperationException))
         {
             throw new InvalidOperationException(
                 "Failed to create RealTimeMeasurement instance with provided values",
@@ -399,7 +409,8 @@ public static class InfluxDbServiceTestHelper
             // Verification: Ensure meter info was created with expected values
             if (meterInfo == null)
             {
-                throw new InvalidOperationException("WallboxMeterInfo instance creation resulted in null");
+                throw new InvalidOperationException(
+                    "WallboxMeterInfo instance creation resulted in null");
             }
 
             if (Math.Abs(meterInfo.Phase1Current - phase1Current) > 0.001)
@@ -416,7 +427,9 @@ public static class InfluxDbServiceTestHelper
 
             return meterInfo;
         }
-        catch (Exception ex) when (!(ex is ArgumentOutOfRangeException) && !(ex is ArgumentNullException) && !(ex is InvalidOperationException))
+        catch (Exception ex) when (!(ex is ArgumentOutOfRangeException) &&
+                                   !(ex is ArgumentNullException) &&
+                                   !(ex is InvalidOperationException))
         {
             throw new InvalidOperationException(
                 "Failed to create WallboxMeterInfo instance with provided values",

@@ -148,5 +148,4 @@ public class SmhiWorker(
         var forecast = CurrentForecast.Skip(hours).FirstOrDefault();
         return forecast?.Temperature;
     }
-
 }

@@ -41,7 +41,7 @@ public class InfluxDbServiceTests
     /// and power factor data, the service correctly calculates the phase power and includes
     /// it in the InfluxDB write operation.
     /// </summary>
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     [Trait("Category", "ProductionBugSuspected")]
     public async Task WriteTibberMeasurementAsync_WithPhase1Data_CalculatesPhase1Power()
     {
@@ -64,7 +64,8 @@ public class InfluxDbServiceTests
 
         var mockPriceLogger = new Mock<ILogger<ElectricityPriceService>>();
         var httpClient = new HttpClient();
-        var priceService = new ElectricityPriceService(httpClient, new Mock<IServiceScopeFactory>().Object, mockPriceLogger.Object);
+        var priceService = new ElectricityPriceService(httpClient,
+            new Mock<IServiceScopeFactory>().Object, mockPriceLogger.Object);
 
         var mockLogger = new Mock<ILogger<InfluxDbService>>();
         var service = new InfluxDbService(options, priceService, mockLogger.Object);
@@ -74,9 +75,9 @@ public class InfluxDbServiceTests
             Timestamp = DateTimeOffset.UtcNow,
             Power = 1000,
             AccumulatedConsumptionLastHour = 0.5m,
-            VoltagePhase1 = 230m,    // Phase 1 voltage
-            CurrentPhase1 = 5m,      // Phase 1 current
-            PowerFactor = 0.95m      // Power factor for calculation
+            VoltagePhase1 = 230m, // Phase 1 voltage
+            CurrentPhase1 = 5m, // Phase 1 current
+            PowerFactor = 0.95m // Power factor for calculation
         };
 
         // Act

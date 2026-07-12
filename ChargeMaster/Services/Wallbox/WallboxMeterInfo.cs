@@ -4,8 +4,7 @@ namespace ChargeMaster.Services.Wallbox;
 
 public class WallboxMeterInfo
 {
-    [JsonPropertyName("success")]
-    public int Success { get; set; }
+    [JsonPropertyName("success")] public int Success { get; set; }
 
     /// <summary>
     /// Ackumulerad förbrukad energi i Wh
@@ -49,26 +48,21 @@ public class WallboxMeterInfo
     [JsonPropertyName("phase3InstPower")]
     public double Phase3InstPower { get; set; }
 
-    [JsonPropertyName("readTime")]
-    public long ReadTime { get; set; }
+    [JsonPropertyName("readTime")] public long ReadTime { get; set; }
 
-    [JsonPropertyName("gridNetType")]
-    public string? GridNetType { get; set; }
+    [JsonPropertyName("gridNetType")] public string? GridNetType { get; set; }
 
-    [JsonPropertyName("meterSerial")]
-    public string? MeterSerial { get; set; }
+    [JsonPropertyName("meterSerial")] public string? MeterSerial { get; set; }
 
-    [JsonPropertyName("type")]
-    public int Type { get; set; }
+    [JsonPropertyName("type")] public int Type { get; set; }
 
-    [JsonPropertyName("apparentPower")]
-    public long ApparentPower { get; set; }
+    [JsonPropertyName("apparentPower")] public long ApparentPower { get; set; }
 
     /// <summary>
     /// Momentan effektförbrukning i W för fas 1
     /// </summary>
     public long Phase1CurrentEnergy =>
-        (long)(Phase1Current*230/10);
+        (long)(Phase1Current * 230 / 10);
 
     /// <summary>
     /// Momentan effektförbrukning i W för fas 2

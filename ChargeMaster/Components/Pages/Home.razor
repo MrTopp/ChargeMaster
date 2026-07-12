@@ -55,7 +55,8 @@
                         <small class="text-muted">Denna timme:</small><br>
                         <strong>@CurrentMeterInfo.EffektTimmeNuFormatted Wh</strong>
                     </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(CurrentMeterInfo.EffektTimmeTotal > 2500 ? "background-color: #f8d7da;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(CurrentMeterInfo.EffektTimmeTotal > 2500 ? "background-color: #f8d7da;" : "")">
                         <small class="text-muted">Uppskattad timme:</small><br>
                         <strong>@CurrentMeterInfo.EffektTimmeTotalFormatted Wh</strong>
                     </div>
@@ -69,15 +70,18 @@
             <div class="col-md-5">
                 <h4 class="mb-2">Temperatur (Shelly)</h4>
                 <div class="row g-2">
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("sovrum") ? "background-color: #cfe2ff;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("sovrum") ? "background-color: #cfe2ff;" : "")">
                         <small class="text-muted">Sovrum:</small><br>
                         <strong>@ShellyTemperatures["sovrum"]?.ToString("F1")°</strong>
                     </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("hall") ? "background-color: #cfe2ff;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("hall") ? "background-color: #cfe2ff;" : "")">
                         <small class="text-muted">Hall:</small><br>
                         <strong>@ShellyTemperatures["hall"]?.ToString("F1")°</strong>
                     </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("arbetsrum") ? "background-color: #cfe2ff;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedShellyProperties.Contains("arbetsrum") ? "background-color: #cfe2ff;" : "")">
                         <small class="text-muted">Arbetsrum:</small><br>
                         <strong>@ShellyTemperatures["arbetsrum"]?.ToString("F1")°</strong>
                     </div>
@@ -86,23 +90,28 @@
             <div class="col-md-7">
                 <h4 class="mb-2">Värmepump (Daikin)</h4>
                 <div class="row g-2">
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("CurrentTemperature") ? "background-color: #cfe2ff;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("CurrentTemperature") ? "background-color: #cfe2ff;" : "")">
                         <small class="text-muted">Inne:</small><br>
                         <strong>@DaikinFacade.CurrentTemperature?.ToString("F1")°</strong>
                     </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("OutdoorTemperature") ? "background-color: #cfe2ff;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("OutdoorTemperature") ? "background-color: #cfe2ff;" : "")">
                         <small class="text-muted">Ute:</small><br>
                         <strong>@DaikinFacade.OutdoorTemperature?.ToString("F1")°</strong>
                     </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("TargetTemperature") ? "background-color: #cfe2ff;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("TargetTemperature") ? "background-color: #cfe2ff;" : "")">
                         <small class="text-muted">Mål:</small><br>
                         <strong>@DaikinFacade.TargetTemperature?.ToString("F1")°</strong>
                     </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("Mode") ? "background-color: #cfe2ff;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("Mode") ? "background-color: #cfe2ff;" : "")">
                         <small class="text-muted">Läge:</small><br>
                         <strong>@(DaikinFacade.IsOn ? DaikinFacade.Mode.ToString() : "Av")</strong>
                     </div>
-                    <div class="col-auto" style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("CompressorFrequency") ? "background-color: #cfe2ff;" : "")">
+                    <div class="col-auto"
+                         style="padding: 0.5rem; border-radius: 0.25rem; @(HighlightedProperties.Contains("CompressorFrequency") ? "background-color: #cfe2ff;" : "")">
                         <small class="text-muted">Kompr.:</small><br>
                         <strong>@(DaikinFacade.CompressorFrequency ?? 0)</strong>
                     </div>
@@ -144,10 +153,12 @@
                             < 11 => "d-none d-sm-block",
                             _ => "d-none d-md-block"
                         };
-                        <div class="col-auto @responsiveClass" style="padding: 0.5rem; border-radius: 0.25rem; text-align: center;">
+                        <div class="col-auto @responsiveClass"
+                             style="padding: 0.5rem; border-radius: 0.25rem; text-align: center;">
                             <small class="text-muted">@forecasts[i].Time.ToString("H:mm")</small><br>
                             <strong>@forecasts[i].Temperature.ToString("F1")°</strong><br>
-                            <span style="font-size: 1.5rem; line-height: 1; display: block; margin-top: 0.25rem;">@forecasts[i].WeatherEmoji</span>
+                            <span
+                                style="font-size: 1.5rem; line-height: 1; display: block; margin-top: 0.25rem;">@forecasts[i].WeatherEmoji</span>
                         </div>
                     }
                 </div>
@@ -215,7 +226,8 @@
                 <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.5rem;" class="mb-3">
                     @foreach (var kvart in CurrentKvartlista.OrderBy(x => x.TimeStart))
                     {
-                        <div style="padding: 0.5rem; border-radius: 0.25rem; text-align: center; background-color: #f8f9fa;">
+                        <div
+                            style="padding: 0.5rem; border-radius: 0.25rem; text-align: center; background-color: #f8f9fa;">
                             <small class="text-muted">@kvart.TimeStart.ToString("MM-dd HH:mm")</small><br>
                             <strong>@kvart.SekPerKwh.ToString("F2") kr</strong>
                         </div>
@@ -233,11 +245,11 @@
 
     <section class="mb-1">
         <div style="max-width: 720px; margin-left: auto; margin-right: auto;">
-        <p class="mb-0 d-flex gap-2">
-            <a href="electricity-prices" class="btn btn-secondary btn-sm">Elpriser</a>
-            <a href="energy-usage" class="btn btn-secondary btn-sm">Timförbrukning</a>
-            <a href="monthly-costs" class="btn btn-secondary btn-sm">Nätavgifter</a>
-        </p>
+            <p class="mb-0 d-flex gap-2">
+                <a href="electricity-prices" class="btn btn-secondary btn-sm">Elpriser</a>
+                <a href="energy-usage" class="btn btn-secondary btn-sm">Timförbrukning</a>
+                <a href="monthly-costs" class="btn btn-secondary btn-sm">Nätavgifter</a>
+            </p>
         </div>
     </section>
 
@@ -257,7 +269,8 @@
                 <div style="max-height: 300px; overflow-y: auto;">
                     @foreach (var error in recentErrorsFiltered)
                     {
-                        <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-left: 3px solid #dc3545; background-color: #f8f9fa; border-radius: 0.25rem;">
+                        <div
+                            style="padding: 0.75rem; margin-bottom: 0.5rem; border-left: 3px solid #dc3545; background-color: #f8f9fa; border-radius: 0.25rem;">
                             <div style="display: flex; justify-content: space-between; align-items: start;">
                                 <div>
                                     <small class="text-muted d-block">@error.Timestamp.ToString("HH:mm:ss")</small>
@@ -281,12 +294,14 @@
     private List<ErrorLogEventArgs> RecentErrors { get; set; } = [];
     private HashSet<string> HighlightedProperties { get; set; } = [];
     private CancellationTokenSource? _highlightCts;
+
     private Dictionary<string, double?> ShellyTemperatures { get; set; } = new()
     {
         { "sovrum", null },
         { "hall", null },
         { "arbetsrum", null }
     };
+
     private HashSet<string> HighlightedShellyProperties { get; set; } = [];
     private CancellationTokenSource? _highlightShellyCts;
     private List<WeatherForecast> CurrentWeatherForecast { get; set; } = [];
@@ -592,5 +607,6 @@
             }
         }
     }
+
 }
 

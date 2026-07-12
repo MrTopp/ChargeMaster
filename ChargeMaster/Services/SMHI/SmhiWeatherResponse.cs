@@ -25,14 +25,12 @@ public class SmhiTimeSeries
 /// </summary>
 public class SmhiTimeSeriesData
 {
-    [JsonPropertyName("air_temperature")]
-    public double? AirTemperature { get; set; }
+    [JsonPropertyName("air_temperature")] public double? AirTemperature { get; set; }
 
     [JsonPropertyName("wind_from_direction")]
     public double? WindFromDirection { get; set; }
 
-    [JsonPropertyName("wind_speed")]
-    public double? WindSpeed { get; set; }
+    [JsonPropertyName("wind_speed")] public double? WindSpeed { get; set; }
 
     [JsonPropertyName("wind_speed_of_gust")]
     public double? WindSpeedOfGust { get; set; }
@@ -70,8 +68,7 @@ public class SmhiTimeSeriesData
     [JsonPropertyName("predominant_precipitation_type_at_surface")]
     public double? PredominantPrecipitationTypeAtSurface { get; set; }
 
-    [JsonPropertyName("symbol_code")]
-    public double? SymbolCode { get; set; }
+    [JsonPropertyName("symbol_code")] public double? SymbolCode { get; set; }
 
     [JsonPropertyName("precipitation_amount_mean_deterministic")]
     public double? PrecipitationAmountMeanDeterministic { get; set; }

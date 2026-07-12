@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace ChargeMaster.UnitTests.Services.SMHI;
+
 /// <summary>
 /// Unit tests for the SmhiWeatherService class.
 /// </summary>
@@ -22,7 +23,8 @@ public class SmhiWeatherServiceTests
         var mockLogger = new Mock<ILogger<SmhiWeatherService>>();
         var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         var httpClient = new HttpClient();
-        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
+        var service = new SmhiWeatherService(httpClient, mockLogger.Object,
+            mockServiceScopeFactory.Object);
         // Act
         var result = await service.GetForecastAsync(CancellationToken.None);
         // Assert
@@ -45,7 +47,8 @@ public class SmhiWeatherServiceTests
         {
             Timeout = TimeSpan.FromMilliseconds(1)
         };
-        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
+        var service = new SmhiWeatherService(httpClient, mockLogger.Object,
+            mockServiceScopeFactory.Object);
         // Act
         var result = await service.GetForecastAsync(CancellationToken.None);
         // Assert
@@ -67,7 +70,8 @@ public class SmhiWeatherServiceTests
         {
             Timeout = TimeSpan.FromMilliseconds(1)
         };
-        var service = new SmhiWeatherService(httpClient, mockLogger.Object, mockServiceScopeFactory.Object);
+        var service = new SmhiWeatherService(httpClient, mockLogger.Object,
+            mockServiceScopeFactory.Object);
         // Act
         var task = service.GetForecastAsync(CancellationToken.None);
         var result = await task;

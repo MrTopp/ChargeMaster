@@ -26,7 +26,7 @@ public class WallboxServiceTests : IDisposable
         _httpClient.Dispose();
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetStatusAsync_OK()
     {
         // Act
@@ -36,8 +36,8 @@ public class WallboxServiceTests : IDisposable
         Assert.NotNull(result);
         Assert.True(result.Serial > 0);
     }
-    
-    [Theory(Skip="Only for interactive testing")]
+
+    [Theory(Skip = "Only for interactive testing")]
     [InlineData(WallboxMode.Available, "ALWAYS_ON")]
     [InlineData(WallboxMode.NotAvailable, "ALWAYS_OFF")]
     [InlineData(WallboxMode.TimerControlled, "SCHEMA")]
@@ -57,16 +57,17 @@ public class WallboxServiceTests : IDisposable
         Assert.True(result);
 
         // reset starting mode
-        await _service.SetModeAsync((WallboxMode)Enum.Parse(typeof(WallboxMode), startingStat!.Mode switch
-        {
-            "ALWAYS_ON" => "Available",
-            "ALWAYS_OFF" => "NotAvailable",
-            "SCHEMA" => "TimerControlled",
-            _ => throw new InvalidOperationException("Unknown mode")
-        }));
+        await _service.SetModeAsync((WallboxMode)Enum.Parse(typeof(WallboxMode),
+            startingStat!.Mode switch
+            {
+                "ALWAYS_ON" => "Available",
+                "ALWAYS_OFF" => "NotAvailable",
+                "SCHEMA" => "TimerControlled",
+                _ => throw new InvalidOperationException("Unknown mode")
+            }));
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetMeterInfoAsync_OK()
     {
         // Act
@@ -77,7 +78,7 @@ public class WallboxServiceTests : IDisposable
         Assert.True(result.AccEnergy > 64067100);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetSchemaAsync_OK()
     {
         // Act
@@ -95,7 +96,7 @@ public class WallboxServiceTests : IDisposable
         });
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetConfigAsync_OK()
     {
         // Act
@@ -107,7 +108,7 @@ public class WallboxServiceTests : IDisposable
         Assert.False(string.IsNullOrWhiteSpace(result.ProgramVersion));
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetSlavesAsync_OK()
     {
         // Act
@@ -119,17 +120,17 @@ public class WallboxServiceTests : IDisposable
         Assert.All(result, r => Assert.True(r.SerialNumber > 0));
     }
 
-    [Fact(Skip="Skriver ut effekten i laddboxen många gånger, inget riktigt testfall")]
+    [Fact(Skip = "Skriver ut effekten i laddboxen många gånger, inget riktigt testfall")]
     public async Task GetMeterInfoAsyncListning_OK()
     {
         for (int i = 0; i < 200; i++)
         {
             var result = await _service.GetMeterInfoAsync();
-            if (result == null) continue;   
+            if (result == null) continue;
             // Skriv ut resultatet för att se att det uppdateras
-            _output.WriteLine($"{i}. {result.Phase1CurrentEnergy} {result.Phase2CurrentEnergy} {result.Phase3CurrentEnergy} {result.AccEnergy}");
+            _output.WriteLine(
+                $"{i}. {result.Phase1CurrentEnergy} {result.Phase2CurrentEnergy} {result.Phase3CurrentEnergy} {result.AccEnergy}");
             await Task.Delay(1000, TestContext.Current.CancellationToken);
         }
     }
-
 }

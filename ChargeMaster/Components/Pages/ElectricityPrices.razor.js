@@ -41,7 +41,7 @@ function createChart(labels, data, currentTime) {
     const max = Math.max(...data);
     const padding = (max - min) * 0.1;
 
-    console.log('Chart data range:', { min, max, padding });
+    console.log('Chart data range:', {min, max, padding});
 
     window.priceChartInstance = new Chart(ctx, {
         type: 'line',

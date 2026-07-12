@@ -1,12 +1,8 @@
 ﻿using System.Text;
-
 using ChargeMaster.Services.Shelly;
-
 using Microsoft.Extensions.Logging.Abstractions;
-
 using MQTTnet;
 using MQTTnet.Packets;
-
 using Xunit;
 
 namespace ChargeMaster.xUnit.Services.Shelly;
@@ -20,7 +16,8 @@ public class ShellyMqttServiceTests
     private static ShellyMqttService CreateService() =>
         new(null!, NullLogger<ShellyMqttService>.Instance);
 
-    private static MqttApplicationMessageReceivedEventArgs CreateEventArgs(string topic, string jsonPayload)
+    private static MqttApplicationMessageReceivedEventArgs CreateEventArgs(
+        string topic, string jsonPayload)
     {
         var applicationMessage = new MqttApplicationMessageBuilder()
             .WithTopic(topic)
@@ -33,17 +30,18 @@ public class ShellyMqttServiceTests
             null);
     }
 
-    [Fact(Skip="Exploratory test using logged MQTT messages")]
+    [Fact(Skip = "Exploratory test using logged MQTT messages")]
     public async Task OnApplicationMessageReceivedAsync_ValidPayload_UpdatesTemperature()
     {
         var service = CreateService();
 
-        await service.OnApplicationMessageReceivedAsync(CreateEventArgs("shelly-hall/status/temperature:0", HallPayload));
+        await service.OnApplicationMessageReceivedAsync(
+            CreateEventArgs("shelly-hall/status/temperature:0", HallPayload));
 
         Assert.Equal(22.4, service.Temperatures["hall"]);
     }
 
-    [Fact(Skip="Exploratory test using logged MQTT messages")]
+    [Fact(Skip = "Exploratory test using logged MQTT messages")]
     public async Task OnApplicationMessageReceivedAsync_logg()
     {
         var loggFilePath = "G:\\dev\\ChargeMaster\\ChargeMaster.xUnit\\Services\\Shelly\\logg";

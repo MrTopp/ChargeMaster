@@ -15,7 +15,10 @@ namespace ChargeMaster.Services.Daikin;
 /// <param name="httpClient">HTTP-klienten konfigurerad med basadressen till Daikin-enheten.</param>
 /// <param name="logger">Logger för diagnostik och felrapportering.</param>
 /// <param name="environment">Miljö-information för att bestämma om skrivningar ska tillåtas.</param>
-public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger, IHostEnvironment environment) : IDaikinService
+public class DaikinService(
+    HttpClient httpClient,
+    ILogger<DaikinService> logger,
+    IHostEnvironment environment) : IDaikinService
 {
     /// <summary>
     /// Spåra "adv" värdet i control info för att upptäcka när det ändras
@@ -238,7 +241,9 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
             var advanced = data.GetValueOrDefault("adv");
             if (PreviousAdvanced != advanced)
             {
-                logger.LogWarning("Daikin control info: Advanced värde ändrat från '{PreviousAdvanced}' till '{CurrentAdvanced}'", PreviousAdvanced, advanced);
+                logger.LogWarning(
+                    "Daikin control info: Advanced värde ändrat från '{PreviousAdvanced}' till '{CurrentAdvanced}'",
+                    PreviousAdvanced, advanced);
                 PreviousAdvanced = advanced;
             }
 
@@ -309,7 +314,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
             {
                 Model = data.GetValueOrDefault("model"),
                 Type = data.GetValueOrDefault("type"),
-                ProtocolVersion = data.GetValueOrDefault("pv") ?? "",   // ex 3.2
+                ProtocolVersion = data.GetValueOrDefault("pv") ?? "", // ex 3.2
                 ControlProtocolVersion = ParseInt(data.GetValueOrDefault("cpv")),
                 HasHumidity = ParseInt(data.GetValueOrDefault("humd")) ?? 0,
                 HasHumiditySensor = ParseInt(data.GetValueOrDefault("s_humd")) ?? 0,
@@ -561,8 +566,10 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
         {
             if (environment.IsDevelopment())
             {
-                logger.LogInformation("🔒 [DEV MODE] Would set control info - Power: {Power}, Mode: {Mode}, Temp: {Temp}°C, FanRate: {FanRate}, FanDir: {FanDir}",
-                    controlInfo.Power, controlInfo.Mode, controlInfo.TargetTemperature, controlInfo.FanRate ?? "A", controlInfo.FanDirection);
+                logger.LogInformation(
+                    "🔒 [DEV MODE] Would set control info - Power: {Power}, Mode: {Mode}, Temp: {Temp}°C, FanRate: {FanRate}, FanDir: {FanDir}",
+                    controlInfo.Power, controlInfo.Mode, controlInfo.TargetTemperature,
+                    controlInfo.FanRate ?? "A", controlInfo.FanDirection);
                 return true;
             }
 
@@ -575,7 +582,7 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
                       $"&stemp={stemp}" +
                       $"&shum={controlInfo.TargetHumidity ?? "0"}" +
                       $"&f_rate={controlInfo.FanRate ?? "A"}" +
-                      $"&f_dir={controlInfo.FanDirection}" + 
+                      $"&f_dir={controlInfo.FanDirection}" +
                       $"&adv={controlInfo.Advanced ?? ""}";
 
             // ret=OK,adv=
@@ -766,8 +773,8 @@ public class DaikinService(HttpClient httpClient, ILogger<DaikinService> logger,
             return null;
 
         if (DateTime.TryParseExact(value, "yyyy/M/d H:m:s",
-            System.Globalization.CultureInfo.InvariantCulture,
-            System.Globalization.DateTimeStyles.None, out var result))
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var result))
         {
             return result;
         }

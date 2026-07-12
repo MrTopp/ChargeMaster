@@ -8,7 +8,9 @@ namespace ChargeMaster.Services.Wallbox;
 /// </summary>
 public class ChargeSessionData
 {
-    public ChargeSessionData(int? accSessionEnergy, long? sessionStartValue, long? accSessionMillis, long? sessionStartTime)
+    public ChargeSessionData(
+        int? accSessionEnergy, long? sessionStartValue, long? accSessionMillis,
+        long? sessionStartTime)
     {
         AccSessionEnergy = accSessionEnergy;
         SessionStartValue = sessionStartValue;
@@ -30,12 +32,13 @@ public class ChargeSessionData
     /// Duration of the charging session in milliseconds.
     /// </summary>
     public long? AccSessionMillis { get; set; }
+
     /// <summary>
     /// Timestamp when the session started (Unix timestamp in seconds).
     /// </summary>
     public long? SessionStartTime { get; set; }
 
     [NotMapped]
-    public bool HasData=> AccSessionEnergy.HasValue && SessionStartValue.HasValue && AccSessionMillis.HasValue && SessionStartTime.HasValue;
-
+    public bool HasData => AccSessionEnergy.HasValue && SessionStartValue.HasValue &&
+                           AccSessionMillis.HasValue && SessionStartTime.HasValue;
 }

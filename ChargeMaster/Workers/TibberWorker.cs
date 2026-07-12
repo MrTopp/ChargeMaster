@@ -26,7 +26,8 @@ public class TibberWorker(
         {
             try
             {
-                logger.LogInformation("TibberWorker: Ansluter (försök #{Attempt})...", ++reconnectCount);
+                logger.LogInformation("TibberWorker: Ansluter (försök #{Attempt})...",
+                    ++reconnectCount);
                 tibberPulseService.MeasurementReceived += OnMeasurementReceived;
                 await tibberPulseService.SubscribeAsync(stoppingToken);
 
@@ -40,7 +41,7 @@ public class TibberWorker(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, 
+                logger.LogError(ex,
                     "Tibber-anslutning misslyckades. Försöker igen om {DelaySeconds}s (försök #{Attempt})",
                     delaySeconds, reconnectCount);
 
@@ -61,7 +62,8 @@ public class TibberWorker(
             }
         }
 
-        logger.LogInformation("TibberWorker: Totalt {Reconnects} återanslutningsförsök", reconnectCount);
+        logger.LogInformation("TibberWorker: Totalt {Reconnects} återanslutningsförsök",
+            reconnectCount);
     }
 
     private async void OnMeasurementReceived(object? sender, TibberMeasurementEventArgs e)

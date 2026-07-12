@@ -9,7 +9,10 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
     private double? _outdoorTemperature;
     private double? _targetTemperature;
     private int _power; // 0 = Off, 1 = On
-    private DaikinMode _mode = DaikinMode.Heat; // 0=Auto, 1=Auto, 2=Dry, 3=Cool, 4=Heat, 6=Fan, 7=Auto
+
+    private DaikinMode
+        _mode = DaikinMode.Heat; // 0=Auto, 1=Auto, 2=Dry, 3=Cool, 4=Heat, 6=Fan, 7=Auto
+
     private int? _compressorFrequency = 0;
 
     /// <summary>
@@ -57,7 +60,8 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
             await UpdateStatusAsync(forceEvent);
             logger.LogInformation(
                 "Daikin-status: Inne: {Current}°C, Ute: {Outdoor}°C, Måltemperatur: {Target}°C, Läge: {Mode}, Status: {Status}, Kompressor: {Compressor}",
-                _currentTemperature, _outdoorTemperature, _targetTemperature, _mode, IsOn ? "PÅ" : "AV", _compressorFrequency);
+                _currentTemperature, _outdoorTemperature, _targetTemperature, _mode,
+                IsOn ? "PÅ" : "AV", _compressorFrequency);
         }
         catch (Exception ex)
         {
@@ -78,19 +82,24 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
 
         if (sensorInfo != null)
         {
-            if (sensorInfo.IndoorTemperature != null && Math.Abs( (_currentTemperature ?? Int32.MinValue) - (sensorInfo.IndoorTemperature ?? Int32.MaxValue)) > 0.015)
+            if (sensorInfo.IndoorTemperature != null &&
+                Math.Abs((_currentTemperature ?? Int32.MinValue) -
+                         (sensorInfo.IndoorTemperature ?? Int32.MaxValue)) > 0.015)
             {
                 _currentTemperature = sensorInfo.IndoorTemperature;
                 changes.CurrentTemperatureChanged = true;
             }
 
-            if (sensorInfo.OutdoorTemperature != null && Math.Abs( (_outdoorTemperature ?? Int32.MinValue) - (sensorInfo.OutdoorTemperature ?? Int32.MaxValue)) > 0.015)
+            if (sensorInfo.OutdoorTemperature != null &&
+                Math.Abs((_outdoorTemperature ?? Int32.MinValue) -
+                         (sensorInfo.OutdoorTemperature ?? Int32.MaxValue)) > 0.015)
             {
                 _outdoorTemperature = sensorInfo.OutdoorTemperature;
                 changes.OutdoorTemperatureChanged = true;
             }
 
-            if (sensorInfo.CompressorFrequency != null && _compressorFrequency != sensorInfo.CompressorFrequency)
+            if (sensorInfo.CompressorFrequency != null &&
+                _compressorFrequency != sensorInfo.CompressorFrequency)
             {
                 _compressorFrequency = sensorInfo.CompressorFrequency;
                 changes.CompressorFrequencyChanged = true;
@@ -99,7 +108,9 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
 
         if (controlInfo != null)
         {
-            if (controlInfo.TargetTemperature != null && Math.Abs( (_targetTemperature ?? Int32.MinValue) - (controlInfo.TargetTemperature ?? Int32.MaxValue)) > 0.015)
+            if (controlInfo.TargetTemperature != null &&
+                Math.Abs((_targetTemperature ?? Int32.MinValue) -
+                         (controlInfo.TargetTemperature ?? Int32.MaxValue)) > 0.015)
             {
                 _targetTemperature = controlInfo.TargetTemperature;
                 changes.TargetTemperatureChanged = true;
@@ -137,13 +148,16 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
             if (result)
             {
                 await UpdateStatusAsync();
-                logger.LogInformation("Måltemperatur inställd till {Temperature}°C", _targetTemperature);
+                logger.LogInformation("Måltemperatur inställd till {Temperature}°C",
+                    _targetTemperature);
             }
+
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Fel vid inställning av måltemperatur till {Temperature}°C", temperature);
+            logger.LogError(ex, "Fel vid inställning av måltemperatur till {Temperature}°C",
+                temperature);
             return false;
         }
     }
@@ -161,6 +175,7 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
                 await UpdateStatusAsync();
                 logger.LogInformation("Daikin värmepump påslagen");
             }
+
             return result;
         }
         catch (Exception ex)
@@ -183,6 +198,7 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
                 await UpdateStatusAsync();
                 logger.LogInformation("Daikin värmepump avstängd");
             }
+
             return result;
         }
         catch (Exception ex)
@@ -205,6 +221,7 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
                 await UpdateStatusAsync();
                 logger.LogInformation("Daikin läge ändrat till {Mode}", _mode);
             }
+
             return result;
         }
         catch (Exception ex)

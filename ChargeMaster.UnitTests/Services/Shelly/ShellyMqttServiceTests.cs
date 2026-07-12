@@ -6,7 +6,6 @@ using MQTTnet;
 
 namespace ChargeMaster.UnitTests.Services.Shelly;
 
-
 /// <summary>
 /// Unit tests for ShellyMqttService.
 /// </summary>
@@ -30,7 +29,8 @@ public class ShellyMqttServiceTests
     [InlineData(double.MaxValue)]
     [InlineData(double.PositiveInfinity)]
     [InlineData(double.NegativeInfinity)]
-    public void GetHallTemperature_WhenHallKeyExists_ReturnsTemperatureValue(double expectedTemperature)
+    public void GetHallTemperature_WhenHallKeyExists_ReturnsTemperatureValue(
+        double expectedTemperature)
     {
         // Arrange
         var service = new ShellyMqttService();
@@ -260,7 +260,8 @@ public class ShellyMqttServiceTests
     /// Expected: SubscriberDisconnected is not invoked
     /// </summary>
     [Fact]
-    public void TemperatureChanged_RemoveSubscriberWithOthersRemaining_DoesNotTriggerSubscriberDisconnectedEvent()
+    public void
+        TemperatureChanged_RemoveSubscriberWithOthersRemaining_DoesNotTriggerSubscriberDisconnectedEvent()
     {
         // Arrange
         var service = new ShellyMqttService();
@@ -343,7 +344,8 @@ public class ShellyMqttServiceTests
         for (int i = 0; i < 3; i++)
         {
             Assert.Equal(subscriber1Events[i].DeviceId, subscriber2Events[i].DeviceId);
-            Assert.Equal(subscriber1Events[i].TemperatureCelsius, subscriber2Events[i].TemperatureCelsius);
+            Assert.Equal(subscriber1Events[i].TemperatureCelsius,
+                subscriber2Events[i].TemperatureCelsius);
         }
     }
 
@@ -738,7 +740,8 @@ public class ShellyMqttServiceTests
     [InlineData(21.5, double.PositiveInfinity)]
     [InlineData(double.NegativeInfinity, 21.5)]
     [InlineData(21.5, double.NegativeInfinity)]
-    public void GetAverage_WithOneInfinityOneFinite_ReturnsInfinity(double arbetsrumTemp, double sovrumTemp)
+    public void GetAverage_WithOneInfinityOneFinite_ReturnsInfinity(
+        double arbetsrumTemp, double sovrumTemp)
     {
         // Arrange
         var service = new ShellyMqttService();
@@ -860,10 +863,11 @@ public class ShellyMqttServiceTests
     {
         // Arrange
         var mockMqttClient = ShellyMqttServiceTestHelper.CreateMockMqttClient();
-        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
+        var service
+            = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Use reflection to set the private _mqttClient field
-        var mqttClientField = typeof(ShellyMqttService).GetField("_mqttClient", 
+        var mqttClientField = typeof(ShellyMqttService).GetField("_mqttClient",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         mqttClientField?.SetValue(service, mockMqttClient.Object);
 
@@ -903,7 +907,8 @@ public class ShellyMqttServiceTests
     [InlineData("arbetsrum", 21.5)]
     [InlineData("hall", 21.5)]
     [InlineData("sovrum", 21.5)]
-    public void ShellyMqttService_NoParameters_InitializesTemperaturesWithDefaultValues(string roomName, double expectedTemperature)
+    public void ShellyMqttService_NoParameters_InitializesTemperaturesWithDefaultValues(
+        string roomName, double expectedTemperature)
     {
         // Arrange & Act
         var service = new ShellyMqttService();
@@ -943,7 +948,7 @@ public class ShellyMqttServiceTests
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
             service.ConnectAsync(null!, 1883, "test-client"));
     }
-    
+
     /// <summary>
     /// Tests that ConnectAsync handles negative port numbers.
     /// Input: negative brokerPort value.
@@ -963,7 +968,7 @@ public class ShellyMqttServiceTests
         await Assert.ThrowsAnyAsync<Exception>(() =>
             service.ConnectAsync("192.168.1.10", brokerPort, "test-client"));
     }
-    
+
     /// <summary>
     /// Tests that ConnectAsync handles null clientId by generating one.
     /// Input: null clientId.
@@ -1040,14 +1045,17 @@ public class ShellyMqttServiceTests
         ShellyMqttServiceTestHelper.ConfigureMqttClientToFailConnection(
             mockMqttClient,
             new System.Net.Sockets.SocketException(10061));
-        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
+        var service
+            = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
             service.ConnectAsync("192.168.1.10", port, "test-client"));
 
         // Verify the port was used in the connection attempt
-        mockMqttClient.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockMqttClient.Verify(
+            c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     /// <summary>
@@ -1067,14 +1075,17 @@ public class ShellyMqttServiceTests
         ShellyMqttServiceTestHelper.ConfigureMqttClientToFailConnection(
             mockMqttClient,
             new System.Net.Sockets.SocketException(10061));
-        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
+        var service
+            = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
             service.ConnectAsync(ipAddress, 1883, "test-client"));
 
         // Verify the address was used in the connection attempt
-        mockMqttClient.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockMqttClient.Verify(
+            c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     /// <summary>
@@ -1093,14 +1104,17 @@ public class ShellyMqttServiceTests
         ShellyMqttServiceTestHelper.ConfigureMqttClientToFailConnection(
             mockMqttClient,
             new System.Net.Sockets.SocketException(10061));
-        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
+        var service
+            = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
             service.ConnectAsync(hostname, 1883, "test-client"));
 
         // Verify the hostname was used in the connection attempt
-        mockMqttClient.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockMqttClient.Verify(
+            c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     /// <summary>
@@ -1118,14 +1132,17 @@ public class ShellyMqttServiceTests
         ShellyMqttServiceTestHelper.ConfigureMqttClientToFailConnection(
             mockMqttClient,
             new System.Net.Sockets.SocketException(10061));
-        var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
+        var service
+            = ShellyMqttServiceTestHelper.CreateServiceWithMocks(mqttClient: mockMqttClient);
 
         // Act & Assert
         await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() =>
             service.ConnectAsync("192.168.1.10", port, "test-client"));
 
         // Verify the boundary port was used in the connection attempt
-        mockMqttClient.Verify(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockMqttClient.Verify(
+            c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     /// <summary>
@@ -1153,7 +1170,7 @@ public class ShellyMqttServiceTests
         if (exception != null)
         {
             Assert.True(
-                exception is MQTTnet.Exceptions.MqttCommunicationException || 
+                exception is MQTTnet.Exceptions.MqttCommunicationException ||
                 exception is System.Net.Sockets.SocketException ||
                 exception.InnerException is MQTTnet.Exceptions.MqttCommunicationException ||
                 exception.InnerException is System.Net.Sockets.SocketException,
@@ -1161,7 +1178,7 @@ public class ShellyMqttServiceTests
         }
         // If no exception, the service completed setup (perhaps with graceful error handling)
     }
-    
+
     /// <summary>
     /// Tests that SetupAsync propagates exceptions when SubscribeAsync fails.
     /// This test calls SubscribeAsync directly without establishing a connection
@@ -1179,7 +1196,8 @@ public class ShellyMqttServiceTests
         // Act & Assert
         // Expected: Exception from subscription failure should propagate
         // We call SubscribeAsync directly without connecting to simulate the failure scenario
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SubscribeAsync("test/topic"));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.SubscribeAsync("test/topic"));
     }
 
     /// <summary>
@@ -1200,7 +1218,7 @@ public class ShellyMqttServiceTests
 
         // Act
         // Use reflection to call the private InitiateTemperatures method
-        var method = typeof(ShellyMqttService).GetMethod("InitiateTemperatures", 
+        var method = typeof(ShellyMqttService).GetMethod("InitiateTemperatures",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var task = (Task)method!.Invoke(service, null)!;
         await task;
@@ -1211,7 +1229,8 @@ public class ShellyMqttServiceTests
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Fel vid hämtning av temperaturer från databasen")),
+                It.Is<It.IsAnyType>((v, t) =>
+                    v.ToString()!.Contains("Fel vid hämtning av temperaturer från databasen")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception, string>>()!),
             Times.Once);
@@ -1314,8 +1333,9 @@ public class ShellyMqttServiceTests
         var topic = "test/topic";
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.SubscribeAsync(topic));
+        var exception
+            = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.SubscribeAsync(topic));
 
         Assert.Equal("Inte ansluten till MQTT-server", exception.Message);
     }
@@ -1332,14 +1352,17 @@ public class ShellyMqttServiceTests
     [InlineData("valid/topic")]
     [InlineData("shelly-arbetsrum/#")]
     [InlineData("sensor/+/temperature")]
-    public async Task SubscribeAsync_WhenMqttClientIsNull_ThrowsInvalidOperationExceptionForAnyTopic(string? topic)
+    public async Task
+        SubscribeAsync_WhenMqttClientIsNull_ThrowsInvalidOperationExceptionForAnyTopic(
+            string? topic)
     {
         // Arrange
         var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.SubscribeAsync(topic!));
+        var exception
+            = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.SubscribeAsync(topic!));
 
         Assert.Equal("Inte ansluten till MQTT-server", exception.Message);
     }
@@ -1410,7 +1433,8 @@ public class ShellyMqttServiceTests
     /// The method should iterate through topics sequentially and fail on the first one.
     /// </summary>
     [Fact]
-    public async Task SubscribeAsync_MultipleTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
+    public async Task
+        SubscribeAsync_MultipleTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
         var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
@@ -1427,7 +1451,8 @@ public class ShellyMqttServiceTests
     /// connection state before attempting to use the empty string.
     /// </summary>
     [Fact]
-    public async Task SubscribeAsync_EmptyStringTopic_ThrowsInvalidOperationExceptionWhenNotConnected()
+    public async Task
+        SubscribeAsync_EmptyStringTopic_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
         var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
@@ -1442,7 +1467,8 @@ public class ShellyMqttServiceTests
     /// when the MQTT client is not connected.
     /// </summary>
     [Fact]
-    public async Task SubscribeAsync_WhitespaceOnlyTopic_ThrowsInvalidOperationExceptionWhenNotConnected()
+    public async Task
+        SubscribeAsync_WhitespaceOnlyTopic_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
         var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
@@ -1458,7 +1484,8 @@ public class ShellyMqttServiceTests
     /// The method should attempt to process each topic even if duplicates exist.
     /// </summary>
     [Fact]
-    public async Task SubscribeAsync_DuplicateTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
+    public async Task
+        SubscribeAsync_DuplicateTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
         var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
@@ -1473,7 +1500,8 @@ public class ShellyMqttServiceTests
     /// throws InvalidOperationException on the first topic when not connected.
     /// </summary>
     [Fact]
-    public async Task SubscribeAsync_MixedValidAndInvalidTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
+    public async Task
+        SubscribeAsync_MixedValidAndInvalidTopics_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
         var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();
@@ -1488,7 +1516,8 @@ public class ShellyMqttServiceTests
     /// throws InvalidOperationException when not connected.
     /// </summary>
     [Fact]
-    public async Task SubscribeAsync_TopicsWithSpecialCharacters_ThrowsInvalidOperationExceptionWhenNotConnected()
+    public async Task
+        SubscribeAsync_TopicsWithSpecialCharacters_ThrowsInvalidOperationExceptionWhenNotConnected()
     {
         // Arrange
         var service = ShellyMqttServiceTestHelper.CreateServiceWithMocks();

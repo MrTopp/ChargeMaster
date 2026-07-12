@@ -223,7 +223,7 @@ public class ChargeWorker(
                 {
                     // Det finns planerad laddning för innevarande timme, räkna ut gräns.
                     var minuterKvar = 60 - nu.Minute;
-                    
+
                     var förbrukningKvar = minuterKvar * 8000 / 60;
                     var totalförbrukningTimme
                         = wallboxWorker.FörbrukningDennaTimme + förbrukningKvar;
@@ -236,6 +236,7 @@ public class ChargeWorker(
                     {
                         förbrukningGräns = 4000;
                     }
+
                     if (totalförbrukningTimme > förbrukningGräns)
                     {
                         logger.LogInformation(

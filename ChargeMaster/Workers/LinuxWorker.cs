@@ -6,7 +6,12 @@ namespace ChargeMaster.Workers;
 /// <summary>
 /// Event args för systemlast-data.
 /// </summary>
-public class SystemLoadEventArgs(double load1, double load5, double load15, int runningProcesses, int totalProcesses) : EventArgs
+public class SystemLoadEventArgs(
+    double load1,
+    double load5,
+    double load15,
+    int runningProcesses,
+    int totalProcesses) : EventArgs
 {
     /// <summary>
     /// Genomsnittlig last över senaste 1 minut.
@@ -72,7 +77,9 @@ public class LinuxWorker(ILogger<LinuxWorker> logger) : BackgroundService
                 if (systemLoad != null)
                 {
                     var now = DateTime.Now;
-                    if (systemLoad.Load1 > 1.0 && (_lastLogTime == DateTime.MinValue || (now - _lastLogTime).TotalSeconds >= LogIntervalSeconds))
+                    if (systemLoad.Load1 > 1.0 && (_lastLogTime == DateTime.MinValue ||
+                                                   (now - _lastLogTime).TotalSeconds >=
+                                                   LogIntervalSeconds))
                     {
                         logger.LogWarning(
                             "Systemlast - 1min: {Load1:F2}, 5min: {Load5:F2}, 15min: {Load15:F2} | Processer: {Running}/{Total}",

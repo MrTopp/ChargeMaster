@@ -74,7 +74,8 @@ public static class SmhiWeatherServiceTestHelper
 
         try
         {
-            return new SmhiWeatherService(clientToUse, loggerToUse.Object, serviceScopeFactoryToUse.Object);
+            return new SmhiWeatherService(clientToUse, loggerToUse.Object,
+                serviceScopeFactoryToUse.Object);
         }
         catch (Exception ex)
         {
@@ -175,7 +176,8 @@ public static class SmhiWeatherServiceTestHelper
     /// <param name="forecastCount">Number of forecast entries to include (default: 24)</param>
     /// <param name="baseTemperature">Base temperature value (default: 15.0)</param>
     /// <returns>JSON string representing a valid SMHI API response</returns>
-    public static string CreateSmhiApiResponse(int forecastCount = 24, double baseTemperature = 15.0)
+    public static string CreateSmhiApiResponse(
+        int forecastCount = 24, double baseTemperature = 15.0)
     {
         var timeSeries = new System.Collections.Generic.List<object>();
         var now = DateTime.UtcNow;

@@ -7,8 +7,7 @@ namespace ChargeMaster.Data;
 /// </summary>
 public class WallboxMeterReading
 {
-    [Key]
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
 
     /// <summary>
     /// The time reported by the meter (converted from milliseconds since epoch)
@@ -36,5 +35,4 @@ public class WallboxMeterReading
     /// Aktuell strömförbrukning i kW rapporterat av wallbox.
     /// </summary>
     public long ApparentPower { get; set; }
-
 }

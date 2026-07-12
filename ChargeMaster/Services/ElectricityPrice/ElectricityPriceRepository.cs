@@ -15,7 +15,8 @@ public class ElectricityPriceRepository : IElectricityPriceRepository
         IServiceScopeFactory serviceScopeFactory,
         ILogger<ElectricityPriceRepository> logger)
     {
-        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+        _serviceScopeFactory = serviceScopeFactory ??
+                               throw new ArgumentNullException(nameof(serviceScopeFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 

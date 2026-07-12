@@ -44,7 +44,8 @@ public class TibberPulseService(
         IObservable<RealTimeMeasurement>? listener;
         try
         {
-            listener = await client.StartRealTimeMeasurementListener(homeId, cancellationToken: cancellationToken);
+            listener = await client.StartRealTimeMeasurementListener(homeId,
+                cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
@@ -52,10 +53,12 @@ public class TibberPulseService(
             throw;
         }
 
-        var streamErrorTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        
+        var streamErrorTcs
+            = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
         // Använd using för att säkerställa att subscription disposas
-        using var subscription = listener.Subscribe(new TibberObserver(this, sessionState, streamErrorTcs, logger));
+        using var subscription
+            = listener.Subscribe(new TibberObserver(this, sessionState, streamErrorTcs, logger));
 
         logger.LogInformation("Tibber Pulse-prenumeration aktiv");
 
@@ -92,7 +95,7 @@ public class TibberPulseService(
             {
                 logger.LogWarning(ex, "Fel vid stopp av Tibber Pulse-lyssnare");
             }
-            
+
             logger.LogInformation(
                 "Tibber Pulse-lyssnare stoppad. Mätningar denna session: {Count}",
                 sessionState.MeasurementCount);
@@ -102,7 +105,8 @@ public class TibberPulseService(
     /// <summary>
     /// Övervakar stream-hälsa och detekterar om ingen data kommer in under en lång tid.
     /// </summary>
-    private async Task MonitorStreamHealthAsync(SessionState sessionState, CancellationToken cancellationToken)
+    private async Task MonitorStreamHealthAsync(
+        SessionState sessionState, CancellationToken cancellationToken)
     {
         const int healthCheckIntervalSeconds = 30;
         const int maxSilenceDurationSeconds = 300; // 5 minuter
@@ -111,7 +115,8 @@ public class TibberPulseService(
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(TimeSpan.FromSeconds(healthCheckIntervalSeconds), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(healthCheckIntervalSeconds),
+                    cancellationToken);
 
                 var now = DateTime.Now;
                 var timeSinceLastMeasurement = now - sessionState.LastMeasurementTime;

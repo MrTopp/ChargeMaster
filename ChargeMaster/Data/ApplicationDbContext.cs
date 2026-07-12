@@ -3,14 +3,15 @@ using ChargeMaster.Services.SMHI;
 
 namespace ChargeMaster.Data
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : DbContext(options)
     {
         public DbSet<ElectricityPrice> ElectricityPrices { get; set; }
-            public DbSet<WallboxMeterReading> WallboxMeterReadings { get; set; }
-            public DbSet<ShellyTemperature> ShellyTemperatures { get; set; }
-            public DbSet<ChargeSession> ChargeSessions { get; set; }
-            public DbSet<WeatherForecast> WeatherForecasts { get; set; }
-            public DbSet<DaikinSession> DaikinSessions { get; set; }
+        public DbSet<WallboxMeterReading> WallboxMeterReadings { get; set; }
+        public DbSet<ShellyTemperature> ShellyTemperatures { get; set; }
+        public DbSet<ChargeSession> ChargeSessions { get; set; }
+        public DbSet<WeatherForecast> WeatherForecasts { get; set; }
+        public DbSet<DaikinSession> DaikinSessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

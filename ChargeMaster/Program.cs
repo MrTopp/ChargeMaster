@@ -9,12 +9,9 @@ using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.TibberPulse;
 using ChargeMaster.Services.ErrorLog;
 using ChargeMaster.Workers;
-
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-
 using Serilog;
-
 using System.Reflection;
 using ChargeMaster.Services.SMHI;
 
@@ -64,6 +61,7 @@ namespace ChargeMaster
                     keyRingPath = Path.Combine(builder.Environment.ContentRootPath,
                         "data-protection-keys");
                 }
+
                 if (!Directory.Exists(keyRingPath))
                 {
                     Directory.CreateDirectory(keyRingPath);
@@ -88,9 +86,11 @@ namespace ChargeMaster
                     if (!context.HostingEnvironment.IsDevelopment())
                     {
                         configuration.WriteTo.Logger(lc => lc
-                            .Filter.ByIncludingOnly(e => e.Level >= Serilog.Events.LogEventLevel.Error)
+                            .Filter.ByIncludingOnly(e =>
+                                e.Level >= Serilog.Events.LogEventLevel.Error)
                             .WriteTo.Console(
-                                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}",
+                                outputTemplate:
+                                "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}",
                                 standardErrorFromLevel: Serilog.Events.LogEventLevel.Verbose));
                     }
                 });
@@ -103,11 +103,13 @@ namespace ChargeMaster
                     options.UseNpgsql(connectionString));
 
                 // ----- Application Services -----
-                builder.Services.AddScoped<IElectricityPriceRepository, ElectricityPriceRepository>();
-                builder.Services.AddHttpClient<ElectricityPriceService, ElectricityPriceService>(client =>
-                {
-                    client.Timeout = TimeSpan.FromSeconds(160);
-                });
+                builder.Services
+                    .AddScoped<IElectricityPriceRepository, ElectricityPriceRepository>();
+                builder.Services
+                    .AddHttpClient<ElectricityPriceService, ElectricityPriceService>(client =>
+                    {
+                        client.Timeout = TimeSpan.FromSeconds(160);
+                    });
 
                 var vwServiceBaseAddress = builder.Configuration["Services:VWService"]
                                            ?? throw new InvalidOperationException(
@@ -129,7 +131,8 @@ namespace ChargeMaster
                     client.BaseAddress = new Uri("http://192.168.1.156/");
                     client.Timeout = TimeSpan.FromSeconds(60);
                 });
-                builder.Services.AddSingleton<IDaikinService>(sp => sp.GetRequiredService<DaikinService>());
+                builder.Services.AddSingleton<IDaikinService>(sp =>
+                    sp.GetRequiredService<DaikinService>());
 
                 builder.Services.AddHttpClient<SmhiWeatherService, SmhiWeatherService>(client =>
                 {
@@ -181,8 +184,10 @@ namespace ChargeMaster
                 {
                     app.UseForwardedHeaders(new ForwardedHeadersOptions
                     {
-                        ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
-                                           | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+                        ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders
+                                               .XForwardedFor
+                                           | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders
+                                               .XForwardedProto
                     });
                     // Säkerhetsheaders
                     app.Use(async (context, next) =>

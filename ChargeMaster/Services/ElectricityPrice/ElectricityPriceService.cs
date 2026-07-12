@@ -23,6 +23,7 @@ public class ElectricityPriceService(
     /// Cache för elprisor lagrat per dag. Nyckel är datumet, värde är listan med priser för dagen.
     /// </summary>
     private DateOnly? _cachedDate;
+
     private List<Data.ElectricityPrice>? _cachedPrices;
     private readonly object _cacheLock = new();
 
@@ -65,16 +66,19 @@ public class ElectricityPriceService(
                     prices.Count, date.ToString("yyyy-MM-dd"));
             }
         }
-        catch(HttpRequestException ex)
+        catch (HttpRequestException ex)
         {
             // Logga error men inte stack-trace, eftersom det kan vara en tillfällig nätverksfel eller problem med API:et.
-            logger.LogError("Fel vid hämtning av elpriser för {Date}, felkod {StatusCode} försöker senare.", date.ToString("yyyy-MM-dd"), ex.StatusCode);
-            throw; 
+            logger.LogError(
+                "Fel vid hämtning av elpriser för {Date}, felkod {StatusCode} försöker senare.",
+                date.ToString("yyyy-MM-dd"), ex.StatusCode);
+            throw;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Kan inte hämta eller lagra elpriser för {Date}.", date.ToString("yyyy-MM-dd"));
-            throw; 
+            logger.LogError(ex, "Kan inte hämta eller lagra elpriser för {Date}.",
+                date.ToString("yyyy-MM-dd"));
+            throw;
         }
     }
 
@@ -157,7 +161,8 @@ public class ElectricityPriceService(
             }
         }
 
-        logger.LogInformation("Raderade {Count} priser för {Date}.", count, date.ToString("yyyy-MM-dd"));
+        logger.LogInformation("Raderade {Count} priser för {Date}.", count,
+            date.ToString("yyyy-MM-dd"));
     }
 
     /// <summary>
@@ -175,7 +180,8 @@ public class ElectricityPriceService(
             if (_cachedDate == requestedDate && _cachedPrices != null)
             {
                 logger.LogDebug("Returnerar cachat pris för {DateTime}", dateTime);
-                return _cachedPrices.FirstOrDefault(p => p.TimeStart <= dateTime && p.TimeEnd > dateTime);
+                return _cachedPrices.FirstOrDefault(p =>
+                    p.TimeStart <= dateTime && p.TimeEnd > dateTime);
             }
         }
 
@@ -191,7 +197,8 @@ public class ElectricityPriceService(
             _cachedPrices = prices;
         }
 
-        logger.LogDebug("Laddade och cachade {Count} priser för {Date}", prices.Count, requestedDate);
+        logger.LogDebug("Laddade och cachade {Count} priser för {Date}", prices.Count,
+            requestedDate);
         return prices.FirstOrDefault(p => p.TimeStart <= dateTime && p.TimeEnd > dateTime);
     }
 }

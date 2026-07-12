@@ -8,29 +8,29 @@
 
 <div style="margin: 8px;">
 
-<h3>Timförbrukning per månad</h3>
+    <h3>Timförbrukning per månad</h3>
 
-<div class="mb-3 d-flex align-items-center gap-2">
-    <button class="btn btn-outline-secondary btn-sm" @onclick="PreviousMonth">&laquo;</button>
-    <span class="fw-bold">@selectedMonth.ToString("MMMM yyyy")</span>
-    <button class="btn btn-outline-secondary btn-sm" @onclick="NextMonth">&raquo;</button>
-</div>
-
-@if (loading)
-{
-    <p><em>Laddar data...</em></p>
-}
-else if (hourlyData is null || hourlyData.Count == 0)
-{
-    <div class="alert alert-info">
-        Ingen förbrukningsdata hittades för @selectedMonth.ToString("MMMM yyyy").
+    <div class="mb-3 d-flex align-items-center gap-2">
+        <button class="btn btn-outline-secondary btn-sm" @onclick="PreviousMonth">&laquo;</button>
+        <span class="fw-bold">@selectedMonth.ToString("MMMM yyyy")</span>
+        <button class="btn btn-outline-secondary btn-sm" @onclick="NextMonth">&raquo;</button>
     </div>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table table-bordered table-sm" style="font-size: 0.75rem;">
-            <thead class="table-light">
+
+    @if (loading)
+    {
+        <p><em>Laddar data...</em></p>
+    }
+    else if (hourlyData is null || hourlyData.Count == 0)
+    {
+        <div class="alert alert-info">
+            Ingen förbrukningsdata hittades för @selectedMonth.ToString("MMMM yyyy").
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm" style="font-size: 0.75rem;">
+                <thead class="table-light">
                 <tr>
                     <th style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;">Timme</th>
                     @foreach (var day in daysInMonth)
@@ -38,13 +38,14 @@ else
                         <th class="text-center">@day</th>
                     }
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 @for (int hour = 0; hour < 24; hour++)
                 {
                     var h = hour;
                     <tr>
-                        <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;" class="fw-bold">
+                        <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;"
+                            class="fw-bold">
                             @h.ToString("00"):00
                         </td>
                         @foreach (var day in daysInMonth)
@@ -56,7 +57,8 @@ else
                             var isHighestHighlight = highestHighlightKey == key;
                             var isBold = isHighestOverall || isHighestHighlight;
                             var hasFrame = isHighestOverall || isHighestHighlight;
-                            <td class="text-end @(isHighlight ? "text-danger" : "") @(isBold ? "fw-bold" : isHighlight ? "fw-semibold" : "")" style="@(hasFrame ? "box-shadow: inset 0 0 0 2px red;" : "")">
+                            <td class="text-end @(isHighlight ? "text-danger" : "") @(isBold ? "fw-bold" : isHighlight ? "fw-semibold" : "")"
+                                style="@(hasFrame ? "box-shadow: inset 0 0 0 2px red;" : "")">
                                 @if (hasValue && wh > 0)
                                 {
                                     @((wh / 1000.0).ToString("F2"))
@@ -65,10 +67,12 @@ else
                         }
                     </tr>
                 }
-            </tbody>
-            <tfoot class="table-light">
+                </tbody>
+                <tfoot class="table-light">
                 <tr>
-                    <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;" class="fw-bold">Summa</td>
+                    <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;"
+                        class="fw-bold">Summa
+                    </td>
                     @foreach (var day in daysInMonth)
                     {
                         var dayTotal = Enumerable.Range(0, 24)
@@ -88,7 +92,9 @@ else
                     var maxRowHighest = maxRowValues.Where(x => x.Max > 0).Select(x => x.Max).DefaultIfEmpty(0).Max();
                 }
                 <tr>
-                    <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;" class="fw-bold">Max</td>
+                    <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;"
+                        class="fw-bold">Max
+                    </td>
                     @foreach (var item in maxRowValues)
                     {
                         var isMaxHighest = item.Max > 0 && item.Max == maxRowHighest;
@@ -115,13 +121,16 @@ else
                         .ToList();
                     var peakRowHighest = peakRowValues.Where(x => x.Max > 0).Select(x => x.Max).DefaultIfEmpty(0).Max();
                     <tr>
-                        <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;" class="fw-bold text-danger">Max 7–19</td>
+                        <td style="position: sticky; left: 0; background: var(--bs-table-bg, #fff); z-index: 1;"
+                            class="fw-bold text-danger">Max 7–19
+                        </td>
                         @foreach (var item in peakRowValues)
                         {
                             if (item.IsWeekday)
                             {
                                 var isPeakHighest = item.Max > 0 && item.Max == peakRowHighest;
-                                <td class="text-end fw-bold text-danger" style="@(isPeakHighest ? "box-shadow: inset 0 0 0 2px red;" : "")">
+                                <td class="text-end fw-bold text-danger"
+                                    style="@(isPeakHighest ? "box-shadow: inset 0 0 0 2px red;" : "")">
                                     @if (item.Max > 0)
                                     {
                                         @((item.Max / 1000.0).ToString("F2"))
@@ -135,24 +144,24 @@ else
                         }
                     </tr>
                 }
-            </tfoot>
-        </table>
-    </div>
-    <p class="text-muted mt-2" style="font-size: 0.8rem;">
-        Värden i kWh. <span class="text-danger fw-semibold">Röda värden</span> = vardagar 07–19, oktober–mars.
-        <strong>Fetstil</strong> = högsta värdet totalt och/eller högsta värdet vardagar 07–19, oktober–mars.
-    </p>
-}
-
-<section class="mt-4">
-    <div style="margin: 8px;">
-        <p class="mb-0 d-flex gap-2">
-            <a href="index" class="btn btn-secondary btn-sm">Översikt</a>
-            <a href="electricity-prices" class="btn btn-secondary btn-sm">Elpriser</a>
-            <a href="monthly-costs" class="btn btn-secondary btn-sm">Nätavgifter</a>
+                </tfoot>
+            </table>
+        </div>
+        <p class="text-muted mt-2" style="font-size: 0.8rem;">
+            Värden i kWh. <span class="text-danger fw-semibold">Röda värden</span> = vardagar 07–19, oktober–mars.
+            <strong>Fetstil</strong> = högsta värdet totalt och/eller högsta värdet vardagar 07–19, oktober–mars.
         </p>
-    </div>
-</section>
+    }
+
+    <section class="mt-4">
+        <div style="margin: 8px;">
+            <p class="mb-0 d-flex gap-2">
+                <a href="index" class="btn btn-secondary btn-sm">Översikt</a>
+                <a href="electricity-prices" class="btn btn-secondary btn-sm">Elpriser</a>
+                <a href="monthly-costs" class="btn btn-secondary btn-sm">Nätavgifter</a>
+            </p>
+        </div>
+    </section>
 
 </div>
 
@@ -299,4 +308,5 @@ else
         var date = new DateTime(selectedMonth.Year, selectedMonth.Month, day);
         return date.DayOfWeek >= DayOfWeek.Monday && date.DayOfWeek <= DayOfWeek.Friday;
     }
+
 }

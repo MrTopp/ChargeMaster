@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
 namespace ChargeMaster.Services.Wallbox;
@@ -33,19 +34,19 @@ public sealed class WallboxSchemaEntry : IEquatable<WallboxSchemaEntry>
         if (ReferenceEquals(this, other)) return true;
 
         return string.Equals(Start, other.Start, StringComparison.Ordinal)
-            && string.Equals(
-                Stop == "24:00:00" ?
-                    "00:00:00" : Stop,
-                other.Stop == "24:00:00" ?
-                "00:00:00" : other.Stop, StringComparison.Ordinal)
-            && string.Equals(Weekday, other.Weekday, StringComparison.Ordinal);
+               && string.Equals(
+                   Stop == "24:00:00" ? "00:00:00" : Stop,
+                   other.Stop == "24:00:00" ? "00:00:00" : other.Stop, StringComparison.Ordinal)
+               && string.Equals(Weekday, other.Weekday, StringComparison.Ordinal);
     }
 
     public override bool Equals(object? obj) => Equals(obj as WallboxSchemaEntry);
 
     public override int GetHashCode() => HashCode.Combine(
         Start is null ? 0 : StringComparer.Ordinal.GetHashCode(Start),
-        Stop is null ? 0 : StringComparer.Ordinal.GetHashCode(Stop == "24:00:00" ? "00:00:00" : Stop),
+        Stop is null
+            ? 0
+            : StringComparer.Ordinal.GetHashCode(Stop == "24:00:00" ? "00:00:00" : Stop),
         Weekday is null ? 0 : StringComparer.Ordinal.GetHashCode(Weekday));
 }
 
@@ -54,12 +55,15 @@ public sealed class WallboxSchemaEntry : IEquatable<WallboxSchemaEntry>
 /// </summary>
 public sealed class WallboxWeekdayJsonConverter : JsonConverter<string?>
 {
-    public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override string? Read(
+        ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         return reader.TokenType switch
         {
             JsonTokenType.String => reader.GetString(),
-            JsonTokenType.Number => reader.TryGetInt32(out var i) ? i.ToString() : reader.GetDouble().ToString(System.Globalization.CultureInfo.InvariantCulture),
+            JsonTokenType.Number => reader.TryGetInt32(out var i)
+                ? i.ToString()
+                : reader.GetDouble().ToString(System.Globalization.CultureInfo.InvariantCulture),
             JsonTokenType.Null => null,
             _ => reader.GetString()
         };

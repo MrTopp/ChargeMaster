@@ -1,9 +1,7 @@
 ﻿using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
 using Moq;
 
 namespace ChargeMaster.xUnit.Services.ElectricityPrice;
@@ -19,31 +17,33 @@ public class ElectricityPriceServiceDebug : IDisposable
         // Use real HttpClient
         _httpClient = new HttpClient();
 
-        var connectionString = "Host=127.0.0.1;Port=5432;Database=chargemaster_db;Username=postgres;Password=bulle";
+        var connectionString
+            = "Host=127.0.0.1;Port=5432;Database=chargemaster_db;Username=postgres;Password=bulle";
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseNpgsql(connectionString)
             .Options;
-        
+
         _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated();
-        
+
         var loggerMock = new Mock<ILogger<ElectricityPriceService>>();
-        
+
         _service = new ElectricityPriceService(_httpClient, null!, loggerMock.Object);
     }
 
     public void Dispose()
     {
         if (_context.Database.CurrentTransaction != null)
-        { 
+        {
             _context.Database.CommitTransaction();
         }
+
         _context.Dispose();
         _httpClient.Dispose();
         GC.SuppressFinalize(this);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task HasPricesForDateAsync_ReturnsFalse_WhenNoPricesExist()
     {
         // Arrange
@@ -55,12 +55,12 @@ public class ElectricityPriceServiceDebug : IDisposable
         // Assert
         Assert.False(result);
     }
-    
+
     /// <summary>
     /// Test running data fetching, deleting existing prices to force a fetch.
     /// </summary>
     /// <returns></returns>
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_Rensa_OK()
     {
         // Arrange
@@ -81,27 +81,25 @@ public class ElectricityPriceServiceDebug : IDisposable
             .Where(p => p.TimeStart >= date && p.TimeStart < date.AddDays(1))
             .ToListAsync(TestContext.Current.CancellationToken);
         Assert.InRange(prices.Count, 96, 96); // Expecting around 96 entries
-
     }
-    
 
-    [Fact(Skip="Only for interactive testing")]
+
+    [Fact(Skip = "Only for interactive testing")]
     public async Task FetchAndStorePricesForDateAsync_utan_rensning_OK()
     {
         // Arrange
         // Use a real valid date for the API. 
         var date = DateTime.Today;
-        
+
         // Act
         await _service.FetchAndStorePricesForDateAsync(DateOnly.FromDateTime(date));
 
         // Assert -
         // Verify database content, prices from day 'date' should be 24*4 = 96 entries
         var prices = await _context.ElectricityPrices
-            .Where(x => x.TimeStart >= date 
-                        && x.TimeStart < date.AddDays(1)).ToListAsync(TestContext.Current.CancellationToken);
+            .Where(x => x.TimeStart >= date
+                        && x.TimeStart < date.AddDays(1))
+            .ToListAsync(TestContext.Current.CancellationToken);
         Assert.InRange(prices.Count, 96, 96);
-
     }
-
 }

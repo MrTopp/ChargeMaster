@@ -102,7 +102,6 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
             BatteryLevel = 60,
             ChargingSettingsTargetLevel = 80,
             ChargingPower = 0.0,
-
         };
     }
 
@@ -144,8 +143,10 @@ public class VWService(HttpClient httpClient, ILogger<VWService> logger)
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "PostAsync: Fel vid skickning av VW-kommando till {Url}", relativeUrl);
-            throw new CarConnectionException($"PostAsync: Kunde inte skicka kommando till {relativeUrl}", ex);
+            logger.LogError(ex, "PostAsync: Fel vid skickning av VW-kommando till {Url}",
+                relativeUrl);
+            throw new CarConnectionException(
+                $"PostAsync: Kunde inte skicka kommando till {relativeUrl}", ex);
         }
     }
 }

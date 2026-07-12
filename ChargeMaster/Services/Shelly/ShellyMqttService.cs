@@ -1,7 +1,5 @@
 ﻿using System.Buffers;
-
 using Microsoft.EntityFrameworkCore;
-
 using MQTTnet;
 
 namespace ChargeMaster.Services.Shelly;
@@ -21,9 +19,9 @@ public class ShellyMqttService(
     public readonly Dictionary<string, double> Temperatures = new()
     {
         // Defaultvärden, kommer att uppdateras vid start från databasen
-        {"arbetsrum", 21.5},
-        {"hall", 21.5},
-        {"sovrum", 21.5}
+        { "arbetsrum", 21.5 },
+        { "hall", 21.5 },
+        { "sovrum", 21.5 }
     };
 
     /// <summary>
@@ -157,11 +155,9 @@ public class ShellyMqttService(
     internal bool IsConnected => _mqttClient?.IsConnected ?? false;
 
 
-
     public ShellyMqttService()
         : this(null!, null!)
     {
-
     }
 
     private EventHandler<ShellyTemperatureChangedEventArgs>? _temperatureChangedHandlers;
@@ -220,7 +216,8 @@ public class ShellyMqttService(
                     if (temp != null)
                     {
                         Temperatures[temp.DeviceId] = temp.TemperatureCelsius;
-                        logger?.LogDebug("Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
+                        logger?.LogDebug(
+                            "Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
                             temp.DeviceId, temp.TemperatureCelsius);
                     }
                 }
@@ -235,7 +232,8 @@ public class ShellyMqttService(
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "Fel vid hämtning av temperaturer från databasen, använder defaultvärden");
+            logger?.LogError(ex,
+                "Fel vid hämtning av temperaturer från databasen, använder defaultvärden");
         }
     }
 
@@ -245,7 +243,8 @@ public class ShellyMqttService(
     /// <param name="brokerAddress">IP-adress eller hostname för MQTT-brokern</param>
     /// <param name="brokerPort">Port för MQTT-brokern (standard: 1883)</param>
     /// <param name="clientId">Klient-ID för MQTT-anslutningen</param>
-    public async Task ConnectAsync(string brokerAddress, int brokerPort = 1883, string? clientId = null)
+    public async Task ConnectAsync(
+        string brokerAddress, int brokerPort = 1883, string? clientId = null)
     {
         clientId ??= $"chargemaster-{Guid.NewGuid().ToString("N")[..8]}";
 
@@ -267,7 +266,8 @@ public class ShellyMqttService(
             .Build();
 
         await _mqttClient.ConnectAsync(_mqttOptions, _disposeCts?.Token ?? CancellationToken.None);
-        logger.LogInformation("Ansluten till MQTT-server på {Address}:{Port} med klient-ID {ClientId}",
+        logger.LogInformation(
+            "Ansluten till MQTT-server på {Address}:{Port} med klient-ID {ClientId}",
             brokerAddress, brokerPort, clientId);
     }
 
@@ -333,14 +333,14 @@ public class ShellyMqttService(
     {
         double temperature = message.TemperatureCelsius;
         string src = message.DeviceId;
-        
+
         bool changed = false;
         lock (_temperaturesLock)
         {
             if (Math.Abs(Temperatures[src] - temperature) > 0.05)
             {
                 Temperatures[src] = temperature;
-                changed = true; 
+                changed = true;
             }
         }
 
@@ -392,7 +392,8 @@ public class ShellyMqttService(
         while (_disposeCts is { IsCancellationRequested: false })
         {
             attempt++;
-            logger.LogInformation("Försöker återansluta till MQTT (försök #{Attempt}) om {Delay}s...",
+            logger.LogInformation(
+                "Försöker återansluta till MQTT (försök #{Attempt}) om {Delay}s...",
                 attempt, delaySeconds);
 
             try

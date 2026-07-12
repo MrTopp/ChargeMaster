@@ -16,7 +16,8 @@ public class WallboxWorkerTests
         long currentEnergy = 1100;
 
         // Act
-        var result = WallboxWorker.GenerateHourBoundaryReadings(previousTime, previousEnergy, currentTime, currentEnergy);
+        var result = WallboxWorker.GenerateHourBoundaryReadings(previousTime, previousEnergy,
+            currentTime, currentEnergy);
 
         // Assert
         Assert.Single(result);
@@ -38,7 +39,8 @@ public class WallboxWorkerTests
         // Förväntad energi vid 15:00 = 1000 + 60 = 1060
 
         // Act
-        var result = WallboxWorker.GenerateHourBoundaryReadings(previousTime, previousEnergy, currentTime, currentEnergy);
+        var result = WallboxWorker.GenerateHourBoundaryReadings(previousTime, previousEnergy,
+            currentTime, currentEnergy);
 
         // Assert
         Assert.Equal(2, result.Count);
@@ -69,7 +71,8 @@ public class WallboxWorkerTests
         // Tid till 17:00 = 150 min -> 1000 * 150/165 ≈ 909 Wh -> AccEnergy = 1909
 
         // Act
-        var result = WallboxWorker.GenerateHourBoundaryReadings(previousTime, previousEnergy, currentTime, currentEnergy);
+        var result = WallboxWorker.GenerateHourBoundaryReadings(previousTime, previousEnergy,
+            currentTime, currentEnergy);
 
         // Assert
         Assert.Equal(4, result.Count); // 3 timgränser + slutmätning
@@ -97,12 +100,12 @@ public class WallboxWorkerTests
         long currentEnergy = 1100;
 
         // Act
-        var result = WallboxWorker.GenerateHourBoundaryReadings(previousTime, previousEnergy, currentTime, currentEnergy);
+        var result = WallboxWorker.GenerateHourBoundaryReadings(previousTime, previousEnergy,
+            currentTime, currentEnergy);
 
         // Assert
         Assert.Equal(2, result.Count);
         Assert.Equal(new DateTime(2024, 1, 16, 0, 0, 0), result[0].ReadAt);
         Assert.Equal(currentTime, result[1].ReadAt);
     }
-
 }

@@ -24,7 +24,8 @@ public static class ShellyMqttServiceTestHelper
         // Verification: Ensure the mock was created successfully
         if (mockServiceScopeFactory == null)
         {
-            throw new InvalidOperationException("Failed to create mock IServiceScopeFactory instance");
+            throw new InvalidOperationException(
+                "Failed to create mock IServiceScopeFactory instance");
         }
 
         return mockServiceScopeFactory;
@@ -42,7 +43,8 @@ public static class ShellyMqttServiceTestHelper
         // Verification: Ensure the mock was created successfully
         if (mockLogger == null)
         {
-            throw new InvalidOperationException("Failed to create mock ILogger<ShellyMqttService> instance");
+            throw new InvalidOperationException(
+                "Failed to create mock ILogger<ShellyMqttService> instance");
         }
 
         return mockLogger;
@@ -121,7 +123,8 @@ public static class ShellyMqttServiceTestHelper
         // Verification: Ensure service was created successfully
         if (service == null)
         {
-            throw new InvalidOperationException("ShellyMqttService instance creation resulted in null");
+            throw new InvalidOperationException(
+                "ShellyMqttService instance creation resulted in null");
         }
 
         return service;
@@ -150,7 +153,8 @@ public static class ShellyMqttServiceTestHelper
         // Verification: Ensure service was created successfully
         if (service == null)
         {
-            throw new InvalidOperationException("ShellyMqttService instance creation resulted in null");
+            throw new InvalidOperationException(
+                "ShellyMqttService instance creation resulted in null");
         }
 
         return service;
@@ -205,7 +209,8 @@ public static class ShellyMqttServiceTestHelper
         if (exception == null)
             throw new ArgumentNullException(nameof(exception));
 
-        mockMqttClient.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
+        mockMqttClient.Setup(c =>
+                c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(exception);
 
         return mockMqttClient;

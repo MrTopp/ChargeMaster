@@ -1,5 +1,4 @@
 ﻿using ChargeMaster.Services.Daikin;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Moq;
@@ -22,7 +21,8 @@ public class DaikinServiceTests : IDisposable
         var mockEnvironment = new Mock<IHostEnvironment>();
         mockEnvironment.Setup(x => x.EnvironmentName).Returns("Production");
 
-        _service = new DaikinService(_httpClient, new Logger<DaikinService>(new LoggerFactory()), mockEnvironment.Object);
+        _service = new DaikinService(_httpClient, new Logger<DaikinService>(new LoggerFactory()),
+            mockEnvironment.Object);
     }
 
     public void Dispose()
@@ -32,7 +32,7 @@ public class DaikinServiceTests : IDisposable
 
     // ==================== COMMON ENDPOINTS ====================
 
-    [Fact(Skip="Allmän info, inget som behöver loggas")]
+    [Fact(Skip = "Allmän info, inget som behöver loggas")]
     public async Task GetBasicInfoAsync_ReturnsDeviceInfo()
     {
         // Allmän info om pumpen, inget som behöver loggas
@@ -48,7 +48,7 @@ public class DaikinServiceTests : IDisposable
         Assert.InRange(result.Power.Value, 0, 1);
     }
 
-    [Fact(Skip="Fjärrkommunikationskonfiguration, inget som behöver loggas")]
+    [Fact(Skip = "Fjärrkommunikationskonfiguration, inget som behöver loggas")]
     public async Task GetRemoteMethodAsync_ReturnsRemoteConfig()
     {
         // 
@@ -60,7 +60,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotNull(result.NoticeSyncInterval);
     }
 
-    [Fact(Skip="Hämtar pumpens klocka, vi vet redan tiden")]
+    [Fact(Skip = "Hämtar pumpens klocka, vi vet redan tiden")]
     public async Task GetDateTimeAsync_ReturnsDateTime()
     {
         DaikinDateTime? result = await _service.GetDateTimeAsync();
@@ -70,7 +70,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotNull(result.Status);
     }
 
-    [Fact(Skip="Semesterläge, Inte intressant")]
+    [Fact(Skip = "Semesterläge, Inte intressant")]
     public async Task GetHolidayAsync_ReturnsHolidayStatus()
     {
         DaikinHoliday? result = await _service.GetHolidayAsync();
@@ -79,7 +79,7 @@ public class DaikinServiceTests : IDisposable
         Assert.IsType<bool>(result.IsHoliday);
     }
 
-    [Fact(Skip="WiFi konfiguration")]
+    [Fact(Skip = "WiFi konfiguration")]
     public async Task GetWifiSettingAsync_ReturnsWifiConfig()
     {
         DaikinWifiSetting? result = await _service.GetWifiSettingAsync();
@@ -89,7 +89,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotNull(result.Link);
     }
 
-    [Fact(Skip="Semesterläge inställning")]
+    [Fact(Skip = "Semesterläge inställning")]
     public async Task SetHolidayAsync_RestoresOriginal()
     {
         DaikinHoliday? original = await _service.GetHolidayAsync();
@@ -112,7 +112,7 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact(Skip="Regionkod inställning")]
+    [Fact(Skip = "Regionkod inställning")]
     public async Task SetRegionCodeAsync_ReturnsTrue()
     {
         bool result = await _service.SetRegionCodeAsync("eu");
@@ -121,7 +121,7 @@ public class DaikinServiceTests : IDisposable
 
     // ==================== AIRCON ENDPOINTS ====================
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetControlInfoAsync_ReturnsSettings()
     {
         DaikinControlInfo? result = await _service.GetControlInfoAsync();
@@ -134,12 +134,12 @@ public class DaikinServiceTests : IDisposable
         Assert.False(string.IsNullOrWhiteSpace(result.ModeDescription));
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetSensorInfoAsync_ReturnsTemperatures()
     {
         // Temperatur inne och ute
         DaikinSensorInfo? result = await _service.GetSensorInfoAsync();
-        
+
         Assert.NotNull(result);
         Assert.NotNull(result.IndoorTemperature);
         Assert.InRange(result.IndoorTemperature.Value, -20, 50);
@@ -148,7 +148,7 @@ public class DaikinServiceTests : IDisposable
         Assert.Equal(0, result.ErrorCode);
     }
 
-    [Fact(Skip="Hårdvarukonfiguration")]
+    [Fact(Skip = "Hårdvarukonfiguration")]
     public async Task GetModelInfoAsync_ReturnsCapabilities()
     {
         DaikinModelInfo? result = await _service.GetModelInfoAsync();
@@ -158,7 +158,7 @@ public class DaikinServiceTests : IDisposable
         Assert.False(string.IsNullOrWhiteSpace(result.ProtocolVersion));
     }
 
-    [Fact(Skip="Returnerar 0")]
+    [Fact(Skip = "Returnerar 0")]
     public async Task GetTargetAsync_ReturnsTarget()
     {
         DaikinTarget? result = await _service.GetTargetAsync();
@@ -167,7 +167,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotNull(result.Target);
     }
 
-    [Fact(Skip="Vet inte vad det betyder")]
+    [Fact(Skip = "Vet inte vad det betyder")]
     public async Task GetPriceAsync_ReturnsPrice()
     {
         DaikinPrice? result = await _service.GetPriceAsync();
@@ -177,7 +177,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotNull(result.PriceDec);
     }
 
-    [Fact(Skip="Körtid för dagen")]
+    [Fact(Skip = "Körtid för dagen")]
     public async Task GetWeekPowerAsync_ReturnsWeeklyData()
     {
         DaikinWeekPower? result = await _service.GetWeekPowerAsync();
@@ -187,7 +187,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotEmpty(result.WeeklyData);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetWeekPowerExAsync_ReturnsWeeklyDataExtended()
     {
         DaikinWeekPowerEx? result = await _service.GetWeekPowerExAsync();
@@ -200,7 +200,7 @@ public class DaikinServiceTests : IDisposable
         Assert.Equal(14, result.WeekCool.Length);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetDayPowerExAsync_ReturnsDailyDataExtended()
     {
         DaikinDayPowerEx? result = await _service.GetDayPowerExAsync();
@@ -214,7 +214,7 @@ public class DaikinServiceTests : IDisposable
         Assert.Equal(24, result.PreviousDayCool.Length);
     }
 
-    [Fact(Skip="Returnerar 5 ggr verkligt värde")]
+    [Fact(Skip = "Returnerar 5 ggr verkligt värde")]
     public async Task GetYearPowerAsync_ReturnsYearlyData()
     {
         DaikinYearPower? result = await _service.GetYearPowerAsync();
@@ -224,7 +224,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotEmpty(result.PreviousYear);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task GetYearPowerExAsync_ReturnsYearlyDataExtended()
     {
         DaikinYearPowerEx? result = await _service.GetYearPowerExAsync();
@@ -240,7 +240,7 @@ public class DaikinServiceTests : IDisposable
         Assert.Equal(12, result.PreviousYearHeat.Length);
     }
 
-    [Fact(Skip="Används inte")]
+    [Fact(Skip = "Används inte")]
     public async Task GetMonthPowerExAsync_ReturnsMonthlyDataExtended()
     {
         // Summerad förbrukning per dag
@@ -253,7 +253,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotEmpty(result.PreviousMonthCool);
     }
 
-    [Fact(Skip="Schema inte intressant")]
+    [Fact(Skip = "Schema inte intressant")]
     public async Task GetScheduleTimerInfoAsync_ReturnsScheduleInfo()
     {
         DaikinScheduleTimerInfo? result = await _service.GetScheduleTimerInfoAsync();
@@ -264,7 +264,7 @@ public class DaikinServiceTests : IDisposable
         Assert.NotNull(result.Enabled);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task SetControlInfoAsync_RestoresOriginal()
     {
         // Ställer måltemperatur, fungerar!
@@ -298,7 +298,7 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact(Skip="Vad gör den här?")]
+    [Fact(Skip = "Vad gör den här?")]
     public async Task SetTargetAsync_ReturnsTrue()
     {
         bool result = await _service.SetTargetAsync(0);
@@ -307,7 +307,7 @@ public class DaikinServiceTests : IDisposable
 
     // ==================== CONVENIENCE METHODS ====================
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task TurnOffAndOn_RestoresOriginalState()
     {
         DaikinControlInfo? original = await _service.GetControlInfoAsync();
@@ -336,7 +336,7 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task SetTargetTemperatureAsync_RestoresOriginal()
     {
         DaikinControlInfo? original = await _service.GetControlInfoAsync();
@@ -363,7 +363,7 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact(Skip="Används inte")]
+    [Fact(Skip = "Används inte")]
     public async Task SetFanRateAsync_RestoresOriginal()
     {
         DaikinControlInfo? original = await _service.GetControlInfoAsync();
@@ -390,7 +390,7 @@ public class DaikinServiceTests : IDisposable
         }
     }
 
-    [Fact(Skip="Används inte")]
+    [Fact(Skip = "Används inte")]
     public async Task SetFanDirectionAsync_RestoresOriginal()
     {
         DaikinControlInfo? original = await _service.GetControlInfoAsync();
@@ -417,7 +417,7 @@ public class DaikinServiceTests : IDisposable
     /// <summary>
     /// Växla mellan kyla och värme och tillbaka
     /// </summary>
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task SetModeAsync_RestoresOriginal()
     {
         DaikinControlInfo? original = await _service.GetControlInfoAsync();

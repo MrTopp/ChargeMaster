@@ -33,14 +33,18 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 {
     private readonly HttpClient _httpClient = fixture.HttpClient;
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task InitializeWallboxStatus_OK()
     {
         // Arrange
-        var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
+        var wallbox
+            = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = new InfluxDbService(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), null!,
+        var influxDbService = new InfluxDbService(
+            Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
+                { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }),
+            null!,
             influxLogger);
         var worker = new WallboxWorker(null!, wallbox, influxDbService, logger);
 
@@ -54,15 +58,18 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         Assert.True(result.Serial > 0);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task CheckWallboxTime_OK()
     {
         // Arrange
-        var wallbox = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
+        var wallbox
+            = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
         var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = new InfluxDbService(Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }), 
-                null!, influxLogger);
+        var influxDbService = new InfluxDbService(
+            Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
+                { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }),
+            null!, influxLogger);
 
         var worker = new WallboxWorker(null!, wallbox, influxDbService, logger);
 
@@ -103,7 +110,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         await worker.CheckWallboxTimeAsync(status);
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task ReadEnergyAsync_Debug()
     {
         // Arrange - Set up services with database and wallbox
@@ -122,7 +129,8 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var worker = new WallboxWorker(scopeFactory, wallboxService, influxDbService, logger);
 
         // Act - Run ReadEnergyAsync for debugging
-        var result = await worker.ReadEnergyAsync(TestContext.Current.CancellationToken, DateTime.Now);
+        var result
+            = await worker.ReadEnergyAsync(TestContext.Current.CancellationToken, DateTime.Now);
 
         // Log results for debugging
         if (result != null)
@@ -144,7 +152,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         }
     }
 
-    [Fact(Skip="Only for interactive testing")]
+    [Fact(Skip = "Only for interactive testing")]
     public async Task KalkyleraGrans_NoAssertion()
     {
         // Arrange - Set up services with database and wallbox
@@ -171,14 +179,16 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
             .AddJsonFile(FindAppSettings(), optional: false)
             .Build();
         var connectionString = config.GetConnectionString("DefaultConnection")
-                               ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                               ?? throw new InvalidOperationException(
+                                   "Connection string 'DefaultConnection' not found.");
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
         services.AddLogging(builder => builder.AddConsole());
         services.AddHttpClient();
         services.Configure<InfluxDBOptions>(config.GetSection("InfluxDB"));
-        services.AddSingleton(new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory())));
+        services.AddSingleton(new WallboxService(_httpClient,
+            new Logger<WallboxService>(new LoggerFactory())));
         services.AddSingleton<ElectricityPriceService>();
         services.AddSingleton<InfluxDbService>();
         return services;
@@ -190,7 +200,8 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
     private static string FindAppSettings()
     {
         var path = Path.GetFullPath(
-            Path.Combine(AppContext.BaseDirectory, "../../../../ChargeMaster/appsettings.Development.json"));
+            Path.Combine(AppContext.BaseDirectory,
+                "../../../../ChargeMaster/appsettings.Development.json"));
 
         if (!File.Exists(path))
         {
@@ -200,8 +211,8 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
 
         return path;
     }
-    
-    
+
+
     [Fact]
     public async Task CalculateHourlyEnergyUsageAsync_Debug()
     {
@@ -212,15 +223,17 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
             .Build();
 
         var connectionString = config.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                               ?? throw new InvalidOperationException(
+                                   "Connection string 'DefaultConnection' not found.");
 
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
         services.AddLogging(builder => builder.AddConsole());
         services.AddHttpClient();
         services.Configure<InfluxDBOptions>(config.GetSection("InfluxDB"));
-        
+
         var httpClient = new HttpClient { BaseAddress = new Uri("http://192.168.1.205:8080/") };
-        services.AddSingleton(new WallboxService(httpClient, new Logger<WallboxService>(new LoggerFactory())));
+        services.AddSingleton(new WallboxService(httpClient,
+            new Logger<WallboxService>(new LoggerFactory())));
         services.AddSingleton<ElectricityPriceService>();
         services.AddSingleton<InfluxDbService>();
 
@@ -235,9 +248,11 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var dateInMonth = new DateTime(2026, 5, 1); // Target month
 
         // Act
-        var result = await worker.CalculateHourlyEnergyUsageAsync(dateInMonth, CancellationToken.None);
+        var result
+            = await worker.CalculateHourlyEnergyUsageAsync(dateInMonth, CancellationToken.None);
 
         // Log result for debugging
-        logger.LogInformation("CalculateHourlyEnergyUsageAsync returned {Count} entries for {Date}", result.Count, dateInMonth);
+        logger.LogInformation("CalculateHourlyEnergyUsageAsync returned {Count} entries for {Date}",
+            result.Count, dateInMonth);
     }
 }
