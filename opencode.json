@@ -1,0 +1,35 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [".github/copilot-instructions.md"],
+  "permission": {
+    "edit": "allow",
+    "read": {
+      "*": "allow"
+    },
+    "bash": "ask",
+    "webfetch": "ask",
+    "grep": "allow",
+    "glob": "allow",
+    "question": "allow"
+  },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama",
+      "options": {
+        "baseURL": "http://localhost:11434/v1",
+        "num_ctx": 262144,
+        "timeout": 600000
+      },
+      "models": {
+        "SetneufPT/Gemma4-12B_Q4_64K_16GB-GPU:latest": {
+          "name": "Gemma4 12B"
+        },
+        "qwen2.5-coder:14b": {
+          "name": "Qwen 2.5 Coder 14B"
+        }
+      }
+    }
+  }
+
+}
