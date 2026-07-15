@@ -176,7 +176,7 @@ namespace ChargeMaster
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<ShellyWorker>());
                 builder.Services.AddHostedService(sp => sp.GetRequiredService<SmhiWorker>());
                 //builder.Services.AddHostedService(sp => sp.GetRequiredService<TibberWorker>());
-                //builder.Services.AddHostedService(sp => sp.GetRequiredService<LinuxWorker>());
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<LinuxWorker>());
 
                 var app = builder.Build();
 
@@ -190,15 +190,17 @@ namespace ChargeMaster
                                                .XForwardedProto
                     });
                     // Säkerhetsheaders
-                    app.Use(async (context, next) =>
+                    // Define the middleware as a local function to resolve ambiguity
+                    async Task SecurityHeadersMiddleware(HttpContext context, RequestDelegate next)
                     {
                         var headers = context.Response.Headers;
                         headers["X-Content-Type-Options"] = "nosniff";
                         headers["X-Frame-Options"] = "DENY";
                         headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
                         headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
-                        await next();
-                    });
+                        await next(context);
+                    }
+                    app.Use(SecurityHeadersMiddleware);
                     app.UsePathBase("/ChargeMaster");
                 }
 
