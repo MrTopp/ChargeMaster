@@ -66,7 +66,7 @@ public class WallboxWorker(
     /// <summary>
     /// Flagga att initieringen av förbrukningsberäkning är klar.
     /// </summary>
-    public bool WallboxInitierad { get; private set; } = false;
+    public bool WallboxInitierad { get; private set; }
 
     /// <summary>
     /// Förbrukning föregående timme
@@ -120,7 +120,7 @@ public class WallboxWorker(
     /// </summary>
     private List<HourlyEnergyUsage> HourlyEnergyUsageCache { get; set; } = [];
 
-    private object CacheLocker { get; } = new();
+    private readonly SemaphoreSlim _cacheLock = new(1, 1);
 
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -633,12 +633,9 @@ public class WallboxWorker(
         DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
-        lock (CacheLocker)
-        {
-            return hourlyUsage.OrderByDescending(x => x.EnergyUsageWh)
-                .FirstOrDefault(
-                    new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
-        }
+        return hourlyUsage.OrderByDescending(x => x.EnergyUsageWh)
+            .FirstOrDefault(
+                new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
     }
 
     /// <summary>
@@ -652,18 +649,15 @@ public class WallboxWorker(
         var hourlyUsage = await GetHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
 
         // Filter for October to March weekdays 7-19
-        lock (CacheLocker)
-        {
-            return hourlyUsage
-                .Where(x => x.Hour.Hour >= 7 && x.Hour.Hour < 19) // Hours between 7-19
-                .Where(x =>
-                    x.Hour.DayOfWeek >= DayOfWeek.Monday &&
-                    x.Hour.DayOfWeek <= DayOfWeek.Friday) // Weekdays only
-                .Where(x => x.Hour.Month >= 10 || x.Hour.Month <= 3) // October to March
-                .OrderByDescending(x => x.EnergyUsageWh)
-                .FirstOrDefault(
-                    new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
-        }
+        return hourlyUsage
+            .Where(x => x.Hour.Hour >= 7 && x.Hour.Hour < 19) // Hours between 7-19
+            .Where(x =>
+                x.Hour.DayOfWeek >= DayOfWeek.Monday &&
+                x.Hour.DayOfWeek <= DayOfWeek.Friday) // Weekdays only
+            .Where(x => x.Hour.Month >= 10 || x.Hour.Month <= 3) // October to March
+            .OrderByDescending(x => x.EnergyUsageWh)
+            .FirstOrDefault(
+                new HourlyEnergyUsage(new DateTime(dateInMonth.Year, dateInMonth.Month, 1), 0));
     }
 
     /// <summary>
@@ -675,7 +669,9 @@ public class WallboxWorker(
     internal async Task<List<HourlyEnergyUsage>> GetHourlyEnergyUsageAsync(
         DateTime dateInMonth, CancellationToken cancellationToken = default)
     {
-        lock (CacheLocker)
+        // Acquire semaphore to perform calculation
+        await _cacheLock.WaitAsync(cancellationToken);
+        try
         {
             // Cache är giltig om den är beräknad under samma timme som nuvarande tid och för samma månad
             var now = DateTime.Now;
@@ -690,23 +686,23 @@ public class WallboxWorker(
             {
                 return HourlyEnergyUsageCache;
             }
-        }
 
-        // Beräkna ny data
-        var result = await CalculateHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
+            // Beräkna ny data
+            var result = await CalculateHourlyEnergyUsageAsync(dateInMonth, cancellationToken);
 
-        // Uppdatera cachen
-        lock (CacheLocker)
-        {
-            var dt = dateInMonth;
+            // Uppdatera cachen
             LastHourlyEnergyUsageCalculationTime
                 = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
             var nu = DateTime.Now;
             LastHourlyEnergyUsageCacheTime = new DateTime(nu.Year, nu.Month, nu.Day, nu.Hour, 0, 0);
             HourlyEnergyUsageCache = result;
-        }
 
-        return result;
+            return result;
+        }
+        finally
+        {
+            _cacheLock.Release();
+        }
     }
 
     /// <summary>
