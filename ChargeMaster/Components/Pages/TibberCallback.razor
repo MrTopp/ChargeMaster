@@ -92,24 +92,15 @@
                 return;
             }
 
-            // Validera state-parameter från sessionStorage
-            try
+            // Validera state-parameter från server-lagring
+            if (!TibberOAuthStateStorage.ValidateAndRemoveState(state))
             {
-                var savedState = await Js.InvokeAsync<string>("sessionStorage.getItem", "tibber_oauth_state");
-                if (savedState != state)
-                {
-                    _errorMessage = "State-parameter matchar inte. Möjlig CSRF-attack.";
-                    Logger.LogWarning("State-parameter mismatch - möjlig CSRF-attack");
-                    _isSuccess = false;
-                    _isProcessing = false;
-                    StateHasChanged();
-                    return;
-                }
-            }
-            catch (Exception jsEx)
-            {
-                Logger.LogWarning(jsEx, "Could not validate state from sessionStorage, continuing anyway");
-                // State validation failed, but continue - state is optional if JS fails
+                _errorMessage = "State-parameter matchar inte. Möjlig CSRF-attack.";
+                Logger.LogWarning("State-parameter mismatch - möjlig CSRF-attack");
+                _isSuccess = false;
+                _isProcessing = false;
+                StateHasChanged();
+                return;
             }
 
             // Utbyt koden mot token direkt via OAuthService

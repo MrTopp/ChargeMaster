@@ -476,10 +476,10 @@ public class ChargeWorker(
             kvartlista = priser.Where(x => x.ChargingAllowed
                                            && x.TimeEnd > DateTime.Now)
                 .OrderBy(x => x.SekPerKwh)
-                //.Take(antalKvartar)
+                .Take(antalKvartar)
                 // tillfälligt, eftersom vw inte berättar laddstatus får 
                 // vi helt enkelt ladda om priset är under 1 SEK.
-                .Where(x => x.SekPerKwh < prisTak)
+                //.Where(x => x.SekPerKwh < prisTak)
                 .ToList();
 
             var nextKvart = kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();

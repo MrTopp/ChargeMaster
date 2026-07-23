@@ -57,7 +57,6 @@ public class TibberOAuthService(
             logger.LogInformation("TokenUrl: {TokenUrl}", _options.TokenUrl);
             logger.LogInformation("ClientId: {ClientId}", _options.ClientId);
             logger.LogInformation("RedirectUri: {RedirectUri}", _options.RedirectUri);
-            logger.LogInformation("HttpClient BaseAddress: {BaseAddress}", httpClient.BaseAddress?.ToString() ?? "null");
 
             var requestBody = new Dictionary<string, string>
             {
@@ -70,8 +69,7 @@ public class TibberOAuthService(
 
             using var content = new FormUrlEncodedContent(requestBody);
 
-            // Create absolute URI to ensure it's used correctly
-            var tokenUri = new Uri(_options.TokenUrl);
+            var tokenUri = new Uri(_options.TokenUrl); 
             logger.LogInformation("Posting to absolute URI: {Uri}", tokenUri.AbsoluteUri);
 
             var response = await httpClient.PostAsync(tokenUri, content);
@@ -132,7 +130,7 @@ public class TibberOAuthService(
             await tokenStorage.SaveAsync(tokens);
             logger.LogInformation("Tibber tokens obtained and saved successfully");
             logger.LogInformation("Saved RefreshToken: {HasRefreshToken}", !string.IsNullOrEmpty(tokens.RefreshToken));
-
+            
             return (true, null);
         }
         catch (Exception ex)
@@ -150,9 +148,9 @@ public class TibberOAuthService(
         try
         {
             var tokens = await tokenStorage.LoadAsync();
-            if (tokens?.RefreshToken == null)
+            if (tokens == null || string.IsNullOrEmpty(tokens.RefreshToken))
             {
-                logger.LogWarning("Ingen refresh token tillgänglig");
+                logger.LogError("Tibber-token har upphört att gälla. Gå till Tibber-inloggning för att uppdatera.");
                 return false;
             }
 
@@ -176,9 +174,9 @@ public class TibberOAuthService(
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
+                logger.LogError("Tibber-token kunde inte uppdateras. Logga in igen för att reparera detta.");
                 logger.LogError("Fel vid token-uppdatering. Status: {Status}", response.StatusCode);
                 logger.LogError("Error response: {ErrorContent}", errorContent);
-                logger.LogError("Kunde inte uppdatera tokens");
                 return false;
             }
 
@@ -205,7 +203,7 @@ public class TibberOAuthService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Fel vid token-uppdatering");
+            logger.LogError(ex, "Tibber-token kunde inte uppdateras. Logga in igen för att reparera detta.");
             return false;
         }
     }
@@ -221,7 +219,7 @@ public class TibberOAuthService(
 
             if (tokens == null)
             {
-                logger.LogInformation("No token stored yet");
+                logger.LogError("Tibber är inte autentiserad. Gå till Tibber-inloggning för att koppla upp konton.");
                 return null;
             }
 
@@ -240,12 +238,12 @@ public class TibberOAuthService(
                 return tokens?.AccessToken;
             }
 
-            logger.LogError("Kunde inte uppdatera tokens");
+            logger.LogError("Tibber-token har upphört att gälla. Gå till Tibber-inloggning för att uppdatera.");
             return null;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Fel vid hämtning av access token");
+            logger.LogError(ex, "Tibber-autentisering misslyckades");
             return null;
         }
     }
