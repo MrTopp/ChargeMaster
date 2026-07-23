@@ -1,0 +1,71 @@
+﻿@page "/tibber-login"
+@rendermode InteractiveServer
+
+@using ChargeMaster.Services.TibberVehicle
+
+@inject TibberOAuthService OAuthService
+@inject NavigationManager Navigation
+@inject ILogger<TibberLogin> Logger
+@inject IJSRuntime Js
+
+<PageTitle>Tibber-inloggning</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Anslut till Tibber</h2>
+                    <p class="card-text">Klicka på knappen nedan för att auktorisera ChargeMaster att hämta fordonsstatus från Tibber.</p>
+
+                    @if (string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <button class="btn btn-primary btn-lg w-100" @onclick="LoginAsync">
+                            <span class="oi oi-account-login"></span> Logga in med Tibber
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @_errorMessage
+                        </div>
+                        <button class="btn btn-primary btn-lg w-100" @onclick="LoginAsync">
+                            <span class="oi oi-account-login"></span> Försök igen
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a href="/" class="btn btn-link">Tillbaka till startsidan</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _errorMessage = string.Empty;
+
+    private async Task LoginAsync()
+    {
+        try
+        {
+            _errorMessage = string.Empty;
+
+            // Spara state-parameter i sessionStorage för validering vid callback
+            var (authorizeUrl, stateParameter) = OAuthService.GenerateAuthorizationUrl();
+
+            // Vi sparar state i cookie/session på servern istället
+            // Det gör vi genom att spara det i HTTP context
+            await Js.InvokeVoidAsync("sessionStorage.setItem", "tibber_oauth_state", stateParameter);
+
+            // Omdirigera till Tibber login
+            Navigation.NavigateTo(authorizeUrl, forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Fel vid initiering av Tibber-inloggning");
+            _errorMessage = "Ett fel uppstod. Försök igen senare.";
+        }
+    }
+}

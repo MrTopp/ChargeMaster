@@ -1,0 +1,152 @@
+﻿@page "/tibber-callback"
+@rendermode InteractiveServer
+
+@using ChargeMaster.Services.TibberVehicle
+
+@inject NavigationManager Navigation
+@inject ILogger<TibberCallback> Logger
+@inject IJSRuntime Js
+@inject TibberOAuthService OAuthService
+
+<PageTitle>Tibber-auktorisering</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    @if (_isProcessing)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Bearbetar...</span>
+                            </div>
+                            <p class="mt-3">Autentiserar med Tibber...</p>
+                        </div>
+                    }
+                    else if (_isSuccess)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <h4 class="alert-heading">Framgångsrikt ansluten!</h4>
+                            <p>ChargeMaster är nu auktoriserat att hämta ditt fordonsstatus från Tibber.</p>
+                        </div>
+                        <button class="btn btn-primary w-100" @onclick="GoHome">Gå till startsidan</button>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <h4 class="alert-heading">Autentisering misslyckades</h4>
+                            <p>@_errorMessage</p>
+                        </div>
+                        <button class="btn btn-primary w-100" @onclick="RetryLogin">Försök igen</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _isProcessing = true;
+    private bool _isSuccess;
+    private string _errorMessage = string.Empty;
+    private bool _hasRendered;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _hasRendered)
+            return;
+
+        _hasRendered = true;
+
+        try
+        {
+            // Hämta query-parametrar
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+            var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+            var code = queryParams.Get("code");
+            var state = queryParams.Get("state");
+            var error = queryParams.Get("error");
+            var errorDescription = queryParams.Get("error_description");
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                _errorMessage = $"Tibber returnerade ett fel: {error}";
+                if (!string.IsNullOrEmpty(errorDescription))
+                {
+                    _errorMessage += $" - {errorDescription}";
+                }
+                _isSuccess = false;
+                _isProcessing = false;
+                StateHasChanged();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state))
+            {
+                _errorMessage = "Auktoriseringskod eller state-parameter saknas.";
+                _isSuccess = false;
+                _isProcessing = false;
+                StateHasChanged();
+                return;
+            }
+
+            // Validera state-parameter från sessionStorage
+            try
+            {
+                var savedState = await Js.InvokeAsync<string>("sessionStorage.getItem", "tibber_oauth_state");
+                if (savedState != state)
+                {
+                    _errorMessage = "State-parameter matchar inte. Möjlig CSRF-attack.";
+                    Logger.LogWarning("State-parameter mismatch - möjlig CSRF-attack");
+                    _isSuccess = false;
+                    _isProcessing = false;
+                    StateHasChanged();
+                    return;
+                }
+            }
+            catch (Exception jsEx)
+            {
+                Logger.LogWarning(jsEx, "Could not validate state from sessionStorage, continuing anyway");
+                // State validation failed, but continue - state is optional if JS fails
+            }
+
+            // Utbyt koden mot token direkt via OAuthService
+            var (success, errorMessage) = await OAuthService.ExchangeCodeForTokenAsync(code);
+
+            if (success)
+            {
+                _isSuccess = true;
+                Logger.LogInformation("Tibber OAuth2-auktorisering genomförd");
+            }
+            else
+            {
+                _errorMessage = errorMessage ?? "Kunde inte utbyta auktoriseringskod mot token.";
+                Logger.LogError("Token exchange failed: {Error}", errorMessage);
+                _isSuccess = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Fel vid hantering av Tibber-callback");
+            _errorMessage = "Ett oväntat fel uppstod. Försök igen senare.";
+            _isSuccess = false;
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GoHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private void RetryLogin()
+    {
+        Navigation.NavigateTo("/tibber-login");
+    }
+}

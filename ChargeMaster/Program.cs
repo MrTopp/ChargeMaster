@@ -8,9 +8,11 @@ using ChargeMaster.Services.Shelly;
 using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.TibberPulse;
 using ChargeMaster.Services.ErrorLog;
+using ChargeMaster.Services.TibberVehicle;
 using ChargeMaster.Workers;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Reflection;
 using ChargeMaster.Services.SMHI;
@@ -117,6 +119,37 @@ namespace ChargeMaster
                 builder.Services.AddHttpClient<VWService, VWService>(client =>
                 {
                     client.BaseAddress = new Uri(vwServiceBaseAddress);
+                    client.Timeout = TimeSpan.FromSeconds(60);
+                });
+
+                // ----- Tibber Vehicle OAuth2 -----
+                builder.Services.Configure<TibberOAuthOptions>(options =>
+                {
+                    builder.Configuration.GetSection("Tibber:OAuth").Bind(options);
+                    options.Validate();
+                });
+                builder.Services.AddSingleton<TibberTokenStorage>();
+
+                // Register named HttpClient for OAuth token exchange (absolute URIs only)
+                builder.Services.AddHttpClient("TibberOAuth", client =>
+                {
+                    client.Timeout = TimeSpan.FromSeconds(60);
+                });
+
+                // Register TibberOAuthService as factory to inject named HttpClient
+                builder.Services.AddSingleton<TibberOAuthService>(sp =>
+                {
+                    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+                    var oauthOptions = sp.GetRequiredService<IOptions<TibberOAuthOptions>>();
+                    var tokenStorage = sp.GetRequiredService<TibberTokenStorage>();
+                    var logger = sp.GetRequiredService<ILogger<TibberOAuthService>>();
+
+                    var httpClient = httpClientFactory.CreateClient("TibberOAuth");
+                    return new TibberOAuthService(oauthOptions, httpClient, tokenStorage, logger);
+                });
+
+                builder.Services.AddHttpClient<TibberVehicleService>(client =>
+                {
                     client.Timeout = TimeSpan.FromSeconds(60);
                 });
 
