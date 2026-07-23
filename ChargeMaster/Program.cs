@@ -113,21 +113,19 @@ namespace ChargeMaster
                         client.Timeout = TimeSpan.FromSeconds(160);
                     });
 
-                var vwServiceBaseAddress = builder.Configuration["Services:VWService"]
-                                           ?? throw new InvalidOperationException(
-                                               "VWService base address 'Services:VWService' not configured.");
-                builder.Services.AddHttpClient<VWService, VWService>(client =>
-                {
-                    client.BaseAddress = new Uri(vwServiceBaseAddress);
-                    client.Timeout = TimeSpan.FromSeconds(60);
-                });
-
                 // ----- Tibber Vehicle OAuth2 -----
                 builder.Services.Configure<TibberOAuthOptions>(options =>
                 {
                     builder.Configuration.GetSection("Tibber:OAuth").Bind(options);
                     options.Validate();
                 });
+
+                // ----- Tibber Vehicle (Data API) -----
+                builder.Services.Configure<TibberVehicleOptions>(options =>
+                {
+                    builder.Configuration.GetSection("Tibber").Bind(options);
+                });
+
                 builder.Services.AddSingleton<TibberTokenStorage>();
 
                 // Register named HttpClient for OAuth token exchange (absolute URIs only)

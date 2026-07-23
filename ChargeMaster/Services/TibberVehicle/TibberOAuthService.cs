@@ -101,12 +101,25 @@ public class TibberOAuthService(
             }
 
             var json = await response.Content.ReadAsStringAsync();
+            logger.LogInformation("Token response JSON: {Json}", json);
+
             var tokenResponse = JsonSerializer.Deserialize<TibberTokenResponse>(json, JsonOptions);
 
             if (tokenResponse?.AccessToken == null)
             {
                 logger.LogError("Invalid token response from Tibber");
                 return (false, "Invalid token response from Tibber");
+            }
+
+            logger.LogInformation("AccessToken: {HasAccessToken}", !string.IsNullOrEmpty(tokenResponse.AccessToken));
+            logger.LogInformation("RefreshToken: {HasRefreshToken}", !string.IsNullOrEmpty(tokenResponse.RefreshToken));
+            logger.LogInformation("ExpiresIn: {ExpiresIn}", tokenResponse.ExpiresIn);
+            logger.LogInformation("TokenType: {TokenType}", tokenResponse.TokenType);
+            logger.LogInformation("Scope: {Scope}", tokenResponse.Scope);
+
+            if (string.IsNullOrEmpty(tokenResponse.RefreshToken))
+            {
+                logger.LogError("WARNING: Tibber did not return a refresh token. Token will expire in {Minutes} minutes.", tokenResponse.ExpiresIn / 60);
             }
 
             var tokens = new TibberTokens
@@ -118,6 +131,7 @@ public class TibberOAuthService(
 
             await tokenStorage.SaveAsync(tokens);
             logger.LogInformation("Tibber tokens obtained and saved successfully");
+            logger.LogInformation("Saved RefreshToken: {HasRefreshToken}", !string.IsNullOrEmpty(tokens.RefreshToken));
 
             return (true, null);
         }
@@ -147,17 +161,24 @@ public class TibberOAuthService(
                 { "grant_type", "refresh_token" },
                 { "refresh_token", tokens.RefreshToken },
                 { "client_id", _options.ClientId },
-                { "client_secret", _options.ClientSecret }
+                { "client_secret", _options.ClientSecret },
+                { "redirect_uri", _options.RedirectUri }
             };
 
+            logger.LogInformation("Refreshing token");
+            logger.LogInformation("TokenUrl: {TokenUrl}", _options.TokenUrl);
+            logger.LogInformation("ClientId: {ClientId}", _options.ClientId);
+            logger.LogInformation("RefreshToken present: {HasRefreshToken}", !string.IsNullOrEmpty(tokens.RefreshToken));
+
             using var content = new FormUrlEncodedContent(requestBody);
-            var response = await httpClient.PostAsync(_options.TokenUrl, content);
+            var response = await httpClient.PostAsync(new Uri(_options.TokenUrl), content);
 
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 logger.LogError("Fel vid token-uppdatering. Status: {Status}", response.StatusCode);
                 logger.LogError("Error response: {ErrorContent}", errorContent);
+                logger.LogError("Kunde inte uppdatera tokens");
                 return false;
             }
 
@@ -200,7 +221,7 @@ public class TibberOAuthService(
 
             if (tokens == null)
             {
-                logger.LogWarning("Ingen token lagrad");
+                logger.LogInformation("No token stored yet");
                 return null;
             }
 
@@ -210,7 +231,7 @@ public class TibberOAuthService(
             }
 
             // Token har löpt ut, försök uppdatera
-            logger.LogInformation("Access token löpt ut, försöker uppdatera");
+            logger.LogInformation("Access token expired, attempting refresh");
             var refreshed = await RefreshTokenAsync();
 
             if (refreshed)

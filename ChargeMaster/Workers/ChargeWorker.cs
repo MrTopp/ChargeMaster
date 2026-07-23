@@ -1,7 +1,7 @@
 ﻿using ChargeMaster.Data;
 using Microsoft.EntityFrameworkCore;
 using ChargeMaster.Services.Wallbox;
-using ChargeMaster.Services.VolksWagen;
+using ChargeMaster.Services.TibberVehicle;
 
 namespace ChargeMaster.Workers;
 
@@ -16,7 +16,7 @@ public class KvartlistaEventArgs(List<ElectricityPrice> kvartlista) : EventArgs
 public class ChargeWorker(
     IServiceScopeFactory serviceScopeFactory,
     WallboxService wallboxService,
-    VWService vwService,
+    TibberVehicleService tibberVehicleService,
     WallboxWorker wallboxWorker,
     DaikinWorker daikinWorker,
     ILogger<ChargeWorker> logger)
@@ -310,9 +310,9 @@ public class ChargeWorker(
                     await StartWallbox();
                 }
 
-                BilenLaddar = await vwService.StartChargingAsync();
+                BilenLaddar = await tibberVehicleService.StartChargingAsync();
             }
-            catch (CarConnectionException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Error starting charging");
             }
@@ -332,7 +332,7 @@ public class ChargeWorker(
             try
             {
                 logger.LogInformation("StoppaLaddningAsync: stopping car charging");
-                success = await vwService.StopChargingAsync();
+                success = await tibberVehicleService.StopChargingAsync();
                 if (!success)
                 {
                     logger.LogError(
@@ -340,7 +340,7 @@ public class ChargeWorker(
                     await StopWallbox();
                 }
             }
-            catch (CarConnectionException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Error stopping charging");
                 await StopWallbox(); // Om det inte går att stänga av genom att fråga bilen, stäng av wallboxen så att bilen inte kan ladda.
@@ -354,14 +354,14 @@ public class ChargeWorker(
     {
         try
         {
-            VWStatus? response = await vwService.GetStatusAsync();
+            TibberVehicleStatus? response = await tibberVehicleService.GetStatusAsync();
             _chargeLevelCurrent = response?.BatteryLevel ?? 0;
             _chargeLevelTarget = response?.ChargingSettingsTargetLevel ?? 0;
             return (response?.ChargingPower ?? 0) > 0;
         }
-        catch (CarConnectionException ex)
+        catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching VW status");
+            logger.LogError(ex, "Error fetching vehicle status");
             await StopWallbox();
             return false;
         }
@@ -444,14 +444,14 @@ public class ChargeWorker(
     internal async Task<double> LaddBehovAsync()
     {
         // Beräkna laddbehov
-        VWStatus? status;
+        TibberVehicleStatus? status;
         try
         {
-            status = await vwService.GetStatusAsync();
+            status = await tibberVehicleService.GetStatusAsync();
         }
-        catch (CarConnectionException ex)
+        catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching VW status: {Message}", ex.Message);
+            logger.LogError(ex, "Error fetching vehicle status: {Message}", ex.Message);
             await StopWallbox();
             return 0;
         }

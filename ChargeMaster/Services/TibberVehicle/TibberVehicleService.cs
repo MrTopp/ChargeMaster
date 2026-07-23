@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace ChargeMaster.Services.TibberVehicle;
 
@@ -12,6 +13,10 @@ public class TibberVehicleStatusLimited
     public double? BatteryLevel { get; set; }
     public double? ChargingPower { get; set; }
     public bool? IsCharging { get; set; }
+    public string? ChargingStatus { get; set; }
+    public string? ConnectorStatus { get; set; }
+    public double? TimeToFullyCharged { get; set; }
+    public double? RangeRemaining { get; set; }
 
     public TibberVehicleStatusLimited(TibberVehicleStatus status)
     {
@@ -19,6 +24,10 @@ public class TibberVehicleStatusLimited
         BatteryLevel = status.BatteryLevel;
         ChargingPower = status.ChargingPower;
         IsCharging = status.IsCharging;
+        ChargingStatus = status.ChargingStatus;
+        ConnectorStatus = status.ConnectorStatus;
+        TimeToFullyCharged = status.TimeToFullyCharged;
+        RangeRemaining = status.RangeRemaining;
     }
 }
 
@@ -38,13 +47,14 @@ public class TibberVehicleStatusEventArgs : EventArgs
 }
 
 /// <summary>
-/// Interaktion med Tibber-fordon via OAuth2-autentisering.
+/// Interaktion med Tibber-fordon via Tibber Data API.
 /// </summary>
 /// <remarks>
-/// Den här tjänsten kapslar in kommunikation med Tibber Vehicle API och hanterar OAuth2-tokens.
-/// Metoder kan kasta undantag om autentisering misslyckas eller den underliggande tjänsten är otillgänglig.
+/// Den här tjänsten kapslar in kommunikation med Tibber Data API för fordonsstatus.
+/// Den använder OAuth2 access token från Tibber-autentisering för att göra API-anrop.
 /// </remarks>
 public class TibberVehicleService(
+    IOptions<TibberVehicleOptions> options,
     TibberOAuthService oauthService,
     HttpClient httpClient,
     ILogger<TibberVehicleService> logger) : IAsyncDisposable
@@ -55,53 +65,72 @@ public class TibberVehicleService(
     public event EventHandler<TibberVehicleStatusEventArgs>? VehicleStatusRetrieved;
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private readonly TibberVehicleOptions _options = options.Value;
 
     /// <summary>
-    /// Hämtar aktuell status för fordonet från Tibber.
+    /// Hämtar aktuell status för fordonet från Tibber Data API.
     /// </summary>
     /// <returns>Fordonets status, eller null om svaret saknar statusdata eller autentisering misslyckades.</returns>
     public async Task<TibberVehicleStatus?> GetStatusAsync()
     {
         try
         {
+            // Få OAuth2 access token
             var accessToken = await oauthService.GetValidAccessTokenAsync();
             if (accessToken == null)
             {
-                logger.LogError("Kunde inte få tillgång till access token för Tibber");
+                logger.LogError("Kunde inte få tillgång till OAuth2 access token för Tibber Data API");
                 return null;
             }
 
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://api.tibber.com/v4-3/vehicles/status");
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            logger.LogInformation("Getting vehicle status from Tibber Data API");
+            logger.LogInformation("Home ID: {HomeId}, Device ID: {DeviceId}", _options.HomeId, _options.DeviceId);
+
+            var url = $"https://data-api.tibber.com/v1/homes/{_options.HomeId}/devices/{_options.DeviceId}";
+            logger.LogInformation("Endpoint URL: {Url}", url);
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            // Use OAuth2 access token
+            request.Headers.Add("Authorization", $"Bearer {accessToken}");
+            logger.LogInformation("Using OAuth2 access token for authentication");
 
             var response = await httpClient.SendAsync(request);
 
+            logger.LogInformation("Vehicle status response status: {Status}", response.StatusCode);
+
             if (!response.IsSuccessStatusCode)
             {
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                {
-                    logger.LogWarning("Obehörig åtkomst till Tibber API, försöker uppdatera tokens");
-                    var refreshed = await oauthService.RefreshTokenAsync();
-                    if (!refreshed)
-                    {
-                        logger.LogError("Kunde inte uppdatera Tibber-tokens. Användaren behöver omautentisera.");
-                    }
-                }
-                else
-                {
-                    logger.LogError("Fel vid hämtning av fordonsstatus från Tibber. Status: {Status}", 
-                        response.StatusCode);
-                }
+                var errorContent = await response.Content.ReadAsStringAsync();
+                logger.LogError("Fel vid hämtning av fordonsstatus från Tibber. Status: {Status}", 
+                    response.StatusCode);
+                logger.LogError("Error response: {ErrorContent}", errorContent);
+
+                // Log response headers for debugging
+                logger.LogError("Response headers: {Headers}", string.Join(", ", response.Headers.Select(h => $"{h.Key}={string.Join(",", h.Value)}")));
+
                 return null;
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            var responseData = JsonSerializer.Deserialize<TibberVehicleStatusResponse>(json, JsonOptions);
+            logger.LogInformation("Vehicle status response JSON: {Json}", json);
 
-            if (responseData?.Status != null)
+            var deviceResponse = JsonSerializer.Deserialize<TibberVehicleStatusResponse>(json, JsonOptions);
+
+            if (deviceResponse != null)
             {
-                VehicleStatusRetrieved?.Invoke(this, new TibberVehicleStatusEventArgs(responseData.Status));
-                return responseData.Status;
+                var status = TibberVehicleStatus.FromDevice(new TibberVehicleDevice
+                {
+                    Id = deviceResponse.Id,
+                    ExternalId = deviceResponse.ExternalId,
+                    Info = deviceResponse.Info,
+                    Status = deviceResponse.Status,
+                    Attributes = deviceResponse.Attributes,
+                    Capabilities = deviceResponse.Capabilities
+                });
+
+                VehicleStatusRetrieved?.Invoke(this, new TibberVehicleStatusEventArgs(status));
+                return status;
             }
 
             return null;
@@ -109,43 +138,6 @@ public class TibberVehicleService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Fel vid hämtning av fordonsstatus från Tibber");
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// Hämtar en lista över registrerade fordon från Tibber.
-    /// </summary>
-    /// <returns>Svar med fordonsdata, eller null vid kommunikationsfel.</returns>
-    public async Task<TibberVehiclesResponse?> GetVehiclesAsync()
-    {
-        try
-        {
-            var accessToken = await oauthService.GetValidAccessTokenAsync();
-            if (accessToken == null)
-            {
-                logger.LogError("Kunde inte få tillgång till access token för Tibber");
-                return null;
-            }
-
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://api.tibber.com/v4-3/vehicles");
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await httpClient.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                logger.LogError("Fel vid hämtning av fordonsdata från Tibber. Status: {Status}", 
-                    response.StatusCode);
-                return null;
-            }
-
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<TibberVehiclesResponse>(json, JsonOptions);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Fel vid hämtning av fordonsdata från Tibber");
             return null;
         }
     }
@@ -189,12 +181,13 @@ public class TibberVehicleService(
             var accessToken = await oauthService.GetValidAccessTokenAsync();
             if (accessToken == null)
             {
-                logger.LogError("Kunde inte få tillgång till access token för Tibber");
+                logger.LogError("Kunde inte få tillgång till OAuth2 access token för Tibber Data API");
                 return false;
             }
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.tibber.com/v4-3/vehicles{commandPath}");
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            var url = $"https://data-api.tibber.com/v1/homes/{_options.HomeId}/devices/{_options.DeviceId}{commandPath}";
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
             var response = await httpClient.SendAsync(request);
             return response.IsSuccessStatusCode;

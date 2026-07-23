@@ -1,4 +1,6 @@
-﻿namespace ChargeMaster.Services.TibberVehicle;
+﻿using System.Text.Json.Serialization;
+
+namespace ChargeMaster.Services.TibberVehicle;
 
 /// <summary>
 /// Representerar lagrade OAuth2-tokens för Tibber.
@@ -36,8 +38,18 @@ public class TibberTokens
 /// </summary>
 internal class TibberTokenResponse
 {
+    [JsonPropertyName("access_token")]
     public string? AccessToken { get; set; }
+
+    [JsonPropertyName("refresh_token")]
     public string? RefreshToken { get; set; }
+
+    [JsonPropertyName("expires_in")]
     public int ExpiresIn { get; set; }
+
+    [JsonPropertyName("token_type")]
     public string? TokenType { get; set; }
+
+    [JsonPropertyName("scope")]
+    public string? Scope { get; set; }
 }

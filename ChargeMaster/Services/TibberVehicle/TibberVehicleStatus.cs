@@ -1,120 +1,246 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ChargeMaster.Services.TibberVehicle;
 
 /// <summary>
-/// Status för Tibber-fordon, motsvarar VWStatus.
+/// Representerar ett fordon från Tibber Data API.
+/// </summary>
+public class TibberVehicleDevice
+{
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    [JsonPropertyName("externalId")]
+    public string? ExternalId { get; set; }
+
+    [JsonPropertyName("info")]
+    public DeviceInfo? Info { get; set; }
+
+    [JsonPropertyName("status")]
+    public DeviceStatus? Status { get; set; }
+
+    [JsonPropertyName("attributes")]
+    public DeviceAttribute[]? Attributes { get; set; }
+
+    [JsonPropertyName("capabilities")]
+    public DeviceCapability[]? Capabilities { get; set; }
+}
+
+public class DeviceInfo
+{
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    [JsonPropertyName("brand")]
+    public string? Brand { get; set; }
+
+    [JsonPropertyName("model")]
+    public string? Model { get; set; }
+}
+
+public class DeviceStatus
+{
+    [JsonPropertyName("lastSeen")]
+    public DateTime? LastSeen { get; set; }
+}
+
+public class DeviceAttribute
+{
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    [JsonPropertyName("value")]
+    public JsonElement? Value { get; set; }
+}
+
+public class DeviceCapability
+{
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    [JsonPropertyName("value")]
+    public JsonElement? Value { get; set; }
+
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    [JsonPropertyName("availableValues")]
+    public JsonElement[]? AvailableValues { get; set; }
+}
+
+/// <summary>
+/// Status för Tibber-fordon, extraherad från device-data för UI-visning.
 /// </summary>
 public class TibberVehicleStatus
 {
     /// <summary>
     /// Fordonets namn/modell.
     /// </summary>
-    [JsonPropertyName("name")]
     public string? Name { get; set; }
 
     /// <summary>
-    /// Fordonets VIN.
+    /// Fordonets märke.
     /// </summary>
-    [JsonPropertyName("vin")]
-    public string? Vin { get; set; }
+    public string? Brand { get; set; }
+
+    /// <summary>
+    /// Fordonets modell.
+    /// </summary>
+    public string? Model { get; set; }
+
+    /// <summary>
+    /// Fordonets externa ID (VIN).
+    /// </summary>
+    public string? ExternalId { get; set; }
 
     /// <summary>
     /// Batterinivå i procent.
     /// </summary>
-    [JsonPropertyName("battery_level")]
     public double? BatteryLevel { get; set; }
-
-    /// <summary>
-    /// Räckvidd i kilometer.
-    /// </summary>
-    [JsonPropertyName("range")]
-    public double? Range { get; set; }
-
-    /// <summary>
-    /// Aktuell laddningseffekt i kW.
-    /// </summary>
-    [JsonPropertyName("charging_power")]
-    public double? ChargingPower { get; set; }
-
-    /// <summary>
-    /// Laddningshastighet i km/min.
-    /// </summary>
-    [JsonPropertyName("charging_rate")]
-    public double? ChargingRate { get; set; }
 
     /// <summary>
     /// Målet för laddningsnivå i procent.
     /// </summary>
-    [JsonPropertyName("charging_target_level")]
     public double? ChargingSettingsTargetLevel { get; set; }
 
     /// <summary>
-    /// Maximalt strömstyrka för laddning.
+    /// Räckvidd i meter.
     /// </summary>
-    [JsonPropertyName("maximum_current")]
-    public double? ChargingSettingsMaximumCurrent { get; set; }
+    public double? RangeRemaining { get; set; }
+
+    /// <summary>
+    /// Beräknad tid till full laddning i timmar.
+    /// </summary>
+    public double? TimeToFullyCharged { get; set; }
+
+    /// <summary>
+    /// Laddarens anslutningsstatus.
+    /// </summary>
+    public string? ConnectorStatus { get; set; }
+
+    /// <summary>
+    /// Fordonets laddningsstatus.
+    /// </summary>
+    public string? ChargingStatus { get; set; }
+
+    /// <summary>
+    /// Är fordonet online?
+    /// </summary>
+    public bool? IsOnline { get; set; }
 
     /// <summary>
     /// Är fordonet för närvarande laddat?
     /// </summary>
-    [JsonPropertyName("is_charging")]
-    public bool? IsCharging { get; set; }
+    public bool? IsCharging => ChargingStatus == "charging";
 
     /// <summary>
-    /// Beräknad tid till full laddning.
+    /// Aktuell laddningseffekt i kW (beräknad från andra värden om inte tillgänglig).
     /// </summary>
-    [JsonPropertyName("estimated_charge_completion")]
-    public DateTimeOffset? ChargingEstimatedDateReached { get; set; }
+    public double? ChargingPower { get; set; }
 
     /// <summary>
-    /// Fordonets position (GPS).
+    /// Skapar en TibberVehicleStatus från en TibberVehicleDevice.
     /// </summary>
-    [JsonPropertyName("position")]
-    public string? Position { get; set; }
+    public static TibberVehicleStatus FromDevice(TibberVehicleDevice device)
+    {
+        var status = new TibberVehicleStatus
+        {
+            Name = device.Info?.Name,
+            Brand = device.Info?.Brand,
+            Model = device.Info?.Model,
+            ExternalId = device.ExternalId,
+        };
 
-    /// <summary>
-    /// Körsträcka i kilometer.
-    /// </summary>
-    [JsonPropertyName("odometer")]
-    public double? Odometer { get; set; }
+        // Extrahera värden från capabilities
+        if (device.Capabilities != null)
+        {
+            foreach (var capability in device.Capabilities)
+            {
+                if (capability.Value == null)
+                    continue;
+
+                switch (capability.Id)
+                {
+                    case "storage.stateOfCharge":
+                        if (capability.Value.Value.TryGetDouble(out var batteryLevel))
+                            status.BatteryLevel = batteryLevel;
+                        break;
+
+                    case "storage.targetStateOfCharge":
+                        if (capability.Value.Value.TryGetDouble(out var targetLevel))
+                            status.ChargingSettingsTargetLevel = targetLevel;
+                        break;
+
+                    case "range.remaining":
+                        if (capability.Value.Value.TryGetDouble(out var range))
+                            status.RangeRemaining = range;
+                        break;
+
+                    case "charging.timeToFullyCharged":
+                        if (capability.Value.Value.TryGetDouble(out var timeToCharged))
+                            status.TimeToFullyCharged = timeToCharged;
+                        break;
+
+                    case "connector.status":
+                        status.ConnectorStatus = capability.Value.Value.GetString();
+                        break;
+
+                    case "charging.status":
+                        status.ChargingStatus = capability.Value.Value.GetString();
+                        break;
+                }
+            }
+        }
+
+        // Extrahera värden från attributes
+        if (device.Attributes != null)
+        {
+            foreach (var attr in device.Attributes)
+            {
+                if (attr.Value == null)
+                    continue;
+
+                switch (attr.Id)
+                {
+                    case "isOnline":
+                        if (attr.Value.Value.ValueKind == System.Text.Json.JsonValueKind.True ||
+                            attr.Value.Value.ValueKind == System.Text.Json.JsonValueKind.False)
+                        {
+                            status.IsOnline = attr.Value.Value.GetBoolean();
+                        }
+                        break;
+                }
+            }
+        }
+
+        return status;
+    }
 }
 
 /// <summary>
-/// Representerar ett fordon från Tibber.
+/// API-svar innehållande enhetsstatus från Tibber Data API.
 /// </summary>
-public class TibberVehicle
+public class TibberVehicleStatusResponse
 {
     [JsonPropertyName("id")]
     public string? Id { get; set; }
 
-    [JsonPropertyName("name")]
-    public string? Name { get; set; }
+    [JsonPropertyName("externalId")]
+    public string? ExternalId { get; set; }
 
-    [JsonPropertyName("vin")]
-    public string? Vin { get; set; }
+    [JsonPropertyName("info")]
+    public DeviceInfo? Info { get; set; }
 
-    [JsonPropertyName("make")]
-    public string? Make { get; set; }
-
-    [JsonPropertyName("model")]
-    public string? Model { get; set; }
-}
-
-/// <summary>
-/// API-svar innehållande fordonsinfo.
-/// </summary>
-public class TibberVehiclesResponse
-{
-    [JsonPropertyName("vehicles")]
-    public TibberVehicle[]? Vehicles { get; set; }
-}
-
-/// <summary>
-/// API-svar innehållande fordonsstatus.
-/// </summary>
-public class TibberVehicleStatusResponse
-{
     [JsonPropertyName("status")]
-    public TibberVehicleStatus? Status { get; set; }
+    public DeviceStatus? Status { get; set; }
+
+    [JsonPropertyName("attributes")]
+    public DeviceAttribute[]? Attributes { get; set; }
+
+    [JsonPropertyName("capabilities")]
+    public DeviceCapability[]? Capabilities { get; set; }
 }
