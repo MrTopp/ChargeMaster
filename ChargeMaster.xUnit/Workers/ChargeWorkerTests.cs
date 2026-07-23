@@ -1,12 +1,13 @@
 ﻿using ChargeMaster.Data;
 using ChargeMaster.Services.InfluxDB;
-using ChargeMaster.Services.VolksWagen;
+using ChargeMaster.Services.TibberVehicle;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Workers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace ChargeMaster.xUnit.Workers;
@@ -81,12 +82,15 @@ public class ChargeWorkerTests
         services.AddSingleton(wallboxService);
         services.AddLogging();
 
-        // Assuming VWService runs on localhost:5211 based on other tests
-        var vwClient = new HttpClient { BaseAddress = new Uri("http://127.0.0.1:5211/") };
-        var logger = new LoggerFactory().CreateLogger<VWService>();
-        var vwService = new VWService(vwClient, logger);
+        // Mock TibberVehicleService
+        var mockTibberService = new Mock<TibberVehicleService>(
+            new Mock<TibberOAuthService>(new Mock<IOptions<TibberOAuthOptions>>().Object,
+                new Mock<HttpClient>().Object, new Mock<TibberTokenStorage>().Object,
+                new Mock<ILogger<TibberOAuthService>>().Object).Object,
+            new HttpClient(),
+            new Mock<ILogger<TibberVehicleService>>().Object);
 
-        services.AddSingleton(vwService);
+        services.AddSingleton(mockTibberService.Object);
 
         var provider = services.BuildServiceProvider();
 

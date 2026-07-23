@@ -89,7 +89,7 @@ public class ChargeWorker(
     /// Tracks the last saved charge session data to avoid saving duplicates.
     /// Used to detect changes in ChargeLevel and SessionEnergy.
     /// </summary>
-    private ChargeSession? _lastSavedChargeSession;
+    private ChargeSession? LastSavedChargeSession { get; set; }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -172,11 +172,7 @@ public class ChargeWorker(
                         x.TimeStart.Hour == nu.Hour &&
                         x.TimeStart.Minute == minutAvrundad))
                 {
-                    logger.LogInformation(
-                        "Illegal charging, stop car and wallbox. {ConnectorStatusTime}",
-                        ConnectorStatusTime);
                     await StoppaLaddningAsync(force: true);
-                    await StopWallbox();
                 }
             }
 
@@ -202,7 +198,6 @@ public class ChargeWorker(
                             x.TimeStart.Minute == minutAvrundad))
                     {
                         logger.LogDebug("Charging allowed, continue.");
-                        BilenLaddar = true;
                     }
                     else
                     {
@@ -281,7 +276,7 @@ public class ChargeWorker(
                 }
             }
 
-            NextIteration:
+        NextIteration:
             // Vänta tills nästa hela minut
             var targetNextMinute = nu.AddMinutes(1);
             while (DateTime.Now < targetNextMinute && !stoppingToken.IsCancellationRequested)
@@ -295,7 +290,9 @@ public class ChargeWorker(
         }
     }
 
-
+    /// <summary>
+    /// Bilen skall ha aktiv laddning, kan skilja sig från verklig status
+    /// </summary>
     private bool BilenLaddar { get; set; }
 
     internal async Task StartaLaddningAsync()
@@ -304,49 +301,26 @@ public class ChargeWorker(
         {
             try
             {
-                var wallboxStatus = await GetConnectorStatusAsync();
-                if (wallboxStatus == ConnectionEnum.Disabled)
-                {
-                    await StartWallbox();
-                }
-
-                BilenLaddar = await tibberVehicleService.StartChargingAsync();
+                bool status = await wallboxService.SetModeAsync(WallboxMode.Available);
+                WallboxStopped = false;
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error starting charging");
-            }
-
-            if (BilenLaddar)
-            {
-                logger.LogInformation("Charging started successfully.");
             }
         }
     }
 
     internal async Task StoppaLaddningAsync(bool force = false)
     {
-        if (BilenLaddar || force)
+        try
         {
-            bool success;
-            try
-            {
-                logger.LogInformation("StoppaLaddningAsync: stopping car charging");
-                success = await tibberVehicleService.StopChargingAsync();
-                if (!success)
-                {
-                    logger.LogError(
-                        "StoppaLaddningAsync: failed to stop car charging, stopping wallbox");
-                    await StopWallbox();
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error stopping charging");
-                await StopWallbox(); // Om det inte går att stänga av genom att fråga bilen, stäng av wallboxen så att bilen inte kan ladda.
-            }
-
-            BilenLaddar = false;
+            await wallboxService.SetModeAsync(WallboxMode.NotAvailable);
+            WallboxStopped = true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error stopping charging");
         }
     }
 
@@ -362,49 +336,12 @@ public class ChargeWorker(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error fetching vehicle status");
-            await StopWallbox();
+            await StoppaLaddningAsync(force: true);
             return false;
         }
     }
 
-    /// <summary>
-    /// Stäng av laddning genom att sätta wallboxen i NotAvailable-läge, används när kopplingen till bilen krånglar. Då kan bilen inte ladda.
-    /// </summary>
-    /// <returns></returns>
-    internal async Task StopWallbox()
-    {
-        // Stoppa laddning genom att sätta wallboxen i NotAvailable-läge
-        try
-        {
-            logger.LogInformation("StopWallbox:");
-            await wallboxService.SetModeAsync(WallboxMode.NotAvailable);
-            WallboxStopped = true;
-            BilenLaddar = false;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error setting wallbox mode to NotAvailable");
-        }
-    }
-
-    internal async Task<bool> StartWallbox()
-    {
-        // Tillåt laddning genom att sätta wallboxen i Normal-läge
-        try
-        {
-            logger.LogInformation("StartWallbox: ");
-            await wallboxService.SetModeAsync(WallboxMode.Available);
-            WallboxStopped = false;
-            return true;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error setting wallbox mode to Available");
-            return false;
-        }
-    }
-
-    /// <summary>
+   /// <summary>
     /// Status för laddning, används för att avgöra om bilen är inkopplad, laddar,
     /// eller inte är ansluten. Om det inte går att få status från wallboxen, returneras Unknown.
     /// </summary>
@@ -452,7 +389,7 @@ public class ChargeWorker(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error fetching vehicle status: {Message}", ex.Message);
-            await StopWallbox();
+            await StoppaLaddningAsync();
             return 0;
         }
 
@@ -591,14 +528,14 @@ public class ChargeWorker(
             }
 
             // Initialize _lastSavedChargeSession from database if it's null
-            if (_lastSavedChargeSession is null)
+            if (LastSavedChargeSession is null)
             {
                 try
                 {
                     using var initScope = serviceScopeFactory.CreateScope();
                     var initContext = initScope.ServiceProvider
                         .GetRequiredService<ApplicationDbContext>();
-                    _lastSavedChargeSession = await initContext.ChargeSessions
+                    LastSavedChargeSession = await initContext.ChargeSessions
                         .OrderByDescending(x => x.Timestamp)
                         .FirstOrDefaultAsync(cancellationToken);
                 }
@@ -609,13 +546,13 @@ public class ChargeWorker(
                 }
 
                 // fallback om databasen är tom eller det blev något fel vid inläsning
-                _lastSavedChargeSession ??= new ChargeSession();
+                LastSavedChargeSession ??= new ChargeSession();
             }
 
             // Check if data has changed compared to last save
             var sessionEnergy = sessionData.AccSessionEnergy;
-            if (_lastSavedChargeSession.ChargeLevel == chargeLevel &&
-                _lastSavedChargeSession.SessionEnergy == sessionEnergy)
+            if (LastSavedChargeSession.ChargeLevel == chargeLevel &&
+                LastSavedChargeSession.SessionEnergy == sessionEnergy)
             {
                 logger.LogDebug(
                     "SaveChargeSessionAsync: No change detected. ChargeLevel={level}, SessionEnergy={energy}",
@@ -644,7 +581,7 @@ public class ChargeWorker(
             await context.SaveChangesAsync(cancellationToken);
 
             // Update last saved data
-            _lastSavedChargeSession = chargeSession;
+            LastSavedChargeSession = chargeSession;
 
             logger.LogInformation(
                 "SaveChargeSessionAsync: Charge session saved. State={state}, Level={level}%, Target={target}%, Energy={energy}Wh",
