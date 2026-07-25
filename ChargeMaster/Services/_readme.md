@@ -16,12 +16,13 @@ Tjänsten `ElectricityPriceService` tillhandahåller interface mot elprisdata fr
 Tjänsten tillhandahåller interface mot SMHI:s väderdata. Den hämtar väderprognoser för Strömtorp och gör det möjligt att
 få aktuell väderinformation och prognoser för de kommande dagarna
 
-## Volkswagen
+## TibberPulse
 
-Tjänsten `VolkswagenService` tillhandahåller interface mot Volkswagen:s API för elbilar. Den hämtar information om
-bilens status, batterinivå och gör det möjligt att styra vissa funktioner på distans.
-Kommunikationen med Volkswagens tjänst går en Open Source Python-modul. Kopplingen mot den går via en egen REST API
-modul som körs lokalt.
+Kommunicerar med tibber pulse och hämtar information om elförbrukning.
+
+## TibberVehicle
+
+Hämtar information om bilens laddstatus.
 
 ## Wallbox
 
