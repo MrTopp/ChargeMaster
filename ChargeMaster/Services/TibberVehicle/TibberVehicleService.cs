@@ -79,7 +79,7 @@ public class TibberVehicleService(
             var accessToken = await oauthService.GetValidAccessTokenAsync();
             if (accessToken == null)
             {
-                logger.LogError("Kunde inte få tillgång till OAuth2 access token för Tibber Data API");
+                // Error message already logged by GetValidAccessTokenAsync
                 return null;
             }
 
@@ -102,12 +102,9 @@ public class TibberVehicleService(
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                logger.LogError("Fel vid hämtning av fordonsstatus från Tibber. Status: {Status}", 
-                    response.StatusCode);
+                logger.LogError("Kunde inte hämta fordonsstatus från Tibber");
+                logger.LogError("HTTP Status: {Status}", response.StatusCode);
                 logger.LogError("Error response: {ErrorContent}", errorContent);
-
-                // Log response headers for debugging
-                logger.LogError("Response headers: {Headers}", string.Join(", ", response.Headers.Select(h => $"{h.Key}={string.Join(",", h.Value)}")));
 
                 return null;
             }
@@ -137,43 +134,11 @@ public class TibberVehicleService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Fel vid hämtning av fordonsstatus från Tibber");
+            logger.LogError(ex, "Kunde inte hämta fordonsstatus från Tibber");
             return null;
         }
     }
-
-    /// <summary>
-    /// Startar laddning av fordonet.
-    /// </summary>
-    public async Task<bool> StartChargingAsync()
-    {
-        return await SendCommandAsync("/start-charging");
-    }
-
-    /// <summary>
-    /// Stoppar laddning av fordonet.
-    /// </summary>
-    public async Task<bool> StopChargingAsync()
-    {
-        return await SendCommandAsync("/stop-charging");
-    }
-
-    /// <summary>
-    /// Startar klimatisering av fordonet.
-    /// </summary>
-    public async Task<bool> StartClimatizationAsync()
-    {
-        return await SendCommandAsync("/start-climatization");
-    }
-
-    /// <summary>
-    /// Stoppar klimatisering av fordonet.
-    /// </summary>
-    public async Task<bool> StopClimatizationAsync()
-    {
-        return await SendCommandAsync("/stop-climatization");
-    }
-
+    
     private async Task<bool> SendCommandAsync(string commandPath)
     {
         try

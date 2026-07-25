@@ -52,12 +52,11 @@
         {
             _errorMessage = string.Empty;
 
-            // Spara state-parameter i sessionStorage för validering vid callback
+            // Spara state-parameter på servern för validering vid callback
             var (authorizeUrl, stateParameter) = OAuthService.GenerateAuthorizationUrl();
 
-            // Vi sparar state i cookie/session på servern istället
-            // Det gör vi genom att spara det i HTTP context
-            await Js.InvokeVoidAsync("sessionStorage.setItem", "tibber_oauth_state", stateParameter);
+            // Spara state på servern (CSRF-skydd)
+            TibberOAuthStateStorage.SaveState(stateParameter);
 
             // Omdirigera till Tibber login
             Navigation.NavigateTo(authorizeUrl, forceLoad: true);
