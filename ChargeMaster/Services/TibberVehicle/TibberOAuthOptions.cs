@@ -42,7 +42,7 @@ public class TibberOAuthOptions
     /// Scope för OAuth2-anropet.
     /// Default: "data-api-vehicles-read" för läsning av fordonsstatus.
     /// </summary>
-    public string Scope { get; set; } = "data-api-vehicles-read";
+    public string Scope { get; set; } = "data-api-vehicles-read offline_access";
 
     /// <summary>
     /// Validera att alla required URLs är absolute.
