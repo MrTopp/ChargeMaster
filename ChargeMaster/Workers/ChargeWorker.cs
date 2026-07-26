@@ -29,61 +29,19 @@ public class ChargeWorker(
     public event EventHandler<KvartlistaEventArgs>? KvartlistaUpdated;
 
     /// <summary>
-    /// Flagga om laddning är tillåten denna timme, sätts till false
-    /// om förbrukningen innevarande timme är över tillåten nivå.
-    /// </summary>
-    private bool Timladdning { get; set; }
-
-    /// <summary>
-    /// Nuvarande laddnivå i bilen, i procent. 
-    /// </summary>
-    private double _chargeLevelCurrent;
-
-    /// <summary>
-    /// Målvärde för laddningen i procent
-    /// </summary>
-    private double _chargeLevelTarget;
-
-    /// <summary>
-    /// Flagga att wallbox är panikstoppad.
-    /// </summary>
-    private bool WallboxStopped
-    {
-        get;
-        set
-        {
-            if (value != field)
-            {
-                field = value;
-                logger.LogInformation("WallboxStopped.set: WallboxStopped set to {Value}", value);
-            }
-        }
-    } = false;
-
-    /// <summary>
     /// Skillnad mellan nuvarande batterinivå och mål för laddning, i procent.
     /// </summary>
-    public double LaddBehovProcent { get; private set; }
-
-    /// <summary>
-    /// Status för laddningen
-    /// </summary>
-    private ConnectionEnum ConnectorStatus
+    private double LaddBehovProcent
     {
-        get;
-        set
+        get
         {
-            if (value != field)
-            {
-                field = value;
-                // Logga klockslag för state-övergången
-                ConnectorStatusTime = DateTime.Now;
-            }
+            if (VehicleStatus?.BatteryLevel == null || VehicleStatus?.ChargingSettingsTargetLevel == null)
+                return 0;
+            return VehicleStatus.ChargingSettingsTargetLevel.Value - VehicleStatus.BatteryLevel.Value;
         }
-    } = ConnectionEnum.Unknown;
+    }
 
-    private DateTime ConnectorStatusTime { get; set; } = DateTime.Now;
-
+    private TibberVehicleStatus? VehicleStatus { get; set; }
 
     /// <summary>
     /// Tracks the last saved charge session data to avoid saving duplicates.
@@ -102,7 +60,6 @@ public class ChargeWorker(
             catch (OperationCanceledException)
             {
                 // Förväntat när tjänsten stoppas, ingen åtgärd krävs.
-                logger.LogInformation("ChargeWorker is stopping due to cancellation.");
                 break;
             }
             catch (Exception ex)
@@ -116,16 +73,7 @@ public class ChargeWorker(
     internal async Task ChargeLoop(CancellationToken stoppingToken)
     {
         DateTime previous = DateTime.Now;
-        Timladdning = true;
-        BilenLaddar = await LaddStatusAsync();
-        var currentConnectorStatus = await GetConnectorStatusAsync();
-        if (currentConnectorStatus == ConnectionEnum.Disabled)
-        {
-            logger.LogInformation("Wallbox is disabled.");
-            WallboxStopped = true;
-        }
 
-        LaddBehovProcent = await LaddBehovAsync();
         while (!wallboxWorker.WallboxInitierad)
             await Task.Delay(100, stoppingToken);
 
@@ -134,150 +82,52 @@ public class ChargeWorker(
             DateTime dt = DateTime.Now;
             DateTime nu = new DateTime(dt.Year, dt.Month, dt.Day,
                 dt.Hour, dt.Minute, 0);
-            currentConnectorStatus = await GetConnectorStatusAsync();
+            var currentConnectorStatus = await wallboxService.GetConnectorStatusAsync();
 
             // ----- Varje timme
             if (nu.Hour != previous.Hour)
             {
                 logger.LogInformation("** Hourly consumption: {Consumption} Wh **",
                     wallboxWorker.FörbrukningFöregåendeTimme);
-                Timladdning = true;
             }
 
             // ----- Effektvakt värmepump
             await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningDennaTimme, nu,
                 stoppingToken);
 
-            // ----- Bilen inte ansluten, hoppa över utvärdering av laddning
+            // ----- Bilens status
+
+            VehicleStatus = await tibberVehicleService.GetStatusAsync();
+
+            // ----- Kvartlista, tom om bilen inte är ansluten
+            GetKvartlista(tom: currentConnectorStatus == ConnectionEnum.SearchingForCommunication);
+
+            await SaveChargeSessionAsync(currentConnectorStatus.ToString(), stoppingToken);
+
+
+            // ----- Om bilen inte är ansluten, hoppa över resten av loopen
+
             if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
             {
-                goto NextIteration; // Hoppa till avslutande paus.
+                goto NextIteration;
             }
 
-            // ----- Bilen är hemma, dags att utvärdera laddning -----
 
-            await SaveChargeSessionAsync(currentConnectorStatus.ToString(),
-                (int)_chargeLevelCurrent,
-                (int)_chargeLevelTarget,
-                wallboxWorker,
-                stoppingToken);
+            // ----- Start/Stoppa laddning -----
 
-            // ----- Nödstopp om bilen laddar när det inte är tillåtet
-            if (ConnectorStatus == ConnectionEnum.Charging && !BilenLaddar)
+            bool chargingAllowed = await IsChargingAllowedAsync();
+            if (!chargingAllowed)
             {
-                int minutAvrundad = nu.Minute / 15 * 15;
-                var kvartlista = GetKvartlista();
-                if (!kvartlista.Any(x =>
-                        x.TimeStart.Day == nu.Day &&
-                        x.TimeStart.Hour == nu.Hour &&
-                        x.TimeStart.Minute == minutAvrundad))
-                {
-                    await StoppaLaddningAsync(force: true);
-                }
+                await wallboxService.StoppaLaddningAsync();
             }
-
-            // ----- State-övergång
-            if (currentConnectorStatus != ConnectorStatus)
+            else
             {
-                logger.LogInformation(
-                    "Charge transition {OldStatus}->{NewStatus}",
-                    ConnectorStatus, currentConnectorStatus);
-
-                // ----- Bilen börjar ladda.
-                if (currentConnectorStatus == ConnectionEnum.Charging)
-                {
-                    // Bilen har börjat ladda, skall den stoppas?
-                    // Det kan hända när bilen kopplas in, då skall laddningen 
-                    // stoppas om det inte är rätt tid för laddning
-                    logger.LogDebug("Car started charging");
-                    int minutAvrundad = nu.Minute / 15 * 15;
-                    var kvartlista = GetKvartlista();
-                    if (kvartlista.Any(x =>
-                            x.TimeStart.Day == nu.Day &&
-                            x.TimeStart.Hour == nu.Hour &&
-                            x.TimeStart.Minute == minutAvrundad))
-                    {
-                        logger.LogDebug("Charging allowed, continue.");
-                    }
-                    else
-                    {
-                        logger.LogInformation("Charging not allowed, stop charging.");
-                        await StoppaLaddningAsync(force: true);
-                    }
-                }
-
-                ConnectorStatus = currentConnectorStatus;
-            }
-
-            // ----- Kontrollera förväntad timförbrukning
-            if (Timladdning && nu.Minute > 10)
-            {
-                var isKvartar = _kvartlista?.Any(x =>
-                    x.TimeStart.Hour == nu.Hour && x.TimeStart.Day == nu.Day) ?? false;
-                if (isKvartar)
-                {
-                    // Det finns planerad laddning för innevarande timme, räkna ut gräns.
-                    var minuterKvar = 60 - nu.Minute;
-
-                    var förbrukningKvar = minuterKvar * 8000 / 60;
-                    var totalförbrukningTimme
-                        = wallboxWorker.FörbrukningDennaTimme + förbrukningKvar;
-
-                    HourlyEnergyUsage maxFörbrukning
-                        = await wallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(nu,
-                            stoppingToken);
-                    var förbrukningGräns = (long)(maxFörbrukning.EnergyUsageWh * 0.9);
-                    if (förbrukningGräns < 4000)
-                    {
-                        förbrukningGräns = 4000;
-                    }
-
-                    if (totalförbrukningTimme > förbrukningGräns)
-                    {
-                        logger.LogInformation(
-                            "! Charging disabled due to high consumption: {consumption} Wh.",
-                            wallboxWorker.FörbrukningDennaTimme);
-                        Timladdning = false;
-                        await StoppaLaddningAsync();
-                    }
-                }
-            }
-
-            // ***** Varje kvart
-            if (nu.Minute % 15 == 0 && nu.Minute != previous.Minute)
-            {
-                LaddBehovProcent = await LaddBehovAsync();
-                // Starta/stoppa laddning beroende på om det är tillåtet eller inte
-                if (wallboxWorker.FörbrukningDennaTimme > 0)
-                    logger.LogInformation("-- Quarter, consumption: {Consumption} Wh --",
-                        wallboxWorker.FörbrukningDennaTimme);
-                if (Timladdning)
-                {
-                    int numin = nu.Minute;
-                    int minutAvrundad = numin / 15 * 15;
-                    var kvartlista = GetKvartlista();
-
-                    // Om 'nu' finns i listan med kvartar 
-                    if (kvartlista.Any(x =>
-                            x.TimeStart.Day == nu.Day &&
-                            x.TimeStart.Hour == nu.Hour &&
-                            x.TimeStart.Minute == minutAvrundad))
-                    {
-                        logger.LogInformation("Quarter, start charge");
-                        await StartaLaddningAsync();
-                    }
-                    else
-                    {
-                        var next = kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
-                        logger.LogInformation("Quarter, not starting, next {Time}",
-                            next?.TimeStart.ToShortTimeString() ?? "---");
-                        await StoppaLaddningAsync();
-                    }
-                }
+                await wallboxService.StartaLaddningAsync();
             }
 
         NextIteration:
-            // Vänta tills nästa hela minut
+
+            // ----- Vänta tills nästa hela minut
             var targetNextMinute = nu.AddMinutes(1);
             while (DateTime.Now < targetNextMinute && !stoppingToken.IsCancellationRequested)
             {
@@ -291,94 +141,10 @@ public class ChargeWorker(
     }
 
     /// <summary>
-    /// Bilen skall ha aktiv laddning, kan skilja sig från verklig status
-    /// </summary>
-    private bool BilenLaddar { get; set; }
-
-    internal async Task StartaLaddningAsync()
-    {
-        if (Timladdning && !BilenLaddar)
-        {
-            try
-            {
-                bool status = await wallboxService.SetModeAsync(WallboxMode.Available);
-                WallboxStopped = false;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error starting charging");
-            }
-        }
-    }
-
-    internal async Task StoppaLaddningAsync(bool force = false)
-    {
-        try
-        {
-            await wallboxService.SetModeAsync(WallboxMode.NotAvailable);
-            WallboxStopped = true;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error stopping charging");
-        }
-    }
-
-    internal async Task<bool> LaddStatusAsync()
-    {
-        try
-        {
-            TibberVehicleStatus? response = await tibberVehicleService.GetStatusAsync();
-            _chargeLevelCurrent = response?.BatteryLevel ?? 0;
-            _chargeLevelTarget = response?.ChargingSettingsTargetLevel ?? 0;
-            return (response?.ChargingPower ?? 0) > 0;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error fetching vehicle status");
-            await StoppaLaddningAsync(force: true);
-            return false;
-        }
-    }
-
-   /// <summary>
-    /// Status för laddning, används för att avgöra om bilen är inkopplad, laddar,
-    /// eller inte är ansluten. Om det inte går att få status från wallboxen, returneras Unknown.
-    /// </summary>
-    /// <returns></returns>
-    internal async Task<ConnectionEnum> GetConnectorStatusAsync()
-    {
-        WallboxStatus? response = await wallboxService.GetStatusAsync();
-        if (response == null)
-            return ConnectionEnum.Unknown;
-        switch (response.Connector)
-        {
-            case "CHARGING_PAUSED":
-                return ConnectionEnum.ChargingPaused;
-            case "CONNECTED":
-                return ConnectionEnum.Connected;
-            case "CHARGING":
-                return ConnectionEnum.Charging;
-            case "DISABLED":
-                return ConnectionEnum.Disabled;
-            case "CHARGING_FINISHED":
-                return ConnectionEnum.ChargingFinished;
-            case "SEARCH_COMM":
-                return ConnectionEnum.SearchingForCommunication;
-
-            default:
-                logger.LogError("Unknown value för WallboxStatus.Connector: {Value}",
-                    response.Connector);
-                return ConnectionEnum.Unknown;
-        }
-    }
-
-
-    /// <summary>
     /// Räknar ut behov av laddning i procent
     /// </summary>
     /// <returns>laddbehov i procent</returns>
-    internal async Task<double> LaddBehovAsync()
+    private async Task<(int, int)> VehicleStateAsync()
     {
         // Beräkna laddbehov
         TibberVehicleStatus? status;
@@ -389,18 +155,16 @@ public class ChargeWorker(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error fetching vehicle status: {Message}", ex.Message);
-            await StoppaLaddningAsync();
-            return 0;
+            return (0, 0);
         }
 
-        if (status == null)
-            return 0;
-        if (status.BatteryLevel == null)
-            return 0;
-        _chargeLevelCurrent = status.BatteryLevel ?? 0;
-        _chargeLevelTarget = status.ChargingSettingsTargetLevel ?? 0;
+        if (status?.BatteryLevel == null)
+            return (0, 0);
 
-        return _chargeLevelTarget - _chargeLevelCurrent;
+        var chargeLevelCurrent = (int)Math.Floor(status.BatteryLevel ?? 0);
+        var chargeLevelTarget = (int)Math.Floor(status.ChargingSettingsTargetLevel ?? 0);
+
+        return (chargeLevelCurrent, chargeLevelTarget);
     }
 
     /// <summary>
@@ -408,17 +172,61 @@ public class ChargeWorker(
     /// </summary>
     private List<ElectricityPrice>? _kvartlista;
 
-    private readonly object _kvartlistaLock = new();
+    private readonly Lock _kvartlistaLock = new();
+
+    private async Task<bool> IsChargingAllowedAsync()
+    {
+        // Kontrollera om nuvarande kvart finns i kvartlistan
+        var nu = DateTime.Now;
+        int minutAvrundad = nu.Minute / 15 * 15;
+        var kvartlista = GetKvartlista();
+        bool allowed = kvartlista.Any(x =>
+            x.TimeStart.Day == nu.Day &&
+            x.TimeStart.Hour == nu.Hour &&
+            x.TimeStart.Minute == minutAvrundad);
+        if (!allowed)
+        {
+            return false;
+        }
+
+        // Kontrollera om timförbrukningen är över gränsen
+        if (nu.Minute > 10)
+        {
+            var minuterKvar = 60 - nu.Minute;
+
+            var förbrukningKvar = minuterKvar * 8000 / 60;
+            var totalförbrukningTimme
+                = wallboxWorker.FörbrukningDennaTimme + förbrukningKvar;
+
+            HourlyEnergyUsage maxFörbrukning
+                = await wallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(nu);
+            var förbrukningGräns = (long)(maxFörbrukning.EnergyUsageWh * 0.9);
+            if (förbrukningGräns < 4000)
+            {
+                förbrukningGräns = 4000;
+            }
+
+            if (totalförbrukningTimme > förbrukningGräns)
+            {
+                logger.LogInformation(
+                    "! Charging disabled due to high consumption: {consumption} Wh.",
+                    wallboxWorker.FörbrukningDennaTimme);
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Skapa lista med kvartar där laddning skall vara aktiv
     /// </summary>
-    public List<ElectricityPrice> GetKvartlista()
+    public List<ElectricityPrice> GetKvartlista(bool tom = false)
     {
         lock (_kvartlistaLock)
         {
             var kvartlista = new List<ElectricityPrice>();
-            if (LaddBehovProcent < 1)
+            if (tom || LaddBehovProcent < 1)
             {
                 // LaddBehovProcent är oinitierat eller bilen fulladdad
                 KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(kvartlista));
@@ -462,28 +270,24 @@ public class ChargeWorker(
             foreach (var kvart in priser)
             {
                 // två kvartar klipps bort i början av varje timme
-                if (kvart.TimeStart.Minute < 20)
+                if (kvart.TimeStart.Minute < 10)
                 {
                     kvart.ChargingAllowed = false;
                 }
             }
 
-            // Antar att det behövs 1.9 kvartar per procent laddbehov.
-            var antalKvartar = (int)(LaddBehovProcent * 1.9);
-            var prisTak = new decimal(1.5); // SEK
+            // Antar att det behövs 1.0 kvartar per procent laddbehov.
+            var antalKvartar = (int)(LaddBehovProcent * 1.0);
 
             // Skapa lista med kvartar där laddning är tillåten och priset är under prisTak
             kvartlista = priser.Where(x => x.ChargingAllowed
                                            && x.TimeEnd > DateTime.Now)
                 .OrderBy(x => x.SekPerKwh)
                 .Take(antalKvartar)
-                // tillfälligt, eftersom vw inte berättar laddstatus får 
-                // vi helt enkelt ladda om priset är under 1 SEK.
-                //.Where(x => x.SekPerKwh < prisTak)
                 .ToList();
 
             var nextKvart = kvartlista.OrderBy(x => x.TimeStart).FirstOrDefault();
-            logger.LogInformation(
+            logger.LogDebug(
                 "Laddbehov {behovProcent}, kvartar {antalKvartar} nästa {nextKvart}",
                 LaddBehovProcent, antalKvartar, nextKvart?.TimeStart.ToString("HH:mm") ?? "---");
 
@@ -499,24 +303,19 @@ public class ChargeWorker(
     /// Compares ChargeLevel and SessionEnergy to detect changes.
     /// </summary>
     /// <param name="chargeState">The current state of charging (e.g., "CHARGING", "IDLE").</param>
-    /// <param name="chargeLevel">The current battery charge level in percentage (0-100).</param>
-    /// <param name="chargeTarget">The target charge level in percentage (0-100).</param>
-    /// <param name="wallboxWorker">The WallboxWorker instance to get session data from.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     internal async Task SaveChargeSessionAsync(
         string chargeState,
-        int? chargeLevel,
-        int? chargeTarget,
-        WallboxWorker wallboxWorker,
         CancellationToken cancellationToken)
     {
         try
         {
+            var (chargeLevel, chargeTarget) = await VehicleStateAsync();
+
             // Get session data from WallboxWorker
             var sessionData = wallboxWorker.ChargeSessionData;
             if (sessionData is null)
             {
-                //logger.LogInformation("SaveChargeSessionAsync: No session data available from WallboxWorker");
                 return;
             }
 
@@ -592,15 +391,4 @@ public class ChargeWorker(
             logger.LogError(ex, "SaveChargeSessionAsync: Error saving charge session");
         }
     }
-}
-
-enum ConnectionEnum
-{
-    Connected,
-    Charging,
-    ChargingPaused,
-    Disabled,
-    Unknown,
-    ChargingFinished,
-    SearchingForCommunication
 }

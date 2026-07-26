@@ -145,9 +145,22 @@ namespace ChargeMaster
                     return new TibberOAuthService(oauthOptions, httpClient, tokenStorage, logger);
                 });
 
-                builder.Services.AddHttpClient<TibberVehicleService>(client =>
+                // Register HttpClient for TibberVehicleService
+                builder.Services.AddHttpClient("TibberVehicle", client =>
                 {
                     client.Timeout = TimeSpan.FromSeconds(60);
+                });
+
+                // Register TibberVehicleService as Singleton with factory pattern
+                builder.Services.AddSingleton<TibberVehicleService>(sp =>
+                {
+                    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+                    var options = sp.GetRequiredService<IOptions<TibberVehicleOptions>>();
+                    var oauthService = sp.GetRequiredService<TibberOAuthService>();
+                    var logger = sp.GetRequiredService<ILogger<TibberVehicleService>>();
+
+                    var httpClient = httpClientFactory.CreateClient("TibberVehicle");
+                    return new TibberVehicleService(options, oauthService, httpClient, logger);
                 });
 
                 builder.Services.AddHttpClient<WallboxService, WallboxService>(client =>

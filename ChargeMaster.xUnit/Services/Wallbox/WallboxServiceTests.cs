@@ -47,14 +47,15 @@ public class WallboxServiceTests : IDisposable
         var startingStat = await _service.GetStatusAsync();
 
         // Act
-        var result = await _service.SetModeAsync(mode);
+        await _service.SetModeAsync(mode);
+
 
         var stat = await _service.GetStatusAsync();
         Assert.NotNull(stat);
         Assert.Equal(expectedMode, stat.Mode);
 
         // Assert
-        Assert.True(result);
+        Assert.True(_service._currentMode == mode);
 
         // reset starting mode
         await _service.SetModeAsync((WallboxMode)Enum.Parse(typeof(WallboxMode),

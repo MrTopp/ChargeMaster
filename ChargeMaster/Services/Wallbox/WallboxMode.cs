@@ -2,6 +2,7 @@
 
 public enum WallboxMode
 {
+    Unset,
     Available,
     NotAvailable,
     TimerControlled

@@ -23,16 +23,6 @@ public class ChargeWorkerTests
     }
 
     [Fact(Skip = "Only for interactive testing")]
-    public async Task LaddBehovAsync_OK()
-    {
-        // Act
-        var result = await _worker.LaddBehovAsync();
-
-        // Assert
-        Assert.Equal(0, result);
-    }
-
-    [Fact(Skip = "Only for interactive testing")]
     public void SkapaKvartlista_OK()
     {
         // Act

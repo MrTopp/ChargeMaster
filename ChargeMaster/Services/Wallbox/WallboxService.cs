@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 
+using ChargeMaster.Workers;
+
 namespace ChargeMaster.Services.Wallbox;
 
 /// <summary>
@@ -49,6 +51,63 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
     }
 
     /// <summary>
+    /// Status för laddning, används för att avgöra om bilen är inkopplad, laddar,
+    /// eller inte är ansluten. Om det inte går att få status från wallboxen, returneras Unknown.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<ConnectionEnum> GetConnectorStatusAsync()
+    {
+        WallboxStatus? response = await GetStatusAsync();
+        if (response == null)
+            return ConnectionEnum.Unknown;
+        switch (response.Connector)
+        {
+            case "CHARGING_PAUSED":
+                return ConnectionEnum.ChargingPaused;
+            case "CONNECTED":
+                return ConnectionEnum.Connected;
+            case "CHARGING":
+                return ConnectionEnum.Charging;
+            case "DISABLED":
+                return ConnectionEnum.Disabled;
+            case "CHARGING_FINISHED":
+                return ConnectionEnum.ChargingFinished;
+            case "SEARCH_COMM":
+                return ConnectionEnum.SearchingForCommunication;
+
+            default:
+                logger.LogError("Unknown value för WallboxStatus.Connector: {Value}",
+                    response.Connector);
+                return ConnectionEnum.Unknown;
+        }
+    }
+    
+    public async Task StartaLaddningAsync()
+    {
+            try
+            {
+                await SetModeAsync(WallboxMode.Available);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error starting charging");
+            }
+    }
+
+    public async Task StoppaLaddningAsync()
+    {
+        try
+        {
+            await SetModeAsync(WallboxMode.NotAvailable);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error stopping charging");
+        }
+    }
+
+
+    /// <summary>
     /// Ställ in wallbox-tid
     /// </summary>
     /// <param name="dateTime"></param>
@@ -77,12 +136,13 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
     }
 
+    internal WallboxMode _currentMode = WallboxMode.Unset;
+
     /// <summary>
     /// Ställer in driftläge på wallboxen.
     /// </summary>
     /// <param name="mode">Önskat driftläge.</param>
-    /// <returns><c>true</c> om anropet lyckades, annars <c>false</c>.</returns>
-    public async Task<bool> SetModeAsync(WallboxMode mode)
+    public async Task SetModeAsync(WallboxMode mode)
     {
         try
         {
@@ -93,16 +153,18 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
                 WallboxMode.TimerControlled => "SCHEMA",
                 _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
             };
-
-            // Wallboxen förväntar vanligtvis nyttolasten på /servlet/rest/chargebox/mode
-            logger.LogInformation("Ställer in wallbox-läge till {Mode}", modeString);
-            var response
-                = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}", null);
-            return response.IsSuccessStatusCode;
+            if (mode != _currentMode)
+            {
+                logger.LogInformation("Ställer in wallbox-läge till {Mode}", modeString);
+                var response
+                    = await httpClient.PostAsync($"/servlet/rest/chargebox/mode/{modeString}",
+                        null);
+                _currentMode = response.IsSuccessStatusCode ? mode : WallboxMode.Unset;
+            }
         }
         catch (HttpRequestException)
         {
-            return false;
+            _currentMode = WallboxMode.Unset;
         }
     }
 
