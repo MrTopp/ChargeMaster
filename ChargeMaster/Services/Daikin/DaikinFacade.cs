@@ -148,8 +148,8 @@ public class DaikinFacade(IDaikinService daikinService, ILogger<DaikinFacade> lo
             if (result)
             {
                 await UpdateStatusAsync();
-                logger.LogInformation("Måltemperatur inställd till {Temperature}°C",
-                    _targetTemperature);
+                //logger.LogInformation("Måltemperatur inställd till {Temperature}°C",
+                //    _targetTemperature);
             }
 
             return result;

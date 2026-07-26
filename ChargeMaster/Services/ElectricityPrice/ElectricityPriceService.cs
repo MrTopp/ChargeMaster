@@ -38,7 +38,6 @@ public class ElectricityPriceService(
 
         if (await repository.HasPricesForDateAsync(date))
         {
-            logger.LogInformation("Priser för {Date} finns redan.", date.ToString("yyyy-MM-dd"));
             return;
         }
 

@@ -266,7 +266,7 @@ public class ShellyMqttService(
             .Build();
 
         await _mqttClient.ConnectAsync(_mqttOptions, _disposeCts?.Token ?? CancellationToken.None);
-        logger.LogInformation(
+        logger.LogDebug(
             "Ansluten till MQTT-server på {Address}:{Port} med klient-ID {ClientId}",
             brokerAddress, brokerPort, clientId);
     }

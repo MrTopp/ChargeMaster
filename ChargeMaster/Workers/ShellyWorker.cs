@@ -17,7 +17,6 @@ public class ShellyWorker(
         try
         {
             await shelly.SetupAsync();
-            logger.LogInformation("ShellyMqttService initialiserad");
 
             // Prenumerera på temperaturändringar
             shelly.TemperatureChanged += OnTemperatureChanged;

@@ -93,7 +93,6 @@ public class InfluxDbService : IAsyncDisposable
         {
             ValidateUrl(_options.Url);
             _client = clientFactory.CreateClient(_options);
-            _logger.LogInformation("InfluxDbService initialized successfully");
         }
         catch (Exception ex)
         {

@@ -173,10 +173,9 @@
     <section class="mb-1">
         <div class="row g-3" style="max-width: 720px; margin-left: auto; margin-right: auto;">
             <div class="col-md-5">
-                <h4 class="mb-2">Bilens laddstatus</h4>
-
                 @if (CurrentTibberVehicleStatus is not null)
                 {
+                    <h4 class="mb-2">Bilens laddstatus</h4>
                     <div class="row g-2">
                         <div class="col-auto">
                             <small class="text-muted">Batterinivå:</small><br>
@@ -339,10 +338,7 @@
         LinuxWorker.SystemLoadUpdated += OnSystemLoadUpdated;
         ErrorLogService.ErrorLogged += OnErrorLogged;
 
-        // Trigga uppdatering av kvartlista
-        CurrentKvartlista = ChargeWorker.GetKvartlista();
-
-        // Ladda elpriser från dagens datum och nästa dag
+       // Ladda elpriser från dagens datum och nästa dag
         await LoadElectricityPricesAsync();
 
         // Starta uppdatering av elpriser var 5:e minut
@@ -438,9 +434,9 @@
         var tomorrowPrices = await ElectricityPriceService.GetPricesForDateAsync(tomorrow);
 
         CurrentElectricityPrices = [];
-        if (todayPrices?.Count > 0)
+        if (todayPrices.Count > 0)
             CurrentElectricityPrices.AddRange(todayPrices);
-        if (tomorrowPrices?.Count > 0)
+        if (tomorrowPrices.Count > 0)
             CurrentElectricityPrices.AddRange(tomorrowPrices);
     }
 

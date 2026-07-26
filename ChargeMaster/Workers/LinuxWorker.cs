@@ -64,9 +64,7 @@ public class LinuxWorker(ILogger<LinuxWorker> logger) : BackgroundService
             logger.LogInformation("LinuxWorker: Inte en Linux-maskin, avslutar");
             return;
         }
-
-        logger.LogInformation("LinuxWorker: Startar systemlast-övervakning");
-
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             try
