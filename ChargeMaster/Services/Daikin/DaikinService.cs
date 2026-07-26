@@ -263,7 +263,7 @@ public class DaikinService(
         {
             // Händer då och då, det får vi leva med. Skickar inte med exception 
             // för att få lite renare logg.
-            logger.LogError(ex, "Fel vid hämtning av Daikin styrinformation");
+            logger.LogError("Fel vid hämtning av Daikin styrinformation");
             return null;
         }
     }

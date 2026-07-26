@@ -40,7 +40,8 @@ public class WallboxService(HttpClient httpClient, ILogger<WallboxService> logge
         }
         catch (HttpRequestException ex)
         {
-            logger.LogError(ex, "Fel vid hämtning av wallbox-status");
+            // Händer ibland, får vi leva med
+            logger.LogError("Fel vid hämtning av wallbox-status");
             return null;
         }
         catch (JsonException ex)

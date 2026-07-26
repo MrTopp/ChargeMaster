@@ -72,7 +72,7 @@ public class TibberVehicleService(
     /// <summary>
     /// Buffer av statusinformation för att inte hämta för ofta
     /// </summary>
-    internal TibberVehicleStatus? StatusBufferd
+    private TibberVehicleStatus? StatusBufferd
     {
         get
         {
@@ -88,7 +88,7 @@ public class TibberVehicleService(
         }
     } = null;
 
-    internal DateTime? StatusBufferedAt { get; set; }
+    private DateTime? StatusBufferedAt { get; set; }
 
 
     /// <summary>
@@ -102,6 +102,7 @@ public class TibberVehicleService(
         {
             if (StatusBufferd != null)
             {
+                VehicleStatusRetrieved?.Invoke(this, new TibberVehicleStatusEventArgs(StatusBufferd));
                 return StatusBufferd;
             }
 
@@ -166,8 +167,6 @@ public class TibberVehicleService(
             _getStatusSemaphore.Release();
         }
     }
-
-
 
     public async ValueTask DisposeAsync()
     {

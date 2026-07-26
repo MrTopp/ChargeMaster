@@ -269,7 +269,6 @@ public class ChargeWorker(
             // Ta bort kvart(ar) i början av varje timme.
             foreach (var kvart in priser)
             {
-                // två kvartar klipps bort i början av varje timme
                 if (kvart.TimeStart.Minute < 10)
                 {
                     kvart.ChargingAllowed = false;
