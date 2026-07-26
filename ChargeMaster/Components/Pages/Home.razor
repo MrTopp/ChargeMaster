@@ -328,6 +328,9 @@
         LinuxWorker.SystemLoadUpdated += OnSystemLoadUpdated;
         ErrorLogService.ErrorLogged += OnErrorLogged;
 
+        // Trigga uppdatering av kvartlista
+        CurrentKvartlista = ChargeWorker.GetKvartlista();
+
         // Ladda elpriser från dagens datum och nästa dag
         await LoadElectricityPricesAsync();
 
