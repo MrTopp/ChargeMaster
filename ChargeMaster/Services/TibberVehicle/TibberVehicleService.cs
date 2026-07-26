@@ -1,5 +1,6 @@
-﻿using System.Text.Json;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using System.Text.Json;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace ChargeMaster.Services.TibberVehicle;
 
@@ -66,6 +67,29 @@ public class TibberVehicleService(
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly TibberVehicleOptions _options = options.Value;
+    private readonly SemaphoreSlim _getStatusSemaphore = new(1, 1);
+
+    /// <summary>
+    /// Buffer av statusinformation för att inte hämta för ofta
+    /// </summary>
+    internal TibberVehicleStatus? StatusBufferd
+    {
+        get
+        {
+            // Returnera null om den buffrade statusen är inom nuvarande kvart
+            var kvartNu = DateTime.Now.Minute / 15;
+            var kvartUppdaterad = StatusBufferedAt?.Minute / 15 ?? -1;
+            return kvartNu != kvartUppdaterad ? null : field;
+        }
+        set
+        {
+            field = value;
+            StatusBufferedAt = DateTime.Now;
+        }
+    } = null;
+
+    internal DateTime? StatusBufferedAt { get; set; }
+
 
     /// <summary>
     /// Hämtar aktuell status för fordonet från Tibber Data API.
@@ -73,31 +97,29 @@ public class TibberVehicleService(
     /// <returns>Fordonets status, eller null om svaret saknar statusdata eller autentisering misslyckades.</returns>
     public async Task<TibberVehicleStatus?> GetStatusAsync()
     {
+        await _getStatusSemaphore.WaitAsync();
         try
         {
+            if (StatusBufferd != null)
+            {
+                return StatusBufferd;
+            }
+
             // Få OAuth2 access token
             var accessToken = await oauthService.GetValidAccessTokenAsync();
             if (accessToken == null)
             {
-                // Error message already logged by GetValidAccessTokenAsync
                 return null;
             }
 
-            logger.LogInformation("Getting vehicle status from Tibber Data API");
-            logger.LogInformation("Home ID: {HomeId}, Device ID: {DeviceId}", _options.HomeId, _options.DeviceId);
-
             var url = $"https://data-api.tibber.com/v1/homes/{_options.HomeId}/devices/{_options.DeviceId}";
-            logger.LogInformation("Endpoint URL: {Url}", url);
 
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
             // Use OAuth2 access token
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
-            logger.LogInformation("Using OAuth2 access token for authentication");
 
             var response = await httpClient.SendAsync(request);
-
-            logger.LogInformation("Vehicle status response status: {Status}", response.StatusCode);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -127,46 +149,30 @@ public class TibberVehicleService(
                 });
 
                 VehicleStatusRetrieved?.Invoke(this, new TibberVehicleStatusEventArgs(status));
+                StatusBufferd = status;
                 return status;
             }
 
             return null;
+
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Kunde inte hämta fordonsstatus från Tibber");
             return null;
         }
-    }
-    
-    private async Task<bool> SendCommandAsync(string commandPath)
-    {
-        try
+        finally
         {
-            var accessToken = await oauthService.GetValidAccessTokenAsync();
-            if (accessToken == null)
-            {
-                logger.LogError("Kunde inte få tillgång till OAuth2 access token för Tibber Data API");
-                return false;
-            }
-
-            var url = $"https://data-api.tibber.com/v1/homes/{_options.HomeId}/devices/{_options.DeviceId}{commandPath}";
-            var request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Headers.Add("Authorization", $"Bearer {accessToken}");
-
-            var response = await httpClient.SendAsync(request);
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Fel vid skickning av kommando till Tibber: {Command}", commandPath);
-            return false;
+            _getStatusSemaphore.Release();
         }
     }
+
+
 
     public async ValueTask DisposeAsync()
     {
-        httpClient?.Dispose();
+        _getStatusSemaphore.Dispose();
+        httpClient.Dispose();
         await Task.CompletedTask;
     }
 }
