@@ -64,7 +64,7 @@ public class ChargeWorker(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in ChargeWorker loop");
+                logger.LogError(ex, "Fel i ChargeWorker-loop");
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
@@ -149,7 +149,7 @@ public class ChargeWorker(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching vehicle status: {Message}", ex.Message);
+                logger.LogError(ex, "Fel vid hämtning av fordonsstatus: {Message}", ex.Message);
             return (0, 0);
         }
 
@@ -206,7 +206,7 @@ public class ChargeWorker(
             {
                 // logga som error så visas den
                 logger.LogError(
-                    "! Charging disabled due to high consumption: {consumption} Wh.",
+                    "! Laddning avstängd pga hög förbrukning: {consumption} Wh.",
                     wallboxWorker.FörbrukningDennaTimme);
                 return false;
             }
@@ -351,7 +351,7 @@ public class ChargeWorker(
                 LastSavedChargeSession.SessionEnergy == sessionEnergy)
             {
                 logger.LogDebug(
-                    "SaveChargeSessionAsync: No change detected. ChargeLevel={level}, SessionEnergy={energy}",
+                    "SaveChargeSessionAsync: Ingen ändring detekterad. ChargeLevel={level}, SessionEnergy={energy}",
                     chargeLevel, sessionEnergy);
                 return;
             }
@@ -380,12 +380,12 @@ public class ChargeWorker(
             LastSavedChargeSession = chargeSession;
 
             logger.LogInformation(
-                "SaveChargeSessionAsync: Charge session saved. State={state}, Level={level}%, Target={target}%, Energy={energy}Wh",
+                "SaveChargeSessionAsync: Laddningssession sparad. State={state}, Level={level}%, Target={target}%, Energy={energy}Wh",
                 chargeState, chargeLevel, chargeTarget, sessionEnergy);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "SaveChargeSessionAsync: Error saving charge session");
+            logger.LogError(ex, "SaveChargeSessionAsync: Fel vid sparande av laddningssession");
         }
     }
 }

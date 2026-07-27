@@ -29,11 +29,11 @@ public class DaikinWorker(
             catch (TaskCanceledException)
             {
                 // Förväntat när tjänsten stoppas, ingen åtgärd krävs.
-                logger.LogInformation("DaikinWorker is stopping due to cancellation.");
+                    logger.LogInformation("DaikinWorker stoppas på grund av avbrottsbegäran.");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in DaikinWorker loop");
+                logger.LogError(ex, "Fel i DaikinWorker-loop");
             }
         }
     }
@@ -236,7 +236,7 @@ public class DaikinWorker(
     /// <returns></returns>
     private async Task EmergencyStop()
     {
-        logger.LogInformation("Emergency stop activated. Setting target temperature to 16°C.");
+        logger.LogInformation("Nödstopp aktiverat. Ställer in måltemperatur till 16°C.");
         EmergencyStopped = true;
         await daikinFacade.SetTargetTemperatureAsync(16, true);
     }
@@ -256,7 +256,7 @@ public class DaikinWorker(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error getting current electricity price");
+            logger.LogError(ex, "Fel vid hämtning av nuvarande elpris");
             return null;
         }
     }
@@ -288,7 +288,7 @@ public class DaikinWorker(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error saving Daikin session data");
+                logger.LogError(ex, "Fel vid sparande av Daikin-sessionsdata");
         }
     }
 
