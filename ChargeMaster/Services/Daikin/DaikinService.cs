@@ -227,6 +227,8 @@ public class DaikinService(
 
     // ==================== AIRCON ENDPOINTS ====================
 
+    private int _httpExceptionCounter = 0;
+    
     /// <summary>
     /// Hämtar aktuella styrinställningar (läge, temperatur, fläkthastighet).
     /// </summary>
@@ -247,7 +249,7 @@ public class DaikinService(
                 PreviousAdvanced = advanced;
             }
 
-            return new DaikinControlInfo
+            var controlInfo = new DaikinControlInfo
             {
                 Power = ParseInt(data.GetValueOrDefault("pow")) ?? 0,
                 Mode = ParseInt(data.GetValueOrDefault("mode")) ?? 0,
@@ -258,12 +260,24 @@ public class DaikinService(
                 Alert = ParseInt(data.GetValueOrDefault("alert")),
                 Advanced = advanced
             };
+            _httpExceptionCounter = 0;
+            return controlInfo;
+        }
+        catch (HttpRequestException)
+        {
+            // Händer då och då, det får vi leva med. 
+            _httpExceptionCounter++;
+            if (_httpExceptionCounter > 5)
+            {
+                logger.LogError("Fel vid hämtning av Daikin styrinformation, fel nr {count}",
+                    _httpExceptionCounter);
+                _httpExceptionCounter = 0;
+            }
+            return null;
         }
         catch (Exception ex)
         {
-            // Händer då och då, det får vi leva med. Skickar inte med exception 
-            // för att få lite renare logg.
-            logger.LogError("Fel vid hämtning av Daikin styrinformation");
+            logger.LogError(ex,"Daikin service krånglar");
             return null;
         }
     }
