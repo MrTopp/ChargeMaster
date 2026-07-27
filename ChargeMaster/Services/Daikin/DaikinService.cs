@@ -234,52 +234,58 @@ public class DaikinService(
     /// </summary>
     public async Task<DaikinControlInfo?> GetControlInfoAsync()
     {
-        try
+        for (int i = 0; i < 3; i++)
         {
-            // ret=OK,pow=1,mode=4,adv=,stemp=21.5,shum=0,dt1=25.0,dt2=M,dt3=25.0,dt4=21.5,dt5=21.5,dt7=25.0,dh1=AUTO,dh2=50,dh3=0,dh4=0,dh5=0,dh7=AUTO,dhh=50,b_mode=4,b_stemp=21.5,b_shum=0,alert=255,f_rate=A,b_f_rate=A,dfr1=A,dfr2=A,dfr3=A,dfr4=A,dfr5=A,dfr6=A,dfr7=A,dfrh=A,f_dir=0,b_f_dir=0,dfd1=0,dfd2=0,dfd3=0,dfd4=0,dfd5=0,dfd6=0,dfd7=0,dfdh=0,dmnd_run=0,en_demand=1
-            var response = await httpClient.GetStringAsync("/aircon/get_control_info");
-            var data = ParseResponse(response);
+            try
+            {
+                // ret=OK,pow=1,mode=4,adv=,stemp=21.5,shum=0,dt1=25.0,dt2=M,dt3=25.0,dt4=21.5,dt5=21.5,dt7=25.0,dh1=AUTO,dh2=50,dh3=0,dh4=0,dh5=0,dh7=AUTO,dhh=50,b_mode=4,b_stemp=21.5,b_shum=0,alert=255,f_rate=A,b_f_rate=A,dfr1=A,dfr2=A,dfr3=A,dfr4=A,dfr5=A,dfr6=A,dfr7=A,dfrh=A,f_dir=0,b_f_dir=0,dfd1=0,dfd2=0,dfd3=0,dfd4=0,dfd5=0,dfd6=0,dfd7=0,dfdh=0,dmnd_run=0,en_demand=1
+                var response = await httpClient.GetStringAsync("/aircon/get_control_info");
+                var data = ParseResponse(response);
 
-            var advanced = data.GetValueOrDefault("adv");
-            if (PreviousAdvanced != advanced)
-            {
-                logger.LogWarning(
-                    "Daikin control info: Advanced värde ändrat från '{PreviousAdvanced}' till '{CurrentAdvanced}'",
-                    PreviousAdvanced, advanced);
-                PreviousAdvanced = advanced;
-            }
+                var advanced = data.GetValueOrDefault("adv");
+                if (PreviousAdvanced != advanced)
+                {
+                    logger.LogWarning(
+                        "Daikin control info: Advanced värde ändrat från '{PreviousAdvanced}' till '{CurrentAdvanced}'",
+                        PreviousAdvanced, advanced);
+                    PreviousAdvanced = advanced;
+                }
 
-            var controlInfo = new DaikinControlInfo
-            {
-                Power = ParseInt(data.GetValueOrDefault("pow")) ?? 0,
-                Mode = ParseInt(data.GetValueOrDefault("mode")) ?? 0,
-                TargetTemperature = ParseDouble(data.GetValueOrDefault("stemp")),
-                TargetHumidity = data.GetValueOrDefault("shum"),
-                FanRate = data.GetValueOrDefault("f_rate"),
-                FanDirection = ParseInt(data.GetValueOrDefault("f_dir")) ?? 0,
-                Alert = ParseInt(data.GetValueOrDefault("alert")),
-                Advanced = advanced
-            };
-            _httpExceptionCounter = 0;
-            return controlInfo;
-        }
-        catch (HttpRequestException)
-        {
-            // Händer då och då, det får vi leva med. 
-            _httpExceptionCounter++;
-            if (_httpExceptionCounter > 5)
-            {
-                logger.LogError("Fel vid hämtning av Daikin styrinformation, fel nr {count}",
-                    _httpExceptionCounter);
+                var controlInfo = new DaikinControlInfo
+                {
+                    Power = ParseInt(data.GetValueOrDefault("pow")) ?? 0,
+                    Mode = ParseInt(data.GetValueOrDefault("mode")) ?? 0,
+                    TargetTemperature = ParseDouble(data.GetValueOrDefault("stemp")),
+                    TargetHumidity = data.GetValueOrDefault("shum"),
+                    FanRate = data.GetValueOrDefault("f_rate"),
+                    FanDirection = ParseInt(data.GetValueOrDefault("f_dir")) ?? 0,
+                    Alert = ParseInt(data.GetValueOrDefault("alert")),
+                    Advanced = advanced
+                };
                 _httpExceptionCounter = 0;
+                return controlInfo;
             }
-            return null;
+            catch (HttpRequestException)
+            {
+                // Händer då och då, det får vi leva med. 
+                _httpExceptionCounter++;
+                if (_httpExceptionCounter > 5)
+                {
+                    logger.LogError("Fel vid hämtning av Daikin styrinformation, fel nr {count}",
+                        _httpExceptionCounter);
+                    _httpExceptionCounter = 0;
+                }
+                // returnera inte, ramla ut till for-loopen
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Daikin service krånglar");
+                return null;
+            }
+            await Task.Delay(TimeSpan.FromSeconds(1));
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex,"Daikin service krånglar");
-            return null;
-        }
+        logger.LogError("Missat tre försök att hämta daikin information");
+        return null;
     }
 
     /// <summary>
