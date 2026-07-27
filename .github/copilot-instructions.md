@@ -46,7 +46,7 @@
   without a separate backing field.
 - Use `System.Threading.Channels.Channel<T>` for producer/consumer scenarios that require serialized or queued
   processing (e.g. InfluxDB writes).
-- Using of hard-coded numbers in code is allowed. Changes to configuration are done through redeploy of the application. 
+- Using of hard-coded numbers in code is allowed to improve readability by keeping values close to their usage. This is acceptable due to the single deployment model. Changes to configuration are done through redeploy of the application. 
 
 ## Configuration
 
