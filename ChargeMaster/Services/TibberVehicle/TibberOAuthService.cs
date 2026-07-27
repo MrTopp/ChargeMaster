@@ -24,10 +24,6 @@ public class TibberOAuthService(
         var stateParameter = GenerateRandomState();
 
         logger.LogInformation("Generating authorization URL with parameters:");
-        logger.LogInformation("  ClientId: {ClientId}", _options.ClientId);
-        logger.LogInformation("  RedirectUri: {RedirectUri}", _options.RedirectUri);
-        logger.LogInformation("  Scope: {Scope}", _options.Scope);
-        logger.LogInformation("  AuthorizeUrl endpoint: {AuthorizeUrl}", _options.AuthorizeUrl);
 
         var parameters = new Dictionary<string, string>
         {
@@ -53,11 +49,6 @@ public class TibberOAuthService(
     {
         try
         {
-            logger.LogInformation("Exchanging authorization code for token");
-            logger.LogInformation("TokenUrl: {TokenUrl}", _options.TokenUrl);
-            logger.LogInformation("ClientId: {ClientId}", _options.ClientId);
-            logger.LogInformation("RedirectUri: {RedirectUri}", _options.RedirectUri);
-
             var requestBody = new Dictionary<string, string>
             {
                 { "grant_type", "authorization_code" },
@@ -70,7 +61,6 @@ public class TibberOAuthService(
             using var content = new FormUrlEncodedContent(requestBody);
 
             var tokenUri = new Uri(_options.TokenUrl); 
-            logger.LogInformation("Posting to absolute URI: {Uri}", tokenUri.AbsoluteUri);
 
             var response = await httpClient.PostAsync(tokenUri, content);
 
@@ -109,12 +99,6 @@ public class TibberOAuthService(
                 return (false, "Invalid token response from Tibber");
             }
 
-            logger.LogInformation("AccessToken: {HasAccessToken}", !string.IsNullOrEmpty(tokenResponse.AccessToken));
-            logger.LogInformation("RefreshToken: {HasRefreshToken}", !string.IsNullOrEmpty(tokenResponse.RefreshToken));
-            logger.LogInformation("ExpiresIn: {ExpiresIn}", tokenResponse.ExpiresIn);
-            logger.LogInformation("TokenType: {TokenType}", tokenResponse.TokenType);
-            logger.LogInformation("Scope: {Scope}", tokenResponse.Scope);
-
             if (string.IsNullOrEmpty(tokenResponse.RefreshToken))
             {
                 logger.LogError("WARNING: Tibber did not return a refresh token. Token will expire in {Minutes} minutes.", tokenResponse.ExpiresIn / 60);
@@ -128,8 +112,6 @@ public class TibberOAuthService(
             };
 
             await tokenStorage.SaveAsync(tokens);
-            logger.LogInformation("Tibber tokens obtained and saved successfully");
-            logger.LogInformation("Saved RefreshToken: {HasRefreshToken}", !string.IsNullOrEmpty(tokens.RefreshToken));
             
             return (true, null);
         }
@@ -163,11 +145,6 @@ public class TibberOAuthService(
                 { "redirect_uri", _options.RedirectUri }
             };
 
-            logger.LogInformation("Refreshing token");
-            logger.LogInformation("TokenUrl: {TokenUrl}", _options.TokenUrl);
-            logger.LogInformation("ClientId: {ClientId}", _options.ClientId);
-            logger.LogInformation("RefreshToken present: {HasRefreshToken}", !string.IsNullOrEmpty(tokens.RefreshToken));
-
             using var content = new FormUrlEncodedContent(requestBody);
             var response = await httpClient.PostAsync(new Uri(_options.TokenUrl), content);
 
@@ -197,7 +174,6 @@ public class TibberOAuthService(
             tokens.ExpiresAt = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
 
             await tokenStorage.SaveAsync(tokens);
-            logger.LogInformation("Tibber-tokens uppdaterade");
 
             return true;
         }
