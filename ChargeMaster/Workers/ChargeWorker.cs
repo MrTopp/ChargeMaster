@@ -189,7 +189,8 @@ public class ChargeWorker(
         {
             var minuterKvar = 60 - nu.Minute;
 
-            var förbrukningKvar = minuterKvar * 8000 / 60;
+            // Gissa kvarvarande förbrukning, antar att effekten är 6 kW
+            var förbrukningKvar = minuterKvar * 6000 / 60;
             var totalförbrukningTimme
                 = wallboxWorker.FörbrukningDennaTimme + förbrukningKvar;
 
@@ -203,7 +204,8 @@ public class ChargeWorker(
 
             if (totalförbrukningTimme > förbrukningGräns)
             {
-                logger.LogInformation(
+                // logga som error så visas den
+                logger.LogError(
                     "! Charging disabled due to high consumption: {consumption} Wh.",
                     wallboxWorker.FörbrukningDennaTimme);
                 return false;
