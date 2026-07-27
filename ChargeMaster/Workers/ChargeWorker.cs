@@ -188,26 +188,37 @@ public class ChargeWorker(
         if (nu.Minute > 10)
         {
             var minuterKvar = 60 - nu.Minute;
-
-            // Gissa kvarvarande förbrukning, antar att effekten är 6 kW
-            var förbrukningKvar = minuterKvar * 6000 / 60;
+            var nuvarandeEffekt = wallboxWorker?.NuvarandeMeterInfo?.CurrentEnergy ?? 6000;
+            var effektEjLaddning = nuvarandeEffekt - 4300;
+            if (effektEjLaddning < 200)
+                effektEjLaddning = nuvarandeEffekt;
+            var förbrukningKvar = minuterKvar * effektEjLaddning / 60;
             var totalförbrukningTimme
                 = wallboxWorker.FörbrukningDennaTimme + förbrukningKvar;
-
+            
+            // TODO: ta hänsyn till både vinter och normalförbrukning max
             HourlyEnergyUsage maxFörbrukning
                 = await wallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(nu);
+            logger.LogInformation("> maxFörbrukning {kvar}", maxFörbrukning.EnergyUsageWh);
             var förbrukningGräns = (long)(maxFörbrukning.EnergyUsageWh * 0.9);
             if (förbrukningGräns < 4000)
             {
                 förbrukningGräns = 4000;
             }
-
+            
+            logger.LogInformation("> minuterKvar {kvar}", minuterKvar);
+            logger.LogInformation($"> nuvarandeEffekt {nuvarandeEffekt}");
+            logger.LogInformation($"> Effekt ej laddning {effektEjLaddning}");
+            logger.LogInformation($"> förbrukning till nu {wallboxWorker.FörbrukningDennaTimme}");
+            logger.LogInformation($"> förbruktnig kvar om stopp {förbrukningKvar}");
+            logger.LogInformation($"> total förbrukning timmen {totalförbrukningTimme}");
+            logger.LogInformation($"> Max förbrukning {förbrukningGräns}");
             if (totalförbrukningTimme > förbrukningGräns)
             {
                 // logga som error så visas den
                 logger.LogError(
-                    "! Laddning avstängd pga hög förbrukning: {consumption} Wh.",
-                    wallboxWorker.FörbrukningDennaTimme);
+                    "! Laddning avstängd pga hög förbrukning: hittils {consumption} Wh. beräknad {expectation}",
+                    wallboxWorker.FörbrukningDennaTimme, totalförbrukningTimme);
                 return false;
             }
         }
