@@ -105,27 +105,22 @@ public class ChargeWorker(
             await SaveChargeSessionAsync(currentConnectorStatus.ToString(), stoppingToken);
 
 
-            // ----- Om bilen inte är ansluten, hoppa över resten av loopen
+            // ----- Hantera laddning om bilen är ansluten
 
-            if (currentConnectorStatus == ConnectionEnum.SearchingForCommunication)
+            if (currentConnectorStatus != ConnectionEnum.SearchingForCommunication)
             {
-                goto NextIteration;
+                // ----- Bilen ansluten, Start/Stoppa laddning -----
+
+                bool chargingAllowed = await IsChargingAllowedAsync();
+                if (!chargingAllowed)
+                {
+                    await wallboxService.StoppaLaddningAsync();
+                }
+                else
+                {
+                    await wallboxService.StartaLaddningAsync();
+                }
             }
-
-
-            // ----- Start/Stoppa laddning -----
-
-            bool chargingAllowed = await IsChargingAllowedAsync();
-            if (!chargingAllowed)
-            {
-                await wallboxService.StoppaLaddningAsync();
-            }
-            else
-            {
-                await wallboxService.StartaLaddningAsync();
-            }
-
-        NextIteration:
 
             // ----- Vänta tills nästa hela minut
             var targetNextMinute = nu.AddMinutes(1);
