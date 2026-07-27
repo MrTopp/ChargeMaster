@@ -99,8 +99,8 @@ public class ChargeWorker(
 
             VehicleStatus = await tibberVehicleService.GetStatusAsync();
 
-            // ----- Kvartlista, tom om bilen inte är ansluten
-            GetKvartlista(tom: currentConnectorStatus == ConnectionEnum.SearchingForCommunication);
+            // ----- Uppdatera kvartlista, tom om bilen inte är ansluten
+            GetKvartlista(skapaTomLista: currentConnectorStatus == ConnectionEnum.SearchingForCommunication);
 
             await SaveChargeSessionAsync(currentConnectorStatus.ToString(), stoppingToken);
 
@@ -165,7 +165,7 @@ public class ChargeWorker(
     /// <summary>
     /// ! Använd GetKvartlista() i stället!
     /// </summary>
-    private List<ElectricityPrice>? _kvartlista;
+    private List<ElectricityPrice>? _kvartlista { get; set; }
 
     private readonly Lock _kvartlistaLock = new();
 
@@ -216,12 +216,13 @@ public class ChargeWorker(
     /// <summary>
     /// Skapa lista med kvartar där laddning skall vara aktiv
     /// </summary>
-    public List<ElectricityPrice> GetKvartlista(bool tom = false)
+    /// <param name="skapaTomLista">Tvinga generering av tom lista</param>
+    public List<ElectricityPrice> GetKvartlista(bool skapaTomLista = false)
     {
         lock (_kvartlistaLock)
         {
             var kvartlista = new List<ElectricityPrice>();
-            if (tom || LaddBehovProcent < 1)
+            if (skapaTomLista || LaddBehovProcent < 1)
             {
                 // LaddBehovProcent är oinitierat eller bilen fulladdad
                 KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(kvartlista));
