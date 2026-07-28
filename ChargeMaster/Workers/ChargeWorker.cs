@@ -35,9 +35,11 @@ public class ChargeWorker(
     {
         get
         {
-            if (VehicleStatus?.BatteryLevel == null || VehicleStatus?.ChargingSettingsTargetLevel == null)
+            if (VehicleStatus?.BatteryLevel == null ||
+                VehicleStatus?.ChargingSettingsTargetLevel == null)
                 return 0;
-            return VehicleStatus.ChargingSettingsTargetLevel.Value - VehicleStatus.BatteryLevel.Value;
+            return VehicleStatus.ChargingSettingsTargetLevel.Value -
+                   VehicleStatus.BatteryLevel.Value;
         }
     }
 
@@ -95,30 +97,37 @@ public class ChargeWorker(
             await daikinWorker.KontrolleraEffekt(wallboxWorker.FörbrukningDennaTimme, nu,
                 stoppingToken);
 
-            // ----- Bilens status
+            // ----- Hantera laddning 
 
-            VehicleStatus = await tibberVehicleService.GetStatusAsync();
-
-            // ----- Uppdatera kvartlista, tom om bilen inte är ansluten
-            GetKvartlista(skapaTomLista: currentConnectorStatus == ConnectionEnum.SearchingForCommunication);
-
-            await SaveChargeSessionAsync(currentConnectorStatus.ToString(), stoppingToken);
-
-
-            // ----- Hantera laddning om bilen är ansluten
-
-            if (currentConnectorStatus != ConnectionEnum.SearchingForCommunication)
+            WallboxStatus? wbStatus = await wallboxService.GetStatusAsync();
+            if (wbStatus.Mode != "SCHEMA")
             {
-                // ----- Bilen ansluten, Start/Stoppa laddning -----
+                // Men inte om laddboxens schema styr, då gäller det
 
-                bool chargingAllowed = await IsChargingAllowedAsync();
-                if (!chargingAllowed)
+                VehicleStatus = await tibberVehicleService.GetStatusAsync();
+
+                // ----- Uppdatera kvartlista, tom om bilen inte är ansluten
+                GetKvartlista(skapaTomLista: currentConnectorStatus ==
+                                             ConnectionEnum.SearchingForCommunication);
+
+                await SaveChargeSessionAsync(currentConnectorStatus.ToString(), stoppingToken);
+
+
+                // ----- Hantera laddning om bilen är ansluten
+
+                if (currentConnectorStatus != ConnectionEnum.SearchingForCommunication)
                 {
-                    await wallboxService.StoppaLaddningAsync();
-                }
-                else
-                {
-                    await wallboxService.StartaLaddningAsync();
+                    // ----- Bilen ansluten, Start/Stoppa laddning -----
+
+                    bool chargingAllowed = await IsChargingAllowedAsync();
+                    if (!chargingAllowed)
+                    {
+                        await wallboxService.StoppaLaddningAsync();
+                    }
+                    else
+                    {
+                        await wallboxService.StartaLaddningAsync();
+                    }
                 }
             }
 
@@ -149,7 +158,7 @@ public class ChargeWorker(
         }
         catch (Exception ex)
         {
-                logger.LogError(ex, "Fel vid hämtning av fordonsstatus: {Message}", ex.Message);
+            logger.LogError(ex, "Fel vid hämtning av fordonsstatus: {Message}", ex.Message);
             return (0, 0);
         }
 
@@ -195,7 +204,7 @@ public class ChargeWorker(
             var förbrukningKvar = minuterKvar * effektEjLaddning / 60;
             var totalförbrukningTimme
                 = wallboxWorker.FörbrukningDennaTimme + förbrukningKvar;
-            
+
             // TODO: ta hänsyn till både vinter och normalförbrukning max
             HourlyEnergyUsage maxFörbrukning
                 = await wallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(nu);
@@ -205,7 +214,7 @@ public class ChargeWorker(
             {
                 förbrukningGräns = 4000;
             }
-            
+
             logger.LogInformation("> minuterKvar {kvar}", minuterKvar);
             logger.LogInformation($"> nuvarandeEffekt {nuvarandeEffekt}");
             logger.LogInformation($"> Effekt ej laddning {effektEjLaddning}");
