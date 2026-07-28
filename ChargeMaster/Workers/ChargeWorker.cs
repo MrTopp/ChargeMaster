@@ -100,7 +100,7 @@ public class ChargeWorker(
             // ----- Hantera laddning 
 
             WallboxStatus? wbStatus = await wallboxService.GetStatusAsync();
-            if (wbStatus.Mode != "SCHEMA")
+            if (wbStatus?.Mode != "SCHEMA")
             {
                 // Men inte om laddboxens schema styr, då gäller det
 
@@ -140,14 +140,14 @@ public class ChargeWorker(
 
             previous = nu;
             // Tvinga uppdatering av kvartlista varje varv
-            _kvartlista = null;
+            Kvartlista = null;
         }
     }
 
     /// <summary>
     /// Räknar ut behov av laddning i procent
     /// </summary>
-    /// <returns>laddbehov i procent</returns>
+    /// <returns>Laddbehov i procent</returns>
     private async Task<(int, int)> VehicleStateAsync()
     {
         // Beräkna laddbehov
@@ -174,7 +174,7 @@ public class ChargeWorker(
     /// <summary>
     /// ! Använd GetKvartlista() i stället!
     /// </summary>
-    private List<ElectricityPrice>? _kvartlista { get; set; }
+    private List<ElectricityPrice>? Kvartlista { get; set; }
 
     private readonly Lock _kvartlistaLock = new();
 
@@ -197,7 +197,7 @@ public class ChargeWorker(
         if (nu.Minute > 10)
         {
             var minuterKvar = 60 - nu.Minute;
-            var nuvarandeEffekt = wallboxWorker?.NuvarandeMeterInfo?.CurrentEnergy ?? 6000;
+            var nuvarandeEffekt = wallboxWorker.NuvarandeMeterInfo?.CurrentEnergy ?? 6000;
             var effektEjLaddning = nuvarandeEffekt - 4300;
             if (effektEjLaddning < 200)
                 effektEjLaddning = nuvarandeEffekt;
@@ -218,14 +218,14 @@ public class ChargeWorker(
             logger.LogInformation($"> nuvarandeEffekt {nuvarandeEffekt}");
             logger.LogInformation($"> Effekt ej laddning {effektEjLaddning}");
             logger.LogInformation($"> förbrukning till nu {wallboxWorker.FörbrukningDennaTimme}");
-            logger.LogInformation($"> förbruktnig kvar om stopp {förbrukningKvar}");
+            logger.LogInformation($"> förbrukning kvar om stopp {förbrukningKvar}");
             logger.LogInformation($"> total förbrukning timmen {totalförbrukningTimme}");
             logger.LogInformation($"> Gräns {förbrukningGräns}");
             if (totalförbrukningTimme > förbrukningGräns)
             {
                 // logga som error så visas den
                 logger.LogError(
-                    "! Laddning avstängd pga hög förbrukning: hittils {consumption} Wh. beräknad {expectation}",
+                    "! Laddning avstängd pga hög förbrukning: hittills {consumption} Wh. beräknad {expectation}",
                     wallboxWorker.FörbrukningDennaTimme, totalförbrukningTimme);
                 return false;
             }
@@ -247,13 +247,13 @@ public class ChargeWorker(
             {
                 // LaddBehovProcent är oinitierat eller bilen fulladdad
                 KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(kvartlista));
-                _kvartlista = kvartlista;
-                return _kvartlista;
+                Kvartlista = kvartlista;
+                return Kvartlista;
             }
 
             // _kvartlista skapas en gång per varv i loopen, sätts till null i slutet av varje varv.
-            if (_kvartlista is { Count: > 0 })
-                return _kvartlista;
+            if (Kvartlista is { Count: > 0 })
+                return Kvartlista;
 
             using var scope = serviceScopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -309,8 +309,8 @@ public class ChargeWorker(
 
             KvartlistaUpdated?.Invoke(this, new KvartlistaEventArgs(kvartlista));
 
-            _kvartlista = kvartlista;
-            return _kvartlista;
+            Kvartlista = kvartlista;
+            return Kvartlista;
         }
     }
 
@@ -320,7 +320,7 @@ public class ChargeWorker(
     /// </summary>
     /// <param name="chargeState">The current state of charging (e.g., "CHARGING", "IDLE").</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    internal async Task SaveChargeSessionAsync(
+    private async Task SaveChargeSessionAsync(
         string chargeState,
         CancellationToken cancellationToken)
     {
@@ -337,7 +337,7 @@ public class ChargeWorker(
 
             if (!sessionData.HasData)
             {
-                // gissar att det inte finns någon inkopplad bil, eller den har inte laddat något.
+                // Gissar att det inte finns någon inkopplad bil, eller den har inte laddat något.
                 //logger.LogInformation("SaveChargeSessionAsync: Incomplete session data. Skipping save.");
                 return;
             }
