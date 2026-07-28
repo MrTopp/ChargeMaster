@@ -622,6 +622,23 @@ public class WallboxWorker(
         return max * nu.Minute / 60;
     }
 
+    /// <summary>
+    /// Ge maximalt hanterad effekt justerad för effekttaxan
+    /// </summary>
+    /// <param name="checkedDateTime"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<HourlyEnergyUsage> GetMaxHourlyEnergyUsage(
+        DateTime checkedDateTime, CancellationToken cancellationToken = default)
+    {
+        if (IsHighEffect(checkedDateTime))
+        {
+            // Effekttaxan aktiv
+            return await GetHighestHourlyEnergyUsageDaytimeAsync(checkedDateTime, cancellationToken);
+        }
+        // Effekttaxan inte aktiv 
+        return await GetHighestHourlyEnergyUsageAsync(checkedDateTime, cancellationToken);
+    }
 
     /// <summary>
     /// Hämtar den timme under angiven månad med högst energiförbrukning.

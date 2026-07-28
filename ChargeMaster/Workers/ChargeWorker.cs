@@ -205,9 +205,8 @@ public class ChargeWorker(
             var totalförbrukningTimme
                 = wallboxWorker.FörbrukningDennaTimme + förbrukningKvar;
 
-            // TODO: ta hänsyn till både vinter och normalförbrukning max
             HourlyEnergyUsage maxFörbrukning
-                = await wallboxWorker.GetHighestHourlyEnergyUsageDaytimeAsync(nu);
+                = await wallboxWorker.GetMaxHourlyEnergyUsage(nu);
             logger.LogInformation("> maxFörbrukning {kvar}", maxFörbrukning.EnergyUsageWh);
             var förbrukningGräns = (long)(maxFörbrukning.EnergyUsageWh * 0.9);
             if (förbrukningGräns < 4000)
@@ -221,7 +220,7 @@ public class ChargeWorker(
             logger.LogInformation($"> förbrukning till nu {wallboxWorker.FörbrukningDennaTimme}");
             logger.LogInformation($"> förbruktnig kvar om stopp {förbrukningKvar}");
             logger.LogInformation($"> total förbrukning timmen {totalförbrukningTimme}");
-            logger.LogInformation($"> Max förbrukning {förbrukningGräns}");
+            logger.LogInformation($"> Gräns {förbrukningGräns}");
             if (totalförbrukningTimme > förbrukningGräns)
             {
                 // logga som error så visas den
