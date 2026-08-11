@@ -24,11 +24,11 @@
         "timeout": 600000
       },
       "models": {
-        "SetneufPT/Gemma4-12B_Q4_64K_16GB-GPU:latest": {
-          "name": "Gemma4 12B"
+        "gemma4-12b-rider": {
+          "name": "Gemma4 12B Rider"
         },
-        "qwen2.5-coder:14b": {
-          "name": "Qwen 2.5 Coder 14B"
+        "SetneufPT/Gemma4-12B_Q4_64K_16GB-GPU:latest": {
+          "name": "Gemma4 12B (orginal)"
         }
       }
     }
