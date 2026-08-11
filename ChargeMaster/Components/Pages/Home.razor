@@ -184,14 +184,7 @@
                             <small class="text-muted">Målnivå:</small><br>
                             <strong>@((CurrentTibberVehicleStatus.ChargingSettingsTargetLevel ?? 0.0).ToString("F0")) %</strong>
                         </div>
-                        <div class="col-auto">
-                            <small class="text-muted">Laddeffekt:</small><br>
-                            <strong>@((CurrentTibberVehicleStatus.ChargingPower ?? 0.0).ToString("F0")) W</strong>
-                        </div>
-                        <div class="col-auto">
-                            <small class="text-muted">Laddar:</small><br>
-                            <strong>@(CurrentTibberVehicleStatus.IsCharging == true ? "Ja" : "Nej")</strong>
-                        </div>
+
                     </div>
                 }
             </div>
