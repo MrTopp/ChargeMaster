@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+using System.Buffers;
+using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using MQTTnet;
 
@@ -13,65 +14,55 @@ public class ShellyMqttService(
     ILogger<ShellyMqttService> logger,
     IMqttClient? mqttClient = null) : IAsyncDisposable
 {
+    private const string Arbetsrum = "arbetsrum";
+    private const string Hall = "hall";
+    private const string Sovrum = "sovrum";
+
     /// <summary>
     /// Aktuella uppdaterade temperaturer
     /// </summary>
-    public readonly Dictionary<string, double> Temperatures = new()
+    public readonly ConcurrentDictionary<string, double> Temperatures = new(new Dictionary<string, double>
     {
-        // Defaultvärden, kommer att uppdateras vid start från databasen
-        { "arbetsrum", 21.5 },
-        { "hall", 21.5 },
-        { "sovrum", 21.5 }
-    };
+        { Arbetsrum, 21.5 },
+        { Hall, 21.5 },
+        { Sovrum, 21.5 }
+    });
 
     /// <summary>
     /// Medelvärde av temperaturerna i arbetsrum och sovrum.
     /// </summary>
     public double GetAverage()
     {
-        lock (_temperaturesLock)
-        {
-            var temp1 = GetArbetsrumTemperatureUnsafe();
-            var temp3 = GetSovrumTemperatureUnsafe();
-            return (temp1 + temp3) / 2.0;
-        }
+        var temp1 = GetArbetsrumTemperatureUnsafe();
+        var temp3 = GetSovrumTemperatureUnsafe();
+        if (temp3 > 22.5)
+            return temp3;
+        return (temp1 + temp3) / 2.0;
     }
 
     /// <summary>
     /// Returnerar aktuell temperatur i hallen.
     /// </summary>
-    public double GetHallTemperature()
-    {
-        lock (_temperaturesLock)
-            return GetHallTemperatureUnsafe();
-    }
+    public double GetHallTemperature() => GetHallTemperatureUnsafe();
 
     /// <summary>
     /// Returnerar aktuell temperatur i arbetsrummet.
     /// </summary>
-    public double GetArbetsrumTemperature()
-    {
-        lock (_temperaturesLock)
-            return GetArbetsrumTemperatureUnsafe();
-    }
+    public double GetArbetsrumTemperature() => GetArbetsrumTemperatureUnsafe();
 
     /// <summary>
     /// Returnerar aktuell temperatur i sovrummet.
     /// </summary>
-    public double GetSovrumTemperature()
-    {
-        lock (_temperaturesLock)
-            return GetSovrumTemperatureUnsafe();
-    }
+    public double GetSovrumTemperature() => GetSovrumTemperatureUnsafe();
 
     private double GetHallTemperatureUnsafe() =>
-        Temperatures.TryGetValue("hall", out var temp) ? temp : 21.5;
+        Temperatures.TryGetValue(Hall, out var temp) ? temp : 21.5;
 
     private double GetArbetsrumTemperatureUnsafe() =>
-        Temperatures.TryGetValue("arbetsrum", out var temp) ? temp : 21.5;
+        Temperatures.TryGetValue(Arbetsrum, out var temp) ? temp : 21.5;
 
     private double GetSovrumTemperatureUnsafe() =>
-        Temperatures.TryGetValue("sovrum", out var temp) ? temp : 21.5;
+        Temperatures.TryGetValue(Sovrum, out var temp) ? temp : 21.5;
 
     /// <summary>
     /// Event som skickas när en temperaturmätning uppdateras från en Shelly-enhet.
@@ -95,17 +86,18 @@ public class ShellyMqttService(
                 SubscriberConnected?.Invoke(this, EventArgs.Empty);
             }
 
+            // Hämta nuvarande värden under lås för att säkerställa konsistens vid notifiering
             lock (_temperaturesLock)
             {
-                arbetsrum = Temperatures.TryGetValue("arbetsrum", out var a) ? a : 21.5;
-                hall = Temperatures.TryGetValue("hall", out var h) ? h : 21.5;
-                sovrum = Temperatures.TryGetValue("sovrum", out var s) ? s : 21.5;
+                arbetsrum = Temperatures.TryGetValue(Arbetsrum, out var a) ? a : 21.5;
+                hall = Temperatures.TryGetValue(Hall, out var h) ? h : 21.5;
+                sovrum = Temperatures.TryGetValue(Sovrum, out var s) ? s : 21.5;
             }
 
             // Only invoke the newly added subscriber with initial temperature values
-            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("arbetsrum", arbetsrum));
-            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("hall", hall));
-            value?.Invoke(this, new ShellyTemperatureChangedEventArgs("sovrum", sovrum));
+            value?.Invoke(this, new ShellyTemperatureChangedEventArgs(Arbetsrum, arbetsrum));
+            value?.Invoke(this, new ShellyTemperatureChangedEventArgs(Hall, hall));
+            value?.Invoke(this, new ShellyTemperatureChangedEventArgs(Sovrum, sovrum));
         }
         remove
         {
@@ -154,7 +146,6 @@ public class ShellyMqttService(
     /// </summary>
     internal bool IsConnected => _mqttClient?.IsConnected ?? false;
 
-
     public ShellyMqttService()
         : this(null!, null!)
     {
@@ -190,7 +181,7 @@ public class ShellyMqttService(
     }
 
     /// <summary>
-    /// Hämtar aktuella värden för temeratur från databasen.
+    /// Hämtar aktuella värden för tempwhyeratur från databasen.
     /// </summary>
     /// <returns></returns>
     private async Task InitiateTemperatures()
@@ -208,25 +199,15 @@ public class ShellyMqttService(
                 .Select(g => g.OrderByDescending(t => t.Timestamp).FirstOrDefault())
                 .ToListAsync();
 
-            // Lägg till värdena i Temperatures-dictionary
-            lock (_temperaturesLock)
+            // Uppdatera endast de specifika enheterna vi hanterar
+            foreach (var temp in latestTemperatures)
             {
-                foreach (var temp in latestTemperatures)
+                if (temp != null && (temp.DeviceId == Arbetsrum || temp.DeviceId == Hall || temp.DeviceId == Sovrum))
                 {
-                    if (temp != null)
-                    {
-                        Temperatures[temp.DeviceId] = temp.TemperatureCelsius;
-                        logger?.LogDebug(
-                            "Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
-                            temp.DeviceId, temp.TemperatureCelsius);
-                    }
-                }
-
-                // Sätt defaultvärden för enheter som inte finns i databasen
-                var enhetIds = new[] { "arbetsrum", "hall", "sovrum" };
-                foreach (var enhetId in enhetIds)
-                {
-                    Temperatures.TryAdd(enhetId, 20.0);
+                    Temperatures[temp.DeviceId] = temp.TemperatureCelsius;
+                    logger?.LogDebug(
+                        "Laddade senaste temperatur för {DeviceId}: {Temperature} °C från databasen",
+                        temp.DeviceId, temp.TemperatureCelsius);
                 }
             }
         }
@@ -335,6 +316,8 @@ public class ShellyMqttService(
         string src = message.DeviceId;
 
         bool changed = false;
+        // Vi använder fortfarande en lock här för att säkerställa atomicitet mellan kontroll och uppdatering
+        // även om ConcurrentDictionary hanterar interna skrivningar säkert.
         lock (_temperaturesLock)
         {
             if (Math.Abs(Temperatures[src] - temperature) > 0.05)
