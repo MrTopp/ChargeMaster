@@ -70,7 +70,7 @@ public class ShellyMqttServiceTests
     {
         // Arrange
         var service = new ShellyMqttService();
-        service.Temperatures.Remove("hall");
+        service.Temperatures.Remove("hall",out double _);
 
         // Act
         var result = service.GetHallTemperature();
@@ -506,7 +506,7 @@ public class ShellyMqttServiceTests
     {
         // Arrange
         var service = new ShellyMqttService();
-        service.Temperatures.Remove("arbetsrum");
+        service.Temperatures.Remove("arbetsrum", out _);
 
         // Act
         double result = service.GetArbetsrumTemperature();
@@ -764,7 +764,7 @@ public class ShellyMqttServiceTests
     {
         // Arrange
         var service = new ShellyMqttService();
-        service.Temperatures.Remove("arbetsrum");
+        service.Temperatures.Remove("arbetsrum", out _);
         service.Temperatures["sovrum"] = 25.0;
 
         // Act
@@ -784,7 +784,7 @@ public class ShellyMqttServiceTests
         // Arrange
         var service = new ShellyMqttService();
         service.Temperatures["arbetsrum"] = 20.0;
-        service.Temperatures.Remove("sovrum");
+        service.Temperatures.Remove("sovrum", out _);
 
         // Act
         double result = service.GetAverage();
@@ -1754,7 +1754,7 @@ public class ShellyMqttServiceTests
     {
         // Arrange
         var service = new ShellyMqttService();
-        service.Temperatures.Remove("sovrum");
+        service.Temperatures.Remove("sovrum", out _);
 
         // Act
         var result = service.GetSovrumTemperature();
