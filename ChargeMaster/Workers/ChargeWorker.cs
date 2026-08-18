@@ -266,6 +266,9 @@ public class ChargeWorker(
                                  x.TimeStart.Hour >= 7 && x.TimeStart.Hour < 19 &&
                                  x.TimeStart.DayOfWeek != DayOfWeek.Saturday &&
                                  x.TimeStart.DayOfWeek != DayOfWeek.Sunday)
+                            // filtrera bort alla timmar på vardagar mellan 08:00 och 17:00
+                            && !(x.TimeStart.DayOfWeek >= DayOfWeek.Monday && x.TimeStart.DayOfWeek <= DayOfWeek.Friday &&
+                                  x.TimeStart.Hour >= 8 && x.TimeStart.Hour < 17)
                 )
                 .OrderBy(x => x.TimeStart)
                 .ToList();
