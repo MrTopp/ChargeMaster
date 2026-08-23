@@ -1,4 +1,4 @@
-using System.Buffers;
+﻿using System.Buffers;
 using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using MQTTnet;
@@ -128,7 +128,7 @@ public class ShellyMqttService(
     private volatile bool _isIntentionalDisconnect;
     private CancellationTokenSource? _disposeCts = new();
 
-    const string BrokerAddress = "192.168.1.10";
+    const string BrokerAddress = "192.168.1.129";
     const int BrokerPort = 1883;
     const string ClientId = "chargemaster-shelly-mqtt";
     const int InitialReconnectDelaySeconds = 5;
