@@ -1,4 +1,4 @@
-﻿using ChargeMaster.Services.InfluxDB;
+﻿//using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.TibberPulse;
 using Tibber.Sdk;
 
@@ -11,7 +11,7 @@ namespace ChargeMaster.Workers;
 /// </summary>
 public class TibberWorker(
     TibberPulseService tibberPulseService,
-    InfluxDbService influxDbService,
+    //InfluxDbService influxDbService,
     ILogger<TibberWorker> logger) : BackgroundService
 {
     private const int InitialDelaySeconds = 60;
@@ -75,7 +75,7 @@ public class TibberWorker(
                 "Mottog Tibber-mätning: {Power} W, {AccumulatedConsumption} kWh, {AccumulatedCost} {Currency}",
                 m.Power, m.AccumulatedConsumption, m.AccumulatedCost, m.Currency);
 
-            await influxDbService.WriteTibberMeasurementAsync(m);
+            //await influxDbService.WriteTibberMeasurementAsync(m);
         }
         catch (Exception ex)
         {

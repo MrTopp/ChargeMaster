@@ -4,7 +4,7 @@ using ChargeMaster.Services.ElectricityPrice;
 using ChargeMaster.Services.Daikin;
 using ChargeMaster.Services.Wallbox;
 using ChargeMaster.Services.Shelly;
-using ChargeMaster.Services.InfluxDB;
+//using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.TibberPulse;
 using ChargeMaster.Services.ErrorLog;
 using ChargeMaster.Services.TibberVehicle;
@@ -192,9 +192,9 @@ namespace ChargeMaster
                 builder.Services.AddSingleton(errorLogService);
 
                 // ----- InfluxDB -----
-                builder.Services.Configure<InfluxDBOptions>(
-                    builder.Configuration.GetSection("InfluxDB"));
-                builder.Services.AddSingleton<InfluxDbService>();
+                //builder.Services.Configure<InfluxDBOptions>(
+                //    builder.Configuration.GetSection("InfluxDB"));
+                //builder.Services.AddSingleton<InfluxDbService>();
 
                 // ----- Tibber Pulse -----
                 builder.Services.Configure<TibberPulseOptions>(

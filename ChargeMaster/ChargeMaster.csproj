@@ -19,10 +19,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove=".github\**"/>
-        <Content Remove=".github\**"/>
-        <EmbeddedResource Remove=".github\**"/>
-        <None Remove=".github\**"/>
+        <Compile Remove=".github\**" />
+        <Content Remove=".github\**" />
+        <EmbeddedResource Remove=".github\**" />
+        <None Remove=".github\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Services\InfluxDB\InfluxDbService.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -37,8 +41,8 @@
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.10" />
         <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
-        <PackageReference Include="Tibber.Sdk" Version="0.6.0-beta"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+        <PackageReference Include="Tibber.Sdk" Version="0.6.0-beta" />
     </ItemGroup>
 
     <ItemGroup>
@@ -49,11 +53,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="logs\"/>
+        <Folder Include="logs\" />
+        <Folder Include="Services\InfluxDB\" />
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="ChargeMaster.UnitTests"/>
+        <InternalsVisibleTo Include="ChargeMaster.UnitTests" />
     </ItemGroup>
 
 </Project>

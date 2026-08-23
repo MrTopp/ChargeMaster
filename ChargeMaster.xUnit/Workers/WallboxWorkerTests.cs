@@ -1,7 +1,7 @@
 ﻿using ChargeMaster.Workers;
 using ChargeMaster.Data;
 using ChargeMaster.Services.ElectricityPrice;
-using ChargeMaster.Services.InfluxDB;
+//using ChargeMaster.Services.InfluxDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,13 +40,13 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var wallbox
             = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = new InfluxDbService(
-            Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
-                { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }),
-            null!,
-            influxLogger);
-        var worker = new WallboxWorker(null!, wallbox, influxDbService, logger);
+        //var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
+        //var influxDbService = new InfluxDbService(
+        //    Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
+        //        { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }),
+        //    null!,
+        //    influxLogger);
+        var worker = new WallboxWorker(null!, wallbox, /*influxDbService,*/ logger);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
@@ -65,13 +65,13 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var wallbox
             = new WallboxService(_httpClient, new Logger<WallboxService>(new LoggerFactory()));
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = new InfluxDbService(
-            Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
-                { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }),
-            null!, influxLogger);
+        //var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
+        //var influxDbService = new InfluxDbService(
+        //    Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
+        //        { Url = "http://localhost:8086", Token = "test", Org = "test", Bucket = "test" }),
+        //    null!, influxLogger);
 
-        var worker = new WallboxWorker(null!, wallbox, influxDbService, logger);
+        var worker = new WallboxWorker(null!, wallbox, /*influxDbService,*/ logger);
 
         var now = DateTime.Now;
 
@@ -124,9 +124,9 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var wallboxService = provider.GetRequiredService<WallboxService>();
         var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
         var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
-        var influxDbService = provider.GetRequiredService<InfluxDbService>();
+        //var influxDbService = provider.GetRequiredService<InfluxDbService>();
 
-        var worker = new WallboxWorker(scopeFactory, wallboxService, influxDbService, logger);
+        var worker = new WallboxWorker(scopeFactory, wallboxService, /*influxDbService,*/ logger);
 
         // Act - Run ReadEnergyAsync for debugging
         var result
@@ -138,7 +138,7 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
             // Write to InfluxDB
             try
             {
-                await influxDbService.WriteWallboxMeterInfoAsync(result);
+                //await influxDbService.WriteWallboxMeterInfoAsync(result);
                 logger.LogInformation("Successfully wrote WallboxMeterInfo to InfluxDB");
             }
             catch (Exception ex)
@@ -163,9 +163,9 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         var wallboxService = provider.GetRequiredService<WallboxService>();
         var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
         var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
-        var influxDbService = provider.GetRequiredService<InfluxDbService>();
+        //var influxDbService = provider.GetRequiredService<InfluxDbService>();
 
-        var worker = new WallboxWorker(scopeFactory, wallboxService, influxDbService, logger);
+        var worker = new WallboxWorker(scopeFactory, wallboxService, /*influxDbService,*/ logger);
 
         // Act
         await worker.KalkyleraGrans(DateTime.Now, CancellationToken.None);
@@ -186,11 +186,11 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
             options.UseNpgsql(connectionString));
         services.AddLogging(builder => builder.AddConsole());
         services.AddHttpClient();
-        services.Configure<InfluxDBOptions>(config.GetSection("InfluxDB"));
+        //services.Configure<InfluxDBOptions>(config.GetSection("InfluxDB"));
         services.AddSingleton(new WallboxService(_httpClient,
             new Logger<WallboxService>(new LoggerFactory())));
         services.AddSingleton<ElectricityPriceService>();
-        services.AddSingleton<InfluxDbService>();
+        //services.AddSingleton<InfluxDbService>();
         return services;
     }
 
@@ -229,21 +229,21 @@ public class WallboxWorkerTests(WallboxHttpClientFixture fixture)
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
         services.AddLogging(builder => builder.AddConsole());
         services.AddHttpClient();
-        services.Configure<InfluxDBOptions>(config.GetSection("InfluxDB"));
+        //services.Configure<InfluxDBOptions>(config.GetSection("InfluxDB"));
 
         var httpClient = new HttpClient { BaseAddress = new Uri("http://192.168.1.205:8080/") };
         services.AddSingleton(new WallboxService(httpClient,
             new Logger<WallboxService>(new LoggerFactory())));
         services.AddSingleton<ElectricityPriceService>();
-        services.AddSingleton<InfluxDbService>();
+        //services.AddSingleton<InfluxDbService>();
 
         using var provider = services.BuildServiceProvider();
         var wallboxService = provider.GetRequiredService<WallboxService>();
         var logger = provider.GetRequiredService<ILogger<WallboxWorker>>();
         var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
-        var influxDbService = provider.GetRequiredService<InfluxDbService>();
+        //var influxDbService = provider.GetRequiredService<InfluxDbService>();
 
-        var worker = new WallboxWorker(scopeFactory, wallboxService, influxDbService, logger);
+        var worker = new WallboxWorker(scopeFactory, wallboxService, /*influxDbService,*/ logger);
 
         var dateInMonth = new DateTime(2026, 5, 1); // Target month
 

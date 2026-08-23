@@ -1,5 +1,5 @@
 ﻿using ChargeMaster.Data;
-using ChargeMaster.Services.InfluxDB;
+//using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Workers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -222,18 +222,18 @@ public class WallboxWorkerInitieraFörbrukningTests
         var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
 
         var logger = new LoggerFactory().CreateLogger<WallboxWorker>();
-        var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
-        var influxDbService = new InfluxDbService(
-            Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
-            {
-                Url = "http://localhost:8086",
-                Token = "test",
-                Org = "test",
-                Bucket = "test"
-            }),
-            null!,
-            influxLogger);
+        //var influxLogger = new LoggerFactory().CreateLogger<InfluxDbService>();
+        //var influxDbService = new InfluxDbService(
+        //    Microsoft.Extensions.Options.Options.Create(new InfluxDBOptions
+        //    {
+        //        Url = "http://localhost:8086",
+        //        Token = "test",
+        //        Org = "test",
+        //        Bucket = "test"
+        //    }),
+        //    null!,
+        //    influxLogger);
 
-        return new WallboxWorker(scopeFactory, null!, influxDbService, logger);
+        return new WallboxWorker(scopeFactory, null!, /*influxDbService,*/ logger);
     }
 }

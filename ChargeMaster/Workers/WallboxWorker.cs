@@ -1,5 +1,5 @@
 ﻿using ChargeMaster.Data;
-using ChargeMaster.Services.InfluxDB;
+//using ChargeMaster.Services.InfluxDB;
 using ChargeMaster.Services.Wallbox;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,7 +35,7 @@ public class MeterInfoEventArgs : EventArgs
 public class WallboxWorker(
     IServiceScopeFactory serviceScopeFactory,
     WallboxService wallboxService,
-    InfluxDbService influxDbService,
+    //InfluxDbService influxDbService,
     ILogger<WallboxWorker> logger) : BackgroundService
 {
     /// <summary>
@@ -179,7 +179,7 @@ public class WallboxWorker(
             // Uppdatera InfluxDB
             if (currentMeterInfo != null)
             {
-                await influxDbService.WriteWallboxMeterInfoAsync(currentMeterInfo);
+                //await influxDbService.WriteWallboxMeterInfoAsync(currentMeterInfo);
             }
 
             // Posta mätarinfo
