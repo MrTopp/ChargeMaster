@@ -197,9 +197,9 @@ namespace ChargeMaster
                 //builder.Services.AddSingleton<InfluxDbService>();
 
                 // ----- Tibber Pulse -----
-                builder.Services.Configure<TibberPulseOptions>(
-                    builder.Configuration.GetSection("Tibber"));
-                builder.Services.AddSingleton<TibberPulseService>();
+                //builder.Services.Configure<TibberPulseOptions>(
+                //    builder.Configuration.GetSection("Tibber"));
+                //builder.Services.AddSingleton<TibberPulseService>();
 
                 // ----- Workers -----
                 builder.Services.AddSingleton<PriceFetchingWorker>();
@@ -208,7 +208,7 @@ namespace ChargeMaster
                 builder.Services.AddSingleton<DaikinWorker>();
                 builder.Services.AddSingleton<ShellyWorker>();
                 builder.Services.AddSingleton<SmhiWorker>();
-                builder.Services.AddSingleton<TibberWorker>();
+                //builder.Services.AddSingleton<TibberWorker>();
                 builder.Services.AddSingleton<LinuxWorker>();
 
                 builder.Services.AddHostedService(sp =>
