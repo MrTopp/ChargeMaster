@@ -36,7 +36,11 @@ ssh $PiUser@$PiHost "sudo systemctl stop chargemaster.service"
 # 3 & 4. Rensa gamla filer och kopiera nya
 Write-Host "3 & 4. Rensar och kopierar filer..." -ForegroundColor Yellow
 ssh $PiUser@$PiHost "mkdir -p $RemotePath && rm -rf $RemotePath/*"
-scp -r "$LocalPublishPath\*" "${PiUser}@${PiHost}:$RemotePath/"
+scp -q -r "$LocalPublishPath\*" "${PiUser}@${PiHost}:$RemotePath/"
+
+# 4b. Ställ in korrekt behörigheter för filerna
+Write-Host "4b. Ställer in behörigheter (filer: 664, kataloger: 775)..." -ForegroundColor Yellow
+ssh $PiUser@$PiHost "find $RemotePath -type f -exec chmod 664 {} \; && find $RemotePath -type d -exec chmod 775 {} \; && mkdir -p $RemotePath/logs"
 
 # 5. Starta ChargeMaster
 Write-Host "5. Startar tjänsten igen..." -ForegroundColor Green
