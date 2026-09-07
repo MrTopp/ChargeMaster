@@ -72,6 +72,11 @@ public class ChargeWorker(
         }
     }
 
+    /// <summary>
+    /// Aktuell state för laddning
+    /// </summary>
+    private bool _chargingActive;
+
     internal async Task ChargeLoop(CancellationToken stoppingToken)
     {
         DateTime previous = DateTime.Now;
@@ -107,8 +112,8 @@ public class ChargeWorker(
                 VehicleStatus = await tibberVehicleService.GetStatusAsync();
 
                 // ----- Uppdatera kvartlista, tom om bilen inte är ansluten
-                GetKvartlista(skapaTomLista: currentConnectorStatus ==
-                                             ConnectionEnum.SearchingForCommunication);
+                //GetKvartlista(skapaTomLista: currentConnectorStatus ==
+                //                             ConnectionEnum.SearchingForCommunication);
 
                 await SaveChargeSessionAsync(currentConnectorStatus.ToString(), stoppingToken);
 
@@ -120,14 +125,19 @@ public class ChargeWorker(
                     // ----- Bilen ansluten, Start/Stoppa laddning -----
 
                     bool chargingAllowed = await IsChargingAllowedAsync();
-                    if (!chargingAllowed)
+                    if (!chargingAllowed && _chargingActive)
                     {
                         await wallboxService.StoppaLaddningAsync();
+                        _chargingActive = false;
                     }
-                    else
+                    else if (chargingAllowed && !_chargingActive)
                     {
                         await wallboxService.StartaLaddningAsync();
+                        _chargingActive = true;
                     }
+                } else
+                {
+                    _chargingActive = false;
                 }
             }
 
@@ -178,17 +188,27 @@ public class ChargeWorker(
 
     private readonly Lock _kvartlistaLock = new();
 
+    /// <summary>
+    /// Kontrollerar om laddning är tillåten baserat på timförbrukning 
+    /// </summary>
+    /// <returns></returns>
     private async Task<bool> IsChargingAllowedAsync()
     {
-        // Kontrollera om nuvarande kvart finns i kvartlistan
         var nu = DateTime.Now;
-        int minutAvrundad = nu.Minute / 15 * 15;
-        var kvartlista = GetKvartlista();
-        bool allowed = kvartlista.Any(x =>
-            x.TimeStart.Day == nu.Day &&
-            x.TimeStart.Hour == nu.Hour &&
-            x.TimeStart.Minute == minutAvrundad);
-        if (!allowed)
+
+        // Kontrollera om nuvarande kvart finns i kvartlistan
+        //int minutAvrundad = nu.Minute / 15 * 15;
+        //var kvartlista = GetKvartlista();
+        //bool allowed = kvartlista.Any(x =>
+        //    x.TimeStart.Day == nu.Day &&
+        //    x.TimeStart.Hour == nu.Hour &&
+        //    x.TimeStart.Minute == minutAvrundad);
+        //if (!allowed)
+        //{
+        //    return false;
+        //}
+
+        if (WallboxWorker.IsHighEffect(nu))
         {
             return false;
         }
@@ -223,14 +243,13 @@ public class ChargeWorker(
             logger.LogInformation($"> Gräns {förbrukningGräns}");
             if (totalförbrukningTimme > förbrukningGräns)
             {
-                // logga som error så visas den
-                logger.LogError(
-                    "! Laddning avstängd pga hög förbrukning: hittills {consumption} Wh. beräknad {expectation}",
-                    wallboxWorker.FörbrukningDennaTimme, totalförbrukningTimme);
+                LogLevel level = _chargingActive ? LogLevel.Error : LogLevel.Information;
+                logger.Log(level,
+                        "! Laddning avstängd pga hög förbrukning: hittills {consumption} Wh. beräknad {expectation}",
+                        wallboxWorker.FörbrukningDennaTimme, totalförbrukningTimme);
                 return false;
             }
         }
-
         return true;
     }
 
@@ -243,6 +262,7 @@ public class ChargeWorker(
         lock (_kvartlistaLock)
         {
             var kvartlista = new List<ElectricityPrice>();
+            return kvartlista;
             if (skapaTomLista || LaddBehovProcent < 1)
             {
                 // LaddBehovProcent är oinitierat eller bilen fulladdad

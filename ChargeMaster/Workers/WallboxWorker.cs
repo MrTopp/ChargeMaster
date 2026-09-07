@@ -805,7 +805,7 @@ public class WallboxWorker(
     /// </summary>
     /// <param name="nu"></param>
     /// <returns></returns>
-    private bool IsHighEffect(DateTime nu)
+    public static bool IsHighEffect(DateTime nu)
     {
         var month = nu.Month;
         var hour = nu.Hour;
