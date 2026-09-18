@@ -76,6 +76,11 @@ public class PriceFetchingWorker(
     }
 
     /// <summary>
+    /// Tidpunkten för den senaste misslyckade hämtningen, om någon. Om det inte finns något fel, är detta null.
+    /// </summary>
+    private DateTime? ErrorFetch { get; set; }
+
+    /// <summary>
     /// Kontrollerar elpriser för det angivna datumet och initierar en asynkron hämtnings- och lagringsoperation.
     /// </summary>
     /// <param name="date">Datumet för vilket elpriser ska hämtas.</param>
@@ -84,6 +89,13 @@ public class PriceFetchingWorker(
     {
         try
         {
+            if (ErrorFetch.HasValue && (DateTime.Now - ErrorFetch.Value).TotalMinutes < 30)
+            {
+                logger.LogInformation("Hoppar över hämtning för {Date} eftersom det nyligen uppstod ett fel.", date);
+                return false;
+            }
+
+            ErrorFetch = null;
             // Kontrollera att morgondagens priser inte hämtas före 13:00
             if (date == DateOnly.FromDateTime(DateTime.Now.AddDays(1)) && DateTime.Now.Hour < 13)
             {
@@ -96,7 +108,7 @@ public class PriceFetchingWorker(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Kunde inte hämta priser för {Date}", date);
+            ErrorFetch = DateTime.Now;
             return false;
         }
     }
