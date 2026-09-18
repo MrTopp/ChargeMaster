@@ -195,6 +195,7 @@ public class TibberOAuthService(
 
             if (tokens == null)
             {
+                // Behöver logga in genom att gå till https://thomasbjork.net/ChargeMaster/tibber-login
                 logger.LogError("Tibber är inte autentiserad. Gå till Tibber-inloggning för att koppla upp konton.");
                 return null;
             }

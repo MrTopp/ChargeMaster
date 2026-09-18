@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+
 using System.Text.Json;
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
@@ -90,6 +91,10 @@ public class TibberVehicleService(
 
     private DateTime? StatusBufferedAt { get; set; }
 
+    /// <summary>
+    /// flagga när fel uppstod, gör inga nya försök förrän 30 minuter har passerat
+    /// </summary>
+    private DateTime? ErrorTime { get; set; }
 
     /// <summary>
     /// Hämtar aktuell status för fordonet från Tibber Data API.
@@ -106,10 +111,18 @@ public class TibberVehicleService(
                 return StatusBufferd;
             }
 
+            if (ErrorTime.HasValue && (DateTime.Now - ErrorTime.Value).TotalMinutes < 30)
+            {
+                logger.LogInformation("Tidigare fel vid hämtning av fordonsstatus. Hoppar över anropet.");
+                return null;
+            }
+            ErrorTime = null;
+
             // Få OAuth2 access token
             var accessToken = await oauthService.GetValidAccessTokenAsync();
             if (accessToken == null)
             {
+                ErrorTime = DateTime.Now;
                 return null;
             }
 
@@ -129,6 +142,7 @@ public class TibberVehicleService(
                 logger.LogError("HTTP Status: {Status}", response.StatusCode);
                 logger.LogError("Error response: {ErrorContent}", errorContent);
 
+                ErrorTime = DateTime.Now;
                 return null;
             }
 
@@ -153,13 +167,14 @@ public class TibberVehicleService(
                 StatusBufferd = status;
                 return status;
             }
-
+            ErrorTime = DateTime.Now;
             return null;
 
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Kunde inte hämta fordonsstatus från Tibber");
+            ErrorTime = DateTime.Now;
             return null;
         }
         finally
