@@ -216,3 +216,9 @@ The service is kept in the codebase for future reference.
 
 Communicates with the Garo wallbox charger via its HTTP interface. Provides methods to read charger status
 and control charging sessions.
+
+# Git commit message
+
+When creating git commit messages, follow these guidelines:
+- Use swedish
+- Create a short summary, no details
