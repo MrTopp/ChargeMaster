@@ -227,20 +227,20 @@ public class ChargeWorker(
 
             HourlyEnergyUsage maxFörbrukning
                 = await wallboxWorker.GetMaxHourlyEnergyUsage(nu);
-            logger.LogInformation("> maxFörbrukning {kvar}", maxFörbrukning.EnergyUsageWh);
+            //logger.LogInformation("> maxFörbrukning {kvar}", maxFörbrukning.EnergyUsageWh);
             var förbrukningGräns = (long)(maxFörbrukning.EnergyUsageWh * 0.9);
             if (förbrukningGräns < 4000)
             {
                 förbrukningGräns = 4000;
             }
 
-            logger.LogInformation("> minuterKvar {kvar}", minuterKvar);
-            logger.LogInformation($"> nuvarandeEffekt {nuvarandeEffekt}");
-            logger.LogInformation($"> Effekt ej laddning {effektEjLaddning}");
-            logger.LogInformation($"> förbrukning till nu {wallboxWorker.FörbrukningDennaTimme}");
-            logger.LogInformation($"> förbrukning kvar om stopp {förbrukningKvar}");
-            logger.LogInformation($"> total förbrukning timmen {totalförbrukningTimme}");
-            logger.LogInformation($"> Gräns {förbrukningGräns}");
+            //logger.LogInformation("> minuterKvar {kvar}", minuterKvar);
+            //logger.LogInformation($"> nuvarandeEffekt {nuvarandeEffekt}");
+            //logger.LogInformation($"> Effekt ej laddning {effektEjLaddning}");
+            //logger.LogInformation($"> förbrukning till nu {wallboxWorker.FörbrukningDennaTimme}");
+            //logger.LogInformation($"> förbrukning kvar om stopp {förbrukningKvar}");
+            //logger.LogInformation($"> total förbrukning timmen {totalförbrukningTimme}");
+            //logger.LogInformation($"> Gräns {förbrukningGräns}");
             if (totalförbrukningTimme > förbrukningGräns)
             {
                 LogLevel level = _chargingActive ? LogLevel.Error : LogLevel.Information;
