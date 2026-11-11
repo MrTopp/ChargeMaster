@@ -150,7 +150,7 @@ public class DaikinWorker(
         }
 
         // ----- Justera mot elpris -----
-        if (inneTemp > 20.5)
+        if (inneTemp > 19.5)
         {
             if (await JusteraMotPris(nu))
             {
@@ -191,25 +191,18 @@ public class DaikinWorker(
     /// Kontrollera om det är hög elprisperiod.
     /// </summary>
     /// <param name="nu">Referenstid för prisjämförelse.</param>
-    /// <param name="temp">Nuvarande beräknad måltemperatur.</param>
     /// <returns>true om high price.</returns>
     private async Task<bool> JusteraMotPris(DateTime nu)
     {
-        // Om priset är riktigt lågt, kosta på lite extra värme
-        //var currentPrice = await GetCurrentPrice(nu);
-        //if (currentPrice != null && currentPrice < 0.1m)
-        //{
-        //    return temp + 2;
-        //}
-
-        // sänk temperaturen kraftigt under de dyraste timmarna på dagen
+        // ----- sänk temperaturen under de dyraste timmarna på dagen
         if (_cachedPrices == null || _cachedPrices.Value.Date != DateOnly.FromDateTime(nu))
         {
+            // Hämta dagens elpriser och filtrera ut de dyraste timmarna (>= 1,50 kr/kWh)
             var todaysPrices
                 = await electricityPriceService.GetPricesForDateAsync(DateOnly.FromDateTime(nu));
             var expensiveHours = todaysPrices.OrderByDescending(p => p.SekPerKwh)
-                .Where(p => p.SekPerKwh >= 1.0m)
-                .Take(10).ToList();
+                .Where(p => p.SekPerKwh >= 1.5m)
+                .Take(20).ToList();
             _cachedPrices = (DateOnly.FromDateTime(nu), expensiveHours);
         }
 
